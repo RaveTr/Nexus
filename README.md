@@ -1,4 +1,4 @@
-# Nexus API
+# Nexus API [W.I.P]
 
 Bulk of common platform-agnostic utilities aimed at reducing boilerplate/compatibility issues,
 thereby streamlining mod development on MultiLoader.
