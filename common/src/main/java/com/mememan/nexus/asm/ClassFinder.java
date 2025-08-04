@@ -4,8 +4,8 @@ import com.mememan.nexus.NexusConstants;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
- * Pseudo-utility class that provides convenient class-loading methods. This should NOT be used directly by dependant
- * mods.
+ * Pseudo-utility {@code class} that provides convenient class-loading methods. This should NOT be used directly by
+ * dependant mods.
  */
 @ApiStatus.Internal
 public final class ClassFinder {

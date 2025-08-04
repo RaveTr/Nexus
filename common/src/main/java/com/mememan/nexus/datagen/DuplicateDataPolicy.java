@@ -22,12 +22,12 @@ public enum DuplicateDataPolicy {
     EXCLUDE_SILENT,
     /**
      * Nexus will simply warn the end-developer in the console during datagen and override the existing object with its
-     * next duplicate instance. Note that there will still only be 1 instance of said object.
+     * next duplicate instance. Note that there will still only be 1 instance of said object, that being the latest one.
      */
     OVERRIDE_WARN,
     /**
      * Nexus will silently override the existing object with its duplicate. Note that there will still only be 1 instance
-     * of said object.
+     * of said object, that being the latest one.
      */
     OVERRIDE_SILENT
 }

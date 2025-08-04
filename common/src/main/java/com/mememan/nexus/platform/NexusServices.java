@@ -34,6 +34,7 @@ public class NexusServices {
      * Internal service loader method for loading platform-agnostic services.
      *
      * @param clazz The platform {@code class} (usually an {@code interface}) to load.
+     *
      * @return The loaded service instance.
      *
      * @param <T> The object type of the service to load.

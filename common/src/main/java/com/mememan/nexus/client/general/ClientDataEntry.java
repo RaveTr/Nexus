@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Wrapper {@code class} for storing side-safe client-only data.
+ * Wrapper {@code class} for storing side-safe client-only data. Attachable to different Property Wrapper implementations.
  */
 public class ClientDataEntry {
     private static final ObjectArrayList<ClientDataEntry> MAPPED_CDES = new ObjectArrayList<>();

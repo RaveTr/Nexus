@@ -74,7 +74,7 @@ public interface DataGenerator {
     /**
      * Alternate variant of {@linkplain #registerDataProvider(String, BiFunction)}, specifically tailored for registering
      * {@link ModDataProvider} types. Useful as a shortcut method that additionally handles providing the metadata needed
-     * to run generators that rely on storing/consuming mod IDs or otherwise simply extend {@link ModDataProvider}.
+     * to run generators that rely on storing/consuming mod IDs or otherwise simply extend or implement {@link ModDataProvider}.
      *
      * @param modId The parent ID mod under which the target provider should be registered.
      * @param modDataProvider The mod provider to register. Takes an input of {@link PackOutput} and

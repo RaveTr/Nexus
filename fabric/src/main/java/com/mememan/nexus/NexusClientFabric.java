@@ -23,8 +23,6 @@ public class NexusClientFabric implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-
-
         registerBlockColorProviders();
         registerItemColorProviders();
 

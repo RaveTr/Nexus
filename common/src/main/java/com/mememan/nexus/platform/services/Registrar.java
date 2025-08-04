@@ -213,7 +213,7 @@ public interface Registrar {
      *
      * @return The {@link PreparableReloadListener} that was registered.
      */
-    PreparableReloadListener registerReloadListener(ResourceLocation listenerId, PreparableReloadListener listener);
+   /* PreparableReloadListener registerReloadListener(ResourceLocation listenerId, PreparableReloadListener listener); */
 
     /**
      * Overloaded variant of {@link #registerDatapackRegistry(ResourceKey, Codec, Codec)} that defaults the network

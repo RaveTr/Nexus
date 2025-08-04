@@ -57,6 +57,14 @@ public class StandardRecipeProvider extends RecipeProvider implements ModDataPro
         this.dupeStrat = dupeStrat;
     }
 
+    /**
+     * Automatically generates all block and item recipes for the specified mod id, if any. Handles {@code null}/missing
+     * recipes.
+     *
+     * @param recipeActionConsumer The recipe action consumer used to serialize recipes.
+     *
+     * @see #run(CachedOutput)
+     */
     @Override
     public void buildRecipes(Consumer<FinishedRecipe> recipeActionConsumer) {
         if (!mappedModBPWs.isEmpty()) {
@@ -84,6 +92,13 @@ public class StandardRecipeProvider extends RecipeProvider implements ModDataPro
         }
     }
 
+    /**
+     * Handles recipe serialization and saving. Also handles duplicate cases based on {@link #getDuplicateDataPolicy()}.
+     *
+     * @param cachedOutput The {@link CachedOutput} instance to use for saving generated data to disk.
+     *
+     * @return A {@link CompletableFuture} that completes when the data generation is complete.
+     */
     @Override
     public @NotNull CompletableFuture<?> run(CachedOutput cachedOutput) {
         ObjectOpenHashSet<ResourceLocation> recipeLocations = new ObjectOpenHashSet<>();

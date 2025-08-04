@@ -115,6 +115,12 @@ accessible field net/minecraft/data/tags/TagsProvider contentsDone Ljava/util/co
 accessible field net/minecraft/data/tags/TagsProvider parentProvider Ljava/util/concurrent/CompletableFuture;
 accessible field net/minecraft/data/tags/TagsProvider builders Ljava/util/Map;
 
+# LootTableProvider
+accessible field net/minecraft/data/loot/LootTableProvider LOGGER Lorg/slf4j/Logger;
+accessible field net/minecraft/data/loot/LootTableProvider pathProvider Lnet/minecraft/data/PackOutput$PathProvider;
+accessible field net/minecraft/data/loot/LootTableProvider requiredTables Ljava/util/Set;
+accessible field net/minecraft/data/loot/LootTableProvider subProviders Ljava/util/List;
+
 # Enchantment
 transitive-accessible method net/minecraft/world/item/enchantment/Enchantment <init> (Lnet/minecraft/world/item/enchantment/Enchantment$Rarity;Lnet/minecraft/world/item/enchantment/EnchantmentCategory;[Lnet/minecraft/world/entity/EquipmentSlot;)V
 transitive-accessible field net/minecraft/world/item/enchantment/Enchantment slots [Lnet/minecraft/world/entity/EquipmentSlot;

@@ -16,6 +16,9 @@ import org.jetbrains.annotations.Nullable;
  * <br></br>
  * Allows for native configuration of a Registry's attributes, such as sync, persistence, and default entry. More may
  * be added as Nexus API updates.
+ *
+ * @param <T> The object type within the {@link Registry} (e.g. {@link Item}).
+ * @param <R> The {@linkplain Registry Registry's} generic type itself (e.g. {@code Registry<Item>}).
  */
 public class StandardRegistryBuilder<T, R extends Registry<T>> {
     private final ResourceKey<R> registryKey;
