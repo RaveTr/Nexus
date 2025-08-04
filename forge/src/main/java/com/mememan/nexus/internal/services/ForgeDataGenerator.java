@@ -138,6 +138,8 @@ public class ForgeDataGenerator implements DataGenerator {
                     primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.LANGUAGE_PROVIDER) && onClient, new StandardLanguageProvider(modSpecificPackOutput, modId, "en_us", providersToValidate.contains(NexusProviderTypes.LANGUAGE_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.LANGUAGE_PROVIDER, DuplicateDataPolicy.CRASH)));
 
                     // Server
+                    primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.DYNAMIC_REGISTRY_PROVIDER) && onServer, new StandardDatapackRegistryProvider(modSpecificPackOutput, regLookupProvider, NexusServices.REGISTRAR.getRegistrySetBuilder(), modId, providersToValidate.contains(NexusProviderTypes.DYNAMIC_REGISTRY_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.DYNAMIC_REGISTRY_PROVIDER, DuplicateDataPolicy.CRASH)));
+
                     primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.BLOCK_TAGS_PROVIDER) && onServer, new StandardBlockTagProvider(modSpecificPackOutput, regLookupProvider, modId, providersToValidate.contains(NexusProviderTypes.BLOCK_TAGS_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.BLOCK_TAGS_PROVIDER, DuplicateDataPolicy.CRASH)));
                     primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.ITEM_TAGS_PROVIDER) && onServer, new StandardItemTagProvider(modSpecificPackOutput, regLookupProvider, modId, providersToValidate.contains(NexusProviderTypes.ITEM_TAGS_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.ITEM_TAGS_PROVIDER, DuplicateDataPolicy.CRASH)));
                     primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.ENTITY_TYPE_TAGS_PROVIDER) && onServer, new StandardEntityTypeTagProvider(modSpecificPackOutput, regLookupProvider, modId, providersToValidate.contains(NexusProviderTypes.ENTITY_TYPE_TAGS_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.ENTITY_TYPE_TAGS_PROVIDER, DuplicateDataPolicy.CRASH)));
@@ -147,7 +149,6 @@ public class ForgeDataGenerator implements DataGenerator {
                     primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.DAMAGE_TYPE_TAGS_PROVIDER) && onServer, new StandardDamageTypeTagProvider(modSpecificPackOutput, regLookupProvider, modId, providersToValidate.contains(NexusProviderTypes.DAMAGE_TYPE_TAGS_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.DAMAGE_TYPE_TAGS_PROVIDER, DuplicateDataPolicy.CRASH)));
 
                     primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.RECIPE_PROVIDER) && onServer, new StandardRecipeProvider(modSpecificPackOutput, modId, providersToValidate.contains(NexusProviderTypes.RECIPE_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.RECIPE_PROVIDER, DuplicateDataPolicy.CRASH)));
-                    primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.DYNAMIC_REGISTRY_PROVIDER) && onServer, new StandardDatapackRegistryProvider(modSpecificPackOutput, regLookupProvider, NexusServices.REGISTRAR.getRegistrySetBuilder(), modId, providersToValidate.contains(NexusProviderTypes.DYNAMIC_REGISTRY_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.DYNAMIC_REGISTRY_PROVIDER, DuplicateDataPolicy.CRASH)));
                 }
             });
 
