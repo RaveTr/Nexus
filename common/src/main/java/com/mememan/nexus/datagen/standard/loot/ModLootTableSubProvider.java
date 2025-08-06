@@ -43,7 +43,7 @@ public interface ModLootTableSubProvider extends LootTableSubProvider, ModDataPr
      * {@code void} simply maps the data to generate rather than generating and saving the data itself.
      *
      * @param lootTableMapper The {@link BiConsumer} used to map the generated data to specific
-     *                         {@linkplain ResourceLocation ResourceLocations}.
+     *                        {@linkplain ResourceLocation ResourceLocations}.
      *
      * @see StandardLootProvider
      */

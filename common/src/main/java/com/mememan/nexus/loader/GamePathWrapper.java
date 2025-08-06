@@ -8,7 +8,7 @@ import java.nio.file.Path;
 import java.util.function.Supplier;
 
 /**
- * Wrapper-Class that effectively streamlines calling loader-specific implementations of common {@link Path}-related
+ * Wrapper {@code class} that effectively streamlines calling loader-specific implementations of common {@link Path}-related
  * methods/operations within the game's root directory.
  *
  * @see NexusServices#PLATFORM_MANAGER

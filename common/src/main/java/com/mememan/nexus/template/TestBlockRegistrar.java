@@ -16,6 +16,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 
 import java.util.function.Supplier;
 
@@ -33,6 +37,10 @@ public class TestBlockRegistrar {
                     .requires(Items.ACACIA_BOAT)
                     .unlockedBy("has_" + BuiltInRegistries.ITEM.getKey(Items.ACACIA_BOAT).getPath(), InventoryChangeTrigger.TriggerInstance.hasItems(Items.ACACIA_BOAT))
                     .save(r, new ResourceLocation("nexus", "test_block")))
+            .withLootTable(parent -> LootTable.lootTable()
+                    .withPool(LootPool.lootPool()
+                            .when(ExplosionCondition.survivesExplosion())
+                            .add(LootItem.lootTableItem(Items.ACACIA_BOAT))))
             .build()
             .getParentBlock();
 

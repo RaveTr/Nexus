@@ -203,19 +203,6 @@ public interface Registrar {
     <T> ResourceKey<Registry<T>> registerDatapackRegistry(ResourceKey<Registry<T>> registryKey, Codec<T> registryCodec, @Nullable Codec<T> networkCodec);
 
     /**
-     * Attempts to register a raw {@link PreparableReloadListener}.
-     * <br></br>
-     * Note that this listener will not be synced to the client by default due to the lack of standardized data getters
-     * for the aforementioned {@code interface}. See the overloaded methods for more configurable options.
-     *
-     * @param listenerId The id of the listener, only really used to distinguish it from other listeners within Nexus.
-     * @param listener The listener to register.
-     *
-     * @return The {@link PreparableReloadListener} that was registered.
-     */
-   /* PreparableReloadListener registerReloadListener(ResourceLocation listenerId, PreparableReloadListener listener); */
-
-    /**
      * Overloaded variant of {@link #registerDatapackRegistry(ResourceKey, Codec, Codec)} that defaults the network
      * codec to {@code null}, such that the datapack registry being registered is only required on the server and isn't
      * synced to the client.
@@ -246,6 +233,19 @@ public interface Registrar {
     default <T> ResourceKey<Registry<T>> registerSyncedDatapackRegistry(ResourceKey<Registry<T>> registryKey, Codec<T> registryCodec) {
         return registerDatapackRegistry(registryKey, registryCodec, registryCodec);
     }
+
+    /**
+     * Attempts to register a raw {@link PreparableReloadListener}.
+     * <br></br>
+     * Note that this listener will not be synced to the client by default due to the lack of standardized data getters
+     * for the aforementioned {@code interface}. See the overloaded methods for more configurable options.
+     *
+     * @param listenerId The id of the listener, only really used to distinguish it from other listeners within Nexus.
+     * @param listener The listener to register.
+     *
+     * @return The {@link PreparableReloadListener} that was registered.
+     */
+    /* PreparableReloadListener registerReloadListener(ResourceLocation listenerId, PreparableReloadListener listener); */
 
     /**
      * Gets the current singleton {@link RegistrySetBuilder} responsible for populating datapack entries from registration

@@ -2,7 +2,10 @@ package com.mememan.nexus.tag;
 
 import com.google.common.collect.ImmutableList;
 import com.mememan.nexus.NexusConstants;
+import com.mememan.nexus.datagen.ProviderType;
+import com.mememan.nexus.datagen.standard.ModDataProvider;
 import it.unimi.dsi.fastutil.ints.IntIntMutablePair;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -11,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -31,6 +35,8 @@ public class TagWrapper<T, TK extends TagKey<T>> {
     protected int cookTime = 0;
     @Nullable
     protected IntIntMutablePair flammabilityPair;
+    protected boolean excludeFromNativeDatagen = false;
+    protected final Map<ProviderType, Boolean> mappedProviderRequisites = new Object2BooleanOpenHashMap<>();
 
     private TagWrapper(Supplier<TK> parentTag) {
         this.parentTag = parentTag;
@@ -196,6 +202,121 @@ public class TagWrapper<T, TK extends TagKey<T>> {
     }
 
     /**
+     * Determines whether this TagWrapper instance should be entirely excluded from Nexus' native datagen.
+     * <br></br>
+     * Fundamentally, all this does is flag this instance as not needing a data entry to be mapped to it. You may
+     * choose to generate data for it yourself if needed, since Nexus won't handle datagen for this particular object.
+     * <br></br>
+     * If a tag-specific data provider has {@link ModDataProvider#validateAllEntries()} set to {@code true}, this
+     * instance (and its children, so long as this value isn't modified) will still be excluded from datagen, and thus
+     * an exception won't be thrown for it.
+     *
+     * @param excludeFromNativeDatagen Whether this instance's data should be passed into Nexus' native datagen for
+     *                                 data generation.
+     *
+     * @return {@code this} (builder method).
+     *
+     * @see #excludeFromNativeDatagen()
+     * @see #requiresDatagenEntry(ProviderType, boolean)
+     */
+    public TagWrapper<T, TK> excludeFromNativeDatagen(boolean excludeFromNativeDatagen) {
+        this.excludeFromNativeDatagen = excludeFromNativeDatagen;
+        return this;
+    }
+
+    /**
+     * Determines whether this TagWrapper instance is required to generate necessary tag-related data based on the
+     * {@link ProviderType} passed in.
+     * <br></br>
+     * By default, unmapped providers will not require an entry for this TagWrapper to be generated unless
+     * {@link ModDataProvider#validateAllEntries()} is set to {@code true}.
+     * <br></br>
+     * Mapping the related provider passed in here to {@code requiresDatagenEntry}, set to {@code true}, will flag
+     * this TagWrapper instance for requiring related data regardless of what
+     * {@link ModDataProvider#validateAllEntries()} is set to.
+     *
+     * @param targetProviderType The {@link ProviderType} to modify the data entry requirement for.
+     * @param requiresDatagenEntry Whether this TagWrapper should require data related to the specified
+     *                             {@code targetProviderType} to be present.
+     *
+     * @return {@code this} (builder method).
+     *
+     * @see #requiresDatagenEntries(List, boolean)
+     * @see #requiresSetDatagenEntries(List, boolean)
+     * @see #requiresSetDatagenEntries(Map)
+     * @see #excludeFromNativeDatagen(boolean)
+     */
+    public TagWrapper<T, TK> requiresDatagenEntry(ProviderType targetProviderType, boolean requiresDatagenEntry) {
+        mappedProviderRequisites.put(targetProviderType, requiresDatagenEntry);
+        return this;
+    }
+
+    /**
+     * Overloaded variant of {@link #requiresDatagenEntry(ProviderType, boolean)}. Maps each of the
+     * {@linkplain ProviderType ProviderTypes} passed in to {@code requiresDatagenEntry}.
+     *
+     * @param targetProviderTypes The {@link List} of {@linkplain ProviderType ProviderTypes} to modify the data
+     *                            entry requirements for.
+     * @param requiresDatagenEntry Whether this TagWrapper should require data related to each of the
+     *                             specified {@code targetProviderTypes} to be present.
+     *
+     * @return {@code this} (builder method).
+     *
+     * @see #requiresDatagenEntry(ProviderType, boolean)
+     * @see #requiresSetDatagenEntries(List, boolean)
+     * @see #requiresSetDatagenEntries(Map)
+     * @see #excludeFromNativeDatagen(boolean)
+     */
+    public TagWrapper<T, TK> requiresDatagenEntries(List<ProviderType> targetProviderTypes, boolean requiresDatagenEntry) {
+        targetProviderTypes.forEach(type -> requiresDatagenEntry(type, requiresDatagenEntry));
+        return this;
+    }
+
+    /**
+     * Overloaded variant of {@link #requiresDatagenEntry(ProviderType, boolean)}. Maps each of the
+     * {@linkplain ProviderType ProviderTypes} passed in to {@code requiresDatagenEntry}. Overrides the existing
+     * {@link Map}.
+     *
+     * @param targetProviderTypes The {@link List} of {@linkplain ProviderType ProviderTypes} to modify the data
+     *                            entry requirements for.
+     * @param requiresDatagenEntry Whether this TagWrapper should require data related to each of the
+     *                             specified {@code targetProviderTypes} to be present.
+     *
+     * @return {@code this} (builder method).
+     *
+     * @see #requiresDatagenEntry(ProviderType, boolean)
+     * @see #requiresDatagenEntries(List, boolean)
+     * @see #requiresSetDatagenEntries(Map)
+     * @see #excludeFromNativeDatagen(boolean)
+     */
+    public TagWrapper<T, TK> requiresSetDatagenEntries(List<ProviderType> targetProviderTypes, boolean requiresDatagenEntry) {
+        mappedProviderRequisites.clear();
+        targetProviderTypes.forEach(type -> requiresDatagenEntry(type, requiresDatagenEntry));
+        return this;
+    }
+
+    /**
+     * Overloaded variant of {@link #requiresDatagenEntry(ProviderType, boolean)}. Maps each of the
+     * {@linkplain ProviderType ProviderTypes} passed in to {@code requiresDatagenEntry}. Overrides the existing
+     * {@link Map}.
+     *
+     * @param mappedProviderRequisites The {@link Map} of provider requisites to override the existing {@link Map}
+     *                                 with.
+     *
+     * @return {@code this} (builder method).
+     *
+     * @see #requiresDatagenEntry(ProviderType, boolean)
+     * @see #requiresDatagenEntries(List, boolean)
+     * @see #requiresSetDatagenEntries(List, boolean)
+     * @see #excludeFromNativeDatagen(boolean)
+     */
+    public TagWrapper<T, TK> requiresSetDatagenEntries(Map<ProviderType, Boolean> mappedProviderRequisites) {
+        this.mappedProviderRequisites.clear();
+        this.mappedProviderRequisites.putAll(mappedProviderRequisites);
+        return this;
+    }
+
+    /**
      * Gets the parent {@link Supplier<TK>} stored in this TW instance.
      *
      * @return The parent {@link Supplier<TK>}.
@@ -256,6 +377,27 @@ public class TagWrapper<T, TK extends TagKey<T>> {
     @Nullable
     public IntIntMutablePair getFlammabilitySettings() {
         return flammabilityPair;
+    }
+
+    /**
+     * Whether {@code TagWrapper} data should automatically be handled/generated by Nexus API.
+     *
+     * @return {@code true} if {@link TagWrapper#excludeFromNativeDatagen} is set to {@code true}, {@code false}
+     * otherwise.
+     */
+    public boolean excludeFromNativeDatagen() {
+        return excludeFromNativeDatagen;
+    }
+
+    /**
+     * Gets a {@link Map} (usually {@link Object2BooleanOpenHashMap}) specifying the {@linkplain ProviderType ProviderTypes}
+     * for which this TagWrapper instance requires data to present for generation.
+     *
+     * @return The {@link Map} representing different {@linkplain ProviderType ProviderTypes} and their requirements for
+     * datagen. May be empty.
+     */
+    public Map<ProviderType, Boolean> getProviderTypeRequisites() {
+        return mappedProviderRequisites;
     }
 
     /**

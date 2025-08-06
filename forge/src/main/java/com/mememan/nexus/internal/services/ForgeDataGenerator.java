@@ -3,6 +3,7 @@ package com.mememan.nexus.internal.services;
 import com.mememan.nexus.asm.annotations.DatagenRegistrarEntry;
 import com.mememan.nexus.datagen.*;
 import com.mememan.nexus.datagen.standard.*;
+import com.mememan.nexus.datagen.standard.loot.StandardLootProvider;
 import com.mememan.nexus.datagen.standard.tag.*;
 import com.mememan.nexus.loader.ModData;
 import com.mememan.nexus.loader.ModSide;
@@ -108,18 +109,35 @@ public class ForgeDataGenerator implements DataGenerator {
                     ModDatagenConfig targetModConfig = NexusServices.DATA_GENERATOR.getConfigForMod(targetModId);
                     boolean allowDatagenForMod = targetModConfig != null && targetModConfig.enableDatagen();
                     ModSpecificPackOutput modSpecificPackOutput = new ModSpecificPackOutput(formattedOutputPath, targetMod, allowDatagenForMod);
-                    ModDataProvider mappedModProvider = modProviderMapper.right().apply(modSpecificPackOutput, regLookupProvider);
-                    ProviderType mappedModProviderType = mappedModProvider.getProviderType();
-                    boolean modOnClient = mappedModProviderType.getSide() == ModSide.CLIENT;
-                    boolean allowDatagenForProviderType = targetModConfig == null || !targetModConfig.disabledProviderTypes().contains(mappedModProviderType);
 
-                    if (allowDatagenForProviderType) primaryGen.addProvider(modOnClient ? onClient : onServer, mappedModProvider);
+                    if (allowDatagenForMod) {
+                        ModDataProvider mappedModProvider = modProviderMapper.right().apply(modSpecificPackOutput, regLookupProvider);
+                        ProviderType mappedModProviderType = mappedModProvider.getProviderType();
+                        boolean modProviderOnClient = mappedModProviderType.getSide() == ModSide.CLIENT;
+                        boolean allowDatagenForProviderType = targetModConfig == null || !targetModConfig.disabledProviderTypes().contains(mappedModProviderType);
+
+                        if (allowDatagenForProviderType) primaryGen.addProvider(modProviderOnClient ? onClient : onServer, mappedModProvider);
+                    }
                 }
             }
 
             // Standard DataProvider types
             if (!ENQUEUED_PROVIDERS.isEmpty()) {
+                ObjectObjectImmutablePair<String, BiFunction<PackOutput, CompletableFuture<HolderLookup.Provider>, ? extends Pair<Boolean, ? extends DataProvider>>> providerMapper;
 
+                while ((providerMapper = ENQUEUED_PROVIDERS.poll()) != null) {
+                    ModData targetMod = NexusServices.PLATFORM_MANAGER.getModDataById(providerMapper.left());
+                    String targetModId = targetMod.getModMetadata().modId();
+                    ModDatagenConfig targetModConfig = NexusServices.DATA_GENERATOR.getConfigForMod(targetModId);
+                    boolean allowDatagenForMod = targetModConfig != null && targetModConfig.enableDatagen();
+                    ModSpecificPackOutput modSpecificPackOutput = new ModSpecificPackOutput(formattedOutputPath, targetMod, allowDatagenForMod);
+
+                    if (allowDatagenForMod) {
+                        Pair<Boolean, DataProvider> mappedDataProvider = (Pair<Boolean, DataProvider>) providerMapper.right().apply(modSpecificPackOutput, regLookupProvider);
+
+                        primaryGen.addProvider(mappedDataProvider.left() ? onClient : onServer, mappedDataProvider.right());
+                    }
+                }
             }
 
             // Native Nexus datagen
@@ -149,6 +167,7 @@ public class ForgeDataGenerator implements DataGenerator {
                     primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.DAMAGE_TYPE_TAGS_PROVIDER) && onServer, new StandardDamageTypeTagProvider(modSpecificPackOutput, regLookupProvider, modId, providersToValidate.contains(NexusProviderTypes.DAMAGE_TYPE_TAGS_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.DAMAGE_TYPE_TAGS_PROVIDER, DuplicateDataPolicy.CRASH)));
 
                     primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.RECIPE_PROVIDER) && onServer, new StandardRecipeProvider(modSpecificPackOutput, modId, providersToValidate.contains(NexusProviderTypes.RECIPE_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.RECIPE_PROVIDER, DuplicateDataPolicy.CRASH)));
+                    primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.LOOT_TABLE_PROVIDER) && onServer, new StandardLootProvider(modSpecificPackOutput, modId, providersToValidate.contains(NexusProviderTypes.LOOT_TABLE_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.LOOT_TABLE_PROVIDER, null), mappedDupeStrats, providersToValidate, disabledProviders));
                 }
             });
 

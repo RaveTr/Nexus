@@ -120,6 +120,7 @@ accessible field net/minecraft/data/loot/LootTableProvider LOGGER Lorg/slf4j/Log
 accessible field net/minecraft/data/loot/LootTableProvider pathProvider Lnet/minecraft/data/PackOutput$PathProvider;
 accessible field net/minecraft/data/loot/LootTableProvider requiredTables Ljava/util/Set;
 accessible field net/minecraft/data/loot/LootTableProvider subProviders Ljava/util/List;
+extendable method net/minecraft/data/loot/LootTableProvider getName ()Ljava/lang/String;
 
 # Enchantment
 transitive-accessible method net/minecraft/world/item/enchantment/Enchantment <init> (Lnet/minecraft/world/item/enchantment/Enchantment$Rarity;Lnet/minecraft/world/item/enchantment/EnchantmentCategory;[Lnet/minecraft/world/entity/EquipmentSlot;)V

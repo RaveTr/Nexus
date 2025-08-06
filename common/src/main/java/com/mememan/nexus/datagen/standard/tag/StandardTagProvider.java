@@ -51,7 +51,7 @@ public abstract class StandardTagProvider<T> extends IntrinsicHolderTagsProvider
         this.dupeStrat = dupeStrat;
 
         this.mappedModObjectTags = TagWrapper.getCachedTWEntries().stream()
-                .filter(curTW -> curTW.getParentTag().get().isFor(registryKey) && curTW.getParentTag().get().location().getNamespace().equals(modId))
+                .filter(curTW -> !curTW.excludeFromNativeDatagen() && curTW.getParentTag().get().isFor(registryKey) && curTW.getParentTag().get().location().getNamespace().equals(modId))
                 .map(curTW -> (TagWrapper<? extends T, TagKey<T>>) curTW)
                 .collect(Collectors.toCollection(ObjectArrayList::new));
     }
@@ -64,7 +64,7 @@ public abstract class StandardTagProvider<T> extends IntrinsicHolderTagsProvider
         this.dupeStrat = dupeStrat;
 
         this.mappedModObjectTags = TagWrapper.getCachedTWEntries().stream()
-                .filter(curTW -> curTW.getParentTag().get().isFor(registryKey) && curTW.getParentTag().get().location().getNamespace().equals(modId))
+                .filter(curTW -> !curTW.excludeFromNativeDatagen() && curTW.getParentTag().get().isFor(registryKey) && curTW.getParentTag().get().location().getNamespace().equals(modId))
                 .map(curTW -> (TagWrapper<? extends T, TagKey<T>>) curTW)
                 .collect(Collectors.toCollection(ObjectArrayList::new));
     }
@@ -90,7 +90,7 @@ public abstract class StandardTagProvider<T> extends IntrinsicHolderTagsProvider
                 List<TagEntry> missingSerializedTags = serializedTagEntries.stream().filter((curTagEntry) -> !curTagEntry.verifyIfPresent(elementPresenceWithinRegistryValidator, tagLocalOrParentPresenceValidator)).toList();
                 boolean shouldCrash = validateAllEntries() && !missingSerializedTags.isEmpty();
 
-                if (shouldCrash) throw new IllegalArgumentException(String.format(Locale.ROOT, "Couldn't define tag %s as it is missing following references: %s (Required by mod of ID %s). Please ensure that these tags are registered and/or that their JSON files are generated.", tagLoc, missingSerializedTags.stream().map(Objects::toString).collect(Collectors.joining(",")), modId));
+                if (shouldCrash) throw new IllegalArgumentException(String.format(Locale.ROOT, "Couldn't define tag %s as it is missing following references: %s (required by mod of ID %s). Please ensure that these tags are registered and/or that their JSON files are generated beforehand (they don't have to be physically present, this primarily refers to generation order).", tagLoc, missingSerializedTags.stream().map(Objects::toString).collect(Collectors.joining(",")), modId));
                 else {
                     DataResult<JsonElement> serializedTagResult = TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(serializedTagEntries, false));
                     JsonElement serializedTagJson = serializedTagResult.getOrThrow(false, LOGGER::error);

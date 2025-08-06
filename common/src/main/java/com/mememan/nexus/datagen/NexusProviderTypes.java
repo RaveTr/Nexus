@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public enum NexusProviderTypes implements ProviderType {
     /**
-     * Represents the sub-{@link LootTableProvider} responsible for generating block loot tables.
+     * Represents the {@link LootTableProvider.SubProviderEntry} responsible for generating block loot tables.
      */
     BLOCK_LOOT_SUB_PROVIDER(ModSide.SERVER),
     /**
@@ -47,7 +47,7 @@ public enum NexusProviderTypes implements ProviderType {
      */
     ENCHANTMENT_TAGS_PROVIDER(ModSide.SERVER),
     /**
-     * Represents the sub-{@link LootTableProvider} responsible for generating entity type loot tables.
+     * Represents the {@link LootTableProvider.SubProviderEntry} responsible for generating entity type loot tables.
      */
     ENTITY_TYPE_LOOT_SUB_PROVIDER(ModSide.SERVER),
     /**
@@ -66,6 +66,11 @@ public enum NexusProviderTypes implements ProviderType {
      * Represents the {@link StandardLanguageProvider} types responsible for generating localization files for objects.
      */
     LANGUAGE_PROVIDER(ModSide.CLIENT),
+    /**
+     * Represents the {@link LootTableProvider} responsible for running all loot sub-providers and generating loot table
+     * data. Configurations applied to this type take precedence over sub-providers'.
+     */
+    LOOT_TABLE_PROVIDER(ModSide.SERVER),
     /**
      * Represents the {@link IntrinsicHolderTagsProvider} responsible for generating mob effect tags.
      */
