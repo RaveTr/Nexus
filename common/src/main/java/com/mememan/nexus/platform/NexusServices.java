@@ -19,14 +19,20 @@ public class NexusServices {
     /**
      * The service responsible for handling all types of object registration (save for packet registration, which is
      * handled by {@link #NETWORK_MANAGER}).
+     *
+     * @see <a href="https://github.com/RaveTr/Nexus/wiki/registrars">Nexus Wiki: Registrars</a>
      */
     public static final Registrar REGISTRAR = loadService(Registrar.class);
     /**
      * The service responsible for handling packet registration and interaction across sides (Client/Server).
+     *
+     * @see <a href="https://github.com/RaveTr/Nexus/wiki/networking">Nexus Wiki: Networking</a>
      */
     public static final NetworkManager NETWORK_MANAGER = loadService(NetworkManager.class);
     /**
      * The service responsible for registering and handling all data generation providers/tasks for dependant mods.
+     *
+     * @see <a href="https://github.com/RaveTr/Nexus/wiki/Data-Generation">Nexus Wiki: Data Generation</a>
      */
     public static final DataGenerator DATA_GENERATOR = loadService(DataGenerator.class);
 

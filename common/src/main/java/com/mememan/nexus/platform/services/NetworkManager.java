@@ -18,6 +18,7 @@ import org.jetbrains.annotations.ApiStatus;
  * multiple separate methods, classes, or redundant loader-specific setup.
  *
  * @see BasePacket
+ * @see <a href="https://github.com/RaveTr/Nexus/wiki/networking">Nexus Wiki: Networking</a>
  */
 public interface NetworkManager {
 

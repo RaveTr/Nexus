@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
  * <br></br>
  * Main use case is to allow for mods to modify Nexus API's behaviour when auto-generating related data. Mods should
  * otherwise prefer writing/implementing their own data providers.
+ *
+ * @see <a href="https://github.com/RaveTr/Nexus/wiki/Data-Generation">Nexus Wiki: Data Generation</a>
  */
 public interface DataGenerator {
 
