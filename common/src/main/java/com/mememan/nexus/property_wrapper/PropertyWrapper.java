@@ -16,11 +16,13 @@ import java.util.function.Supplier;
  * This is only the base {@code interface}, so it isn't going to do much on its own.
  *
  * @param <T> The object type being wrapped.
+ * @param <SELF> Generic type for this PW {@code interface}. You would usually pass the implementing {@code class} or
+ *               extending {@code interface} here.
  *
  * @see PropertyWrapperBuilder
  * @see <a href="https://github.com/RaveTr/Nexus/wiki/Property-Wrappers">Nexus Wiki: Property Wrappers</a>
  */
-public interface PropertyWrapper<T> {
+public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF>> {
 
     /**
      * Gets the parent {@code Supplier<T>} of this PW instance.
@@ -45,19 +47,15 @@ public interface PropertyWrapper<T> {
      *
      * @return A new builder for this PW instance, or the current builder if it is not {@code null} and
      * {@code overrideExistingBuilder} is {@code false}.
-     *
-     * @param <PW> Any {@link PropertyWrapper} type implementing this {@code interface}.
      */
-    <PW extends PropertyWrapper<T>> PropertyWrapperBuilder<T, PW> builder(boolean overrideExistingBuilder);
+    PropertyWrapperBuilder<T, SELF> builder(boolean overrideExistingBuilder);
 
     /**
      * Overloaded variant of {@link #builder(boolean)} with {@code overrideExistingBuilder} set to {@code false}.
      *
      * @return A new builder for this PW instance, or the current builder if it is not {@code null}.
-     *
-     * @param <PW> Any {@link PropertyWrapper} type implementing this {@code interface}.
      */
-    default <PW extends PropertyWrapper<T>> PropertyWrapperBuilder<T, PW> builder() {
+    default PropertyWrapperBuilder<T, SELF> builder() {
         return builder(false);
     }
 

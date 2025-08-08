@@ -17,7 +17,7 @@ import java.util.function.Supplier;
  * @param <T> The object type being wrapped.
  * @param <PW> The {@link PropertyWrapper} type being built, and whose generic type is {@code T}.
  */
-public interface PropertyWrapperBuilder<T, PW extends PropertyWrapper<T>> {
+public interface PropertyWrapperBuilder<T, PW extends PropertyWrapper<T, PW>> {
 
     /**
      * Returns the owner {@link PropertyWrapper} instance of this builder.
