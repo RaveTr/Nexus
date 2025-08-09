@@ -132,7 +132,7 @@ public class StandardLanguageProvider implements ModDataProvider {
         handleMobEffectTranslations();
 
         // Misc. types
-
+        
     }
 
     protected void handleBlockTranslations() {

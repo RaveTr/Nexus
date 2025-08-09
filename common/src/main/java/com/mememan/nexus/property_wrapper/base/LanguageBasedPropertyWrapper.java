@@ -1,5 +1,8 @@
 package com.mememan.nexus.property_wrapper.base;
 
+import java.util.List;
+import java.util.function.Function;
+
 /**
  * Extension of {@link DataGenPropertyWrapper} with methods tailored towards localization for both description IDs and
  * misc translation keys (e.g. tooltips).
@@ -11,7 +14,6 @@ package com.mememan.nexus.property_wrapper.base;
  *               extending {@code interface} here.
  */
 public interface LanguageBasedPropertyWrapper<T, SELF extends LanguageBasedPropertyWrapper<T, SELF>> extends DataGenPropertyWrapper<T, SELF> {
-
 
 
 }
