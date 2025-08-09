@@ -1,4 +1,4 @@
-package com.mememan.nexus.property_wrapper;
+package com.mememan.nexus.property_wrapper.base;
 
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
