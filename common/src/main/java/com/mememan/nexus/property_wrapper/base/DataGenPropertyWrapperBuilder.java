@@ -15,10 +15,9 @@ import java.util.Map;
  * <br></br>
  * This PWB extension goes hand-in-hand with {@link DataGenPropertyWrapper}.
  *
- * @param <T> The object type being wrapped.
- * @param <DGPW> The {@link DataGenPropertyWrapper} type being built, and whose generic type is {@code T}.
+ * @see DataGenPropertyWrapper
  */
-public interface DataGenPropertyWrapperBuilder<T, DGPW extends DataGenPropertyWrapper<T, DGPW>> extends PropertyWrapperBuilder<T, DGPW> {
+public interface DataGenPropertyWrapperBuilder<T, SELF extends DataGenPropertyWrapperBuilder<T, SELF, DGPW>, DGPW extends DataGenPropertyWrapper<T, DGPW, SELF>> extends PropertyWrapperBuilder<T, SELF, DGPW> {
 
     /**
      * Determines whether this DGPWB instance should be entirely excluded from Nexus' native datagen.
@@ -38,7 +37,7 @@ public interface DataGenPropertyWrapperBuilder<T, DGPW extends DataGenPropertyWr
      * @see #excludeFromNativeDatagen()
      * @see #requiresDatagenEntry(ProviderType, boolean)
      */
-    DataGenPropertyWrapper<T, DGPW> excludeFromNativeDatagen(boolean excludeFromNativeDatagen);
+    DataGenPropertyWrapperBuilder<T, SELF, DGPW> excludeFromNativeDatagen(boolean excludeFromNativeDatagen);
 
     /**
      * Overloaded variant of {@link #excludeFromNativeDatagen(boolean)}. Sets the value of
@@ -48,7 +47,7 @@ public interface DataGenPropertyWrapperBuilder<T, DGPW extends DataGenPropertyWr
      *
      * @see #excludeFromNativeDatagen(boolean)
      */
-    default DataGenPropertyWrapper<T, DGPW> excludeFromNativeDatagen() {
+    default DataGenPropertyWrapperBuilder<T, SELF, DGPW> excludeFromNativeDatagen() {
         return excludeFromNativeDatagen(true);
     }
 
@@ -75,7 +74,7 @@ public interface DataGenPropertyWrapperBuilder<T, DGPW extends DataGenPropertyWr
      * @see #excludeFromNativeDatagen(boolean)
      * @see DataGenPropertyWrapper#getProviderTypeRequisites()
      */
-    DataGenPropertyWrapper<T, DGPW> requiresDatagenEntry(ProviderType targetProviderType, boolean requiresDatagenEntry);
+    DataGenPropertyWrapperBuilder<T, SELF, DGPW> requiresDatagenEntry(ProviderType targetProviderType, boolean requiresDatagenEntry);
 
     /**
      * Overloaded variant of {@link #requiresDatagenEntry(ProviderType, boolean)}. Maps each of the
@@ -94,7 +93,7 @@ public interface DataGenPropertyWrapperBuilder<T, DGPW extends DataGenPropertyWr
      * @see #excludeFromNativeDatagen(boolean)
      * @see DataGenPropertyWrapper#getProviderTypeRequisites()
      */
-    DataGenPropertyWrapper<T, DGPW> requiresDatagenEntries(List<ProviderType> targetProviderTypes, boolean requiresDatagenEntry);
+    DataGenPropertyWrapperBuilder<T, SELF, DGPW> requiresDatagenEntries(List<ProviderType> targetProviderTypes, boolean requiresDatagenEntry);
 
     /**
      * Overloaded variant of {@link #requiresDatagenEntry(ProviderType, boolean)}. Maps each of the
@@ -114,7 +113,7 @@ public interface DataGenPropertyWrapperBuilder<T, DGPW extends DataGenPropertyWr
      * @see #excludeFromNativeDatagen(boolean)
      * @see DataGenPropertyWrapper#getProviderTypeRequisites()
      */
-    DataGenPropertyWrapper<T, DGPW> requiresSetDatagenEntries(List<ProviderType> targetProviderTypes, boolean requiresDatagenEntry);
+    DataGenPropertyWrapperBuilder<T, SELF, DGPW> requiresSetDatagenEntries(List<ProviderType> targetProviderTypes, boolean requiresDatagenEntry);
 
     /**
      * Overloaded variant of {@link #requiresDatagenEntry(ProviderType, boolean)}. Maps each of the
@@ -132,5 +131,5 @@ public interface DataGenPropertyWrapperBuilder<T, DGPW extends DataGenPropertyWr
      * @see #excludeFromNativeDatagen(boolean)
      * @see DataGenPropertyWrapper#getProviderTypeRequisites()
      */
-    DataGenPropertyWrapper<T, DGPW> requiresSetDatagenEntries(Map<ProviderType, Boolean> mappedProviderRequisites);
+    DataGenPropertyWrapperBuilder<T, SELF, DGPW> requiresSetDatagenEntries(Map<ProviderType, Boolean> mappedProviderRequisites);
 }

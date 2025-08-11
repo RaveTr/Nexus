@@ -15,13 +15,9 @@ import java.util.Map;
  * <br></br>
  * This PW extension goes hand-in-hand with {@link DataGenPropertyWrapperBuilder}.
  *
- * @param <T> The object type being wrapped.
- * @param <SELF> Generic type for this PW {@code interface}. You would usually pass the implementing {@code class} or
- *               extending {@code interface} here.
- *
  * @see DataGenPropertyWrapperBuilder
  */
-public interface DataGenPropertyWrapper<T, SELF extends DataGenPropertyWrapper<T, SELF>> extends PropertyWrapper<T, SELF> {
+public interface DataGenPropertyWrapper<T, SELF extends DataGenPropertyWrapper<T, SELF, BUILDER>, BUILDER extends DataGenPropertyWrapperBuilder<T, BUILDER, SELF>> extends PropertyWrapper<T, SELF, BUILDER> {
 
     /**
      * Whether this DGPW instance should be excluded from Nexus data generation entirely.

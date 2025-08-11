@@ -1,4 +1,38 @@
 package com.mememan.nexus.property_wrapper.base;
 
-public interface TagBasedPropertyWrapper<T, SELF extends TagBasedPropertyWrapper<T, SELF>> extends DataGenPropertyWrapper<T, SELF> {
+import net.minecraft.tags.TagKey;
+
+import java.util.List;
+
+/**
+ * Extension of {@link DataGenPropertyWrapper} with methods tailored towards handling tags for the object being wrapped.
+ * <br></br>
+ * This PW extension goes hand-in-hand with {@link TagBasedPropertyWrapperBuilder}.
+ *
+ * @see TagBasedPropertyWrapperBuilder
+ */
+public interface TagBasedPropertyWrapper<T, SELF extends TagBasedPropertyWrapper<T, SELF, BUILDER>, BUILDER extends TagBasedPropertyWrapperBuilder<T, BUILDER, SELF>> extends DataGenPropertyWrapper<T, SELF, BUILDER> {
+
+    /**
+     * Gets a {@link List} of {@link TagKey} entries for the object being wrapped, and whose generic types are {@code T}.
+     * May be empty.
+     *
+     * @return A {@link List} of {@link TagKey} entries for the object being wrapped, or an empty {@link List} if no
+     * tags are present.
+     */
+    List<TagKey<T>> getObjectTags();
+
+    /**
+     * Gets a {@link List} of additional {@link TagKey} entries for the object being wrapped, and whose generic types are
+     * ambiguous.
+     * <br></br>
+     * Useful for cases like adding tags to blocks, where they may require item tags to be added to them for proper
+     * functionality too.
+     *
+     * @return A {@link List} of additional {@link TagKey} entries for the object being wrapped, or an empty {@link List}
+     * if no tags are present.
+     *
+     * @implNote Some PW types don't have a need for implementing this. Thus, they may always return an empty {@link List}.
+     */
+    List<TagKey<?>> getAdditionalTags();
 }

@@ -38,7 +38,7 @@ public class TagWrapper<T, TK extends TagKey<T>> {
     protected boolean excludeFromNativeDatagen = false;
     protected final Map<ProviderType, Boolean> mappedProviderRequisites = new Object2BooleanOpenHashMap<>();
 
-    private TagWrapper(Supplier<TK> parentTag) {
+    private TagWrapper(@NotNull Supplier<TK> parentTag) {
         this.parentTag = parentTag;
     }
 
@@ -87,12 +87,32 @@ public class TagWrapper<T, TK extends TagKey<T>> {
      * @see #withEntry(Supplier)
      * @see #withTagEntry(Supplier)
      * @see #withTagEntries(List)
+     * @see #withEntries(Supplier[])
      * @see #withParentTagEntry(Supplier)
      * @see #withParentTagEntries(List)
      */
     public TagWrapper<T, TK> withEntries(List<Supplier<T>> tagEntries) {
         this.storedTaggedObjects.addAll(tagEntries);
         return this;
+    }
+
+    /**
+     * Adds all specified object entries to this TW instance's parent {@link TagKey}.
+     *
+     * @param tagEntries The object entries to add to the collection of pre-defined objects tagged with this TW
+     *                   instance's parent {@link TagKey}.
+     *
+     * @return {@code this} (builder method).
+     *
+     * @see #withEntry(Supplier)
+     * @see #withEntries(List)
+     * @see #withTagEntry(Supplier)
+     * @see #withTagEntries(List)
+     * @see #withParentTagEntry(Supplier)
+     * @see #withParentTagEntries(List)
+     */
+    public TagWrapper<T, TK> withEntries(Supplier<T>... tagEntries) {
+        return withEntries(ObjectArrayList.of(tagEntries));
     }
 
     /**
@@ -126,6 +146,7 @@ public class TagWrapper<T, TK extends TagKey<T>> {
      *
      * @see #withEntry(Supplier)
      * @see #withEntries(List)
+     * @see #withTagEntries(Supplier[])
      * @see #withTagEntry(Supplier)
      * @see #withParentTagEntry(Supplier)
      * @see #withParentTagEntries(List)
@@ -133,6 +154,25 @@ public class TagWrapper<T, TK extends TagKey<T>> {
     public TagWrapper<T, TK> withTagEntries(List<Supplier<TK>> tagEntries) {
         this.storedCopiedTags.addAll(tagEntries);
         return this;
+    }
+
+    /**
+     * Adds all specified {@link TagKey} entries to this TW instance's {@link ObjectArrayList} of
+     * {@linkplain TagKey TagKeys} to inherit object entries from.
+     *
+     * @param tagEntries The {@link TagKey} entries to add to this TW instance's {@link ObjectArrayList} of
+     *                   {@linkplain TagKey TagKeys} to inherit object entries from.
+     *
+     * @return {@code this} (builder method).
+     *
+     * @see #withEntry(Supplier)
+     * @see #withEntries(List)
+     * @see #withTagEntry(Supplier)
+     * @see #withParentTagEntry(Supplier)
+     * @see #withParentTagEntries(List)
+     */
+    public TagWrapper<T, TK> withTagEntries(Supplier<TK>... tagEntries) {
+        return withTagEntries(ObjectArrayList.of(tagEntries));
     }
 
     /**
@@ -167,10 +207,30 @@ public class TagWrapper<T, TK extends TagKey<T>> {
      * @see #withEntries(List)
      * @see #withTagEntry(Supplier)
      * @see #withParentTagEntry(Supplier)
+     * @see #withParentTagEntries(Supplier[])
      */
     public TagWrapper<T, TK> withParentTagEntries(List<Supplier<TK>> parentTagEntries) {
         this.storedParentTags.addAll(parentTagEntries);
         return this;
+    }
+
+    /**
+     * Adds all specified {@link TagKey} entries to this TW instance's {@link ObjectArrayList} of
+     * {@linkplain TagKey TagKeys} to be added to.
+     *
+     * @param parentTagEntries The {@link TagKey} entries to add to this TW instance's {@link ObjectArrayList} of
+     *                         parent {@linkplain TagKey TagKeys} to be added to.
+     *
+     * @return {@code this} (builder method).
+     *
+     * @see #withEntry(Supplier)
+     * @see #withEntries(List)
+     * @see #withTagEntry(Supplier)
+     * @see #withParentTagEntry(Supplier)
+     * @see #withParentTagEntries(List)
+     */
+    public TagWrapper<T, TK> withParentTagEntries(Supplier<TK>... parentTagEntries) {
+        return withParentTagEntries(ObjectArrayList.of(parentTagEntries));
     }
 
     /**

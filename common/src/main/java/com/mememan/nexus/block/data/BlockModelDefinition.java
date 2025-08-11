@@ -1,7 +1,6 @@
 package com.mememan.nexus.block.data;
 
 import com.mememan.nexus.item.data.ItemModelDefinition;
-import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemTransform;
@@ -14,14 +13,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
-import java.util.function.Supplier;
 
 /**
  * A wrapper-builder {@code class} primarily used to hold and group block model data for more convenient model
  * definitions.
  */
 public class BlockModelDefinition {
-    private static final Object2ObjectLinkedOpenHashMap<Supplier<Block>, BlockModelDefinition> CACHED_DEFINITIONS = new Object2ObjectLinkedOpenHashMap<>();
     @NotNull
     private final ModelTemplate parentModel;
     private boolean ambientOcclusion = true;
@@ -322,14 +319,5 @@ public class BlockModelDefinition {
      */
     public ResourceLocation getParentModelLocation() {
         return parentModel.model.orElseGet(ModelTemplates.CUBE.model::get);
-    }
-
-    /**
-     * Gets a mutable view of all cached model definitions. Only non-empty during datagen.
-     *
-     * @return The cached model definitions.
-     */
-    public static Object2ObjectLinkedOpenHashMap<Supplier<Block>, BlockModelDefinition> getCachedModelDefinitions() {
-        return CACHED_DEFINITIONS;
     }
 }

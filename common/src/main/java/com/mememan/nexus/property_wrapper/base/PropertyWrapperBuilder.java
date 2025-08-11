@@ -15,9 +15,21 @@ import java.util.function.Supplier;
  * {@code build()} method (with overloads) and standard generic type constraints.
  *
  * @param <T> The object type being wrapped.
+ * @param <SELF> Type reference generic for this PWB {@code interface}. Useful for implementations that implicitly require
+ *               different generic types for their property wrappers.
  * @param <PW> The {@link PropertyWrapper} type being built, and whose generic type is {@code T}.
  */
-public interface PropertyWrapperBuilder<T, PW extends PropertyWrapper<T, PW>> {
+public interface PropertyWrapperBuilder<T, SELF extends PropertyWrapperBuilder<T, SELF, PW>, PW extends PropertyWrapper<T, PW, SELF>> {
+
+    /**
+     * Copies data from the provided {@link PropertyWrapper} instance into this builder. Overrides all existing data
+     * for this builder.
+     *
+     * @param propertyWrapper The {@link PropertyWrapper} instance to copy data from
+     *
+     * @return {@code this} (builder method)
+     */
+    PropertyWrapperBuilder<T, SELF, PW> copyFrom(PW propertyWrapper);
 
     /**
      * Returns the owner {@link PropertyWrapper} instance of this builder.

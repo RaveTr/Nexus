@@ -1,5 +1,7 @@
 package com.mememan.nexus.property_wrapper.base;
 
+import com.google.common.collect.ImmutableMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -18,11 +20,16 @@ import java.util.function.Supplier;
  * @param <T> The object type being wrapped.
  * @param <SELF> Generic type for this PW {@code interface}. You would usually pass the implementing {@code class} or
  *               extending {@code interface} here.
+ * @param <BUILDER> The {@link PropertyWrapperBuilder} type, primarily used for type inference within inheriting classes
+ *                  and interfaces.
+ *
+ * @implNote Some implementations extending from base classes implementing this {@code interface} may have some
+ * factory helpers and private constructors to enforce factory pattern when used.
  *
  * @see PropertyWrapperBuilder
  * @see <a href="https://github.com/RaveTr/Nexus/wiki/Property-Wrappers">Nexus Wiki: Property Wrappers</a>
  */
-public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF>> {
+public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDER>, BUILDER extends PropertyWrapperBuilder<T, BUILDER, SELF>> {
 
     /**
      * Gets the parent {@code Supplier<T>} of this PW instance.
@@ -33,7 +40,7 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF>> {
      * may be a default object delegate (similar to how referencing blocks too early results in an air delegate) or
      * {@code null}, depending on the object being wrapped and implemented.
      * <br></br>
-     * If this PW instance happens to be a template, this method should always return {@code Suppliers#instanceOf(null)}.
+     * If this PW instance happens to be a template, this method should always return {@code Suppliers#ofInstance(null)}.
      */
     @NotNull
     Supplier<T> getParentObject();
@@ -48,14 +55,14 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF>> {
      * @return A new builder for this PW instance, or the current builder if it is not {@code null} and
      * {@code overrideExistingBuilder} is {@code false}.
      */
-    PropertyWrapperBuilder<T, SELF> builder(boolean overrideExistingBuilder);
+    PropertyWrapperBuilder<T, BUILDER, SELF> builder(boolean overrideExistingBuilder);
 
     /**
      * Overloaded variant of {@link #builder(boolean)} with {@code overrideExistingBuilder} set to {@code false}.
      *
      * @return A new builder for this PW instance, or the current builder if it is not {@code null}.
      */
-    default PropertyWrapperBuilder<T, SELF> builder() {
+    default PropertyWrapperBuilder<T, BUILDER, SELF> builder() {
         return builder(false);
     }
 
@@ -67,4 +74,34 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF>> {
      * @return Whether this {@link PropertyWrapper} instance is a template.
      */
     boolean isTemplate();
+
+    /**
+     * Gets an immutable view (via {@link ImmutableMap}) of {@link PropertyWrappersContainer#MAPPED_PROPERTY_WRAPPERS}.
+     *
+     * @return An immutable copy of {@link PropertyWrappersContainer#MAPPED_PROPERTY_WRAPPERS}.
+     */
+    static ImmutableMap<Supplier<?>, PropertyWrapper<?, ? extends PropertyWrapper<?, ?, ?>, ? extends PropertyWrapperBuilder<?, ?, ?>>> getMappedPropertyWrappers() {
+        return ImmutableMap.copyOf(PropertyWrappersContainer.MAPPED_PROPERTY_WRAPPERS);
+    }
+
+    /**
+     * Container {@code class} for storing an access-protected {@link Object2ObjectOpenHashMap} of PWs mapped
+     * to their parent objects.
+     */
+    class PropertyWrappersContainer {
+        private static final Object2ObjectOpenHashMap<Supplier<?>, PropertyWrapper<?, ? extends PropertyWrapper<?, ?, ?>, ? extends PropertyWrapperBuilder<?, ?, ?>>> MAPPED_PROPERTY_WRAPPERS = new Object2ObjectOpenHashMap<>();
+
+        private PropertyWrappersContainer() {
+            throw new IllegalAccessError("Attempted to construct instance of container class! (PropertyWrappersContainer)");
+        }
+
+        public static <T, PW extends PropertyWrapper<T, PW, PWB>, PWB extends PropertyWrapperBuilder<T, PWB, PW>> PW registerPropertyWrapper(Supplier<T> parentObject, PW propertyWrapper) {
+            if (!propertyWrapper.isTemplate()) MAPPED_PROPERTY_WRAPPERS.putIfAbsent(parentObject, propertyWrapper);
+            return propertyWrapper;
+        }
+
+        public static <T> void unregisterPropertyWrapper(Supplier<T> parentObject) {
+            MAPPED_PROPERTY_WRAPPERS.remove(parentObject);
+        }
+    }
 }
