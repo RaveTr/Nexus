@@ -19,6 +19,10 @@ public interface TagBasedPropertyWrapper<T, SELF extends TagBasedPropertyWrapper
      *
      * @return A {@link List} of {@link TagKey} entries for the object being wrapped, or an empty {@link List} if no
      * tags are present.
+     *
+     * @see TagBasedPropertyWrapperBuilder#withTag(TagKey)
+     * @see TagBasedPropertyWrapperBuilder#withTags(List)
+     * @see TagBasedPropertyWrapperBuilder#withTags(TagKey...)
      */
     List<TagKey<T>> getObjectTags();
 
@@ -33,6 +37,10 @@ public interface TagBasedPropertyWrapper<T, SELF extends TagBasedPropertyWrapper
      * if no tags are present.
      *
      * @implNote Some PW types don't have a need for implementing this. Thus, they may always return an empty {@link List}.
+     *
+     * @see TagBasedPropertyWrapperBuilder#withAdditionalTag(TagKey)
+     * @see TagBasedPropertyWrapperBuilder#withAdditionalTags(List)
+     * @see TagBasedPropertyWrapperBuilder#withAdditionalTags(TagKey...)
      */
     List<TagKey<?>> getAdditionalTags();
 }

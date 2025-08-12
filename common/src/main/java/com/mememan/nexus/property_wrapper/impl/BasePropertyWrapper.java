@@ -6,10 +6,13 @@ import com.mememan.nexus.property_wrapper.base.PropertyWrapperBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
  * Base class for all Property Wrappers, with base implementations from {@code interface}.
+ *
+ * @see BasePropertyWrapperBuilder
  */
 public class BasePropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDER>, BUILDER extends PropertyWrapperBuilder<T, BUILDER, SELF>> implements PropertyWrapper<T, SELF, BUILDER> {
     protected final Supplier<T> parentObject;
@@ -45,6 +48,11 @@ public class BasePropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
     @Override
     public BUILDER builder() {
         return (BUILDER) PropertyWrapper.super.builder();
+    }
+
+    @Override
+    public Optional<BUILDER> rawBuilder() {
+        return Optional.ofNullable(builder);
     }
 
     /**

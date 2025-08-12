@@ -2,7 +2,10 @@ package com.mememan.nexus.internal.services;
 
 import com.mememan.nexus.asm.annotations.DatagenRegistrarEntry;
 import com.mememan.nexus.datagen.*;
-import com.mememan.nexus.datagen.standard.*;
+import com.mememan.nexus.datagen.standard.ModDataProvider;
+import com.mememan.nexus.datagen.standard.StandardDatapackRegistryProvider;
+import com.mememan.nexus.datagen.standard.StandardLanguageProvider;
+import com.mememan.nexus.datagen.standard.StandardRecipeProvider;
 import com.mememan.nexus.datagen.standard.loot.StandardLootProvider;
 import com.mememan.nexus.datagen.standard.tag.*;
 import com.mememan.nexus.loader.ModData;

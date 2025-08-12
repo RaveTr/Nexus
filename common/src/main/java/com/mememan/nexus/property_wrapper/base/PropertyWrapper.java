@@ -6,6 +6,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -52,8 +53,8 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
      *
      * @param overrideExistingBuilder Whether to create a new builder even if one is already stored.
      *
-     * @return A new builder for this PW instance, or the current builder if it is not {@code null} and
-     * {@code overrideExistingBuilder} is {@code false}.
+     * @return A new builder with default properties for this PW instance, or the current builder if it is not
+     * {@code null} and {@code overrideExistingBuilder} is {@code false}.
      */
     PropertyWrapperBuilder<T, BUILDER, SELF> builder(boolean overrideExistingBuilder);
 
@@ -65,6 +66,14 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
     default PropertyWrapperBuilder<T, BUILDER, SELF> builder() {
         return builder(false);
     }
+
+    /**
+     * Method that wraps the stored {@code builder} instance in an {@link Optional} to allow for nullability and defaulting
+     * values.
+     *
+     * @return The builder instance wrapped in an {@link Optional}. May be empty.
+     */
+    Optional<? extends PropertyWrapperBuilder<T, BUILDER, SELF>> rawBuilder();
 
     /**
      * Whether this {@link PropertyWrapper} instance is a template.

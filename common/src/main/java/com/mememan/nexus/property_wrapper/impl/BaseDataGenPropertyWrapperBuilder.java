@@ -9,6 +9,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Base implementation of {@link DataGenPropertyWrapperBuilder}. Extends from {@link BasePropertyWrapperBuilder} for
+ * default behavior.
+ *
+ * @see BaseDataGenPropertyWrapper
+ */
 public class BaseDataGenPropertyWrapperBuilder<T, SELF extends DataGenPropertyWrapperBuilder<T, SELF, DGPW>, DGPW extends DataGenPropertyWrapper<T, DGPW, SELF>> extends BasePropertyWrapperBuilder<T, SELF, DGPW> implements DataGenPropertyWrapperBuilder<T, SELF, DGPW> {
     protected boolean excludeFromNativeDatagen = false;
     protected final Map<ProviderType, Boolean> providerTypeRequisites = new Object2BooleanOpenHashMap<>();

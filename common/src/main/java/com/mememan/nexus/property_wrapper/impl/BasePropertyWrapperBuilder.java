@@ -6,6 +6,8 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * Base implementation for Property Wrapper Builders, implementing {@link PropertyWrapperBuilder}.
+ *
+ * @see BasePropertyWrapper
  */
 public class BasePropertyWrapperBuilder<T, SELF extends PropertyWrapperBuilder<T, SELF, PW>, PW extends PropertyWrapper<T, PW, SELF>> implements PropertyWrapperBuilder<T, SELF, PW> {
     @NotNull

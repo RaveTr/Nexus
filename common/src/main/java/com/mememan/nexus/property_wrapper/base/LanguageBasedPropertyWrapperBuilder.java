@@ -16,6 +16,7 @@ import java.util.function.Function;
  * @see LanguageBasedPropertyWrapper
  */
 public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW>, LBPW extends LanguageBasedPropertyWrapper<T, LBPW, SELF>> extends DataGenPropertyWrapperBuilder<T, SELF, LBPW> {
+    ObjectArrayList<String> DEFAULT_SEPARATOR_WORDS = ObjectArrayList.of("Of", "And");
 
     /**
      * Assigns a custom translation key for datagen. By default, a basic regex algorithm is used to automatically localize
@@ -136,6 +137,27 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
     }
 
     /**
+     * Assigns a custom separator word which is lowercased during the algorithm's de-localization process. This is
+     * ignored if {@link #withCustomName(String)} is defined, {@link #literalTranslation()} is {@code true}, or if
+     * {@link #withLocalization(Function)} is non-null.
+     *
+     * @param customSeparatorWord The custom separator word to lowercase while the algorithm is running.
+     *
+     * @return {@code this} (builder method).
+     *
+     * @apiNote The default entries for this are {"Of", "And"}. This word is appended to the default separator
+     * definitions rather than replacing them.
+     *
+     * @see #withCustomSeparatorWords(String...)
+     * @see #withCustomSeparatorWords(List)
+     * @see #withCustomName(String)
+     * @see #withLocalization(Function)
+     * @see #withCustomSeparatorWords(List)
+     * @see #literalTranslation(boolean)
+     */
+    LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW> withCustomSeparatorWord(String customSeparatorWord);
+
+    /**
      * Assigns a {@link List} of custom separator words which are lowercased during the algorithm's de-localization
      * process. This is ignored if {@link #withCustomName(String)} is defined, {@link #literalTranslation()} is
      * {@code true}, or if {@link #withLocalization(Function)} is non-null.
@@ -148,11 +170,35 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      * @apiNote The default entries for this are {"Of", "And"}. This {@link List} is appended to the default
      * separator definitions rather than replacing them.
      *
+     * @see #withCustomSeparatorWord(String)
+     * @see #withCustomSeparatorWords(String...)
      * @see #withCustomName(String)
      * @see #withLocalization(Function)
      * @see #literalTranslation(boolean)
      */
     LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW> withCustomSeparatorWords(List<String> definedSeparatorWords);
+
+    /**
+     * Overloaded variant of {@link #withCustomSeparatorWords(List)}, assigning a {@link List} of custom separator
+     * words which are lowercased during the algorithm's de-localization process from the provided array.
+     *
+     * @param definedSeparatorWords The {@link List} of custom separator words to lowercase while the algorithm is
+     *                              running.
+     *
+     * @return {@code this} (builder method).
+     *
+     * @apiNote The default entries for this are {"Of", "And"}. This {@link List} is appended to the default
+     * separator definitions rather than replacing them.
+     *
+     * @see #withCustomSeparatorWord(String)
+     * @see #withCustomSeparatorWords(List)
+     * @see #withCustomName(String)
+     * @see #withLocalization(Function)
+     * @see #literalTranslation(boolean)
+     */
+    default LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW> withCustomSeparatorWords(String... definedSeparatorWords) {
+        return withCustomSeparatorWords(ObjectArrayList.of(definedSeparatorWords));
+    }
 
     /**
      * Sets a {@link List} of custom separator words which are lowercased during the algorithm's de-localization
@@ -245,7 +291,8 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      * {@link #withLocalization(Function)} are not applied here.
      *
      * @param localizationKey The key to localize (e.g. "tooltip.mod_id.block_name").
-     * @param localizedValue The localized value to use (e.g. "Block Name").
+     * @param localizedValue The localized value to use (e.g. "Block Name"). Note that if this is {@code null}, then
+     *                       the key provided will behave similarly to {@link #withAdditionalLocalizationKey(String)}.
      *
      * @return {@code this} (builder method).
      *
@@ -268,7 +315,8 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      * {@link #withLocalization(Function)} are not applied here.
      *
      * @param localizationKeys The keys to localize (e.g. "tooltip.mod_id.block_name").
-     * @param localizedValues The localized values to use (e.g. "Block Name").
+     * @param localizedValues The localized values to use (e.g. "Block Name"). Note that any keys corresponding to
+     *                        {@code null} values will behave similarly to {@link #withAdditionalLocalizationKey(String)}.
      *
      * @return {@code this} (builder method).
      *
@@ -280,7 +328,7 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
 
     /**
      * Adds a new translation key to this LBPWBuilder instance for localization through datagen. Uses the provided
-     * {@code localizedValue} directly instead of automatically localizing the provided key using the standard Nexus
+     * {@code localizedValueMapper} directly instead of automatically localizing the provided key using the standard Nexus
      * localization algorithm (see {@link #withCustomName(String)} for more info).
      * <br></br>
      * The specified {@linkplain Function Functions} input is the auto-localized key (as specified in
@@ -291,7 +339,7 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      * {@link #withLocalization(Function)} are not applied here.
      *
      * @param localizationKey The key to localize (e.g. "tooltip.mod_id.block_name").
-     * @param localizedValue A {@link Function} which provides the auto-localized key for modification and application.
+     * @param localizedValueMapper A {@link Function} which provides the auto-localized key for modification and application.
      *
      * @return {@code this} (builder method).
      *
@@ -300,7 +348,7 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      * @see #setAdditionalLocalizationKeys(Map)
      * @see #withCustomName(String)
      */
-    LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW> withAdditionalLocalizationKey(String localizationKey, Function<String, String> localizedValue);
+    LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW> withAdditionalLocalizationKey(String localizationKey, Function<String, String> localizedValueMapper);
 
     /**
      * Sets a {@link Map} of new translation keys to this LBPWBuilder instance for localization through datagen. Overrides

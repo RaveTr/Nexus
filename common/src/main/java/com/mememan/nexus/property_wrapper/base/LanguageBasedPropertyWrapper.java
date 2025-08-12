@@ -1,6 +1,7 @@
 package com.mememan.nexus.property_wrapper.base;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
@@ -18,13 +19,30 @@ import java.util.function.Function;
 public interface LanguageBasedPropertyWrapper<T, SELF extends LanguageBasedPropertyWrapper<T, SELF, BUILDER>, BUILDER extends LanguageBasedPropertyWrapperBuilder<T, BUILDER, SELF>> extends DataGenPropertyWrapper<T, SELF, BUILDER> {
 
     /**
-     * Gets the custom name for the object being wrapped, if present.
+     * Gets the description ID for the object being wrapped. Used as the object's key during automatic localization.
+     *
+     * @return The description ID for the object being wrapped.
+     */
+    @NotNull
+    String getObjectDescriptionId();
+
+    /**
+     * Gets the custom name for the object being wrapped, if present. May be empty.
      *
      * @return The custom name for the object being wrapped, if present.
      *
      * @see LanguageBasedPropertyWrapperBuilder#withCustomName(String)
      */
     Optional<String> getCustomName();
+
+    /**
+     * Gets the custom post-translation mapper for the object being wrapped, if present. May be empty.
+     *
+     * @return The custom post-translation mapper for the object being wrapped, if present.
+     *
+     * @see LanguageBasedPropertyWrapperBuilder#withLocalization(Function)
+     */
+    Optional<Function<String, String>> getObjectPostTranslationMapper();
 
     /**
      * Gets the custom separator words for the localized name of the object being wrapped, if present. Defaults to
