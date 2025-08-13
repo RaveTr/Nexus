@@ -35,8 +35,8 @@ public class CoreDataGenPropertyWrapperBuilder<T, SELF extends CoreDataGenProper
     }
 
     @Override
-    public CoreDataGenPropertyWrapperBuilder<T, SELF, SPW> copyFrom(SPW propertyWrapper) {
-        return ((SELF) super.copyFrom(propertyWrapper))
+    public SELF copyFrom(SPW propertyWrapper) {
+        return super.copyFrom(propertyWrapper)
                 .withCustomName(propertyWrapper.getCustomName().orElse(null))
                 .literalTranslation(propertyWrapper.hasLiteralTranslation())
                 .withLocalization(propertyWrapper.getObjectPostTranslationMapper().orElse(null))
@@ -49,69 +49,69 @@ public class CoreDataGenPropertyWrapperBuilder<T, SELF extends CoreDataGenProper
     }
 
     @Override
-    public CoreDataGenPropertyWrapperBuilder<T, SELF, SPW> withCustomName(String manuallyLocalizedObjectName) {
+    public SELF withCustomName(String manuallyLocalizedObjectName) {
         this.customName = Optional.ofNullable(manuallyLocalizedObjectName); // Allow blanks cuz why not + JIC
-        return this;
+        return self();
     }
 
     @Override
-    public CoreDataGenPropertyWrapperBuilder<T, SELF, SPW> literalTranslation(boolean literalTranslation) {
+    public SELF literalTranslation(boolean literalTranslation) {
         this.literalTranslation = literalTranslation;
-        return this;
+        return self();
     }
 
     @Override
-    public CoreDataGenPropertyWrapperBuilder<T, SELF, SPW> withLocalization(Function<String, String> objectTranslationFunc) {
+    public SELF withLocalization(Function<String, String> objectTranslationFunc) {
         this.objectPostTranslationMapper = Optional.ofNullable(objectTranslationFunc); // JIC
-        return this;
+        return self();
     }
 
     @Override
-    public CoreDataGenPropertyWrapperBuilder<T, SELF, SPW> bypassDefaultTranslation(boolean bypassDefaultTranslation) {
+    public SELF bypassDefaultTranslation(boolean bypassDefaultTranslation) {
         this.bypassDefaultTranslation = bypassDefaultTranslation;
-        return this;
+        return self();
     }
 
     @Override
-    public LanguageBasedPropertyWrapperBuilder<T, SELF, SPW> withCustomSeparatorWord(String customSeparatorWord) {
+    public SELF withCustomSeparatorWord(String customSeparatorWord) {
         this.customSeparatorWords.add(customSeparatorWord);
-        return this;
+        return self();
     }
 
     @Override
-    public CoreDataGenPropertyWrapperBuilder<T, SELF, SPW> withCustomSeparatorWords(List<String> definedSeparatorWords) {
+    public SELF withCustomSeparatorWords(List<String> definedSeparatorWords) {
         this.customSeparatorWords.addAll(definedSeparatorWords);
-        return this;
+        return self();
     }
 
     @Override
-    public CoreDataGenPropertyWrapperBuilder<T, SELF, SPW> setCustomSeparatorWords(List<String> definedSeparatorWords) {
+    public SELF setCustomSeparatorWords(List<String> definedSeparatorWords) {
         this.customSeparatorWords.clear();
         this.customSeparatorWords.addAll(DEFAULT_SEPARATOR_WORDS);
         this.customSeparatorWords.addAll(definedSeparatorWords);
-        return this;
+        return self();
     }
 
     @Override
-    public CoreDataGenPropertyWrapperBuilder<T, SELF, SPW> withAdditionalLocalizationKey(String localizationKey) {
+    public SELF withAdditionalLocalizationKey(String localizationKey) {
         this.additionalLocalizations.put(localizationKey, null); // Allow for overrides + null keys
-        return this;
+        return self();
     }
 
     @Override
-    public CoreDataGenPropertyWrapperBuilder<T, SELF, SPW> withAdditionalLocalizationKeys(List<String> localizationKeys) {
+    public SELF withAdditionalLocalizationKeys(List<String> localizationKeys) {
         if (!localizationKeys.isEmpty()) localizationKeys.forEach(this::withAdditionalLocalizationKey);
-        return this;
+        return self();
     }
 
     @Override
-    public CoreDataGenPropertyWrapperBuilder<T, SELF, SPW> withAdditionalLocalizationKey(String localizationKey, String localizedValue) {
+    public SELF withAdditionalLocalizationKey(String localizationKey, String localizedValue) {
         this.additionalLocalizations.put(localizationKey, resultKey -> localizedValue);
-        return this;
+        return self();
     }
 
     @Override
-    public CoreDataGenPropertyWrapperBuilder<T, SELF, SPW> withAdditionalLocalizationKeys(String[] localizationKeys, String[] localizedValues) {
+    public SELF withAdditionalLocalizationKeys(String[] localizationKeys, String[] localizedValues) {
         int chosenLength = Math.min(localizationKeys.length, localizedValues.length);
 
         if (chosenLength > 0) {
@@ -122,63 +122,63 @@ public class CoreDataGenPropertyWrapperBuilder<T, SELF extends CoreDataGenProper
             }
         }
 
-        return this;
+        return self();
     }
 
     @Override
-    public CoreDataGenPropertyWrapperBuilder<T, SELF, SPW> withAdditionalLocalizationKey(String localizationKey, Function<String, String> localizedValueMapper) {
+    public SELF withAdditionalLocalizationKey(String localizationKey, Function<String, String> localizedValueMapper) {
         this.additionalLocalizations.put(localizationKey, localizedValueMapper);
-        return this;
+        return self();
     }
 
     @Override
-    public CoreDataGenPropertyWrapperBuilder<T, SELF, SPW> setAdditionalLocalizationKeys(Map<String, Function<String, String>> localizationKeys) {
+    public SELF setAdditionalLocalizationKeys(Map<String, Function<String, String>> localizationKeys) {
         this.additionalLocalizations.clear();
         this.additionalLocalizations.putAll(localizationKeys);
-        return this;
+        return self();
     }
 
     @Override
-    public CoreDataGenPropertyWrapperBuilder<T, SELF, SPW> withModelDefinition(Function<T, ModelBasedPropertyWrapper.ModelDefinition> modelDefinition) {
+    public SELF withModelDefinition(Function<T, ModelBasedPropertyWrapper.ModelDefinition> modelDefinition) {
         this.modelDefinitionsMapper = Optional.ofNullable(modelDefinition); // JIC
-        return this;
+        return self();
     }
 
     @Override
-    public CoreDataGenPropertyWrapperBuilder<T, SELF, SPW> withTag(TagKey<T> targetTag) {
+    public SELF withTag(TagKey<T> targetTag) {
         this.objectTagKeys.add(targetTag);
-        return this;
+        return self();
     }
 
     @Override
-    public CoreDataGenPropertyWrapperBuilder<T, SELF, SPW> withTags(List<TagKey<T>> targetTags) {
+    public SELF withTags(List<TagKey<T>> targetTags) {
         this.objectTagKeys.addAll(targetTags);
-        return this;
+        return self();
     }
 
     @Override
-    public CoreDataGenPropertyWrapperBuilder<T, SELF, SPW> setTags(List<TagKey<T>> targetTags) {
+    public SELF setTags(List<TagKey<T>> targetTags) {
         this.objectTagKeys.clear();
         this.objectTagKeys.addAll(targetTags);
-        return this;
+        return self();
     }
 
     @Override
-    public CoreDataGenPropertyWrapperBuilder<T, SELF, SPW> withAdditionalTag(TagKey<?> targetTag) {
+    public SELF withAdditionalTag(TagKey<?> targetTag) {
         this.additionalTagKeys.add(targetTag);
-        return this;
+        return self();
     }
 
     @Override
-    public CoreDataGenPropertyWrapperBuilder<T, SELF, SPW> withAdditionalTags(List<TagKey<?>> targetTags) {
+    public SELF withAdditionalTags(List<TagKey<?>> targetTags) {
         this.additionalTagKeys.addAll(targetTags);
-        return this;
+        return self();
     }
 
     @Override
-    public CoreDataGenPropertyWrapperBuilder<T, SELF, SPW> setAdditionalTags(List<TagKey<?>> targetTags) {
+    public SELF setAdditionalTags(List<TagKey<?>> targetTags) {
         this.additionalTagKeys.clear();
         this.additionalTagKeys.addAll(targetTags);
-        return this;
+        return self();
     }
 }

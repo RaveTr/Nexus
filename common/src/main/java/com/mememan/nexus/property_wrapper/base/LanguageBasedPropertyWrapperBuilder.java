@@ -50,7 +50,7 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      *
      * @param manuallyLocalizedObjectName The name override used to localize the parent object's registry name.
      *
-     * @return {@code this} (builder method).
+     * @return {@link #self()} (builder method).
      *
      * @apiNote Some different implementations have several different misc. mutations applied to them automatically, like
      * how block description IDs can be transformed from "material_block" to "Block of Material". You may use this
@@ -64,7 +64,7 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      * @see #withAdditionalLocalizationKey(String)
      * @see StandardLanguageProvider
      */
-    LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW> withCustomName(String manuallyLocalizedObjectName);
+    SELF withCustomName(String manuallyLocalizedObjectName);
 
     /**
      * Marks this builder as using literal translations, meaning that corrections (like the one seen in the example
@@ -72,7 +72,7 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      *
      * @param literalTranslation Whether to use literal translations.
      *
-     * @return {@code this} (builder method).
+     * @return {@link #self()} (builder method).
      *
      * @see #withCustomName(String)
      * @see #withLocalization(Function)
@@ -80,7 +80,7 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      * @see #bypassDefaultTranslation(boolean)
      * @see #withAdditionalLocalizationKey(String)
      */
-    LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW> literalTranslation(boolean literalTranslation);
+    SELF literalTranslation(boolean literalTranslation);
 
     /**
      * A custom {@link Function} to apply miscellaneous modifications to the resulting localized block name. This is
@@ -89,21 +89,21 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      * @param objectTranslationFunc The {@link Function} responsible for directly modifying the resulting localized
      *                              object name.
      *
-     * @return {@code this} (builder method).
+     * @return {@link #self()} (builder method).
      *
      * @see #withCustomName(String)
      * @see #literalTranslation(boolean)
      */
-    LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW> withLocalization(Function<String, String> objectTranslationFunc);
+    SELF withLocalization(Function<String, String> objectTranslationFunc);
 
     /**
      * Overloaded variant of {@link #literalTranslation(boolean)} which marks this builder as using literal translations.
      *
-     * @return {@code this} (builder method).
+     * @return {@link #self()} (builder method).
      *
      * @see #literalTranslation(boolean)
      */
-    default LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW> literalTranslation() {
+    default SELF literalTranslation() {
         return literalTranslation(true);
     }
 
@@ -114,13 +114,13 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      * for your mod) unless {@link #literalTranslation(boolean)} is marked as {@code true} or {@link #withCustomName(String)}
      * is set to a non-{@code null} value.
      *
-     * @return {@code this} (builder method).
+     * @return {@link #self()} (builder method).
      *
      * @see #literalTranslation(boolean)
      * @see #withCustomName(String)
      * @see #bypassDefaultTranslation()
      */
-    LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW> bypassDefaultTranslation(boolean bypassDefaultTranslation);
+    SELF bypassDefaultTranslation(boolean bypassDefaultTranslation);
 
     /**
      * Overloaded variant of {@link #bypassDefaultTranslation(boolean)}, marking this builder to be skipped by the
@@ -132,7 +132,7 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      * @see #withCustomName(String)
      * @see #bypassDefaultTranslation(boolean)
      */
-    default LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW> bypassDefaultTranslation() {
+    default SELF bypassDefaultTranslation() {
         return bypassDefaultTranslation(true);
     }
 
@@ -143,7 +143,7 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      *
      * @param customSeparatorWord The custom separator word to lowercase while the algorithm is running.
      *
-     * @return {@code this} (builder method).
+     * @return {@link #self()} (builder method).
      *
      * @apiNote The default entries for this are {"Of", "And"}. This word is appended to the default separator
      * definitions rather than replacing them.
@@ -155,7 +155,7 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      * @see #withCustomSeparatorWords(List)
      * @see #literalTranslation(boolean)
      */
-    LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW> withCustomSeparatorWord(String customSeparatorWord);
+    SELF withCustomSeparatorWord(String customSeparatorWord);
 
     /**
      * Assigns a {@link List} of custom separator words which are lowercased during the algorithm's de-localization
@@ -165,7 +165,7 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      * @param definedSeparatorWords The {@link List} of custom separator words to lowercase while the algorithm is
      *                              running.
      *
-     * @return {@code this} (builder method).
+     * @return {@link #self()} (builder method).
      *
      * @apiNote The default entries for this are {"Of", "And"}. This {@link List} is appended to the default
      * separator definitions rather than replacing them.
@@ -176,7 +176,7 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      * @see #withLocalization(Function)
      * @see #literalTranslation(boolean)
      */
-    LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW> withCustomSeparatorWords(List<String> definedSeparatorWords);
+    SELF withCustomSeparatorWords(List<String> definedSeparatorWords);
 
     /**
      * Overloaded variant of {@link #withCustomSeparatorWords(List)}, assigning a {@link List} of custom separator
@@ -185,7 +185,7 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      * @param definedSeparatorWords The {@link List} of custom separator words to lowercase while the algorithm is
      *                              running.
      *
-     * @return {@code this} (builder method).
+     * @return {@link #self()} (builder method).
      *
      * @apiNote The default entries for this are {"Of", "And"}. This {@link List} is appended to the default
      * separator definitions rather than replacing them.
@@ -196,7 +196,7 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      * @see #withLocalization(Function)
      * @see #literalTranslation(boolean)
      */
-    default LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW> withCustomSeparatorWords(String... definedSeparatorWords) {
+    default SELF withCustomSeparatorWords(String... definedSeparatorWords) {
         return withCustomSeparatorWords(ObjectArrayList.of(definedSeparatorWords));
     }
 
@@ -208,7 +208,7 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      * @param definedSeparatorWords The {@link List} of custom separator words to lowercase while the algorithm is
      *                              running.
      *
-     * @return {@code this} (builder method).
+     * @return {@link #self()} (builder method).
      *
      * @apiNote The default entries for this are {"Of", "And"}. This {@link List} is appended to the default
      * separator definitions rather than replacing them.
@@ -218,7 +218,7 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      * @see #withCustomSeparatorWords(List)
      * @see #literalTranslation(boolean)
      */
-    LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW> setCustomSeparatorWords(List<String> definedSeparatorWords);
+    SELF setCustomSeparatorWords(List<String> definedSeparatorWords);
 
     /**
      * Adds a new translation key to this LBPWBuilder instance for localization through datagen. Automatically localizes
@@ -230,7 +230,7 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      *
      * @param localizationKey The key to localize (e.g. "tooltip.mod_id.block_name").
      *
-     * @return {@code this} (builder method).
+     * @return {@link #self()} (builder method).
      *
      * @see #withAdditionalLocalizationKey(String, String)
      * @see #withAdditionalLocalizationKeys(List)
@@ -238,7 +238,7 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      * @see #withAdditionalLocalizationKey(String, Function)
      * @see #withCustomName(String)
      */
-    LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW> withAdditionalLocalizationKey(String localizationKey);
+    SELF withAdditionalLocalizationKey(String localizationKey);
 
     /**
      * Appends the provided list of keys to this LBPWBuilder instance for localization through datagen. Automatically
@@ -250,7 +250,7 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      *
      * @param localizationKeys The keys to localize (e.g. "tooltip.mod_id.block_name").
      *
-     * @return {@code this} (builder method).
+     * @return {@link #self()} (builder method).
      *
      * @see #withAdditionalLocalizationKey(String)
      * @see #withAdditionalLocalizationKey(String, String)
@@ -258,7 +258,7 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      * @see #withAdditionalLocalizationKey(String, Function)
      * @see #withCustomName(String)
      */
-    LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW> withAdditionalLocalizationKeys(List<String> localizationKeys);
+    SELF withAdditionalLocalizationKeys(List<String> localizationKeys);
 
     /**
      * Appends the provided array of keys to this LBPWBuilder instance for localization through datagen. Automatically
@@ -270,7 +270,7 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      *
      * @param localizationKeys The keys to localize (e.g. "tooltip.mod_id.block_name").
      *
-     * @return {@code this} (builder method).
+     * @return {@link #self()} (builder method).
      *
      * @see #withAdditionalLocalizationKey(String)
      * @see #withAdditionalLocalizationKey(String, String)
@@ -278,7 +278,7 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      * @see #withAdditionalLocalizationKey(String, Function)
      * @see #withCustomName(String)
      */
-    default LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW> withAdditionalLocalizationKeys(String... localizationKeys) {
+    default SELF withAdditionalLocalizationKeys(String... localizationKeys) {
         return withAdditionalLocalizationKeys(ObjectArrayList.of(localizationKeys));
     }
 
@@ -294,14 +294,14 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      * @param localizedValue The localized value to use (e.g. "Block Name"). Note that if this is {@code null}, then
      *                       the key provided will behave similarly to {@link #withAdditionalLocalizationKey(String)}.
      *
-     * @return {@code this} (builder method).
+     * @return {@link #self()} (builder method).
      *
      * @see #withAdditionalLocalizationKey(String, String)
      * @see #withAdditionalLocalizationKey(String, Function)
      * @see #withAdditionalLocalizationKeys(String[], String[])
      * @see #withCustomName(String)
      */
-    LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW> withAdditionalLocalizationKey(String localizationKey, String localizedValue);
+    SELF withAdditionalLocalizationKey(String localizationKey, String localizedValue);
 
     /**
      * Adds the provided array of new translation keys to this LBPWBuilder instance for localization through datagen.
@@ -318,13 +318,13 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      * @param localizedValues The localized values to use (e.g. "Block Name"). Note that any keys corresponding to
      *                        {@code null} values will behave similarly to {@link #withAdditionalLocalizationKey(String)}.
      *
-     * @return {@code this} (builder method).
+     * @return {@link #self()} (builder method).
      *
      * @see #withAdditionalLocalizationKey(String, String)
      * @see #withAdditionalLocalizationKey(String, Function)
      * @see #withCustomName(String)
      */
-    LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW> withAdditionalLocalizationKeys(String[] localizationKeys, String[] localizedValues);
+    SELF withAdditionalLocalizationKeys(String[] localizationKeys, String[] localizedValues);
 
     /**
      * Adds a new translation key to this LBPWBuilder instance for localization through datagen. Uses the provided
@@ -341,14 +341,14 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      * @param localizationKey The key to localize (e.g. "tooltip.mod_id.block_name").
      * @param localizedValueMapper A {@link Function} which provides the auto-localized key for modification and application.
      *
-     * @return {@code this} (builder method).
+     * @return {@link #self()} (builder method).
      *
      * @see #withAdditionalLocalizationKey(String)
      * @see #withAdditionalLocalizationKey(String, String)
      * @see #setAdditionalLocalizationKeys(Map)
      * @see #withCustomName(String)
      */
-    LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW> withAdditionalLocalizationKey(String localizationKey, Function<String, String> localizedValueMapper);
+    SELF withAdditionalLocalizationKey(String localizationKey, Function<String, String> localizedValueMapper);
 
     /**
      * Sets a {@link Map} of new translation keys to this LBPWBuilder instance for localization through datagen. Overrides
@@ -361,12 +361,12 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBas
      *                         "Block Name"). The specified {@linkplain Function Function's} input is the auto-localized
      *                         key (as specified in {@link #withAdditionalLocalizationKey(String)}).
      *
-     * @return {@code this} (builder method).
+     * @return {@link #self()} (builder method).
      *
      * @see #withAdditionalLocalizationKey(String)
      * @see #withAdditionalLocalizationKey(String, String)
      * @see #withAdditionalLocalizationKey(String, Function)
      * @see #withCustomName(String)
      */
-    LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW> setAdditionalLocalizationKeys(Map<String, Function<String, String>> localizationKeys);
+    SELF setAdditionalLocalizationKeys(Map<String, Function<String, String>> localizationKeys);
 }

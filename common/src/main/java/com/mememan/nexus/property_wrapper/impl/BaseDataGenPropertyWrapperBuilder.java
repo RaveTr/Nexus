@@ -24,41 +24,41 @@ public class BaseDataGenPropertyWrapperBuilder<T, SELF extends DataGenPropertyWr
     }
 
     @Override
-    public DataGenPropertyWrapperBuilder<T, SELF, DGPW> copyFrom(DGPW propertyWrapper) {
-        return this
+    public SELF copyFrom(DGPW propertyWrapper) {
+        return self()
                 .excludeFromNativeDatagen(propertyWrapper.isExcludedFromDataGen())
                 .requiresSetDatagenEntries(propertyWrapper.getProviderTypeRequisites());
     }
 
     @Override
-    public DataGenPropertyWrapperBuilder<T, SELF, DGPW> excludeFromNativeDatagen(boolean excludeFromNativeDatagen) {
+    public SELF excludeFromNativeDatagen(boolean excludeFromNativeDatagen) {
         this.excludeFromNativeDatagen = excludeFromNativeDatagen;
-        return this;
+        return self();
     }
 
     @Override
-    public DataGenPropertyWrapperBuilder<T, SELF, DGPW> requiresDatagenEntry(ProviderType targetProviderType, boolean requiresDatagenEntry) {
+    public SELF requiresDatagenEntry(ProviderType targetProviderType, boolean requiresDatagenEntry) {
         this.providerTypeRequisites.put(targetProviderType, requiresDatagenEntry);
-        return this;
+        return self();
     }
 
     @Override
-    public DataGenPropertyWrapperBuilder<T, SELF, DGPW> requiresDatagenEntries(List<ProviderType> targetProviderTypes, boolean requiresDatagenEntry) {
+    public SELF requiresDatagenEntries(List<ProviderType> targetProviderTypes, boolean requiresDatagenEntry) {
         if (!targetProviderTypes.isEmpty()) targetProviderTypes.forEach(type -> providerTypeRequisites.put(type, requiresDatagenEntry));
-        return this;
+        return self();
     }
 
     @Override
-    public DataGenPropertyWrapperBuilder<T, SELF, DGPW> requiresSetDatagenEntries(List<ProviderType> targetProviderTypes, boolean requiresDatagenEntry) {
+    public SELF requiresSetDatagenEntries(List<ProviderType> targetProviderTypes, boolean requiresDatagenEntry) {
         this.providerTypeRequisites.clear();
         if (!targetProviderTypes.isEmpty()) targetProviderTypes.forEach(type -> providerTypeRequisites.put(type, requiresDatagenEntry));
-        return this;
+        return self();
     }
 
     @Override
-    public DataGenPropertyWrapperBuilder<T, SELF, DGPW> requiresSetDatagenEntries(Map<ProviderType, Boolean> mappedProviderRequisites) {
+    public SELF requiresSetDatagenEntries(Map<ProviderType, Boolean> mappedProviderRequisites) {
         this.providerTypeRequisites.clear();
         this.providerTypeRequisites.putAll(mappedProviderRequisites);
-        return this;
+        return self();
     }
 }

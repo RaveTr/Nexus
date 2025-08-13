@@ -18,8 +18,8 @@ public class BasePropertyWrapperBuilder<T, SELF extends PropertyWrapperBuilder<T
     }
 
     @Override
-    public PropertyWrapperBuilder<T, SELF, PW> copyFrom(PW propertyWrapper) {
-        return this;
+    public SELF copyFrom(PW propertyWrapper) {
+        return self();
     }
 
     @Override

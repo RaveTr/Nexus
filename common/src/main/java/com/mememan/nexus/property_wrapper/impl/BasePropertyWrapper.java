@@ -46,11 +46,6 @@ public class BasePropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
     }
 
     @Override
-    public BUILDER builder() {
-        return (BUILDER) PropertyWrapper.super.builder();
-    }
-
-    @Override
     public Optional<BUILDER> rawBuilder() {
         return Optional.ofNullable(builder);
     }
@@ -60,6 +55,9 @@ public class BasePropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
      *
      * @return A new builder instance for this {@link PropertyWrapper} instance.
      *
+     * @apiNote Typecasting {@code BUILDER} is handled appropriately in other builder methods. This method is of base
+     * type {@link PropertyWrapperBuilder} to allow for convenient return statements without having to typecast at every
+     * turn.
      * @implNote Only needed if your property wrapper requires a specified builder implementation type.
      */
     @NotNull

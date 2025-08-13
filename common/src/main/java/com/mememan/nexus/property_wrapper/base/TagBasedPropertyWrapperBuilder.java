@@ -20,39 +20,39 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends TagBasedProperty
      *
      * @param targetTag The tag to append.
      *
-     * @return {@code this} (builder method).
+     * @return {@link #self()} (builder method).
      *
      * @see #withTags(List)
      * @see #withTags(TagKey...)
      * @see #setTags(List)
      */
-    TagBasedPropertyWrapperBuilder<T, SELF, TBPW> withTag(TagKey<T> targetTag);
+    SELF withTag(TagKey<T> targetTag);
 
     /**
      * Appends multiple tags to the object being wrapped.
      *
      * @param targetTags The tags to append.
      *
-     * @return {@code this} (builder method).
+     * @return {@link #self()} (builder method).
      *
      * @see #withTag(TagKey)
      * @see #withTags(TagKey...)
      * @see #setTags(List)
      */
-    TagBasedPropertyWrapperBuilder<T, SELF, TBPW> withTags(List<TagKey<T>> targetTags);
+    SELF withTags(List<TagKey<T>> targetTags);
 
     /**
      * Appends multiple tags to the object being wrapped.
      *
      * @param targetTags The tags to append.
      *
-     * @return {@code this} (builder method).
+     * @return {@link #self()} (builder method).
      *
      * @see #withTag(TagKey)
      * @see #withTags(List)
      * @see #setTags(List)
      */
-    default TagBasedPropertyWrapperBuilder<T, SELF, TBPW> withTags(TagKey<T>... targetTags) {
+    default SELF withTags(TagKey<T>... targetTags) {
         return withTags(ObjectArrayList.of(targetTags));
     }
 
@@ -61,20 +61,20 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends TagBasedProperty
      *
      * @param targetTags The tags to set.
      *
-     * @return {@code this} (builder method).
+     * @return {@link #self()} (builder method).
      *
      * @see #withTag(TagKey)
      * @see #withTags(List)
      * @see #withTags(TagKey...)
      */
-    TagBasedPropertyWrapperBuilder<T, SELF, TBPW> setTags(List<TagKey<T>> targetTags);
+    SELF setTags(List<TagKey<T>> targetTags);
 
     /**
      * Appends an additional tag to the object being wrapped.
      *
      * @param targetTag The tag to append.
      *
-     * @return {@code this} (builder method).
+     * @return {@link #self()} (builder method).
      *
      * @implNote Additional tags are used for cases like adding tags to blocks, where they may require item tags to be
      * added to them for proper functionality too. Some PW types don't have a need for implementing this.
@@ -83,14 +83,14 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends TagBasedProperty
      * @see #withAdditionalTags(TagKey...)
      * @see #setAdditionalTags(List)
      */
-    TagBasedPropertyWrapperBuilder<T, SELF, TBPW> withAdditionalTag(TagKey<?> targetTag);
+    SELF withAdditionalTag(TagKey<?> targetTag);
 
     /**
      * Appends multiple additional tags to the object being wrapped.
      *
      * @param targetTags The tags to append.
      *
-     * @return {@code this} (builder method).
+     * @return {@link #self()} (builder method).
      *
      * @implNote Additional tags are used for cases like adding tags to blocks, where they may require item tags to be
      * added to them for proper functionality too. Some PW types don't have a need for implementing this.
@@ -99,14 +99,14 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends TagBasedProperty
      * @see #withAdditionalTags(TagKey...)
      * @see #setAdditionalTags(List)
      */
-    TagBasedPropertyWrapperBuilder<T, SELF, TBPW> withAdditionalTags(List<TagKey<?>> targetTags);
+    SELF withAdditionalTags(List<TagKey<?>> targetTags);
 
     /**
      * Appends multiple additional tags to the object being wrapped.
      *
      * @param targetTags The tags to append.
      *
-     * @return {@code this} (builder method).
+     * @return {@link #self()} (builder method).
      *
      * @implNote Additional tags are used for cases like adding tags to blocks, where they may require item tags to be
      * added to them for proper functionality too. Some PW types don't have a need for implementing this.
@@ -115,7 +115,7 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends TagBasedProperty
      * @see #withAdditionalTags(List)
      * @see #setAdditionalTags(List)
      */
-    default TagBasedPropertyWrapperBuilder<T, SELF, TBPW> withAdditionalTags(TagKey<?>... targetTags) {
+    default SELF withAdditionalTags(TagKey<?>... targetTags) {
         return withAdditionalTags(ObjectArrayList.of(targetTags));
     }
 
@@ -124,7 +124,7 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends TagBasedProperty
      *
      * @param targetTags The tags to set.
      *
-     * @return {@code this} (builder method).
+     * @return {@link #self()} (builder method).
      *
      * @implNote Additional tags are used for cases like adding tags to blocks, where they may require item tags to be
      * added to them for proper functionality too. Some PW types don't have a need for implementing this.
@@ -133,5 +133,5 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends TagBasedProperty
      * @see #withAdditionalTags(List)
      * @see #withAdditionalTags(TagKey...)
      */
-    TagBasedPropertyWrapperBuilder<T, SELF, TBPW> setAdditionalTags(List<TagKey<?>> targetTags);
+    SELF setAdditionalTags(List<TagKey<?>> targetTags);
 }

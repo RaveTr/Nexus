@@ -18,7 +18,7 @@ public interface ModelBasedPropertyWrapperBuilder<T, SELF extends ModelBasedProp
      *
      * @param modelDefinition The model definition to associate with the parent object.
      *
-     * @return {@code this} (builder method)
+     * @return {@link #self()} (builder method)
      */
-    ModelBasedPropertyWrapperBuilder<T, SELF, MBPW> withModelDefinition(Function<T, ModelBasedPropertyWrapper.ModelDefinition> modelDefinition);
+    SELF withModelDefinition(Function<T, ModelBasedPropertyWrapper.ModelDefinition> modelDefinition);
 }

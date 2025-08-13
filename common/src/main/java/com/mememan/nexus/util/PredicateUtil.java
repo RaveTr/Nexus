@@ -2,6 +2,8 @@ package com.mememan.nexus.util;
 
 import com.mememan.nexus.block.standard.BlockPropertyWrapper;
 import com.mememan.nexus.item.standard.ItemPropertyWrapper;
+import com.mememan.nexus.property_wrapper.base.PropertyWrapper;
+import com.mememan.nexus.property_wrapper.base.PropertyWrapperBuilder;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 
@@ -54,5 +56,9 @@ public final class PredicateUtil {
         if (!foundMatch.get()) foundMatch.set(targetParentTab.get().getDisplayItems().contains(stackToTest));
 
         return foundMatch.get();
+    }
+
+    public static <T, PW extends PropertyWrapper<T, PW, PB>, PB extends PropertyWrapperBuilder<T, PB, PW>> boolean validatePropertyWrapperFor(PW propertyWrapper, Class<PB> builderType) {
+        return propertyWrapper != null && !propertyWrapper.getDisabledBuilderTypes().contains(builderType);
     }
 }
