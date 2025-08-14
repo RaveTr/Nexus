@@ -58,7 +58,17 @@ public final class PredicateUtil {
         return foundMatch.get();
     }
 
-    public static <T, PW extends PropertyWrapper<T, PW, PB>, PB extends PropertyWrapperBuilder<T, PB, PW>> boolean validatePropertyWrapperFor(PW propertyWrapper, Class<PB> builderType) {
+    /**
+     *
+     *
+     * @param propertyWrapper
+     * @param builderType
+     * @return
+     * @param <T>
+     * @param <PW>
+     * @param <PB>
+     */
+    public static <T, PW extends PropertyWrapper<T, PW, PB>, PB extends PropertyWrapperBuilder<T, PB, PW>> boolean validateBuilderForWrapper(PW propertyWrapper, Class<PB> builderType) {
         return propertyWrapper != null && !propertyWrapper.getDisabledBuilderTypes().contains(builderType);
     }
 }

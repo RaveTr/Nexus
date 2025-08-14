@@ -1,0 +1,2 @@
+Took way too much time to think about the design principles I should follow for PWs, then realized that it isn't 
+worth all that time, so I went with what I thought was optimal for the time being. Inb4 "composition >> inheritance!!!"

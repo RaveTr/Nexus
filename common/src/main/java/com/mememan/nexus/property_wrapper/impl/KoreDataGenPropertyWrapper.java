@@ -17,15 +17,15 @@ import java.util.function.Supplier;
 /**
  * Core implementation for a generic Property Wrapper that covers most datagen-based use cases for a standard object.
  *
- * @see CoreDataGenPropertyWrapperBuilder
+ * @see KoreDataGenPropertyWrapperBuilder
  */
-public class CoreDataGenPropertyWrapper<T, SELF extends CoreDataGenPropertyWrapper<T, SELF, BUILDER>, BUILDER extends CoreDataGenPropertyWrapperBuilder<T, BUILDER, SELF>> extends BaseDataGenPropertyWrapper<T, SELF, BUILDER> implements LanguageBasedPropertyWrapper<T, SELF, BUILDER>, ModelBasedPropertyWrapper<T, SELF, BUILDER>, TagBasedPropertyWrapper<T, SELF, BUILDER> {
+public class KoreDataGenPropertyWrapper<T, SELF extends KoreDataGenPropertyWrapper<T, SELF, BUILDER>, BUILDER extends KoreDataGenPropertyWrapperBuilder<T, BUILDER, SELF>> extends BaseDataGenPropertyWrapper<T, SELF, BUILDER> implements LanguageBasedPropertyWrapper<T, SELF, BUILDER>, ModelBasedPropertyWrapper<T, SELF, BUILDER>, TagBasedPropertyWrapper<T, SELF, BUILDER> {
 
-    public CoreDataGenPropertyWrapper(Supplier<T> parentObject, boolean isTemplate) {
+    public KoreDataGenPropertyWrapper(Supplier<T> parentObject, boolean isTemplate) {
         super(parentObject, isTemplate);
     }
 
-    public CoreDataGenPropertyWrapper(@NotNull Supplier<T> parentObject) {
+    public KoreDataGenPropertyWrapper(@NotNull Supplier<T> parentObject) {
         super(parentObject);
     }
 

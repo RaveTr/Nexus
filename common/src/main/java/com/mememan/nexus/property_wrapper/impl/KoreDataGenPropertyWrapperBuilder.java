@@ -17,9 +17,9 @@ import java.util.function.Function;
 /**
  * Core implementation for a generic Property Wrapper Builder that covers most datagen-based use cases for a standard object.
  *
- * @see CoreDataGenPropertyWrapper
+ * @see KoreDataGenPropertyWrapper
  */
-public class CoreDataGenPropertyWrapperBuilder<T, SELF extends CoreDataGenPropertyWrapperBuilder<T, SELF, SPW>, SPW extends CoreDataGenPropertyWrapper<T, SPW, SELF>> extends BaseDataGenPropertyWrapperBuilder<T, SELF, SPW> implements LanguageBasedPropertyWrapperBuilder<T, SELF, SPW>, ModelBasedPropertyWrapperBuilder<T, SELF, SPW>, TagBasedPropertyWrapperBuilder<T, SELF, SPW> {
+public class KoreDataGenPropertyWrapperBuilder<T, SELF extends KoreDataGenPropertyWrapperBuilder<T, SELF, SPW>, SPW extends KoreDataGenPropertyWrapper<T, SPW, SELF>> extends BaseDataGenPropertyWrapperBuilder<T, SELF, SPW> implements LanguageBasedPropertyWrapperBuilder<T, SELF, SPW>, ModelBasedPropertyWrapperBuilder<T, SELF, SPW>, TagBasedPropertyWrapperBuilder<T, SELF, SPW> {
     protected Optional<String> customName = Optional.empty();
     protected boolean literalTranslation = false;
     protected Optional<Function<String, String>> objectPostTranslationMapper = Optional.empty();
@@ -30,12 +30,12 @@ public class CoreDataGenPropertyWrapperBuilder<T, SELF extends CoreDataGenProper
     protected final List<TagKey<T>> objectTagKeys = ObjectArrayList.of();
     protected final List<TagKey<?>> additionalTagKeys = ObjectArrayList.of();
 
-    public CoreDataGenPropertyWrapperBuilder(@NotNull SPW ownerWrapper) {
+    public KoreDataGenPropertyWrapperBuilder(@NotNull SPW ownerWrapper) {
         super(ownerWrapper);
     }
 
     @Override
-    public SELF copyFrom(SPW propertyWrapper) {
+    public SELF copyFrom(SPW propertyWrapper) { // Allow gen of (either builder or specific property)
         return super.copyFrom(propertyWrapper)
                 .withCustomName(propertyWrapper.getCustomName().orElse(null))
                 .literalTranslation(propertyWrapper.hasLiteralTranslation())
