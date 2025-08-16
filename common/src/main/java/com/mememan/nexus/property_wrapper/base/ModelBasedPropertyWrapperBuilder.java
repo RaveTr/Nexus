@@ -10,7 +10,7 @@ import java.util.function.Function;
  *
  * @see ModelBasedPropertyWrapper
  */
-public interface ModelBasedPropertyWrapperBuilder<T, SELF extends ModelBasedPropertyWrapperBuilder<T, SELF, MBPW>, MBPW extends ModelBasedPropertyWrapper<T, MBPW, SELF>> extends DataGenPropertyWrapperBuilder<T, SELF, MBPW> {
+public interface ModelBasedPropertyWrapperBuilder<T, SELF extends PropertyWrapperBuilder<T, SELF, MBPW>, MBPW extends PropertyWrapper<T, MBPW, SELF>> extends DataGenPropertyWrapperBuilder<T, SELF, MBPW> {
 
     /**
      * Defines a custom mapping function representing the parent object's model definition, where the input is the parent

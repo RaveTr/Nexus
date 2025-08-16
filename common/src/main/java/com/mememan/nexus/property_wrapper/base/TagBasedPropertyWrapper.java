@@ -11,7 +11,7 @@ import java.util.List;
  *
  * @see TagBasedPropertyWrapperBuilder
  */
-public interface TagBasedPropertyWrapper<T, SELF extends TagBasedPropertyWrapper<T, SELF, BUILDER>, BUILDER extends TagBasedPropertyWrapperBuilder<T, BUILDER, SELF>> extends DataGenPropertyWrapper<T, SELF, BUILDER> {
+public interface TagBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDER>, BUILDER extends PropertyWrapperBuilder<T, BUILDER, SELF>> extends DataGenPropertyWrapper<T, SELF, BUILDER> {
 
     /**
      * Gets a {@link List} of {@link TagKey} entries for the object being wrapped, and whose generic types are {@code T}.

@@ -13,7 +13,7 @@ import java.util.List;
  *
  * @see TagBasedPropertyWrapper
  */
-public interface TagBasedPropertyWrapperBuilder<T, SELF extends TagBasedPropertyWrapperBuilder<T, SELF, TBPW>, TBPW extends TagBasedPropertyWrapper<T, TBPW, SELF>> extends DataGenPropertyWrapperBuilder<T, SELF, TBPW> {
+public interface TagBasedPropertyWrapperBuilder<T, SELF extends PropertyWrapperBuilder<T, SELF, TBPW>, TBPW extends PropertyWrapper<T, TBPW, SELF>> extends DataGenPropertyWrapperBuilder<T, SELF, TBPW> {
 
     /**
      * Appends a tag to the object being wrapped.

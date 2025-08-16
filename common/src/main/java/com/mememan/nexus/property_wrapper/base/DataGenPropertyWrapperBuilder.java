@@ -17,7 +17,7 @@ import java.util.Map;
  *
  * @see DataGenPropertyWrapper
  */
-public interface DataGenPropertyWrapperBuilder<T, SELF extends DataGenPropertyWrapperBuilder<T, SELF, DGPW>, DGPW extends DataGenPropertyWrapper<T, DGPW, SELF>> extends PropertyWrapperBuilder<T, SELF, DGPW> {
+public interface DataGenPropertyWrapperBuilder<T, SELF extends PropertyWrapperBuilder<T, SELF, DGPW>, DGPW extends PropertyWrapper<T, DGPW, SELF>> extends PropertyWrapperBuilder<T, SELF, DGPW> {
 
     /**
      * Determines whether this DGPWB instance should be entirely excluded from Nexus' native datagen.

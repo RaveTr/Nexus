@@ -1,10 +1,11 @@
 package com.mememan.nexus.property_wrapper.impl;
 
-import com.google.common.base.Suppliers;
 import com.mememan.nexus.property_wrapper.base.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.PropertyWrapperBuilder;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Set;
 import java.util.function.Supplier;
 
 /**
@@ -21,5 +22,13 @@ public class CorePropertyWrapper<T, SELF extends CorePropertyWrapper<T, SELF, BU
 
     public CorePropertyWrapper(@NotNull Supplier<T> parentObject) {
         super(parentObject);
+    }
+
+    public CorePropertyWrapper() {
+        super();
+    }
+
+    public Set<PropertyWrapperBuilder<T, ?, ?>> getConfiguredBuilders() {
+        return rawBuilder().map(b -> b.configuredBuilders).orElse(ObjectOpenHashSet.of());
     }
 }

@@ -19,7 +19,7 @@ import java.util.function.Function;
  *
  * @see ModelBasedPropertyWrapperBuilder
  */
-public interface ModelBasedPropertyWrapper<T, SELF extends ModelBasedPropertyWrapper<T, SELF, BUILDER>, BUILDER extends ModelBasedPropertyWrapperBuilder<T, BUILDER, SELF>> extends DataGenPropertyWrapper<T, SELF, BUILDER> {
+public interface ModelBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDER>, BUILDER extends PropertyWrapperBuilder<T, BUILDER, SELF>> extends DataGenPropertyWrapper<T, SELF, BUILDER> {
 
     /**
      * Gets the {@link List} of model definitions for the object being wrapped, represented as a {@link Function} taking

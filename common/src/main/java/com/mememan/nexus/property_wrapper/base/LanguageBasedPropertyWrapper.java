@@ -16,7 +16,7 @@ import java.util.function.Function;
  *
  * @see LanguageBasedPropertyWrapperBuilder
  */
-public interface LanguageBasedPropertyWrapper<T, SELF extends LanguageBasedPropertyWrapper<T, SELF, BUILDER>, BUILDER extends LanguageBasedPropertyWrapperBuilder<T, BUILDER, SELF>> extends DataGenPropertyWrapper<T, SELF, BUILDER> {
+public interface LanguageBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDER>, BUILDER extends PropertyWrapperBuilder<T, BUILDER, SELF>> extends DataGenPropertyWrapper<T, SELF, BUILDER> {
 
     /**
      * Gets the description ID for the object being wrapped. Used as the object's key during automatic localization.

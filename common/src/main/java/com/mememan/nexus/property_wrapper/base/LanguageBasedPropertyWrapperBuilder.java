@@ -15,7 +15,7 @@ import java.util.function.Function;
  *
  * @see LanguageBasedPropertyWrapper
  */
-public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW>, LBPW extends LanguageBasedPropertyWrapper<T, LBPW, SELF>> extends DataGenPropertyWrapperBuilder<T, SELF, LBPW> {
+public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends PropertyWrapperBuilder<T, SELF, LBPW>, LBPW extends PropertyWrapper<T, LBPW, SELF>> extends DataGenPropertyWrapperBuilder<T, SELF, LBPW> {
     ObjectArrayList<String> DEFAULT_SEPARATOR_WORDS = ObjectArrayList.of("Of", "And");
 
     /**
