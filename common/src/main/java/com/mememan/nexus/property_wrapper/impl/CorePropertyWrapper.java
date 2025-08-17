@@ -10,6 +10,11 @@ import java.util.function.Supplier;
 
 /**
  * Core implementation of Property Wrappers that uses composition to attach properties from specialised property wrappers.
+ * <br></br>
+ * Useful for selectively composing a builder with several different PWB types. Each builder passed into here is
+ * defensively cloned, stored, and re-built to ensure proper registration and segregation between value mutation.
+ * <br></br>
+ * Can be extended for specialization. This base {@code class} handles all general cases.
  *
  * @see PropertyWrapper
  * @see CorePropertyWrapperBuilder

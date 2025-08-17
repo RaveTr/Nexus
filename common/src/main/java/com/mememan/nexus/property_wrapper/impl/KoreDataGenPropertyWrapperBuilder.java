@@ -41,11 +41,11 @@ public class KoreDataGenPropertyWrapperBuilder<T, SELF extends KoreDataGenProper
                 .literalTranslation(propertyWrapper.hasLiteralTranslation())
                 .withLocalization(propertyWrapper.getObjectPostTranslationMapper().orElse(null))
                 .bypassDefaultTranslation(propertyWrapper.bypassesDefaultTranslation())
-                .setCustomSeparatorWords(propertyWrapper.getCustomSeparatorWords())
-                .setAdditionalLocalizationKeys(propertyWrapper.getAdditionalLocalizationKeys())
+                .setCustomSeparatorWords(List.copyOf(propertyWrapper.getCustomSeparatorWords()))
+                .setAdditionalLocalizationKeys(Map.copyOf(propertyWrapper.getAdditionalLocalizationKeys()))
                 .withModelDefinition(propertyWrapper.getModelDefinition().orElse(null))
-                .setTags(propertyWrapper.getObjectTags())
-                .setAdditionalTags(propertyWrapper.getAdditionalTags());
+                .setTags(List.copyOf(propertyWrapper.getObjectTags()))
+                .setAdditionalTags(List.copyOf(propertyWrapper.getAdditionalTags()));
     }
 
     @Override

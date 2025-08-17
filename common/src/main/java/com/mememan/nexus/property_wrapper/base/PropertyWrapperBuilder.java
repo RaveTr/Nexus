@@ -1,8 +1,5 @@
 package com.mememan.nexus.property_wrapper.base;
 
-import com.mememan.nexus.damage_type.DamageTypePropertyWrapper;
-import com.mememan.nexus.property_wrapper.impl.KoreDataGenPropertyWrapperBuilder;
-import com.mememan.nexus.property_wrapper.impl.DynamicPropertyWrapper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
@@ -17,14 +14,6 @@ import java.util.function.Supplier;
  * This is only the base {@code interface}, so it isn't going to do much on its own. It only provides the core
  * {@code build()} method (with overloads) and standard generic type constraints.
  *
- * @implNote Some implementations that inherit from base classes share multiple different PWB types
- * (such as {@link KoreDataGenPropertyWrapperBuilder}) may override different builder methods and have them do nothing
- * if they are not applicable. Such methods should be annotated with {@linkplain Deprecated @Deprecated}.
- * <br></br>
- * An example of this would be {@link DamageTypePropertyWrapper}, which extends from {@link DynamicPropertyWrapper} (and
- * by extension, its builder extends from {@link KoreDataGenPropertyWrapperBuilder}). Obviously, damage types do not have
- * models, and thus any methods defined in {@link ModelBasedPropertyWrapperBuilder} are not applicable to it.
- *
  * @param <T> The object type being wrapped.
  * @param <SELF> Type reference generic for this PWB {@code interface}. Useful for implementations that implicitly require
  *               different generic types for their property wrappers.
@@ -32,7 +21,7 @@ import java.util.function.Supplier;
  *
  * @see PropertyWrapper
  */
-public interface PropertyWrapperBuilder<T, SELF extends PropertyWrapperBuilder<T, SELF, PW>, PW extends PropertyWrapper<T, PW, SELF>> {
+public interface PropertyWrapperBuilder<T, SELF extends PropertyWrapperBuilder<T, SELF, PW>, PW extends PropertyWrapper<T, PW, SELF>> extends Cloneable {
 
     /**
      * Copies data from the provided {@link PropertyWrapper} instance into this builder. Overrides all existing data
@@ -55,6 +44,22 @@ public interface PropertyWrapperBuilder<T, SELF extends PropertyWrapperBuilder<T
      * @see PropertyWrapper#isTemplate()
      */
     PW build();
+
+    /**
+     * Gets the current owner {@link PropertyWrapper} instance of this builder. Does not perform any extra operations.
+     *
+     * @return The current owner {@link PropertyWrapper} instance of this builder.
+     */
+    @NotNull
+    PW getCurrentOwnerWrapper();
+
+    /**
+     * Safely clones this builder via {@link Object#clone()}. Useful if you need to create a copy of this builder rather
+     * than copying from another one, but it is a bit more performance taxing.
+     *
+     * @return A deep copy of this builder instance (deep copying mostly depends on {@link #copyFrom(PropertyWrapper)}).
+     */
+    SELF clone();
 
     /**
      * Shortcut overload for {@link PropertyWrapperBuilder#build()} that returns the parent object {@link Supplier}

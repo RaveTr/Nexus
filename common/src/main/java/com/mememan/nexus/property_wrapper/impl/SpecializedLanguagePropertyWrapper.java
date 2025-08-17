@@ -1,8 +1,6 @@
 package com.mememan.nexus.property_wrapper.impl;
 
-import com.mememan.nexus.property_wrapper.base.DataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.LanguageBasedPropertyWrapper;
-import com.mememan.nexus.property_wrapper.base.LanguageBasedPropertyWrapperBuilder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -11,7 +9,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class SpecializedLanguagePropertyWrapper<T, SELF extends DataGenPropertyWrapper<T, SELF, BUILDER>, BUILDER extends LanguageBasedPropertyWrapperBuilder<T, BUILDER, SELF>> extends BaseDataGenPropertyWrapper<T, SELF, BUILDER> implements LanguageBasedPropertyWrapper<T, SELF, BUILDER> {
+public class SpecializedLanguagePropertyWrapper<T, SELF extends LanguageBasedPropertyWrapper<T, SELF, BUILDER>, BUILDER extends SpecializedLanguagePropertyWrapperBuilder<T, BUILDER, SELF>> extends BaseDataGenPropertyWrapper<T, SELF, BUILDER> implements LanguageBasedPropertyWrapper<T, SELF, BUILDER> {
 
     public SpecializedLanguagePropertyWrapper(Supplier<T> parentObject, boolean isTemplate) {
         super(parentObject, isTemplate);

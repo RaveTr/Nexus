@@ -26,4 +26,20 @@ public class BasePropertyWrapperBuilder<T, SELF extends PropertyWrapperBuilder<T
     public PW build() {
         return PropertyWrapper.PropertyWrappersContainer.registerPropertyWrapper(ownerWrapper.getParentObject(), ownerWrapper);
     }
+
+    @Override
+    public @NotNull PW getCurrentOwnerWrapper() {
+        return ownerWrapper;
+    }
+
+    @Override
+    public SELF clone() {
+        try {
+            SELF self = (SELF) super.clone();
+
+            return self.copyFrom(ownerWrapper);
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
