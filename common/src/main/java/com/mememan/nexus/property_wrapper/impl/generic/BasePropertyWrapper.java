@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -17,20 +18,22 @@ import java.util.function.Supplier;
 public class BasePropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDER>, BUILDER extends PropertyWrapperBuilder<T, BUILDER, SELF>> implements PropertyWrapper<T, SELF, BUILDER> {
     protected final Supplier<T> parentObject;
     protected final boolean isTemplate;
+    protected final Function<SELF, PropertyWrapperBuilder<T, BUILDER, SELF>> builderFactory; // Output can't be BUILDER cuz generic type invariance
     @Nullable
     protected BUILDER builder;
 
-    public BasePropertyWrapper(Supplier<T> parentObject, boolean isTemplate) {
+    public BasePropertyWrapper(Supplier<T> parentObject, boolean isTemplate, Function<SELF, PropertyWrapperBuilder<T, BUILDER, SELF>> builderFactory) {
         this.parentObject = isTemplate || parentObject == null ? Suppliers.ofInstance(null) : parentObject;
         this.isTemplate = isTemplate;
+        this.builderFactory = builderFactory;
     }
 
-    public BasePropertyWrapper(@NotNull Supplier<T> parentObject) {
-        this(parentObject, false);
+    public BasePropertyWrapper(@NotNull Supplier<T> parentObject, Function<SELF, PropertyWrapperBuilder<T, BUILDER, SELF>> builderFactory) {
+        this(parentObject, false, builderFactory);
     }
 
-    public BasePropertyWrapper() {
-        this(null, false);
+    public BasePropertyWrapper(Function<SELF, PropertyWrapperBuilder<T, BUILDER, SELF>> builderFactory) {
+        this(null, false, builderFactory);
     }
 
     @Override
@@ -51,18 +54,18 @@ public class BasePropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
     }
 
     /**
-     * Used to create a new builder instance for this {@link PropertyWrapper} instance.
+     * Used to create a new builder instance for this {@link PropertyWrapper} instance. Uses {@link #builderFactory} to
+     * create the builder.
      *
      * @return A new builder instance for this {@link PropertyWrapper} instance.
      *
      * @apiNote Typecasting {@code BUILDER} is handled appropriately in other builder methods. This method is of base
      * type {@link PropertyWrapperBuilder} to allow for convenient return statements without having to typecast at every
      * turn.
-     * @implNote Only needed if your property wrapper requires a specified builder implementation type.
      */
     @NotNull
     public PropertyWrapperBuilder<T, BUILDER, SELF> constructBuilder() {
-        return new BasePropertyWrapperBuilder<>(this);
+        return builderFactory.apply((SELF) this);
     }
 
     @Override

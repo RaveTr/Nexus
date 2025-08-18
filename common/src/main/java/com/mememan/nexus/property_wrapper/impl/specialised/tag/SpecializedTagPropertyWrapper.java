@@ -12,15 +12,15 @@ import java.util.function.Supplier;
 public class SpecializedTagPropertyWrapper<T, SELF extends TagBasedPropertyWrapper<T, SELF, BUILDER>, BUILDER extends SpecializedTagPropertyWrapperBuilder<T, BUILDER, SELF>> extends BaseDataGenPropertyWrapper<T, SELF, BUILDER> implements TagBasedPropertyWrapper<T, SELF, BUILDER> {
 
     public SpecializedTagPropertyWrapper(Supplier<T> parentObject, boolean isTemplate) {
-        super(parentObject, isTemplate);
+        super(parentObject, isTemplate, SpecializedTagPropertyWrapperBuilder::new);
     }
 
     public SpecializedTagPropertyWrapper(@NotNull Supplier<T> parentObject) {
-        super(parentObject);
+        super(parentObject, SpecializedTagPropertyWrapperBuilder::new);
     }
 
     public SpecializedTagPropertyWrapper() {
-        super();
+        super(SpecializedTagPropertyWrapperBuilder::new);
     }
 
     @Override
