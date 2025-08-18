@@ -2,12 +2,10 @@ package com.mememan.nexus.property_wrapper.base.generic;
 
 import com.google.common.collect.ImmutableMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -76,21 +74,6 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
      * @return The builder instance wrapped in an {@link Optional}. May be empty.
      */
     Optional<? extends PropertyWrapperBuilder<T, BUILDER, SELF>> rawBuilder();
-
-    /**
-     * Defaulted method that specifies {@code BUILDER} types that should be disabled for this {@link PropertyWrapper} instance.
-     * <br></br>
-     * Disabled builders are typically used in checks for validation of usable property values. In implementations that
-     * specify disabled builder types, methods in both the builder and this PW instance are appropriately overridden
-     * and marked to indicate that their usage is invalid.
-     *
-     * @return A list of {@code BUILDER} types that should be disabled for this {@link PropertyWrapper} instance.
-     *
-     * @see PropertyWrapperBuilder
-     */
-    default List<Class<BUILDER>> getDisabledBuilderTypes() {
-        return ObjectArrayList.of();
-    }
 
     /**
      * Whether this {@link PropertyWrapper} instance is a template.

@@ -24,4 +24,10 @@ public interface DefaultablePropertyWrapperBuilder<T, SELF extends PropertyWrapp
      * methods are only called if the value is present.
      */
     Optional<SPEC> getSpecializedBuilder();
+
+    @Override
+    default SELF copyFrom(PW propertyWrapper) {
+        getSpecializedBuilder().ifPresent(builder -> builder.copyFrom(propertyWrapper));
+        return self();
+    }
 }

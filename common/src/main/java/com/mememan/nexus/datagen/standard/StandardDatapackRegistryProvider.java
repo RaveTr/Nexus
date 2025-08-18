@@ -99,7 +99,7 @@ public class StandardDatapackRegistryProvider extends RegistriesDatapackGenerato
             return CompletableFuture.allOf(regLookup.listElements()
                     .filter(holderRef -> holderRef.key().location().getNamespace().equals(modId))
                     .filter(holderRef -> {
-                        if (validateAllEntries() && holderRef.value() == null) throw new NullPointerException(String.format("Missing/null registry entry for: %s (from mod of ID: %s)", holderRef.key().location(), getModId()));
+                        if (validateAllEntries() && holderRef.value() == null) throw new NullPointerException(String.format("Missing/null registry entry for: %s (required by mod of ID: %s)", holderRef.key().location(), getModId()));
 
                         if (serializedElements.get(holderRef.key()) != null) { // Registries themselves already handle duplicates anyway, but you never know
                             switch (getDuplicateDataPolicy()) {
