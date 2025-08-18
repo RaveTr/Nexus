@@ -1,8 +1,8 @@
-package com.mememan.nexus.property_wrapper.impl;
+package com.mememan.nexus.property_wrapper.impl.generic;
 
 import com.google.common.base.Suppliers;
-import com.mememan.nexus.property_wrapper.base.PropertyWrapper;
-import com.mememan.nexus.property_wrapper.base.PropertyWrapperBuilder;
+import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
+import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

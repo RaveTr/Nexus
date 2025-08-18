@@ -1,4 +1,4 @@
-package com.mememan.nexus.property_wrapper.base;
+package com.mememan.nexus.property_wrapper.base.generic;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -30,6 +30,10 @@ public interface PropertyWrapperBuilder<T, SELF extends PropertyWrapperBuilder<T
      * @param propertyWrapper The {@link PropertyWrapper} instance to copy data from.
      *
      * @return {@link #self()} (builder method)
+     *
+     * @implSpec Implementations should ensure that properties are deep-copied rather than shallow-copied from the
+     * provided {@code propertyWrapper} (e.g. instead of {@code #setSomeList(propertyWrapper.getSomeList())}, use
+     * {@code #setSomeList(List.copyOf(propertyWrapper.getSomeList()))}).
      */
     SELF copyFrom(PW propertyWrapper);
 

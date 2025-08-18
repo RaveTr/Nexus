@@ -1,4 +1,4 @@
-package com.mememan.nexus.property_wrapper.base;
+package com.mememan.nexus.property_wrapper.base.generic;
 
 import com.google.common.collect.ImmutableMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;

@@ -1,4 +1,4 @@
-package com.mememan.nexus.property_wrapper.base;
+package com.mememan.nexus.property_wrapper.base.generic;
 
 import com.mememan.nexus.datagen.ProviderType;
 import com.mememan.nexus.datagen.standard.ModDataProvider;

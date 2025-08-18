@@ -1,6 +1,7 @@
-package com.mememan.nexus.property_wrapper.impl;
+package com.mememan.nexus.property_wrapper.impl.specialised.model;
 
-import com.mememan.nexus.property_wrapper.base.ModelBasedPropertyWrapper;
+import com.mememan.nexus.property_wrapper.base.specialised.model.ModelBasedPropertyWrapper;
+import com.mememan.nexus.property_wrapper.impl.generic.BaseDataGenPropertyWrapper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -23,6 +24,6 @@ public class SpecializedModelPropertyWrapper<T, SELF extends ModelBasedPropertyW
 
     @Override
     public Optional<Function<T, ModelDefinition>> getModelDefinition() {
-        return Optional.empty();
+        return rawBuilder().flatMap(b -> b.modelDefinitionsMapper);
     }
 }

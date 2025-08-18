@@ -1,5 +1,8 @@
-package com.mememan.nexus.property_wrapper.base;
+package com.mememan.nexus.property_wrapper.base.specialised.model;
 
+import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
+import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
+import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.data.models.model.ModelTemplate;
 import net.minecraft.data.models.model.TextureMapping;

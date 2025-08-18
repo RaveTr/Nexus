@@ -1,8 +1,8 @@
-package com.mememan.nexus.property_wrapper.impl;
+package com.mememan.nexus.property_wrapper.impl.generic;
 
 import com.mememan.nexus.datagen.ProviderType;
-import com.mememan.nexus.property_wrapper.base.DataGenPropertyWrapper;
-import com.mememan.nexus.property_wrapper.base.DataGenPropertyWrapperBuilder;
+import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
+import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapperBuilder;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 

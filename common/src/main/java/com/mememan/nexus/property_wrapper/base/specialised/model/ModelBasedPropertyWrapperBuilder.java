@@ -1,4 +1,8 @@
-package com.mememan.nexus.property_wrapper.base;
+package com.mememan.nexus.property_wrapper.base.specialised.model;
+
+import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapperBuilder;
+import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
+import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
 
 import java.util.function.Function;
 

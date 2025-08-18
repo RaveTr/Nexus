@@ -1,5 +1,8 @@
-package com.mememan.nexus.property_wrapper.base;
+package com.mememan.nexus.property_wrapper.base.specialised.tag;
 
+import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapperBuilder;
+import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
+import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.tags.TagKey;
 

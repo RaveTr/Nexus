@@ -2,8 +2,8 @@ package com.mememan.nexus.util;
 
 import com.mememan.nexus.block.standard.BlockPropertyWrapper;
 import com.mememan.nexus.item.standard.ItemPropertyWrapper;
-import com.mememan.nexus.property_wrapper.base.PropertyWrapper;
-import com.mememan.nexus.property_wrapper.base.PropertyWrapperBuilder;
+import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
+import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 

@@ -1,7 +1,8 @@
-package com.mememan.nexus.property_wrapper.impl;
+package com.mememan.nexus.property_wrapper.impl.generic;
 
-import com.mememan.nexus.property_wrapper.base.PropertyWrapper;
-import com.mememan.nexus.property_wrapper.base.PropertyWrapperBuilder;
+import com.mememan.nexus.NexusConstants;
+import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
+import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -39,7 +40,7 @@ public class BasePropertyWrapperBuilder<T, SELF extends PropertyWrapperBuilder<T
 
             return self.copyFrom(ownerWrapper);
         } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
+            NexusConstants.LOGGER.error("Failed to clone property wrapper builder", e);
         }
     }
 }
