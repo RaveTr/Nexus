@@ -8,8 +8,10 @@ import java.util.Map;
 import java.util.function.Function;
 
 /**
- * Delegate extension for {@link LanguageBasedPropertyWrapperBuilder} that adds default method implementations using
- * {@link DefaultablePropertyWrapperBuilder}.
+ * Delegate extension for {@link LanguageBasedPropertyWrapperBuilder} that adds default builder method implementations
+ * using {@link #getSpecializedBuilder()}.
+ *
+ * @see DefaultablePropertyWrapperBuilder
  */
 public interface DefaultableLanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW>, LBPW extends LanguageBasedPropertyWrapper<T, LBPW, SELF>> extends LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW>, DefaultablePropertyWrapperBuilder<T, SELF, LBPW, SpecializedLanguagePropertyWrapperBuilder<T, SELF, LBPW>> {
 

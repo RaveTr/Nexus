@@ -9,6 +9,8 @@ import java.util.Optional;
  *
  * @param <SPEC> Separate generic type that extends from the same type as {@code SELF} to allow for concrete/specialized
  *              implementation definition for use in {@link #getSpecializedBuilder()}.
+ *
+ * @see DefaultablePropertyWrapper
  */
 public interface DefaultablePropertyWrapperBuilder<T, SELF extends PropertyWrapperBuilder<T, SELF, PW>, PW extends PropertyWrapper<T, PW, SELF>, SPEC extends PropertyWrapperBuilder<T, SELF, PW>> extends PropertyWrapperBuilder<T, SELF, PW> {
 
