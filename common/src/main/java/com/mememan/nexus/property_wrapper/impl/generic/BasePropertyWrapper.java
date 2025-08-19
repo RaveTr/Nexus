@@ -19,26 +19,45 @@ public class BasePropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
     protected final Supplier<T> parentObject;
     protected final boolean isTemplate;
     protected final Function<SELF, PropertyWrapperBuilder<T, BUILDER, SELF>> builderFactory; // Output can't be BUILDER cuz generic type invariance
+    protected final Optional<String> modId;
     @Nullable
     protected BUILDER builder;
 
-    public BasePropertyWrapper(Supplier<T> parentObject, boolean isTemplate, Function<SELF, PropertyWrapperBuilder<T, BUILDER, SELF>> builderFactory) {
+    public BasePropertyWrapper(Supplier<T> parentObject, boolean isTemplate, Function<SELF, PropertyWrapperBuilder<T, BUILDER, SELF>> builderFactory, String modId) {
         this.parentObject = isTemplate || parentObject == null ? Suppliers.ofInstance(null) : parentObject;
         this.isTemplate = isTemplate;
         this.builderFactory = builderFactory;
+        this.modId = Optional.ofNullable(modId);
+    }
+
+    public BasePropertyWrapper(@NotNull Supplier<T> parentObject, Function<SELF, PropertyWrapperBuilder<T, BUILDER, SELF>> builderFactory, String modId) {
+        this(parentObject, false, builderFactory, modId);
+    }
+
+    public BasePropertyWrapper(Function<SELF, PropertyWrapperBuilder<T, BUILDER, SELF>> builderFactory) {
+        this(null, true, builderFactory, null);
+    }
+
+    public BasePropertyWrapper(Supplier<T> parentObject, boolean isTemplate, Function<SELF, PropertyWrapperBuilder<T, BUILDER, SELF>> builderFactory) {
+        this(parentObject, isTemplate, builderFactory, null);
     }
 
     public BasePropertyWrapper(@NotNull Supplier<T> parentObject, Function<SELF, PropertyWrapperBuilder<T, BUILDER, SELF>> builderFactory) {
         this(parentObject, false, builderFactory);
     }
 
-    public BasePropertyWrapper(Function<SELF, PropertyWrapperBuilder<T, BUILDER, SELF>> builderFactory) {
-        this(null, false, builderFactory);
+    public BasePropertyWrapper() {
+        this(null, true, BasePropertyWrapperBuilder::new);
     }
 
     @Override
     public @NotNull Supplier<T> getParentObject() {
         return parentObject;
+    }
+
+    @Override
+    public Optional<String> getModId() {
+        return isTemplate() ? Optional.empty() : modId;
     }
 
     @Override

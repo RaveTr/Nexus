@@ -13,12 +13,12 @@ import java.util.function.Supplier;
 
 public abstract class SpecializedLanguagePropertyWrapper<T, SELF extends LanguageBasedPropertyWrapper<T, SELF, BUILDER>, BUILDER extends SpecializedLanguagePropertyWrapperBuilder<T, BUILDER, SELF>> extends BaseDataGenPropertyWrapper<T, SELF, BUILDER> implements LanguageBasedPropertyWrapper<T, SELF, BUILDER> {
 
-    public SpecializedLanguagePropertyWrapper(Supplier<T> parentObject, boolean isTemplate) {
-        super(parentObject, isTemplate, SpecializedLanguagePropertyWrapperBuilder::new);
+    public SpecializedLanguagePropertyWrapper(Supplier<T> parentObject, boolean isTemplate, String modId) {
+        super(parentObject, isTemplate, SpecializedLanguagePropertyWrapperBuilder::new, modId);
     }
 
-    public SpecializedLanguagePropertyWrapper(@NotNull Supplier<T> parentObject) {
-        super(parentObject, SpecializedLanguagePropertyWrapperBuilder::new);
+    public SpecializedLanguagePropertyWrapper(@NotNull Supplier<T> parentObject, @NotNull String modId) {
+        super(parentObject, SpecializedLanguagePropertyWrapperBuilder::new, modId);
     }
 
     public SpecializedLanguagePropertyWrapper() {

@@ -16,28 +16,28 @@ import java.util.function.Supplier;
  */
 public class BaseDataGenPropertyWrapper<T, SELF extends DataGenPropertyWrapper<T, SELF, BUILDER>, BUILDER extends BaseDataGenPropertyWrapperBuilder<T, BUILDER, SELF>> extends BasePropertyWrapper<T, SELF, BUILDER> implements DataGenPropertyWrapper<T, SELF, BUILDER> {
 
-    public BaseDataGenPropertyWrapper(Supplier<T> parentObject, boolean isTemplate, Function<SELF, PropertyWrapperBuilder<T, BUILDER, SELF>> builderFactory) {
-        super(parentObject, isTemplate, builderFactory);
+    public BaseDataGenPropertyWrapper(Supplier<T> parentObject, boolean isTemplate, Function<SELF, PropertyWrapperBuilder<T, BUILDER, SELF>> builderFactory, String modId) {
+        super(parentObject, isTemplate, builderFactory, modId);
     }
 
-    public BaseDataGenPropertyWrapper(@NotNull Supplier<T> parentObject, Function<SELF, PropertyWrapperBuilder<T, BUILDER, SELF>> builderFactory) {
-        super(parentObject, builderFactory);
+    public BaseDataGenPropertyWrapper(@NotNull Supplier<T> parentObject, Function<SELF, PropertyWrapperBuilder<T, BUILDER, SELF>> builderFactory, String modId) {
+        super(parentObject, builderFactory, modId);
     }
 
     public BaseDataGenPropertyWrapper(Function<SELF, PropertyWrapperBuilder<T, BUILDER, SELF>> builderFactory) {
         super(builderFactory);
     }
 
-    public BaseDataGenPropertyWrapper(Supplier<T> parentObject, boolean isTemplate) {
-        this(parentObject, isTemplate, BaseDataGenPropertyWrapperBuilder::new);
+    public BaseDataGenPropertyWrapper(Supplier<T> parentObject, boolean isTemplate, String modId) {
+        super(parentObject, isTemplate, BaseDataGenPropertyWrapperBuilder::new, modId);
     }
 
-    public BaseDataGenPropertyWrapper(@NotNull Supplier<T> parentObject) {
-        this(parentObject, BaseDataGenPropertyWrapperBuilder::new);
+    public BaseDataGenPropertyWrapper(@NotNull Supplier<T> parentObject, String modId) {
+        super(parentObject, BaseDataGenPropertyWrapperBuilder::new, modId);
     }
 
     public BaseDataGenPropertyWrapper() {
-        this(BaseDataGenPropertyWrapperBuilder::new);
+        super(BaseDataGenPropertyWrapperBuilder::new);
     }
 
     @Override

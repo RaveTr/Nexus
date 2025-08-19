@@ -2,12 +2,14 @@ package com.mememan.nexus.property_wrapper.base.generic;
 
 import com.google.common.collect.ImmutableMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Base implementation for Property Wrappers.
@@ -45,6 +47,17 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
      */
     @NotNull
     Supplier<T> getParentObject();
+
+    /**
+     * Gets the parent mod ID of this PW instance. Wrapped in an {@link Optional} to allow for nullability and defaulting
+     * values (since not all PWs have to be associated with a particular mod).
+     * <br></br>
+     * Note that templates do not store their parent mod ID, and thus this method will always return an empty
+     * {@link Optional} if {@link #isTemplate()} is {@code true}.
+     *
+     * @return The parent mod ID of this PW instance, wrapped in an {@link Optional}. May be empty.
+     */
+    Optional<String> getModId();
 
     /**
      * Creates a new builder for this PW instance if the one currently stored is {@code null} or if
@@ -104,13 +117,116 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
             throw new IllegalAccessError("Attempted to construct instance of container class! (PropertyWrappersContainer)");
         }
 
+        /**
+         * Registers a {@link PropertyWrapper} instance mapped to its parent object.
+         * <br></br>
+         * Non-template PWs are added to {@link #MAPPED_PROPERTY_WRAPPERS}.
+         *
+         * @param parentObject The parent object of the {@code propertyWrapper}.
+         * @param propertyWrapper The {@link PropertyWrapper} instance to register and map.
+         *
+         * @return The registered {@code propertyWrapper}.
+         *
+         * @param <T> The parent object type.
+         * @param <PW> The {@link PropertyWrapper} type.
+         * @param <PWB> The {@link PropertyWrapperBuilder} type.
+         *
+         * @apiNote {@link #MAPPED_PROPERTY_WRAPPERS} is stored as a map to ensure the presence of exactly 1 {@link PropertyWrapper}
+         * instance per parent object.
+         *
+         * @see PropertyWrapper#getMappedPropertyWrappers()
+         */
         public static <T, PW extends PropertyWrapper<T, PW, PWB>, PWB extends PropertyWrapperBuilder<T, PWB, PW>> PW registerPropertyWrapper(Supplier<T> parentObject, PW propertyWrapper) {
             if (!propertyWrapper.isTemplate()) MAPPED_PROPERTY_WRAPPERS.putIfAbsent(parentObject, propertyWrapper);
+
             return propertyWrapper;
         }
 
+        /**
+         * Unregisters a {@link PropertyWrapper} instance by its mapped parent object.
+         *
+         * @param parentObject The parent object of the {@code propertyWrapper} to unregister.
+         *
+         * @param <T> The parent object type.
+         */
         public static <T> void unregisterPropertyWrapper(Supplier<T> parentObject) {
             MAPPED_PROPERTY_WRAPPERS.remove(parentObject);
+        }
+
+        /**
+         * Compiles an {@link ObjectArrayList} of all {@link PropertyWrapper} instances of the provided type
+         * {@code class}, including subclasses.
+         *
+         * @param propertyWrapperTypeClass The {@link PropertyWrapper} type to filter by.
+         *
+         * @return A list of all {@link PropertyWrapper} instances corresponding to the provided type. Includes
+         * subclasses. May be empty.
+         *
+         * @param <T> The parent object type.
+         * @param <PW> The {@link PropertyWrapper} type.
+         * @param <PWB> The {@link PropertyWrapperBuilder} type.
+         *
+         * @see #getWrappersOfType(Class, String)
+         * @see #getWrappersFromMod(String)
+         */
+        public static <T, PW extends PropertyWrapper<T, PW, PWB>, PWB extends PropertyWrapperBuilder<T, PWB, PW>> ObjectArrayList<PW> getWrappersOfType(Class<? extends PW> propertyWrapperTypeClass) {
+            return MAPPED_PROPERTY_WRAPPERS.values()
+                    .stream()
+                    .filter(propertyWrapperTypeClass::isInstance)
+                    .map(propertyWrapperTypeClass::cast)
+                    .collect(Collectors.toCollection(ObjectArrayList::new));
+        }
+
+        /**
+         * Compiles an {@link ObjectArrayList} of all {@link PropertyWrapper} instances that are associated with the
+         * provided mod ID. Automatically maps to {@code PW}.
+         *
+         * @param modId The mod ID to filter by.
+         *
+         * @return A list of all {@link PropertyWrapper} instances corresponding to the provided mod ID. May be empty.
+         *
+         * @param <T> The parent object type.
+         * @param <PW> The {@link PropertyWrapper} type.
+         * @param <PWB> The {@link PropertyWrapperBuilder} type.
+         *
+         * @apiNote Not an overload of {@link #getWrappersOfType(Class, String)} cuz memory overhead.
+         *
+         * @see #getWrappersOfType(Class)
+         * @see #getWrappersOfType(Class, String)
+         */
+        public static <T, PW extends PropertyWrapper<T, PW, PWB>, PWB extends PropertyWrapperBuilder<T, PWB, PW>> ObjectArrayList<PW> getWrappersFromMod(String modId) {
+            return MAPPED_PROPERTY_WRAPPERS.values()
+                    .stream()
+                    .filter(propertyWrapper -> propertyWrapper.getModId().map(modId::equals).orElse(false))
+                    .map(propertyWrapper -> (PW) propertyWrapper)
+                    .collect(Collectors.toCollection(ObjectArrayList::new));
+        }
+
+        /**
+         * Compiles an {@link ObjectArrayList} of all {@link PropertyWrapper} instances of the provided type
+         * {@code class}, including subclasses. Only includes instances that are associated with the provided mod ID.
+         *
+         * @param propertyWrapperTypeClass The {@link PropertyWrapper} type to filter by.
+         * @param modId The mod ID to filter by.
+         *
+         * @return A list of all {@link PropertyWrapper} instances corresponding to the provided type and mod ID. Includes
+         * subclasses. May be empty
+         *
+         * @param <T> The parent object type.
+         * @param <PW> The {@link PropertyWrapper} type.
+         * @param <PWB> The {@link PropertyWrapperBuilder} type.
+         *
+         * @apiNote Not an overload of {@link #getWrappersOfType(Class)} cuz memory overhead.
+         *
+         * @see #getWrappersOfType(Class)
+         * @see #getWrappersFromMod(String)
+         */
+        public static <T, PW extends PropertyWrapper<T, PW, PWB>, PWB extends PropertyWrapperBuilder<T, PWB, PW>> ObjectArrayList<PW> getWrappersOfType(Class<? extends PW> propertyWrapperTypeClass, String modId) {
+            return MAPPED_PROPERTY_WRAPPERS.values()
+                    .stream()
+                    .filter(propertyWrapper -> propertyWrapperTypeClass.isInstance(propertyWrapper) && propertyWrapper.getModId().map(modId::equals).orElse(false))
+                    .map(propertyWrapperTypeClass::cast)
+                    .collect(Collectors.toCollection(ObjectArrayList::new));
         }
     }
 }

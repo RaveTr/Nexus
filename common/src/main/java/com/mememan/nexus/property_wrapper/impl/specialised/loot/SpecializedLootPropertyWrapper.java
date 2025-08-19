@@ -11,12 +11,12 @@ import java.util.function.Supplier;
 
 public class SpecializedLootPropertyWrapper<T, SELF extends LootBasedPropertyWrapper<T, SELF, BUILDER>, BUILDER extends SpecializedLootPropertyWrapperBuilder<T, BUILDER, SELF>> extends BaseDataGenPropertyWrapper<T, SELF, BUILDER> implements LootBasedPropertyWrapper<T, SELF, BUILDER> {
 
-    public SpecializedLootPropertyWrapper(Supplier<T> parentObject, boolean isTemplate) {
-        super(parentObject, isTemplate, SpecializedLootPropertyWrapperBuilder::new);
+    public SpecializedLootPropertyWrapper(Supplier<T> parentObject, boolean isTemplate, String modId) {
+        super(parentObject, isTemplate, SpecializedLootPropertyWrapperBuilder::new, modId);
     }
 
-    public SpecializedLootPropertyWrapper(@NotNull Supplier<T> parentObject) {
-        super(parentObject, SpecializedLootPropertyWrapperBuilder::new);
+    public SpecializedLootPropertyWrapper(@NotNull Supplier<T> parentObject, @NotNull String modId) {
+        super(parentObject, SpecializedLootPropertyWrapperBuilder::new, modId);
     }
 
     public SpecializedLootPropertyWrapper() {
