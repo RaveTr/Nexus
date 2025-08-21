@@ -189,7 +189,7 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
          * @param <PW> The {@link PropertyWrapper} type.
          * @param <PWB> The {@link PropertyWrapperBuilder} type.
          *
-         * @apiNote Not an overload of {@link #getWrappersOfType(Class, String)} cuz memory overhead.
+         * @apiNote Not an overload of {@link #getWrappersOfType(Class, String)} cuz memory overhead - O(n) VS O(2n).
          *
          * @see #getWrappersOfType(Class)
          * @see #getWrappersOfType(Class, String)
@@ -216,7 +216,7 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
          * @param <PW> The {@link PropertyWrapper} type.
          * @param <PWB> The {@link PropertyWrapperBuilder} type.
          *
-         * @apiNote Not an overload of {@link #getWrappersOfType(Class)} cuz memory overhead.
+         * @apiNote Not an overload of {@link #getWrappersOfType(Class)} cuz memory overhead - O(n) VS O(2n).
          *
          * @see #getWrappersOfType(Class)
          * @see #getWrappersFromMod(String)
