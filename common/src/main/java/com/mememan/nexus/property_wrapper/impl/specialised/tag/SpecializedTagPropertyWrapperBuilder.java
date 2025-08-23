@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public class SpecializedTagPropertyWrapperBuilder<T, SELF extends TagBasedPropertyWrapperBuilder<T, SELF, TBPW>, TBPW extends TagBasedPropertyWrapper<T, TBPW, SELF>> extends BaseDataGenPropertyWrapperBuilder<T, SELF, TBPW> implements TagBasedPropertyWrapperBuilder<T, SELF, TBPW> {
-    protected final List<TagKey<T>> objectTagKeys = ObjectArrayList.of();
+    protected final List<TagKey<? super T>> objectTagKeys = ObjectArrayList.of();
     protected final List<TagKey<?>> additionalTagKeys = ObjectArrayList.of();
 
     public SpecializedTagPropertyWrapperBuilder(@NotNull TBPW ownerWrapper) {
@@ -25,19 +25,19 @@ public class SpecializedTagPropertyWrapperBuilder<T, SELF extends TagBasedProper
     }
 
     @Override
-    public SELF withTag(TagKey<T> targetTag) {
+    public SELF withTag(TagKey<? super T> targetTag) {
         this.objectTagKeys.add(targetTag);
         return self();
     }
 
     @Override
-    public SELF withTags(List<TagKey<T>> targetTags) {
+    public SELF withTags(List<TagKey<? super T>> targetTags) {
         this.objectTagKeys.addAll(targetTags);
         return self();
     }
 
     @Override
-    public SELF setTags(List<TagKey<T>> targetTags) {
+    public SELF setTags(List<TagKey<? super T>> targetTags) {
         this.objectTagKeys.clear();
         this.objectTagKeys.addAll(targetTags);
         return self();

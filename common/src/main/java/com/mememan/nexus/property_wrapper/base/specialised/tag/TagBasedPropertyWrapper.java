@@ -27,7 +27,7 @@ public interface TagBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF
      * @see TagBasedPropertyWrapperBuilder#withTags(List)
      * @see TagBasedPropertyWrapperBuilder#withTags(TagKey...)
      */
-    List<TagKey<T>> getObjectTags();
+    List<TagKey<? super T>> getObjectTags();
 
     /**
      * Gets a {@link List} of additional {@link TagKey} entries for the object being wrapped, and whose generic types are

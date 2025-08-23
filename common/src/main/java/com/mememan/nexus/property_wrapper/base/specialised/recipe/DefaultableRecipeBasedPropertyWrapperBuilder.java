@@ -2,6 +2,7 @@ package com.mememan.nexus.property_wrapper.base.specialised.recipe;
 
 import com.mememan.nexus.property_wrapper.impl.specialised.recipe.SpecializedRecipePropertyWrapperBuilder;
 import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.world.level.block.Block;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -19,8 +20,14 @@ public interface DefaultableRecipeBasedPropertyWrapperBuilder<T, SELF extends Re
     Optional<SpecializedRecipePropertyWrapperBuilder<T, SELF, RBPW>> getSpecializedRecipeBuilder();
 
     @Override
-    default SELF withRecipe(Function<Supplier<T>, Consumer<FinishedRecipe>> recipeConsumerFunc) {
+    default SELF withRecipe(Function<Consumer<FinishedRecipe>, Consumer<Supplier<Block>>> recipeConsumerFunc) {
         getSpecializedRecipeBuilder().ifPresent(specializedRecipeBuilder -> specializedRecipeBuilder.withRecipe(recipeConsumerFunc));
+        return self();
+    }
+
+    @Override
+    default SELF copyFrom(RBPW propertyWrapper) {
+        getSpecializedRecipeBuilder().ifPresent(builder -> builder.copyFrom(propertyWrapper));
         return self();
     }
 }

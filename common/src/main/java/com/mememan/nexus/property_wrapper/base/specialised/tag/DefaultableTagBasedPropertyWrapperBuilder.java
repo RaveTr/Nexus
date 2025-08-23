@@ -12,30 +12,31 @@ import java.util.Optional;
  *
  * @see DefaultableTagBasedPropertyWrapper
  */
-public interface DefaultableTagBasedPropertyWrapperBuilder<T, SELF extends TagBasedPropertyWrapperBuilder<T, SELF, MBPW>, MBPW extends TagBasedPropertyWrapper<T, MBPW, SELF>> extends TagBasedPropertyWrapperBuilder<T, SELF, MBPW> {
+public interface DefaultableTagBasedPropertyWrapperBuilder<T, SELF extends TagBasedPropertyWrapperBuilder<T, SELF, TBPW>, TBPW extends TagBasedPropertyWrapper<T, TBPW, SELF>> extends TagBasedPropertyWrapperBuilder<T, SELF, TBPW> {
 
-    Optional<SpecializedTagPropertyWrapperBuilder<T, SELF, MBPW>> getSpecializedTagBuilder();
+    Optional<SpecializedTagPropertyWrapperBuilder<T, SELF, TBPW>> getSpecializedTagBuilder();
 
     @Override
-    default SELF withTag(TagKey<T> targetTag) {
+    default SELF withTag(TagKey<? super T> targetTag) {
         getSpecializedTagBuilder().ifPresent(builder -> builder.withTag(targetTag));
         return self();
     }
 
     @Override
-    default SELF withTags(List<TagKey<T>> targetTags) {
+    default SELF withTags(List<TagKey<? super T>> targetTags) {
+        getSpecializedTagBuilder().ifPresent(builder -> builder.withTags(targetTags));
+        return self();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    default SELF withTags(TagKey<? super T>... targetTags) {
         getSpecializedTagBuilder().ifPresent(builder -> builder.withTags(targetTags));
         return self();
     }
 
     @Override
-    default SELF withTags(TagKey<T>... targetTags) {
-        getSpecializedTagBuilder().ifPresent(builder -> builder.withTags(targetTags));
-        return self();
-    }
-
-    @Override
-    default SELF setTags(List<TagKey<T>> targetTags) {
+    default SELF setTags(List<TagKey<? super T>> targetTags) {
         getSpecializedTagBuilder().ifPresent(builder -> builder.setTags(targetTags));
         return self();
     }
@@ -55,6 +56,18 @@ public interface DefaultableTagBasedPropertyWrapperBuilder<T, SELF extends TagBa
     @Override
     default SELF withAdditionalTags(TagKey<?>... targetTags) {
         getSpecializedTagBuilder().ifPresent(builder -> builder.withAdditionalTags(targetTags));
+        return self();
+    }
+
+    @Override
+    default SELF setAdditionalTags(List<TagKey<?>> targetTags) {
+        getSpecializedTagBuilder().ifPresent(builder -> builder.setAdditionalTags(targetTags));
+        return self();
+    }
+
+    @Override
+    default SELF copyFrom(TBPW propertyWrapper) {
+        getSpecializedTagBuilder().ifPresent(builder -> builder.copyFrom(propertyWrapper));
         return self();
     }
 }

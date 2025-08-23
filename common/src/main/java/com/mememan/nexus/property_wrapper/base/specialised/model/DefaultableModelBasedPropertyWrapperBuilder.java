@@ -20,4 +20,10 @@ public interface DefaultableModelBasedPropertyWrapperBuilder<T, SELF extends Mod
         getSpecializedModelBuilder().ifPresent(builder -> builder.withModelDefinition(modelDefinition));
         return self();
     }
+
+    @Override
+    default SELF copyFrom(MBPW propertyWrapper) {
+        getSpecializedModelBuilder().ifPresent(builder -> builder.copyFrom(propertyWrapper));
+        return self();
+    }
 }

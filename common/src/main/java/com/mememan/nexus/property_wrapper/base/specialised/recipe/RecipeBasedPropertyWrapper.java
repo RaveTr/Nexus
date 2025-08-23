@@ -4,6 +4,7 @@ import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
 import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.world.level.block.Block;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -20,10 +21,10 @@ import java.util.function.Supplier;
 public interface RecipeBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDER>, BUILDER extends PropertyWrapperBuilder<T, BUILDER, SELF>> extends DataGenPropertyWrapper<T, SELF, BUILDER> {
 
     /**
-     * Gets the {@code Function<Supplier<T>, Consumer<FinishedRecipe>>} responsible for outputting the
+     * Gets the {@code Function<Consumer<FinishedRecipe>, Consumer<Supplier<Block>>>} responsible for outputting the
      * {@link FinishedRecipe} {@link Consumer} to be used in data generation.
      *
      * @return The loot table builder function for the parent object. May be empty.
      */
-    Optional<Function<Supplier<T>, Consumer<FinishedRecipe>>> getRecipeConsumer();
+    Optional<Function<Consumer<FinishedRecipe>, Consumer<Supplier<Block>>>> getRecipeConsumer();
 }

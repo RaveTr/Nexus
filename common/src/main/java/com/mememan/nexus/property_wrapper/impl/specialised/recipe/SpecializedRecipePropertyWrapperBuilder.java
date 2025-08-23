@@ -4,6 +4,7 @@ import com.mememan.nexus.property_wrapper.base.specialised.recipe.RecipeBasedPro
 import com.mememan.nexus.property_wrapper.base.specialised.recipe.RecipeBasedPropertyWrapperBuilder;
 import com.mememan.nexus.property_wrapper.impl.generic.BaseDataGenPropertyWrapperBuilder;
 import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -12,7 +13,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class SpecializedRecipePropertyWrapperBuilder<T, SELF extends RecipeBasedPropertyWrapperBuilder<T, SELF, RBPW>, RBPW extends RecipeBasedPropertyWrapper<T, RBPW, SELF>> extends BaseDataGenPropertyWrapperBuilder<T, SELF, RBPW> implements RecipeBasedPropertyWrapperBuilder<T, SELF, RBPW> {
-    protected Optional<Function<Supplier<T>, Consumer<FinishedRecipe>>> recipeConsumerFunc = Optional.empty();
+    protected Optional<Function<Consumer<FinishedRecipe>, Consumer<Supplier<Block>>>> recipeConsumerFunc = Optional.empty();
 
     public SpecializedRecipePropertyWrapperBuilder(@NotNull RBPW ownerWrapper) {
         super(ownerWrapper);
@@ -25,7 +26,7 @@ public class SpecializedRecipePropertyWrapperBuilder<T, SELF extends RecipeBased
     }
 
     @Override
-    public SELF withRecipe(Function<Supplier<T>, Consumer<FinishedRecipe>> lootTableBuilderFunc) {
+    public SELF withRecipe(Function<Consumer<FinishedRecipe>, Consumer<Supplier<Block>>> lootTableBuilderFunc) {
         this.recipeConsumerFunc = Optional.ofNullable(lootTableBuilderFunc);
         return self();
     }

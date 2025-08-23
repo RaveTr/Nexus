@@ -3,6 +3,7 @@ package com.mememan.nexus.property_wrapper.impl.specialised.recipe;
 import com.mememan.nexus.property_wrapper.base.specialised.recipe.RecipeBasedPropertyWrapper;
 import com.mememan.nexus.property_wrapper.impl.generic.BaseDataGenPropertyWrapper;
 import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -25,7 +26,7 @@ public class SpecializedRecipePropertyWrapper<T, SELF extends RecipeBasedPropert
     }
 
     @Override
-    public Optional<Function<Supplier<T>, Consumer<FinishedRecipe>>> getRecipeConsumer() {
-        return Optional.empty();
+    public Optional<Function<Consumer<FinishedRecipe>, Consumer<Supplier<Block>>>> getRecipeConsumer() {
+        return rawBuilder().flatMap(builder -> builder.recipeConsumerFunc);
     }
 }

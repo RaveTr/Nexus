@@ -18,7 +18,7 @@ public interface DefaultableTagBasedPropertyWrapper<T, SELF extends TagBasedProp
     Optional<SpecializedTagPropertyWrapper<T, ?, ?>> getSpecializedTagWrapper();
 
     @Override
-    default List<TagKey<T>> getObjectTags() {
+    default List<TagKey<? super T>> getObjectTags() {
         return getSpecializedTagWrapper().map(SpecializedTagPropertyWrapper::getObjectTags).orElse(ObjectArrayList.of());
     }
 

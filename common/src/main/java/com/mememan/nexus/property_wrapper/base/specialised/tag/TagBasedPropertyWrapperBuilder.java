@@ -29,7 +29,7 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends PropertyWrapperB
      * @see #withTags(TagKey...)
      * @see #setTags(List)
      */
-    SELF withTag(TagKey<T> targetTag);
+    SELF withTag(TagKey<? super T> targetTag);
 
     /**
      * Appends multiple tags to the object being wrapped.
@@ -42,7 +42,7 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends PropertyWrapperB
      * @see #withTags(TagKey...)
      * @see #setTags(List)
      */
-    SELF withTags(List<TagKey<T>> targetTags);
+    SELF withTags(List<TagKey<? super T>> targetTags);
 
     /**
      * Appends multiple tags to the object being wrapped.
@@ -55,7 +55,7 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends PropertyWrapperB
      * @see #withTags(List)
      * @see #setTags(List)
      */
-    default SELF withTags(TagKey<T>... targetTags) {
+    default SELF withTags(TagKey<? super T>... targetTags) {
         return withTags(ObjectArrayList.of(targetTags));
     }
 
@@ -70,7 +70,7 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends PropertyWrapperB
      * @see #withTags(List)
      * @see #withTags(TagKey...)
      */
-    SELF setTags(List<TagKey<T>> targetTags);
+    SELF setTags(List<TagKey<? super T>> targetTags);
 
     /**
      * Appends an additional tag to the object being wrapped.

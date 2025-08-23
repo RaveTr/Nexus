@@ -26,14 +26,15 @@ public abstract class SpecializedLanguagePropertyWrapper<T, SELF extends Languag
     }
 
     /**
-     * Utility factory method for constructing an implemented variant of {@code SpecializedLanguagePropertyWrapper}.
+     * Utility factory method for directly constructing an implemented variant of
+     * {@link SpecializedLanguagePropertyWrapper}.
      *
      * @param parentObject The parent object.
      * @param isTemplate Whether this instance is a template.
      * @param modId The mod id associated with this instance.
-     * @param descIdImpl The description id (usually getter) for this instance.
+     * @param descIdImpl The description id (usually getter) for this instance (for {@link #getObjectDescriptionId()}).
      *
-     * @return An implemented variant of {@code SpecializedLanguagePropertyWrapper}.
+     * @return An implemented variant of {@link SpecializedLanguagePropertyWrapper}.
      *
      * @param <T> The parent object type.
      * @param <SELF> The wrapper type.

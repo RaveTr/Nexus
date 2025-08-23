@@ -22,4 +22,10 @@ public interface DefaultableLootBasedPropertyWrapperBuilder<T, SELF extends Loot
         getSpecializedLootBuilder().ifPresent(builder -> builder.withLootTable(lootTableBuilderFunc));
         return self();
     }
+
+    @Override
+    default SELF copyFrom(LBPW propertyWrapper) {
+        getSpecializedLootBuilder().ifPresent(builder -> builder.copyFrom(propertyWrapper));
+        return self();
+    }
 }
