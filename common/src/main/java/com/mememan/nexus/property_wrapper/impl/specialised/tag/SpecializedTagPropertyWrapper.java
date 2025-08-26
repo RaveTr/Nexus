@@ -24,12 +24,12 @@ public class SpecializedTagPropertyWrapper<T, SELF extends TagBasedPropertyWrapp
     }
 
     @Override
-    public List<TagKey<? super T>> getObjectTags() {
+    public List<Supplier<TagKey<? super T>>> getObjectTags() {
         return rawBuilder().map(b -> b.objectTagKeys).orElse(ObjectArrayList.of());
     }
 
     @Override
-    public List<TagKey<?>> getAdditionalTags() {
+    public List<Supplier<TagKey<?>>> getAdditionalTags() {
         return rawBuilder().map(b -> b.additionalTagKeys).orElse(ObjectArrayList.of());
     }
 }

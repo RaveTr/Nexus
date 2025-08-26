@@ -3,6 +3,7 @@ package com.mememan.nexus.property_wrapper.impl.generic;
 import com.mememan.nexus.datagen.ProviderType;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
+import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -38,6 +39,11 @@ public class BaseDataGenPropertyWrapper<T, SELF extends DataGenPropertyWrapper<T
 
     public BaseDataGenPropertyWrapper() {
         super(BaseDataGenPropertyWrapperBuilder::new);
+    }
+
+    @Override
+    public @NotNull String getObjectDescriptionId() {
+        return parentObject.get() instanceof ItemLike ilParent ? ilParent.asItem().getDescriptionId() : parentObject.get().toString();
     }
 
     @Override

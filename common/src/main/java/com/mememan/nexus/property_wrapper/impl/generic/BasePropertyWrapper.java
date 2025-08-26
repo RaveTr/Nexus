@@ -72,18 +72,8 @@ public class BasePropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
         return Optional.ofNullable(builder);
     }
 
-    /**
-     * Used to create a new builder instance for this {@link PropertyWrapper} instance. Uses {@link #builderFactory} to
-     * create the builder.
-     *
-     * @return A new builder instance for this {@link PropertyWrapper} instance.
-     *
-     * @apiNote Typecasting {@code BUILDER} is handled appropriately in other builder methods. This method is of base
-     * type {@link PropertyWrapperBuilder} to allow for convenient return statements without having to typecast at every
-     * turn.
-     */
-    @NotNull
-    public PropertyWrapperBuilder<T, BUILDER, SELF> constructBuilder() {
+    @Override
+    public @NotNull PropertyWrapperBuilder<T, BUILDER, SELF> constructBuilder() {
         return builderFactory.apply((SELF) this);
     }
 

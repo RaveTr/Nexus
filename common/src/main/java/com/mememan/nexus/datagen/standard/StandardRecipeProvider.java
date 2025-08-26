@@ -2,29 +2,27 @@ package com.mememan.nexus.datagen.standard;
 
 import com.google.gson.JsonObject;
 import com.mememan.nexus.NexusConstants;
-import com.mememan.nexus.block.standard.BlockPropertyWrapper;
 import com.mememan.nexus.datagen.DuplicateDataPolicy;
 import com.mememan.nexus.datagen.NexusProviderTypes;
 import com.mememan.nexus.datagen.ProviderType;
-import com.mememan.nexus.item.standard.ItemPropertyWrapper;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
+import com.mememan.nexus.property_wrapper.base.specialised.recipe.RecipeBasedPropertyWrapper;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Standard loader-agnostic mod-specific recipe provider in Nexus API. Instanced based on the provided mod ID. Handles
@@ -32,8 +30,7 @@ import java.util.function.Supplier;
  */
 public class StandardRecipeProvider extends RecipeProvider implements ModDataProvider {
     protected final String modId;
-    protected final Object2ObjectOpenHashMap<Supplier<Block>, BlockPropertyWrapper> mappedModBPWs;
-    protected final Object2ObjectOpenHashMap<Supplier<Item>, ItemPropertyWrapper> mappedModIPWs;
+    protected final ObjectArrayList<? extends RecipeBasedPropertyWrapper<Supplier<?>, ?, ?>> mappedRecipePWs;
     protected final boolean validateAllEntries;
     protected final DuplicateDataPolicy dupeStrat;
 
@@ -41,20 +38,13 @@ public class StandardRecipeProvider extends RecipeProvider implements ModDataPro
         super(targetPackOutput);
 
         this.modId = modId;
-
-        this.mappedModBPWs = BlockPropertyWrapper.getMappedBpws().entrySet()
-                .stream()
-                .filter(curEntry -> BuiltInRegistries.BLOCK.getKey(curEntry.getKey().get()).getNamespace().equals(modId))
-                .filter(curEntry -> !curEntry.getValue().excludeFromNativeDatagen())
-                .collect(Object2ObjectOpenHashMap::new, (map, entry) -> map.put(entry.getKey(), entry.getValue()), Object2ObjectOpenHashMap::putAll);
-        this.mappedModIPWs = ItemPropertyWrapper.getMappedIpws().entrySet()
-                .stream()
-                .filter(curEntry -> BuiltInRegistries.ITEM.getKey(curEntry.getKey().get()).getNamespace().equals(modId))
-                .filter(curEntry -> !curEntry.getValue().excludeFromNativeDatagen())
-                .collect(Object2ObjectOpenHashMap::new, (map, entry) -> map.put(entry.getKey(), entry.getValue()), Object2ObjectOpenHashMap::putAll);
-
         this.validateAllEntries = validateAllEntries;
         this.dupeStrat = dupeStrat;
+
+        this.mappedRecipePWs = PropertyWrapper.getMappedPropertyWrappers().values().stream()
+                .filter(RecipeBasedPropertyWrapper.class::isInstance)
+                .map(e -> (RecipeBasedPropertyWrapper<Supplier<?>, ?, ?>) e)
+                .collect(Collectors.toCollection(ObjectArrayList::new));
     }
 
     /**
@@ -67,27 +57,19 @@ public class StandardRecipeProvider extends RecipeProvider implements ModDataPro
      */
     @Override
     public void buildRecipes(Consumer<FinishedRecipe> recipeActionConsumer) {
-        if (!mappedModBPWs.isEmpty()) {
-            mappedModBPWs.forEach((blockSupEntry, bpwEntry) -> {
-                Function<Consumer<FinishedRecipe>, Consumer<Supplier<Block>>> mappedRecipe = bpwEntry.getRecipeMappingFunction();
+        if (!mappedRecipePWs.isEmpty()) {
+            mappedRecipePWs.forEach(curPW -> {
+                Optional<Function<Consumer<FinishedRecipe>, Consumer<Supplier<Supplier<?>>>>> mappedRecipe = curPW.getRecipeConsumer();
 
-                if (mappedRecipe != null) {
-                    NexusConstants.LOGGER.debug("[{}] [Generating Block Recipe]: {}", modId, blockSupEntry.get().getDescriptionId());
+                mappedRecipe.ifPresentOrElse(recipeMapperFunc -> {
+                    NexusConstants.LOGGER.debug("[{}] [Generating Recipe for Object]: {}", modId, curPW.getObjectDescriptionId());
 
-                    mappedRecipe.apply(recipeActionConsumer).accept(blockSupEntry);
-                } else if (validateAllEntries() || bpwEntry.getProviderTypeRequisites().getOrDefault(getProviderType(), false)) throw new NullPointerException(String.format("Missing recipe for block: %s, required by mod: %s, either because validateAllEntries is set to true for this provider or the block itself requires validation through BlockPropertyWrapper#getProviderTypeRequisites().", blockSupEntry.get().getDescriptionId(), modId));
-            });
-        }
-
-        if (!mappedModIPWs.isEmpty()) {
-            mappedModIPWs.forEach((itemSupEntry, ipwEntry) -> {
-                Function<Consumer<FinishedRecipe>, Consumer<Supplier<Item>>> mappedRecipe = ipwEntry.getRecipeMappingFunction();
-
-                if (mappedRecipe != null) {
-                    NexusConstants.LOGGER.debug("[{}] [Generating Item Recipe]: {}", modId, itemSupEntry.get().getDescriptionId());
-
-                    mappedRecipe.apply(recipeActionConsumer).accept(itemSupEntry);
-                } else if (validateAllEntries() || ipwEntry.getProviderTypeRequisites().getOrDefault(getProviderType(), false)) throw new NullPointerException(String.format("Missing recipe for item: %s, required by mod: %s, either because validateAllEntries is set to true for this provider or the item itself requires validation through ItemPropertyWrapper#getProviderTypeRequisites().", itemSupEntry.get().getDescriptionId(), modId));
+                    recipeMapperFunc.apply(recipeActionConsumer).accept(curPW.getParentObject());
+                }, () -> {
+                    if (validateAllEntries() || curPW.getProviderTypeRequisites().getOrDefault(getProviderType(), false)) {
+                        throw new NullPointerException(String.format("Missing recipe for object: %s, required by mod: %s, either because validateAllEntries is set to true for this provider or the object itself requires validation through DataGenBasedPropertyWrapper#getProviderTypeRequisites().", curPW.getObjectDescriptionId(), modId));
+                    }
+                });
             });
         }
     }

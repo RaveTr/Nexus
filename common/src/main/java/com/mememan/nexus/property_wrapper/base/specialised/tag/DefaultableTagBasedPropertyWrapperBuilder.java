@@ -5,6 +5,7 @@ import net.minecraft.tags.TagKey;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * Delegate extension for {@link TagBasedPropertyWrapperBuilder} that adds default builder method implementations
@@ -17,50 +18,50 @@ public interface DefaultableTagBasedPropertyWrapperBuilder<T, SELF extends TagBa
     Optional<SpecializedTagPropertyWrapperBuilder<T, SELF, TBPW>> getSpecializedTagBuilder();
 
     @Override
-    default SELF withTag(TagKey<? super T> targetTag) {
+    default SELF withTag(Supplier<TagKey<? super T>> targetTag) {
         getSpecializedTagBuilder().ifPresent(builder -> builder.withTag(targetTag));
         return self();
     }
 
     @Override
-    default SELF withTags(List<TagKey<? super T>> targetTags) {
+    default SELF withTags(List<Supplier<TagKey<? super T>>> targetTags) {
         getSpecializedTagBuilder().ifPresent(builder -> builder.withTags(targetTags));
         return self();
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    default SELF withTags(TagKey<? super T>... targetTags) {
+    default SELF withTags(Supplier<TagKey<? super T>>... targetTags) {
         getSpecializedTagBuilder().ifPresent(builder -> builder.withTags(targetTags));
         return self();
     }
 
     @Override
-    default SELF setTags(List<TagKey<? super T>> targetTags) {
+    default SELF setTags(List<Supplier<TagKey<? super T>>> targetTags) {
         getSpecializedTagBuilder().ifPresent(builder -> builder.setTags(targetTags));
         return self();
     }
 
     @Override
-    default SELF withAdditionalTag(TagKey<?> targetTag) {
+    default SELF withAdditionalTag(Supplier<TagKey<?>> targetTag) {
         getSpecializedTagBuilder().ifPresent(builder -> builder.withAdditionalTag(targetTag));
         return self();
     }
 
     @Override
-    default SELF withAdditionalTags(List<TagKey<?>> targetTags) {
+    default SELF withAdditionalTags(List<Supplier<TagKey<?>>> targetTags) {
         getSpecializedTagBuilder().ifPresent(builder -> builder.withAdditionalTags(targetTags));
         return self();
     }
 
     @Override
-    default SELF withAdditionalTags(TagKey<?>... targetTags) {
+    default SELF withAdditionalTags(Supplier<TagKey<?>>... targetTags) {
         getSpecializedTagBuilder().ifPresent(builder -> builder.withAdditionalTags(targetTags));
         return self();
     }
 
     @Override
-    default SELF setAdditionalTags(List<TagKey<?>> targetTags) {
+    default SELF setAdditionalTags(List<Supplier<TagKey<?>>> targetTags) {
         getSpecializedTagBuilder().ifPresent(builder -> builder.setAdditionalTags(targetTags));
         return self();
     }

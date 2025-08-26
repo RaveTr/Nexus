@@ -46,15 +46,15 @@ public class TestBlockRegistrar {
             .build()
             .getParentBlock();
 
-    public static final Supplier<SlabBlock> BLAH = new com.mememan.nexus.property_wrapper.BlockPropertyWrapper<>(registerBlock(new ResourceLocation("nexus", "test_block"), () -> new SlabBlock(BlockBehaviour.Properties.of())), "nexus")
+    public static final Supplier<SlabBlock> BLAH = new com.mememan.nexus.property_wrapper.BlockPropertyWrapper<>(registerBlock(new ResourceLocation("nexus", "test_block_2"), () -> new SlabBlock(BlockBehaviour.Properties.of())), "nexus")
             .builder()
             .literalTranslation()
             .excludeFromNativeDatagen()
-            .withTag(BlockTags.ACACIA_LOGS)
+            .withTag(() -> BlockTags.ACACIA_LOGS)
             .withRecipe(r -> result -> ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, result.get())
                     .requires(Items.ACACIA_BOAT)
                     .unlockedBy("has_" + BuiltInRegistries.ITEM.getKey(Items.ACACIA_BOAT).getPath(), InventoryChangeTrigger.TriggerInstance.hasItems(Items.ACACIA_BOAT))
-                    .save(r, new ResourceLocation("nexus", "test_block")))
+                    .save(r, new ResourceLocation("nexus", "test_block_2")))
             .withLootTable(parent -> LootTable.lootTable()
                     .withPool(LootPool.lootPool()
                             .when(ExplosionCondition.survivesExplosion())

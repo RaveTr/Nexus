@@ -3,7 +3,6 @@ package com.mememan.nexus.property_wrapper.base.specialised.recipe;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapperBuilder;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
 import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.world.level.block.Block;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -21,10 +20,10 @@ public interface RecipeBasedPropertyWrapperBuilder<T, SELF extends PropertyWrapp
     /**
      * Specifies the recipe consumer to be used in data generation, using the parent object as an input.
      *
-     * @param recipeConsumerFunc The mapping {@code Function<Consumer<FinishedRecipe>, Consumer<Supplier<Block>>>} used
+     * @param recipeConsumerFunc The mapping {@code Function<Consumer<FinishedRecipe>, Consumer<Supplier<T>>>} used
      *                           to build the parent object's recipe in datagen.
      *
      * @return {@link #self()} (builder method).
      */
-    SELF withRecipe(Function<Consumer<FinishedRecipe>, Consumer<Supplier<Block>>> recipeConsumerFunc);
+    SELF withRecipe(Function<Consumer<FinishedRecipe>, Consumer<Supplier<T>>> recipeConsumerFunc);
 }

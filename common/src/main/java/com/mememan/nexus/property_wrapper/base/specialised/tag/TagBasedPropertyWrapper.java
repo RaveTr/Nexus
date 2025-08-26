@@ -6,6 +6,7 @@ import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
 import net.minecraft.tags.TagKey;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Extension of {@link DataGenPropertyWrapper} with methods tailored towards handling tags for the object being wrapped.
@@ -22,12 +23,11 @@ public interface TagBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF
      *
      * @return A {@link List} of {@link TagKey} entries for the object being wrapped, or an empty {@link List} if no
      * tags are present.
-     *
-     * @see TagBasedPropertyWrapperBuilder#withTag(TagKey)
+     * @see TagBasedPropertyWrapperBuilder#withTag(java.util.function.Supplier)
      * @see TagBasedPropertyWrapperBuilder#withTags(List)
-     * @see TagBasedPropertyWrapperBuilder#withTags(TagKey...)
+     * @see TagBasedPropertyWrapperBuilder#withTags(java.util.function.Supplier[])
      */
-    List<TagKey<? super T>> getObjectTags();
+    List<Supplier<TagKey<? super T>>> getObjectTags();
 
     /**
      * Gets a {@link List} of additional {@link TagKey} entries for the object being wrapped, and whose generic types are
@@ -38,12 +38,10 @@ public interface TagBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF
      *
      * @return A {@link List} of additional {@link TagKey} entries for the object being wrapped, or an empty {@link List}
      * if no tags are present.
-     *
      * @implNote Some PW types don't have a need for implementing this. Thus, they may always return an empty {@link List}.
-     *
-     * @see TagBasedPropertyWrapperBuilder#withAdditionalTag(TagKey)
+     * @see TagBasedPropertyWrapperBuilder#withAdditionalTag(java.util.function.Supplier)
      * @see TagBasedPropertyWrapperBuilder#withAdditionalTags(List)
-     * @see TagBasedPropertyWrapperBuilder#withAdditionalTags(TagKey...)
+     * @see TagBasedPropertyWrapperBuilder#withAdditionalTags(java.util.function.Supplier[])
      */
-    List<TagKey<?>> getAdditionalTags();
+    List<Supplier<TagKey<?>>> getAdditionalTags();
 }

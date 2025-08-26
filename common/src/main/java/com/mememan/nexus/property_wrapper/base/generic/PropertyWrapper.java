@@ -8,6 +8,7 @@ import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -79,6 +80,19 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
     default BUILDER builder() {
         return builder(false);
     }
+
+    /**
+     * Used to create a new builder instance for this {@link PropertyWrapper} instance. Uses a factory {@link Function}
+     * to create the builder.
+     *
+     * @return A new builder instance for this {@link PropertyWrapper} instance.
+     *
+     * @apiNote Typecasting {@code BUILDER} is handled appropriately in other builder methods. This method is of base
+     * type {@link PropertyWrapperBuilder} to allow for convenient return statements without having to typecast at every
+     * turn.
+     */
+    @NotNull
+    PropertyWrapperBuilder<T, BUILDER, SELF> constructBuilder();
 
     /**
      * Method that wraps the stored {@code builder} instance in an {@link Optional} to allow for nullability and defaulting

@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.tags.TagKey;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Extension of {@link DataGenPropertyWrapperBuilder} with builder methods tailored towards handling tags for the object
@@ -26,10 +27,10 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends PropertyWrapperB
      * @return {@link #self()} (builder method).
      *
      * @see #withTags(List)
-     * @see #withTags(TagKey...)
+     * @see #withTags(Supplier[])
      * @see #setTags(List)
      */
-    SELF withTag(TagKey<? super T> targetTag);
+    SELF withTag(Supplier<TagKey<? super T>> targetTag);
 
     /**
      * Appends multiple tags to the object being wrapped.
@@ -38,11 +39,11 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends PropertyWrapperB
      *
      * @return {@link #self()} (builder method).
      *
-     * @see #withTag(TagKey)
-     * @see #withTags(TagKey...)
+     * @see #withTag(Supplier)
+     * @see #withTags(Supplier[])
      * @see #setTags(List)
      */
-    SELF withTags(List<TagKey<? super T>> targetTags);
+    SELF withTags(List<Supplier<TagKey<? super T>>> targetTags);
 
     /**
      * Appends multiple tags to the object being wrapped.
@@ -51,11 +52,11 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends PropertyWrapperB
      *
      * @return {@link #self()} (builder method).
      *
-     * @see #withTag(TagKey)
+     * @see #withTag(Supplier)
      * @see #withTags(List)
      * @see #setTags(List)
      */
-    default SELF withTags(TagKey<? super T>... targetTags) {
+    default SELF withTags(Supplier<TagKey<? super T>>... targetTags) {
         return withTags(ObjectArrayList.of(targetTags));
     }
 
@@ -66,11 +67,11 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends PropertyWrapperB
      *
      * @return {@link #self()} (builder method).
      *
-     * @see #withTag(TagKey)
+     * @see #withTag(Supplier)
      * @see #withTags(List)
-     * @see #withTags(TagKey...)
+     * @see #withTags(Supplier[])
      */
-    SELF setTags(List<TagKey<? super T>> targetTags);
+    SELF setTags(List<Supplier<TagKey<? super T>>> targetTags);
 
     /**
      * Appends an additional tag to the object being wrapped.
@@ -83,10 +84,10 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends PropertyWrapperB
      * added to them for proper functionality too. Some PW types don't have a need for implementing this.
      *
      * @see #withAdditionalTags(List)
-     * @see #withAdditionalTags(TagKey...)
+     * @see #withAdditionalTags(Supplier[])
      * @see #setAdditionalTags(List)
      */
-    SELF withAdditionalTag(TagKey<?> targetTag);
+    SELF withAdditionalTag(Supplier<TagKey<?>> targetTag);
 
     /**
      * Appends multiple additional tags to the object being wrapped.
@@ -98,11 +99,11 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends PropertyWrapperB
      * @implNote Additional tags are used for cases like adding tags to blocks, where they may require item tags to be
      * added to them for proper functionality too. Some PW types don't have a need for implementing this.
      *
-     * @see #withAdditionalTag(TagKey)
-     * @see #withAdditionalTags(TagKey...)
+     * @see #withAdditionalTag(Supplier)
+     * @see #withAdditionalTags(Supplier[])
      * @see #setAdditionalTags(List)
      */
-    SELF withAdditionalTags(List<TagKey<?>> targetTags);
+    SELF withAdditionalTags(List<Supplier<TagKey<?>>> targetTags);
 
     /**
      * Appends multiple additional tags to the object being wrapped.
@@ -114,11 +115,11 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends PropertyWrapperB
      * @implNote Additional tags are used for cases like adding tags to blocks, where they may require item tags to be
      * added to them for proper functionality too. Some PW types don't have a need for implementing this.
      *
-     * @see #withAdditionalTag(TagKey)
+     * @see #withAdditionalTag(Supplier)
      * @see #withAdditionalTags(List)
      * @see #setAdditionalTags(List)
      */
-    default SELF withAdditionalTags(TagKey<?>... targetTags) {
+    default SELF withAdditionalTags(Supplier<TagKey<?>>... targetTags) {
         return withAdditionalTags(ObjectArrayList.of(targetTags));
     }
 
@@ -132,9 +133,9 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends PropertyWrapperB
      * @implNote Additional tags are used for cases like adding tags to blocks, where they may require item tags to be
      * added to them for proper functionality too. Some PW types don't have a need for implementing this.
      *
-     * @see #withAdditionalTag(TagKey)
+     * @see #withAdditionalTag(Supplier)
      * @see #withAdditionalTags(List)
-     * @see #withAdditionalTags(TagKey...)
+     * @see #withAdditionalTags(Supplier[])
      */
-    SELF setAdditionalTags(List<TagKey<?>> targetTags);
+    SELF setAdditionalTags(List<Supplier<TagKey<?>>> targetTags);
 }

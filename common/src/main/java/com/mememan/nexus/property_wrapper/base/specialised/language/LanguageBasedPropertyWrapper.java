@@ -4,7 +4,6 @@ import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
@@ -20,14 +19,6 @@ import java.util.function.Function;
  * @see LanguageBasedPropertyWrapperBuilder
  */
 public interface LanguageBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDER>, BUILDER extends PropertyWrapperBuilder<T, BUILDER, SELF>> extends DataGenPropertyWrapper<T, SELF, BUILDER> {
-
-    /**
-     * Gets the description ID for the object being wrapped. Used as the object's key during automatic localization.
-     *
-     * @return The description ID for the object being wrapped.
-     */
-    @NotNull
-    String getObjectDescriptionId();
 
     /**
      * Gets the custom name for the object being wrapped, if present. May be empty.

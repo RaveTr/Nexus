@@ -6,6 +6,7 @@ import net.minecraft.tags.TagKey;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * Delegate extension for {@link TagBasedPropertyWrapper} that adds default getter method implementations (for
@@ -18,12 +19,12 @@ public interface DefaultableTagBasedPropertyWrapper<T, SELF extends TagBasedProp
     Optional<SpecializedTagPropertyWrapper<T, ?, ?>> getSpecializedTagWrapper();
 
     @Override
-    default List<TagKey<? super T>> getObjectTags() {
+    default List<Supplier<TagKey<? super T>>> getObjectTags() {
         return getSpecializedTagWrapper().map(SpecializedTagPropertyWrapper::getObjectTags).orElse(ObjectArrayList.of());
     }
 
     @Override
-    default List<TagKey<?>> getAdditionalTags() {
+    default List<Supplier<TagKey<?>>> getAdditionalTags() {
         return getSpecializedTagWrapper().map(SpecializedTagPropertyWrapper::getAdditionalTags).orElse(ObjectArrayList.of());
     }
 }

@@ -3,6 +3,7 @@ package com.mememan.nexus.property_wrapper.base.generic;
 import com.mememan.nexus.datagen.ProviderType;
 import com.mememan.nexus.datagen.standard.ModDataProvider;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
@@ -18,6 +19,15 @@ import java.util.Map;
  * @see DataGenPropertyWrapperBuilder
  */
 public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDER>, BUILDER extends PropertyWrapperBuilder<T, BUILDER, SELF>> extends PropertyWrapper<T, SELF, BUILDER> {
+
+    /**
+     * Gets the description ID for the object being wrapped. Used for the object's key during automatic localization,
+     * logging, and general identification.
+     *
+     * @return The description ID for the object being wrapped.
+     */
+    @NotNull
+    String getObjectDescriptionId();
 
     /**
      * Whether this DGPW instance should be excluded from Nexus data generation entirely.
