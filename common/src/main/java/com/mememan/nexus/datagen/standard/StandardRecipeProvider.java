@@ -17,12 +17,12 @@ import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  * Standard loader-agnostic mod-specific recipe provider in Nexus API. Instanced based on the provided mod ID. Handles
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  */
 public class StandardRecipeProvider extends RecipeProvider implements ModDataProvider {
     protected final String modId;
-    protected final ObjectArrayList<? extends RecipeBasedPropertyWrapper<Supplier<?>, ?, ?>> mappedRecipePWs;
+    protected final List<? extends RecipeBasedPropertyWrapper<Supplier<?>, ?, ?>> mappedRecipePWs;
     protected final boolean validateAllEntries;
     protected final DuplicateDataPolicy dupeStrat;
 
@@ -41,10 +41,7 @@ public class StandardRecipeProvider extends RecipeProvider implements ModDataPro
         this.validateAllEntries = validateAllEntries;
         this.dupeStrat = dupeStrat;
 
-        this.mappedRecipePWs = PropertyWrapper.getMappedPropertyWrappers().values().stream()
-                .filter(RecipeBasedPropertyWrapper.class::isInstance)
-                .map(e -> (RecipeBasedPropertyWrapper<Supplier<?>, ?, ?>) e)
-                .collect(Collectors.toCollection(ObjectArrayList::new));
+        this.mappedRecipePWs = PropertyWrapper.PropertyWrappersContainer.getInferrableWrappersOfType(RecipeBasedPropertyWrapper.class, modId);
     }
 
     /**

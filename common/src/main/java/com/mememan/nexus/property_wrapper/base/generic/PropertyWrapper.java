@@ -36,9 +36,9 @@ import java.util.stream.Collectors;
 public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDER>, BUILDER extends PropertyWrapperBuilder<T, BUILDER, SELF>> {
 
     /**
-     * Gets the parent {@code Supplier<T>} of this PW instance.
+     * Gets the parent {@code Supplier<PW>} of this PW instance.
      *
-     * @return The parent {@code Supplier<T>} stored in this PW instance.
+     * @return The parent {@code Supplier<PW>} stored in this PW instance.
      *
      * @implNote Note that while the {@linkplain Supplier} itself should never be {@code null}, the object it's wrapping
      * may be a default object delegate (similar to how referencing blocks too early results in an air delegate) or
@@ -170,6 +170,10 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
         /**
          * Compiles an {@link ObjectArrayList} of all {@link PropertyWrapper} instances of the provided type
          * {@code class}, including subclasses.
+         * <br></br>
+         * <b>NOTE:</b> For variable value setting, collections will have to define explicit type arguments that
+         * correspond to {@code PW} and {@code PWB} due to how Java's generic type inference works. To bypass this
+         * constraint, use the {@linkplain #getInferrableWrappersOfType(Class) wildcard variant} of this method.
          *
          * @param propertyWrapperTypeClass The {@link PropertyWrapper} type to filter by.
          *
@@ -182,6 +186,9 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
          *
          * @see #getWrappersOfType(Class, String)
          * @see #getWrappersFromMod(String)
+         * @see #getInferrableWrappersOfType(Class)
+         * @see #getInferrableWrappersOfType(Class, String)
+         * @see #getInferrableWrappersFromMod(String)
          */
         public static <T, PW extends PropertyWrapper<T, PW, PWB>, PWB extends PropertyWrapperBuilder<T, PWB, PW>> ObjectArrayList<PW> getWrappersOfType(Class<? extends PW> propertyWrapperTypeClass) {
             return MAPPED_PROPERTY_WRAPPERS.values()
@@ -192,8 +199,37 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
         }
 
         /**
+         * Alternate variant of {@link #getWrappersOfType(Class)} that allows for broader inference of generic type
+         * arguments.
+         *
+         * @param propertyWrapperTypeClass The {@link PropertyWrapper} type to filter by.
+         *
+         * @return A list of all {@link PropertyWrapper} instances corresponding to the provided type. Includes
+         * subclasses. May be empty.
+         *
+         * @param <PW> The {@link PropertyWrapper} type.
+         *
+         * @see #getWrappersOfType(Class)
+         * @see #getWrappersFromMod(String)
+         * @see #getWrappersOfType(Class, String)
+         * @see #getInferrableWrappersOfType(Class, String)
+         * @see #getInferrableWrappersFromMod(String)
+         */
+        public static <PW extends PropertyWrapper<?, ?, ?>> ObjectArrayList<PW> getInferrableWrappersOfType(Class<?> propertyWrapperTypeClass) {
+            return MAPPED_PROPERTY_WRAPPERS.values()
+                    .stream()
+                    .filter(propertyWrapperTypeClass::isInstance)
+                    .map(curPW -> (PW) curPW)
+                    .collect(Collectors.toCollection(ObjectArrayList::new));
+        }
+
+        /**
          * Compiles an {@link ObjectArrayList} of all {@link PropertyWrapper} instances that are associated with the
          * provided mod ID. Automatically maps to {@code PW}.
+         * <br></br>
+         * <b>NOTE:</b> For variable value setting, collections will have to define explicit type arguments that
+         * correspond to {@code PW} and {@code PWB} due to how Java's generic type inference works. To bypass this
+         * constraint, use the {@linkplain #getInferrableWrappersFromMod(String) wildcard variant} of this method.
          *
          * @param modId The mod ID to filter by.
          *
@@ -207,6 +243,7 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
          *
          * @see #getWrappersOfType(Class)
          * @see #getWrappersOfType(Class, String)
+         * @see #getInferrableWrappersFromMod(String)
          */
         public static <T, PW extends PropertyWrapper<T, PW, PWB>, PWB extends PropertyWrapperBuilder<T, PWB, PW>> ObjectArrayList<PW> getWrappersFromMod(String modId) {
             return MAPPED_PROPERTY_WRAPPERS.values()
@@ -217,8 +254,34 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
         }
 
         /**
+         * Alternate variant of {@link #getWrappersFromMod(String)} that allows for broader inference of generic type
+         * arguments.
+         *
+         * @param modId The mod ID to filter by.
+         *
+         * @return A list of all {@link PropertyWrapper} instances corresponding to the provided mod ID. May be empty.
+         *
+         * @param <PW> The {@link PropertyWrapper} type.
+         *
+         * @see #getWrappersFromMod(String)
+         * @see #getWrappersOfType(Class, String)
+         * @see #getInferrableWrappersOfType(Class, String)
+         */
+        public static <PW extends PropertyWrapper<?, ?, ?>> ObjectArrayList<PW> getInferrableWrappersFromMod(String modId) {
+            return MAPPED_PROPERTY_WRAPPERS.values()
+                    .stream()
+                    .filter(propertyWrapper -> propertyWrapper.getModId().map(modId::equals).orElse(false))
+                    .map(propertyWrapper -> (PW) propertyWrapper)
+                    .collect(Collectors.toCollection(ObjectArrayList::new));
+        }
+
+        /**
          * Compiles an {@link ObjectArrayList} of all {@link PropertyWrapper} instances of the provided type
          * {@code class}, including subclasses. Only includes instances that are associated with the provided mod ID.
+         * <br></br>
+         * <b>NOTE:</b> For variable value setting, collections will have to define explicit type arguments that
+         * correspond to {@code PW} and {@code PWB} due to how Java's generic type inference works. To bypass this
+         * constraint, use the {@linkplain #getInferrableWrappersOfType(Class, String) wildcard variant} of this method.
          *
          * @param propertyWrapperTypeClass The {@link PropertyWrapper} type to filter by.
          * @param modId The mod ID to filter by.
@@ -234,12 +297,38 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
          *
          * @see #getWrappersOfType(Class)
          * @see #getWrappersFromMod(String)
+         * @see #getInferrableWrappersOfType(Class, String)
+         * @see #getInferrableWrappersFromMod(String)
          */
         public static <T, PW extends PropertyWrapper<T, PW, PWB>, PWB extends PropertyWrapperBuilder<T, PWB, PW>> ObjectArrayList<PW> getWrappersOfType(Class<? extends PW> propertyWrapperTypeClass, String modId) {
             return MAPPED_PROPERTY_WRAPPERS.values()
                     .stream()
                     .filter(propertyWrapper -> propertyWrapperTypeClass.isInstance(propertyWrapper) && propertyWrapper.getModId().map(modId::equals).orElse(false))
                     .map(propertyWrapperTypeClass::cast)
+                    .collect(Collectors.toCollection(ObjectArrayList::new));
+        }
+
+        /**
+         * Alternate variant of {@link #getWrappersOfType(Class, String)} that allows for broader inference of generic type
+         * arguments. Primarily helpful when defining field values using these methods.
+         *
+         * @param pwClazz The {@link PropertyWrapper} type to filter by.
+         * @param modId The mod ID to filter by.
+         *
+         * @return A list of all {@link PropertyWrapper} instances corresponding to the provided type and mod ID. Includes
+         * subclasses. May be empty.
+         *
+         * @param <PW> The {@link PropertyWrapper} type.
+         *
+         * @see #getWrappersOfType(Class, String)
+         * @see #getWrappersFromMod(String)
+         * @see #getInferrableWrappersFromMod(String)
+         */
+        public static <PW extends PropertyWrapper<?, ?, ?>> ObjectArrayList<PW> getInferrableWrappersOfType(Class<?> pwClazz, String modId) {
+            return MAPPED_PROPERTY_WRAPPERS.values().stream()
+                    .filter(pwClazz::isInstance)
+                    .map(pw -> (PW) pw)
+                    .filter(w -> w.getModId().map(modId::equals).orElse(false))
                     .collect(Collectors.toCollection(ObjectArrayList::new));
         }
     }

@@ -90,11 +90,6 @@ public class BlockPropertyWrapper<B extends Block> extends BaseDataGenPropertyWr
     }
 
     @Override
-    public BPWBuilder<B> builder(boolean overrideExistingBuilder) {
-        return super.builder(overrideExistingBuilder);
-    }
-
-    @Override
     public Optional<SpecializedLanguagePropertyWrapper<B, ?, ?>> getSpecializedLanguageWrapper() {
         return Optional.of(compositeLanguageWrapper);
     }
@@ -129,11 +124,17 @@ public class BlockPropertyWrapper<B extends Block> extends BaseDataGenPropertyWr
         public BPWBuilder(@NotNull BlockPropertyWrapper<B> ownerWrapper) {
             super(ownerWrapper);
 
-            this.compositeLanguageBuilder = new SpecializedLanguagePropertyWrapperBuilder<>(ownerWrapper);
-            this.compositeLootBuilder = new SpecializedLootPropertyWrapperBuilder<>(ownerWrapper);
-            this.compositeModelBuilder = new SpecializedModelPropertyWrapperBuilder<>(ownerWrapper);
-            this.compositeRecipeBuilder = new SpecializedRecipePropertyWrapperBuilder<>(ownerWrapper);
-            this.compositeTagBuilder = new SpecializedTagPropertyWrapperBuilder<>(ownerWrapper);
+            this.compositeLanguageBuilder = (SpecializedLanguagePropertyWrapperBuilder<B, BPWBuilder<B>, BlockPropertyWrapper<B>>) ownerWrapper.getSpecializedLanguageWrapper().map(SpecializedLanguagePropertyWrapper::builder).get();
+            this.compositeLootBuilder = (SpecializedLootPropertyWrapperBuilder<B, BPWBuilder<B>, BlockPropertyWrapper<B>>) ownerWrapper.getSpecializedLootWrapper().map(SpecializedLootPropertyWrapper::builder).get();
+            this.compositeModelBuilder = (SpecializedModelPropertyWrapperBuilder<B, BPWBuilder<B>, BlockPropertyWrapper<B>>) ownerWrapper.getSpecializedModelWrapper().map(SpecializedModelPropertyWrapper::builder).get();
+            this.compositeRecipeBuilder = (SpecializedRecipePropertyWrapperBuilder<B, BPWBuilder<B>, BlockPropertyWrapper<B>>) ownerWrapper.getSpecializedRecipeWrapper().map(SpecializedRecipePropertyWrapper::builder).get();
+            this.compositeTagBuilder = (SpecializedTagPropertyWrapperBuilder<B, BPWBuilder<B>, BlockPropertyWrapper<B>>) ownerWrapper.getSpecializedTagWrapper().map(SpecializedTagPropertyWrapper::builder).get();
+        }
+
+        @Override
+        public BPWBuilder<B> copyFrom(BlockPropertyWrapper<B> propertyWrapper) {
+            DefaultableDataGenPropertyWrapperBuilder.super.copyFrom(propertyWrapper);
+            return super.copyFrom(propertyWrapper);
         }
 
         @Override
@@ -159,12 +160,6 @@ public class BlockPropertyWrapper<B extends Block> extends BaseDataGenPropertyWr
         @Override
         public Optional<SpecializedTagPropertyWrapperBuilder<B, BPWBuilder<B>, BlockPropertyWrapper<B>>> getSpecializedTagBuilder() {
             return Optional.of(compositeTagBuilder);
-        }
-
-        @Override
-        public BPWBuilder<B> copyFrom(BlockPropertyWrapper<B> propertyWrapper) {
-            DefaultableDataGenPropertyWrapperBuilder.super.copyFrom(propertyWrapper);
-            return super.copyFrom(propertyWrapper);
         }
     }
 }
