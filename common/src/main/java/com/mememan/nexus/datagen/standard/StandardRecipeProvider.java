@@ -57,14 +57,17 @@ public class StandardRecipeProvider extends RecipeProvider implements ModDataPro
         if (!mappedRecipePWs.isEmpty()) {
             mappedRecipePWs.forEach(curPW -> {
                 Optional<Function<Consumer<FinishedRecipe>, Consumer<Supplier<Supplier<?>>>>> mappedRecipe = curPW.getRecipeConsumer();
+                String objectClassName = curPW.getParentObject() instanceof Supplier<?>
+                        ? ((Supplier<?>) curPW.getParentObject()).get().getClass().getSimpleName()
+                        : curPW.getParentObject().getClass().getSimpleName();
 
                 mappedRecipe.ifPresentOrElse(recipeMapperFunc -> {
-                    NexusConstants.LOGGER.debug("[{}] [Generating Recipe for Object]: {}", modId, curPW.getObjectDescriptionId());
+                    NexusConstants.LOGGER.debug("[{}] [Generating Recipe for {}]: {}", modId, objectClassName, curPW.getObjectDescriptionId());
 
                     recipeMapperFunc.apply(recipeActionConsumer).accept(curPW.getParentObject());
                 }, () -> {
                     if (validateAllEntries() || curPW.getProviderTypeRequisites().getOrDefault(getProviderType(), false)) {
-                        throw new NullPointerException(String.format("Missing recipe for object: %s, required by mod: %s, either because validateAllEntries is set to true for this provider or the object itself requires validation through DataGenBasedPropertyWrapper#getProviderTypeRequisites().", curPW.getObjectDescriptionId(), modId));
+                        throw new NullPointerException(String.format("Missing recipe for %s: %s, required by mod: %s, either because validateAllEntries is set to true for this provider or the object itself requires validation through DataGenBasedPropertyWrapper#getProviderTypeRequisites().", objectClassName, curPW.getObjectDescriptionId(), modId));
                     }
                 });
             });

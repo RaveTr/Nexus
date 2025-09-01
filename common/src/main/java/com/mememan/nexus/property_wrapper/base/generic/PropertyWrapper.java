@@ -7,6 +7,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -126,6 +128,7 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
      */
     class PropertyWrappersContainer {
         private static final Object2ObjectOpenHashMap<Supplier<?>, PropertyWrapper<?, ? extends PropertyWrapper<?, ?, ?>, ? extends PropertyWrapperBuilder<?, ?, ?>>> MAPPED_PROPERTY_WRAPPERS = new Object2ObjectOpenHashMap<>();
+        private static final Object2ObjectOpenHashMap<Class<?>, Map<String, List<PropertyWrapper<?, ? extends PropertyWrapper<?, ?, ?>, ? extends PropertyWrapperBuilder<?, ?, ?>>>>> CACHED_WRAPPER_LOOKUP = new Object2ObjectOpenHashMap<>();
 
         private PropertyWrappersContainer() {
             throw new IllegalAccessError("Attempted to construct instance of container class! (PropertyWrappersContainer)");
@@ -187,15 +190,17 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
          * @see #getWrappersOfType(Class, String)
          * @see #getWrappersFromMod(String)
          * @see #getInferrableWrappersOfType(Class)
-         * @see #getInferrableWrappersOfType(Class, String)
          * @see #getInferrableWrappersFromMod(String)
          */
         public static <T, PW extends PropertyWrapper<T, PW, PWB>, PWB extends PropertyWrapperBuilder<T, PWB, PW>> ObjectArrayList<PW> getWrappersOfType(Class<? extends PW> propertyWrapperTypeClass) {
-            return MAPPED_PROPERTY_WRAPPERS.values()
-                    .stream()
-                    .filter(propertyWrapperTypeClass::isInstance)
-                    .map(propertyWrapperTypeClass::cast)
-                    .collect(Collectors.toCollection(ObjectArrayList::new));
+            return (ObjectArrayList<PW>) CACHED_WRAPPER_LOOKUP
+                    .computeIfAbsent(propertyWrapperTypeClass, k -> new Object2ObjectOpenHashMap<>())
+                    .computeIfAbsent("*", modId ->
+                            MAPPED_PROPERTY_WRAPPERS.values().stream()
+                                    .filter(propertyWrapperTypeClass::isInstance)
+                                    .map(propertyWrapperTypeClass::cast)
+                                    .collect(Collectors.toCollection(ObjectArrayList::new))
+                    );
         }
 
         /**
@@ -212,15 +217,16 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
          * @see #getWrappersOfType(Class)
          * @see #getWrappersFromMod(String)
          * @see #getWrappersOfType(Class, String)
-         * @see #getInferrableWrappersOfType(Class, String)
          * @see #getInferrableWrappersFromMod(String)
          */
         public static <PW extends PropertyWrapper<?, ?, ?>> ObjectArrayList<PW> getInferrableWrappersOfType(Class<?> propertyWrapperTypeClass) {
-            return MAPPED_PROPERTY_WRAPPERS.values()
-                    .stream()
-                    .filter(propertyWrapperTypeClass::isInstance)
-                    .map(curPW -> (PW) curPW)
-                    .collect(Collectors.toCollection(ObjectArrayList::new));
+            return (ObjectArrayList<PW>) CACHED_WRAPPER_LOOKUP
+                    .computeIfAbsent(propertyWrapperTypeClass, k -> new Object2ObjectOpenHashMap<>())
+                    .computeIfAbsent("*", modId ->
+                            MAPPED_PROPERTY_WRAPPERS.values().stream()
+                                    .filter(propertyWrapperTypeClass::isInstance)
+                                    .collect(Collectors.toCollection(ObjectArrayList::new))
+                    );
         }
 
         /**
@@ -246,11 +252,13 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
          * @see #getInferrableWrappersFromMod(String)
          */
         public static <T, PW extends PropertyWrapper<T, PW, PWB>, PWB extends PropertyWrapperBuilder<T, PWB, PW>> ObjectArrayList<PW> getWrappersFromMod(String modId) {
-            return MAPPED_PROPERTY_WRAPPERS.values()
-                    .stream()
-                    .filter(propertyWrapper -> propertyWrapper.getModId().map(modId::equals).orElse(false))
-                    .map(propertyWrapper -> (PW) propertyWrapper)
-                    .collect(Collectors.toCollection(ObjectArrayList::new));
+            return (ObjectArrayList<PW>) CACHED_WRAPPER_LOOKUP
+                    .computeIfAbsent(PropertyWrapper.class, k -> new Object2ObjectOpenHashMap<>())
+                    .computeIfAbsent(modId, curModId ->
+                            MAPPED_PROPERTY_WRAPPERS.values().stream()
+                                    .filter(propertyWrapper -> propertyWrapper.getModId().map(curModId::equals).orElse(false))
+                                    .collect(Collectors.toCollection(ObjectArrayList::new))
+                    );
         }
 
         /**
@@ -268,11 +276,13 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
          * @see #getInferrableWrappersOfType(Class, String)
          */
         public static <PW extends PropertyWrapper<?, ?, ?>> ObjectArrayList<PW> getInferrableWrappersFromMod(String modId) {
-            return MAPPED_PROPERTY_WRAPPERS.values()
-                    .stream()
-                    .filter(propertyWrapper -> propertyWrapper.getModId().map(modId::equals).orElse(false))
-                    .map(propertyWrapper -> (PW) propertyWrapper)
-                    .collect(Collectors.toCollection(ObjectArrayList::new));
+            return (ObjectArrayList<PW>) CACHED_WRAPPER_LOOKUP
+                    .computeIfAbsent(PropertyWrapper.class, k -> new Object2ObjectOpenHashMap<>())
+                    .computeIfAbsent(modId, curModId ->
+                            MAPPED_PROPERTY_WRAPPERS.values().stream()
+                                    .filter(propertyWrapper -> propertyWrapper.getModId().map(curModId::equals).orElse(false))
+                                    .collect(Collectors.toCollection(ObjectArrayList::new))
+                    );
         }
 
         /**
@@ -301,11 +311,14 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
          * @see #getInferrableWrappersFromMod(String)
          */
         public static <T, PW extends PropertyWrapper<T, PW, PWB>, PWB extends PropertyWrapperBuilder<T, PWB, PW>> ObjectArrayList<PW> getWrappersOfType(Class<? extends PW> propertyWrapperTypeClass, String modId) {
-            return MAPPED_PROPERTY_WRAPPERS.values()
-                    .stream()
-                    .filter(propertyWrapper -> propertyWrapperTypeClass.isInstance(propertyWrapper) && propertyWrapper.getModId().map(modId::equals).orElse(false))
-                    .map(propertyWrapperTypeClass::cast)
-                    .collect(Collectors.toCollection(ObjectArrayList::new));
+            return (ObjectArrayList<PW>) CACHED_WRAPPER_LOOKUP
+                    .computeIfAbsent(propertyWrapperTypeClass, k -> new Object2ObjectOpenHashMap<>())
+                    .computeIfAbsent(modId, curModId ->
+                            MAPPED_PROPERTY_WRAPPERS.values().stream()
+                                    .filter(propertyWrapper -> propertyWrapperTypeClass.isInstance(propertyWrapper) && propertyWrapper.getModId().map(modId::equals).orElse(false))
+                                    .map(propertyWrapperTypeClass::cast)
+                                    .collect(Collectors.toCollection(ObjectArrayList::new))
+                    );
         }
 
         /**
@@ -325,11 +338,14 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
          * @see #getInferrableWrappersFromMod(String)
          */
         public static <PW extends PropertyWrapper<?, ?, ?>> ObjectArrayList<PW> getInferrableWrappersOfType(Class<?> pwClazz, String modId) {
-            return MAPPED_PROPERTY_WRAPPERS.values().stream()
-                    .filter(pwClazz::isInstance)
-                    .map(pw -> (PW) pw)
-                    .filter(w -> w.getModId().map(modId::equals).orElse(false))
-                    .collect(Collectors.toCollection(ObjectArrayList::new));
+            return (ObjectArrayList<PW>) CACHED_WRAPPER_LOOKUP
+                    .computeIfAbsent(pwClazz, k -> new Object2ObjectOpenHashMap<>())
+                    .computeIfAbsent(modId, curModId ->
+                            MAPPED_PROPERTY_WRAPPERS.values().stream()
+                                    .filter(propertyWrapper -> pwClazz.isInstance(propertyWrapper) && propertyWrapper.getModId().map(modId::equals).orElse(false))
+                                    .map(pw -> (PW) pw)
+                                    .collect(Collectors.toCollection(ObjectArrayList::new))
+                    );
         }
     }
 }
