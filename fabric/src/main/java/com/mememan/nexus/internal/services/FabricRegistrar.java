@@ -1,6 +1,7 @@
 package com.mememan.nexus.internal.services;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.asm.ClassFinder;
@@ -8,7 +9,11 @@ import com.mememan.nexus.asm.annotations.RegistrarEntry;
 import com.mememan.nexus.loader.StandardRegistryBuilder;
 import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.platform.services.Registrar;
+import com.mememan.nexus.resource.config.ResourceReloadListenerConfig;
 import com.mojang.serialization.Codec;
+import it.unimi.dsi.fastutil.Pair;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import it.unimi.dsi.fastutil.objects.ObjectObjectMutablePair;
 import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
@@ -21,11 +26,13 @@ import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.resources.RegistryDataLoader;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -34,6 +41,7 @@ import java.util.function.Supplier;
  */
 public class FabricRegistrar implements Registrar {
     private static final Multimap<ResourceKey<? extends Registry<?>>, ObjectObjectMutablePair<ResourceKey<?>, Function<? extends BootstapContext<?>, ? extends Supplier<?>>>> CACHED_DATAPACK_OBJECT_ENTRIES = ArrayListMultimap.create(); // Slower put() than HashMultiMap, but we need to allow duplicates for leniency
+    private static final Map<ResourceLocation, Pair<? extends PreparableReloadListener, Optional<ResourceReloadListenerConfig<? extends PreparableReloadListener>>>> CACHED_RESOURCE_RELOAD_LISTENERS = new Object2ObjectOpenHashMap<>();
     private static RegistrySetBuilder DATAPACK_REGISTRY_SET_BUILDER;
 
     @Override
@@ -120,6 +128,12 @@ public class FabricRegistrar implements Registrar {
     }
 
     @Override
+    public <PRL extends PreparableReloadListener> PRL registerReloadListener(ResourceLocation listenerId, PRL listener, @Nullable ResourceReloadListenerConfig<PRL> config) {
+        CACHED_RESOURCE_RELOAD_LISTENERS.putIfAbsent(listenerId, ObjectObjectImmutablePair.of(listener, Optional.ofNullable(config)));
+        return listener;
+    }
+
+    @Override
     public @Nullable RegistrySetBuilder getRegistrySetBuilder() {
         return getDatapackRegistrySetBuilder();
     }
@@ -131,7 +145,12 @@ public class FabricRegistrar implements Registrar {
 
     @Override
     public Map<ResourceKey<? extends Registry<?>>, RegistrySynchronization.NetworkedRegistryData<?>> getSyncedDynamicRegistries() {
-        return Map.copyOf(RegistrySynchronization.NETWORKABLE_REGISTRIES);
+        return ImmutableMap.copyOf(RegistrySynchronization.NETWORKABLE_REGISTRIES);
+    }
+
+    @Override
+    public <PRL extends PreparableReloadListener> Map<ResourceLocation, Pair<PRL, Optional<ResourceReloadListenerConfig<PRL>>>> getMappedResourceReloadListeners() {
+        return getCachedResourceReloadListeners();
     }
 
     protected <T> Supplier<T> tCastObjSupMappingFunc(Function<? extends BootstapContext<?>, ? extends Supplier<?>> objSupMappingFunc, BootstapContext<T> bootstapContext) { // I love wildcard casts
@@ -148,5 +167,14 @@ public class FabricRegistrar implements Registrar {
 
     public static RegistrySetBuilder getDatapackRegistrySetBuilder() {
         return DATAPACK_REGISTRY_SET_BUILDER == null ? DATAPACK_REGISTRY_SET_BUILDER = new RegistrySetBuilder() : DATAPACK_REGISTRY_SET_BUILDER;
+    }
+
+    public static <PRL extends PreparableReloadListener> ImmutableMap<ResourceLocation, Pair<PRL, Optional<ResourceReloadListenerConfig<PRL>>>> getCachedResourceReloadListeners() {
+        Map<ResourceLocation, Pair<PRL, Optional<ResourceReloadListenerConfig<PRL>>>> result = new Object2ObjectOpenHashMap<>();
+        CACHED_RESOURCE_RELOAD_LISTENERS.forEach((key, value) ->
+                result.put(key, ObjectObjectImmutablePair.of((PRL) value.left(), value.right().flatMap(config -> Optional.of((ResourceReloadListenerConfig<PRL>) config))))
+        );
+
+        return ImmutableMap.copyOf(result);
     }
 }

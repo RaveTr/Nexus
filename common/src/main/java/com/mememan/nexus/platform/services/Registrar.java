@@ -3,7 +3,9 @@ package com.mememan.nexus.platform.services;
 import com.mememan.nexus.Nexus;
 import com.mememan.nexus.asm.annotations.RegistrarEntry;
 import com.mememan.nexus.loader.StandardRegistryBuilder;
+import com.mememan.nexus.resource.config.ResourceReloadListenerConfig;
 import com.mojang.serialization.Codec;
+import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.RegistrySetBuilder;
@@ -14,6 +16,7 @@ import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.resources.RegistryDataLoader;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.Item;
@@ -23,6 +26,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -235,17 +240,73 @@ public interface Registrar {
     }
 
     /**
-     * Attempts to register a raw {@link PreparableReloadListener}.
+     * Attempts to register a {@link PreparableReloadListener}.
      * <br></br>
      * Note that this listener will not be synced to the client by default due to the lack of standardized data getters
      * for the aforementioned {@code interface}. See the overloaded methods for more configurable options.
      *
-     * @param listenerId The id of the listener, only really used to distinguish it from other listeners within Nexus.
+     * @param listenerId The id of the listener, used by Nexus to keep track of different listeners and their
+     *                   configurations.
      * @param listener The listener to register.
+     * @param config The configurator for the listener to register. May be {@code null}.
      *
      * @return The {@link PreparableReloadListener} that was registered.
+     *
+     * @param <PRL> A {@link PreparableReloadListener} subtype.
      */
-    /* PreparableReloadListener registerReloadListener(ResourceLocation listenerId, PreparableReloadListener listener); */
+    <PRL extends PreparableReloadListener> PRL registerReloadListener(ResourceLocation listenerId, PRL listener, @Nullable ResourceReloadListenerConfig<PRL> config);
+
+    /**
+     * Overloaded variant of {@link #registerReloadListener(ResourceLocation, PreparableReloadListener, ResourceReloadListenerConfig)}
+     * that defaults the listener's configuration to use {@link PackType#SERVER_DATA}.
+     *
+     * @param listenerId The {@linkplain ResourceLocation ID} to map the {@code listener} to.
+     * @param listener The {@link PreparableReloadListener} to register.
+     *
+     * @return {@link #registerReloadListener(ResourceLocation, PreparableReloadListener, ResourceReloadListenerConfig)}
+     *
+     * @param <PRL> A {@link PreparableReloadListener} subtype.
+     */
+    default <PRL extends PreparableReloadListener> PRL registerServerReloadListener(ResourceLocation listenerId, PRL listener) {
+        return registerReloadListener(listenerId, listener, ResourceReloadListenerConfig.createDefaultSided(PackType.SERVER_DATA));
+    }
+
+    /**
+     * Overloaded variant of {@link #registerReloadListener(ResourceLocation, PreparableReloadListener, ResourceReloadListenerConfig)}
+     * that defaults the listener's configuration to use {@link PackType#SERVER_DATA} and marks it as syncable using the
+     * provided {@code dataMapGetter}.
+     *
+     * @param listenerId The {@linkplain ResourceLocation ID} to map the {@code listener} to.
+     * @param listener The {@link PreparableReloadListener} to register.
+     * @param dataMapGetter A {@link Function} that returns a {@link Map} of {@linkplain ResourceLocation ResourceLocations}
+     *                      corresponding to the locations of the data that should be synced to the client.
+     * @param dataCodecMapper A {@link Function} that returns a {@link Codec} used to de/serialize mapped object data
+     *                        from the {@code listener}.
+     * @param resourceSyncOperation A side-safe operation to run on the client once data is received. This should usually
+     *                              only update data on the client (or some copy of it).
+     *
+     * @return {@link #registerReloadListener(ResourceLocation, PreparableReloadListener, ResourceReloadListenerConfig)}
+     *
+     * @param <PRL> A {@link PreparableReloadListener} subtype.
+     */
+    default <PRL extends PreparableReloadListener> PRL registerSyncableReloadListener(ResourceLocation listenerId, PRL listener, Function<PRL, Map<ResourceLocation, ?>> dataMapGetter, Function<PRL, Codec<?>> dataCodecMapper, BiConsumer<PRL, Map<ResourceLocation, ?>> resourceSyncOperation) {
+        return registerReloadListener(listenerId, listener, ResourceReloadListenerConfig.createSyncable(dataMapGetter, dataCodecMapper, resourceSyncOperation));
+    }
+
+    /**
+     * Overloaded variant of {@link #registerReloadListener(ResourceLocation, PreparableReloadListener, ResourceReloadListenerConfig)}
+     * that defaults the listener's configuration to use {@link PackType#CLIENT_RESOURCES}.
+     *
+     * @param listenerId The {@linkplain ResourceLocation ID} to map the {@code listener} to.
+     * @param listener The {@link PreparableReloadListener} to register.
+     *
+     * @return {@link #registerReloadListener(ResourceLocation, PreparableReloadListener, ResourceReloadListenerConfig)}
+     *
+     * @param <PRL> A {@link PreparableReloadListener} subtype.
+     */
+    default <PRL extends PreparableReloadListener> PRL registerClientReloadListener(ResourceLocation listenerId, PRL listener) {
+        return registerReloadListener(listenerId, listener, ResourceReloadListenerConfig.createDefaultSided(PackType.CLIENT_RESOURCES));
+    }
 
     /**
      * Gets the current singleton {@link RegistrySetBuilder} responsible for populating datapack entries from registration
@@ -274,7 +335,7 @@ public interface Registrar {
     List<RegistryDataLoader.RegistryData<?>> getDynamicRegistries();
 
     /**
-     * Gets a {@link Map} of all registered dynamic registries synced to the client.
+     * Gets a copy of all registered dynamic registries synced to the client.
      * <br></br>
      * Each loader has its own implementation when it comes to retrieving a collection of synced registered dynamic
      * registries, all of which boiling down to modifying {@link RegistrySynchronization#NETWORKABLE_REGISTRIES} (to
@@ -287,4 +348,15 @@ public interface Registrar {
      * @return A {@link Map} of all registered dynamic registries synced to the client.
      */
     Map<ResourceKey<? extends Registry<?>>, RegistrySynchronization.NetworkedRegistryData<?>> getSyncedDynamicRegistries();
+
+    /**
+     * Gets a copy of all {@linkplain PreparableReloadListener PreparableReloadListeners} registered to and tracked by
+     * Nexus API.
+     *
+     * @return A {@link Map} of all registered {@linkplain PreparableReloadListener PreparableReloadListeners}. Usually
+     * just a {@code static} getter call of the singular existing {@link Map}.
+     *
+     * @param <PRL> A {@link PreparableReloadListener} subtype.
+     */
+    <PRL extends PreparableReloadListener> Map<ResourceLocation, Pair<PRL, Optional<ResourceReloadListenerConfig<PRL>>>> getMappedResourceReloadListeners();
 }

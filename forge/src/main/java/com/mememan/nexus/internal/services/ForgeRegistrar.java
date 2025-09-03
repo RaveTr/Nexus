@@ -10,9 +10,12 @@ import com.mememan.nexus.loader.StandardRegistryBuilder;
 import com.mememan.nexus.mixins.forge.DataPackRegistriesHooksAccessor;
 import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.platform.services.Registrar;
+import com.mememan.nexus.resource.config.ResourceReloadListenerConfig;
 import com.mojang.serialization.Codec;
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import it.unimi.dsi.fastutil.objects.ObjectObjectMutablePair;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistrySetBuilder;
@@ -21,8 +24,7 @@ import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.resources.RegistryDataLoader;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.event.OnDatapackSyncEvent;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.*;
@@ -31,6 +33,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -40,6 +43,7 @@ import java.util.function.Supplier;
 public class ForgeRegistrar implements Registrar {
     private static final Object2ObjectLinkedOpenHashMap<String, Object2ObjectOpenHashMap<ResourceKey<?>, DeferredRegister<?>>> CACHED_REGISTRIES = new Object2ObjectLinkedOpenHashMap<>();
     private static final Multimap<ResourceKey<? extends Registry<?>>, ObjectObjectMutablePair<ResourceKey<?>, Function<? extends BootstapContext<?>, ? extends Supplier<?>>>> CACHED_DATAPACK_OBJECT_ENTRIES = ArrayListMultimap.create(); // Slower put() than HashMultiMap, but we need to allow duplicates for leniency
+    private static final Map<ResourceLocation, Pair<? extends PreparableReloadListener, Optional<ResourceReloadListenerConfig<? extends PreparableReloadListener>>>> CACHED_RESOURCE_RELOAD_LISTENERS = new Object2ObjectOpenHashMap<>();
     private static RegistrySetBuilder DATAPACK_REGISTRY_SET_BUILDER;
 
     @Override
@@ -139,6 +143,12 @@ public class ForgeRegistrar implements Registrar {
     }
 
     @Override
+    public <PRL extends PreparableReloadListener> PRL registerReloadListener(ResourceLocation listenerId, PRL listener, @Nullable ResourceReloadListenerConfig<PRL> config) {
+        CACHED_RESOURCE_RELOAD_LISTENERS.putIfAbsent(listenerId, ObjectObjectImmutablePair.of(listener, Optional.ofNullable(config)));
+        return listener;
+    }
+
+    @Override
     public @Nullable RegistrySetBuilder getRegistrySetBuilder() {
         return getDatapackRegistrySetBuilder();
     }
@@ -153,12 +163,9 @@ public class ForgeRegistrar implements Registrar {
         return DataPackRegistriesHooksAccessor.getNetworkableRegistries();
     }
 
-    public static RegistrySetBuilder getDatapackRegistrySetBuilder() {
-        return DATAPACK_REGISTRY_SET_BUILDER == null ? DATAPACK_REGISTRY_SET_BUILDER = new RegistrySetBuilder() : DATAPACK_REGISTRY_SET_BUILDER;
-    }
-
-    public static ImmutableMap<String, Object2ObjectOpenHashMap<ResourceKey<?>, DeferredRegister<?>>> getCachedRegistries() {
-        return ImmutableMap.copyOf(CACHED_REGISTRIES);
+    @Override
+    public <PRL extends PreparableReloadListener> Map<ResourceLocation, Pair<PRL, Optional<ResourceReloadListenerConfig<PRL>>>> getMappedResourceReloadListeners() {
+        return getCachedResourceReloadListeners();
     }
 
     protected <T> Supplier<T> tCastObjSupMappingFunc(Function<? extends BootstapContext<?>, ? extends Supplier<?>> objSupMappingFunc, BootstapContext<T> bootstapContext) { // I love wildcard casts
@@ -173,11 +180,20 @@ public class ForgeRegistrar implements Registrar {
         return (ResourceKey<Registry<T>>) registryKey;
     }
 
-    private static void onAddReloadListenerEvent(AddReloadListenerEvent event) {
-        
+    public static RegistrySetBuilder getDatapackRegistrySetBuilder() {
+        return DATAPACK_REGISTRY_SET_BUILDER == null ? DATAPACK_REGISTRY_SET_BUILDER = new RegistrySetBuilder() : DATAPACK_REGISTRY_SET_BUILDER;
     }
 
-    private static void onDatapackSyncEvent(OnDatapackSyncEvent event) {
+    public static ImmutableMap<String, Object2ObjectOpenHashMap<ResourceKey<?>, DeferredRegister<?>>> getCachedRegistries() {
+        return ImmutableMap.copyOf(CACHED_REGISTRIES);
+    }
 
+    public static <PRL extends PreparableReloadListener> ImmutableMap<ResourceLocation, Pair<PRL, Optional<ResourceReloadListenerConfig<PRL>>>> getCachedResourceReloadListeners() {
+        Map<ResourceLocation, Pair<PRL, Optional<ResourceReloadListenerConfig<PRL>>>> result = new Object2ObjectOpenHashMap<>();
+        CACHED_RESOURCE_RELOAD_LISTENERS.forEach((key, value) ->
+                result.put(key, ObjectObjectImmutablePair.of((PRL) value.left(), value.right().flatMap(config -> Optional.of((ResourceReloadListenerConfig<PRL>) config))))
+        );
+
+        return ImmutableMap.copyOf(result);
     }
 }
