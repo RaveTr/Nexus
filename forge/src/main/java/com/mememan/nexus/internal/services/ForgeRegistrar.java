@@ -143,7 +143,7 @@ public class ForgeRegistrar implements Registrar {
     }
 
     @Override
-    public <PRL extends PreparableReloadListener> PRL registerReloadListener(ResourceLocation listenerId, PRL listener, @Nullable ResourceReloadListenerConfig<PRL> config) {
+    public <PRL extends PreparableReloadListener> PRL registerReloadListener(ResourceLocation listenerId, PRL listener, ResourceReloadListenerConfig<PRL> config) {
         CACHED_RESOURCE_RELOAD_LISTENERS.putIfAbsent(listenerId, ObjectObjectImmutablePair.of(listener, Optional.ofNullable(config)));
         return listener;
     }

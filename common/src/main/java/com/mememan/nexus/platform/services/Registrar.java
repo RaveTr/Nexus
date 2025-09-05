@@ -253,8 +253,11 @@ public interface Registrar {
      * @return The {@link PreparableReloadListener} that was registered.
      *
      * @param <PRL> A {@link PreparableReloadListener} subtype.
+     *
+     * @apiNote In actuality, if {@code config} is {@code null}, then the specified {@code listener} will not be registered
+     * in order to prevent indeterministic behavior (essentially just so that there's a clear API guideline).
      */
-    <PRL extends PreparableReloadListener> PRL registerReloadListener(ResourceLocation listenerId, PRL listener, @Nullable ResourceReloadListenerConfig<PRL> config);
+    <PRL extends PreparableReloadListener> PRL registerReloadListener(ResourceLocation listenerId, PRL listener, ResourceReloadListenerConfig<PRL> config);
 
     /**
      * Overloaded variant of {@link #registerReloadListener(ResourceLocation, PreparableReloadListener, ResourceReloadListenerConfig)}
