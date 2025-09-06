@@ -72,6 +72,8 @@ public interface PropertyWrapperBuilder<T, SELF extends PropertyWrapperBuilder<T
      * @return The parent object {@link Supplier} wrapped by the owner {@link PropertyWrapper} instance of this builder.
      *
      * @see PropertyWrapper#getParentObject()
+     *
+     * @implNote Typically, if this PW is a template, this method will return {@code Suppliers#ofInstance(null)}.
      */
     @NotNull
     default Supplier<T> buildAndGet() {

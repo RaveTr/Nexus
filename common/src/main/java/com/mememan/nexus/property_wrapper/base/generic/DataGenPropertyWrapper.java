@@ -3,9 +3,12 @@ package com.mememan.nexus.property_wrapper.base.generic;
 import com.mememan.nexus.datagen.ProviderType;
 import com.mememan.nexus.datagen.standard.ModDataProvider;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Extension of {@link PropertyWrapper} that provides additional getters for Nexus data generation.
@@ -55,4 +58,12 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
      * @see DataGenPropertyWrapperBuilder#requiresDatagenEntry(ProviderType, boolean)
      */
     Map<ProviderType, Boolean> getProviderTypeRequisites();
+
+    default Optional<ResourceKey<Registry<? super T>>> getObjectRegistryKey() {
+        return Optional.empty();
+    }
+
+    static <T> Optional<ResourceKey<Registry<? super T>>> ofRegistryKey(ResourceKey<?> registryKey) {
+        return Optional.of((ResourceKey<Registry<? super T>>) registryKey);
+    }
 }

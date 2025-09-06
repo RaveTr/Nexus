@@ -50,8 +50,10 @@ public class FabricNetworkManager implements NetworkManager {
      */
     @Override
     public <MSGT> BasePacket<MSGT> registerPacket(BasePacket<MSGT> packet) {
-        if (packet.packetId() == null || !ResourceLocation.isValidResourceLocation(packet.packetId().toString())) {
-            throw new IllegalArgumentException("Attempted to register packet with invalid packet id: " + (packet == null ? "null" : packet.packetId()));
+        ResourceLocation packetId = packet.packetId();
+
+        if (packetId == null || !ResourceLocation.isValidResourceLocation(packetId.toString())) {
+            throw new IllegalArgumentException(String.format("Attempted to register packet with invalid packet id: %s", packetId == null ? "null" : packetId));
         }
 
         NetworkSide targetSide = packet.targetSide();
@@ -59,8 +61,8 @@ public class FabricNetworkManager implements NetworkManager {
         MAPPED_PACKETS.putIfAbsent(packet.packetClass(), packet);
 
         if (targetSide.equals(NetworkSide.C2S)) {
-            ServerPlayNetworking.registerGlobalReceiver(packet.packetId(), ((targetServer, playerReceiver, serverPacketListener, buf, fabricPacketSender) -> {
-                buf.readByte(); // Forge discriminator handling
+            ServerPlayNetworking.registerGlobalReceiver(packetId, ((targetServer, playerReceiver, serverPacketListener, buf, fabricPacketSender) -> {
+                buf.readByte(); // Forge discriminator handling (see #writeByte calls below)
 
                 packet.packetHandler().apply(packet.packetDecoder().apply(buf)).handlePacket(playerReceiver, targetServer.getLevel(playerReceiver.level().dimension()), serverPacketListener.connection, NetworkSide.C2S);
             }));
@@ -85,7 +87,7 @@ public class FabricNetworkManager implements NetworkManager {
             if (ClientPlayNetworking.canSend(mappedPacketToSend.packetId())) {
                 FriendlyByteBuf encodedBuf = PacketByteBufs.create();
 
-                encodedBuf.writeByte(0); // Forge discriminator handling (monke see monke do)
+                encodedBuf.writeByte(0); // Forge discriminator handling (0 used as a dummy value)
                 mappedPacketToSend.packetEncoder().accept(c2sPacket, encodedBuf);
 
                 ClientPlayNetworking.send(mappedPacketToSend.packetId(), encodedBuf);
@@ -145,7 +147,7 @@ public class FabricNetworkManager implements NetworkManager {
             if (ServerPlayNetworking.canSend(targetPlayer, mappedPacketToSend.packetId())) {
                 FriendlyByteBuf encodedBuf = PacketByteBufs.create();
 
-                encodedBuf.writeByte(0); // Forge discriminator handling (monke see monke do)
+                encodedBuf.writeByte(0); // Forge discriminator handling (0 used as a dummy value)
                 mappedPacketToSend.packetEncoder().accept(s2cPacket, encodedBuf);
 
                 ServerPlayNetworking.send(targetPlayer, mappedPacketToSend.packetId(), encodedBuf);

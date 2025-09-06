@@ -1,13 +1,17 @@
 package com.mememan.nexus.property_wrapper.base.specialised.language;
 
+import com.mememan.nexus.datagen.standard.StandardLanguageProvider;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
+import com.mememan.nexus.util.StringUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 /**
@@ -78,4 +82,43 @@ public interface LanguageBasedPropertyWrapper<T, SELF extends PropertyWrapper<T,
      * @see LanguageBasedPropertyWrapperBuilder#withAdditionalLocalizationKey(String, Function)
      */
     Map<String, Function<String, String>> getAdditionalLocalizationKeys();
+
+    /**
+     * The backing method responsible for automatically localizing keys for the object being wrapped if it has no
+     * {@linkplain #getCustomName() custom name}, does not {@linkplain #bypassesDefaultTranslation() bypass default
+     * translation}, and does not have a {@linkplain #hasLiteralTranslation() literal translation}. Factors
+     * {@linkplain #getCustomSeparatorWords() separator words} into account. Additionally, handles
+     * {@linkplain #getObjectPostTranslationMapper() post-translation mapping} (if applicable).
+     *
+     * @return The localized key wrapped in an {@link Optional}. May be empty to indicate that the data in this property
+     * wrapper cannot logically produce a localized value for the wrapped object's key (e.g. if the object
+     * {@linkplain #bypassesDefaultTranslation() bypasses default translation} and has no {@linkplain #getCustomName()
+     * custom name} or {@linkplain #hasLiteralTranslation() literal translation}).
+     *
+     * @param postTranslationLoggingCallback An optional {@link BiConsumer} to allow for additional logging of
+     *                                       post-translation mapping based on the resulting localized value of the
+     *                                       {@linkplain #getParentObject() parent object}, if applicable.
+     *
+     * @see LanguageBasedPropertyWrapperBuilder#withCustomName(String)
+     * @see StringUtil#literallyLocalize(String, List)
+     * @see StringUtil#localizeWithDefaultAssertions(String, List)
+     * @see StandardLanguageProvider
+     */
+    default Optional<String> getLocalizedObjectKey(@Nullable BiConsumer<String, String> postTranslationLoggingCallback) {
+        String unlocalizedKey = getObjectDescriptionId();
+
+        return Optional.ofNullable(getCustomName().orElseGet(() -> {
+            if (hasLiteralTranslation()) return StringUtil.literallyLocalize(unlocalizedKey, getCustomSeparatorWords());
+            else if (bypassesDefaultTranslation()) return null;
+            else return StringUtil.localizeWithDefaultAssertions(unlocalizedKey, getCustomSeparatorWords());
+        })).map(locVal -> {
+            if (getObjectPostTranslationMapper().isPresent()) {
+                String mappedValue = getObjectPostTranslationMapper().get().apply(locVal);
+
+                if (postTranslationLoggingCallback != null) postTranslationLoggingCallback.accept(locVal, mappedValue);
+
+                return mappedValue;
+            } else return locVal;
+        });
+    }
 }

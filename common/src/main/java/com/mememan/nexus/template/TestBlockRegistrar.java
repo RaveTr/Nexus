@@ -59,6 +59,7 @@ public class TestBlockRegistrar {
                     .withPool(LootPool.lootPool()
                             .when(ExplosionCondition.survivesExplosion())
                             .add(LootItem.lootTableItem(Items.ACACIA_BOAT))))
+            .withAdditionalLocalizationKey("tooltip.nexus.test_block_2", "Bruh")
             .buildAndGet();
 
     private static <B extends Block> Supplier<B> registerBlock(ResourceLocation name, Supplier<B> block) {

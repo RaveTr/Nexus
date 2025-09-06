@@ -12,8 +12,8 @@ import java.util.function.Function;
  *
  * @param packetId The {@linkplain ResourceLocation identifier} of this packet. Primarily used in Fabric for packet
  *                 registration.
- * @param packetClass The {@code class} representing the rest of this packet's data. Can be any custom object that
- *                    stores the required packet handler methods (encoding, decoding, handling).
+ * @param packetClass The {@code class} representing the rest of this packet's data. Can be any custom {@code class}
+ *                    that holds the required packet handler methods (encoding, decoding, handling).
  * @param packetEncoder The encoding method used to encode this packet's data into a {@link FriendlyByteBuf} on the
  *                      initial side.
  * @param packetDecoder The decoding method used to decode this packet's data from a {@link FriendlyByteBuf} on the
@@ -31,8 +31,8 @@ public record BasePacket<MSGT>(ResourceLocation packetId, Class<MSGT> packetClas
      * Overloaded constructor with the {@code packetId} set to a formatted version of the packet class' name.
      *
      * @param modId The ID of the mod this packet belongs to.
-     * @param packetClass The class representing the rest of this packet's data. Can be any custom object that stores
-     *                    the required packet handler methods (encoding, decoding, handling).
+     * @param packetClass The {@code class} representing the rest of this packet's data. Can be any custom {@code class}
+     *                    that holds the required packet handler methods (encoding, decoding, handling).
      * @param packetEncoder The encoding method used to encode this packet's data into a {@link FriendlyByteBuf} on the
      *                      initial side.
      * @param packetDecoder The decoding method used to decode this packet's data from a {@link FriendlyByteBuf} on the
