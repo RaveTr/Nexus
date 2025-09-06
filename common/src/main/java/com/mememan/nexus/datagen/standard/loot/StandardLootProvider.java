@@ -21,8 +21,8 @@ import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.storage.loot.*;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;

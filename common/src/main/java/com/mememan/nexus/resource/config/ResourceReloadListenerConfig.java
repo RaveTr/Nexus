@@ -15,7 +15,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 /**
- * Configurator {@code record} object primarily used in {@link NexusServices#REGISTRAR} in conjunction with
+ * Configurator {@code record} object primarily used by {@link NexusServices#REGISTRAR} in conjunction with
  * {@linkplain PreparableReloadListener PreparableReloadListeners} to streamline extra (basic) operations, such as
  * syncing data to the client automatically and/or specifying which side a reload listener should be registered on.
  *
@@ -47,10 +47,34 @@ import java.util.function.Function;
  */
 public record ResourceReloadListenerConfig<PRL extends PreparableReloadListener>(PackType listenerPackType, boolean shouldSyncToClient, Optional<Function<PRL, Map<ResourceLocation, ?>>> dataMapGetter, Optional<Function<PRL, Codec<?>>> dataCodecMapper, Optional<BiConsumer<PRL, Map<ResourceLocation, ?>>> resourceSyncOperation) {
 
+    /**
+     * Factory method for creating a {@link ResourceReloadListenerConfig} using {@link DefaultedCodecResourceReloadListener}.
+     *
+     * @param listenerPackType The {@link PackType} specifying the side that the associated listener should listen to
+     *                         (resource, data).
+     * @param shouldSyncToClient Whether this configurator should mark its associated listener as syncable to the client.
+     *                           This will only be effective if {@code listenerPackType} is {@link PackType#SERVER_DATA}.
+     *
+     * @return A {@link ResourceReloadListenerConfig} using {@link DefaultedCodecResourceReloadListener}.
+     *
+     * @param <T> The object type being listened to by the {@link DefaultedCodecResourceReloadListener}.
+     */
     public static <T> ResourceReloadListenerConfig<DefaultedCodecResourceReloadListener<T>> createForDefaultable(PackType listenerPackType, boolean shouldSyncToClient) {
         return new ResourceReloadListenerConfig<>(listenerPackType, shouldSyncToClient, Optional.of(DefaultedCodecResourceReloadListener::getMappedObjectData), Optional.of(DefaultedCodecResourceReloadListener::getObjectCodec), Optional.of((targetListener, updatedObjectData) -> targetListener.updateSyncedObjectData((Map<ResourceLocation, T>) updatedObjectData)));
     }
 
+    /**
+     * Factory method for creating a {@link ResourceReloadListenerConfig} that only reads data on one side without
+     * syncing.
+     *
+     * @param listenerPackType The {@link PackType} specifying the side that the associated listener should listen to
+     *                         (resource, data).
+     *
+     * @return A {@link ResourceReloadListenerConfig} that only reads data on one side without syncing.
+     *
+     * @param <PRL> The type of {@linkplain PreparableReloadListener PreparableReloadListener} that this configurator is
+     *              associated with.
+     */
     public static <PRL extends PreparableReloadListener> ResourceReloadListenerConfig<PRL> createDefaultSided(PackType listenerPackType) {
         return new ResourceReloadListenerConfig<>(listenerPackType, false, Optional.empty(), Optional.empty(), Optional.empty());
     }
