@@ -2,10 +2,14 @@ package com.mememan.nexus;
 
 import com.mememan.nexus.block.standard.BlockPropertyWrapper;
 import com.mememan.nexus.client.item.WrappedClampedItemPropertyFunction;
+import com.mememan.nexus.internal.services.FabricNetworkManager;
 import com.mememan.nexus.item.standard.ItemPropertyWrapper;
+import com.mememan.nexus.network.BasePacket;
+import com.mememan.nexus.network.NetworkSide;
 import com.mememan.nexus.util.ClientUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.renderer.item.ItemProperties;
@@ -23,10 +27,25 @@ public class NexusClientFabric implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        registerClientNetworkReceivers();
+
         registerBlockColorProviders();
         registerItemColorProviders();
 
         registerItemModelPredicates();
+    }
+
+    private static <MSGT> void registerClientNetworkReceivers() {
+        FabricNetworkManager.getMappedPackets().values().stream()
+                .filter(curPacket -> curPacket.targetSide() == NetworkSide.S2C)
+                .map(curPacket -> (BasePacket<MSGT>) curPacket)
+                .forEach(packet -> {
+                    ClientPlayNetworking.registerGlobalReceiver(packet.packetId(), ((targetClient, clientPacketListener, buf, fabricPacketSender) -> {
+                        buf.readByte();
+
+                        packet.packetHandler().apply(packet.packetDecoder().apply(buf)).handlePacket(ClientUtil.getClientPlayer(), ClientUtil.getClientLevel(), clientPacketListener.getConnection(), NetworkSide.S2C);
+                    }));
+                });
     }
 
     private static void registerBlockColorProviders() {

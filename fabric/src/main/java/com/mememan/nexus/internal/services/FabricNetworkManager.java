@@ -1,5 +1,7 @@
 package com.mememan.nexus.internal.services;
 
+import com.google.common.collect.ImmutableMap;
+import com.mememan.nexus.NexusClientFabric;
 import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.asm.annotations.NetworkRegistrarEntry;
 import com.mememan.nexus.internal.FabricServerHooks;
@@ -7,7 +9,6 @@ import com.mememan.nexus.network.BasePacket;
 import com.mememan.nexus.network.NetworkSide;
 import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.platform.services.NetworkManager;
-import com.mememan.nexus.util.ClientUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -42,6 +43,11 @@ public class FabricNetworkManager implements NetworkManager {
         NexusConstants.LOGGER.info("Network manager setup took {} ms", endTime - startTime);
     }
 
+    /**
+     * @apiNote Due to how Fabric handles sides (specifically, their usage of ClientPacketListener inside of
+     * {@code ClientPlayNetworking$PlayChannelHandler}), client-side receivers have their registration delegated to
+     * {@link NexusClientFabric} using {@link #MAPPED_PACKETS}.
+     */
     @Override
     public <MSGT> BasePacket<MSGT> registerPacket(BasePacket<MSGT> packet) {
         if (packet.packetId() == null || !ResourceLocation.isValidResourceLocation(packet.packetId().toString())) {
@@ -58,13 +64,8 @@ public class FabricNetworkManager implements NetworkManager {
 
                 packet.packetHandler().apply(packet.packetDecoder().apply(buf)).handlePacket(playerReceiver, targetServer.getLevel(playerReceiver.level().dimension()), serverPacketListener.connection, NetworkSide.C2S);
             }));
-        } else if (targetSide.equals(NetworkSide.S2C)) {
-            ClientPlayNetworking.registerGlobalReceiver(packet.packetId(), ((targetClient, clientPacketListener, buf, fabricPacketSender) -> {
-                buf.readByte();
+        } // Client packet receivers are registered accordingly in NexusClientFabric
 
-                packet.packetHandler().apply(packet.packetDecoder().apply(buf)).handlePacket(ClientUtil.getClientPlayer(), ClientUtil.getClientLevel(), clientPacketListener.getConnection(), NetworkSide.S2C);
-            }));
-        }
         return packet;
     }
 
@@ -76,7 +77,7 @@ public class FabricNetworkManager implements NetworkManager {
             if (mappedPacketToSend.targetSide() != NetworkSide.C2S) {
                 NexusConstants.LOGGER.warn("Attempted to send non-C2S packet ({}) to server!",
                         mappedPacketToSend.packetId() == null
-                                ? mappedPacketToSend.packetClass().getTypeName()
+                                ? mappedPacketToSend.packetClass().getSimpleName()
                                 : mappedPacketToSend.packetId());
                 return;
             }
@@ -136,7 +137,7 @@ public class FabricNetworkManager implements NetworkManager {
             if (mappedPacketToSend.targetSide() != NetworkSide.S2C) {
                 NexusConstants.LOGGER.warn("Attempted to send non-S2C packet ({}) to client!",
                         mappedPacketToSend.packetId() == null
-                                ? mappedPacketToSend.packetClass().getTypeName()
+                                ? mappedPacketToSend.packetClass().getSimpleName()
                                 : mappedPacketToSend.packetId());
                 return;
             }
@@ -150,5 +151,9 @@ public class FabricNetworkManager implements NetworkManager {
                 ServerPlayNetworking.send(targetPlayer, mappedPacketToSend.packetId(), encodedBuf);
             }
         } else NexusConstants.LOGGER.warn("Attempted to send unknown packet ({}) to client! Ensure that the packet is registered!", s2cPacket.getClass().getName());
+    }
+
+    public static ImmutableMap<Class<?>, BasePacket<?>> getMappedPackets() {
+        return ImmutableMap.copyOf(MAPPED_PACKETS);
     }
 }
