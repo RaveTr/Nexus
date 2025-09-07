@@ -26,8 +26,8 @@ public interface DataGenPropertyWrapperBuilder<T, SELF extends PropertyWrapperBu
      * choose to generate data for it yourself if needed, since Nexus won't handle datagen for this particular object.
      * <br></br>
      * If an object-specific data provider has {@link ModDataProvider#validateAllEntries()} set to {@code true}, this
-     * instance (and its children, so long as this value isn't modified) will still be excluded from datagen, and thus
-     * an exception won't be thrown for it.
+     * instance (and its children/inheritors, so long as this value isn't modified) will still be excluded from datagen,
+     * and thus an exception won't be thrown for it.
      *
      * @param excludeFromNativeDatagen Whether this instance's data should be excluded from Nexus' native datagen for
      *                                 data generation.

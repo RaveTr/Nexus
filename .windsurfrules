@@ -1,4 +1,4 @@
-# Nexus API Rules
+# Nexus API Rules [Primarily for convenient contextualized autocompletion instead of whatever AI hallucinates most of the time]
 1. My build system is Gradle
 2. I'm using Java 17
 3. I'm working in a Minecraft modding workspace using my own version of Jared's Multiloader Template.

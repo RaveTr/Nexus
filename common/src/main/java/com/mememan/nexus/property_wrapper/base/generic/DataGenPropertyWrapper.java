@@ -60,7 +60,7 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
     Map<ProviderType, Boolean> getProviderTypeRequisites();
 
     default Optional<ResourceKey<Registry<? super T>>> getObjectRegistryKey() {
-        return Optional.empty();
+        return isTemplate() ? Optional.empty() : ofRegistryKey(null); //TODO
     }
 
     static <T> Optional<ResourceKey<Registry<? super T>>> ofRegistryKey(ResourceKey<?> registryKey) {

@@ -72,6 +72,12 @@ public interface ModData {
      * @apiNote We're specifically using CHM as the backing collection since different loaders have their own optimization
      * nuances during mod-loading. For instance, Forge creates several mod loading worker threads to load and initialize
      * mods in parallel, so concurrency is needed in order to avoid race conditions and/or any other undefined behaviour.
+     *
+     * @implNote Annotation paths (map key) themselves are formatted in typical annotation path format (e.g.
+     * {@code "Lsome/package/to/Annotation;"} rather than {@code "some.package.to.Annotation"}). If you want to do any
+     * annotation-based comparisons from literal annotation classes using the map keys, make sure to format the
+     * annotations beforehand so that they're properly identified and matched:
+     * {@code String formattedAnnotationName = "L" + annotationTypeClazz.getName().replace('.', '/') + ";";}.
      */
     ConcurrentHashMap<String, ObjectArrayList<String>> getCachedAnnotatedClasses();
 

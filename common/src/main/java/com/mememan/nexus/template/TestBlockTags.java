@@ -16,7 +16,7 @@ import java.util.function.Supplier;
 public class TestBlockTags {
 
     public static final Supplier<TagKey<Block>> TEST = createWrappedBlockTag("test/sometagtest")
-            .withEntries(ObjectArrayList.of(() -> Blocks.ANDESITE, TestBlockRegistrar.TEST_ITEM_2))
+            .withEntries(ObjectArrayList.of(() -> Blocks.ANDESITE))
             .withTagEntry(() -> BlockTags.ACACIA_LOGS)
             .withParentTagEntry(() -> BlockTags.ANVIL)
             .getParentTag();

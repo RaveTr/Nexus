@@ -1,5 +1,6 @@
 package com.mememan.nexus.datagen.standard;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.datagen.DuplicateDataPolicy;
@@ -17,6 +18,7 @@ import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -41,7 +43,7 @@ public class StandardRecipeProvider extends RecipeProvider implements ModDataPro
         this.validateAllEntries = validateAllEntries;
         this.dupeStrat = dupeStrat;
 
-        this.mappedRecipePWs = PropertyWrapper.PropertyWrappersContainer.getInferrableWrappersOfType(RecipeBasedPropertyWrapper.class, modId);
+        this.mappedRecipePWs = PropertyWrapper.PropertyWrappersContainer.getInferrableDataGennableWrappersOfType(RecipeBasedPropertyWrapper.class, modId);
     }
 
     /**
@@ -93,7 +95,9 @@ public class StandardRecipeProvider extends RecipeProvider implements ModDataPro
      *
      * @param cachedOutput The {@link CachedOutput} instance to use for saving generated data to disk.
      *
-     * @return A {@link CompletableFuture} that completes when the data generation is complete.
+     * @return A {@link CompletableFuture} of all recipes and advancements that completes when all runnable
+     * recipe/advancement serializers are completed (where each element comprises
+     * {@link DataProvider#saveStable(CachedOutput, JsonElement, Path)}).
      */
     @Override
     public @NotNull CompletableFuture<?> run(CachedOutput cachedOutput) {

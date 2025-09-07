@@ -203,6 +203,10 @@ public interface PlatformManager {
      * Whether the current loader is running data generation. Only really useful in the development environment.
      *
      * @return Whether the current loader is running data generation.
+     *
+     * @apiNote Calling this too early (e.g. during mixin initialization, inside your mixin config plugin
+     * {@code class}) will result in this method returning {@code false}, as the data generator instance would not have
+     * been initialized yet.
      */
     boolean isRunningDataGen();
 

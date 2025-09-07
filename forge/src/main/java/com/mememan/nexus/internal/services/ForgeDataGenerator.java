@@ -31,12 +31,15 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 
+/**
+ * Forge-specific implementation of {@link DataGenerator}. Handles all datagen logic.
+ */
 public class ForgeDataGenerator implements DataGenerator {
-    private static boolean HAS_CONSUMED_GENERATORS = false;
-    @Nullable
-    private static net.minecraft.data.DataGenerator GLOBAL_DATA_GENERATOR_INSTANCE;
+    private static boolean hasConsumedGenerators = false;
+    private static final AtomicReference<net.minecraft.data.DataGenerator> GLOBAL_DATA_GENERATOR_INSTANCE = new AtomicReference<>();
     private static final Queue<ObjectObjectImmutablePair<String, BiFunction<PackOutput, CompletableFuture<HolderLookup.Provider>, ? extends Pair<Boolean, ? extends DataProvider>>>> ENQUEUED_PROVIDERS = new ConcurrentLinkedQueue<>();
     private static final Queue<ObjectObjectImmutablePair<String, BiFunction<PackOutput, CompletableFuture<HolderLookup.Provider>, ? extends ModDataProvider>>> ENQUEUED_MOD_PROVIDERS = new ConcurrentLinkedQueue<>();
     private static final ObjectOpenCustomHashSet<ModDatagenConfig> MOD_DATAGEN_CONFIGS = new ObjectOpenCustomHashSet<>(new Hash.Strategy<>() {
@@ -83,11 +86,11 @@ public class ForgeDataGenerator implements DataGenerator {
 
     @Override
     public @Nullable net.minecraft.data.DataGenerator getDataGenerator() {
-        return GLOBAL_DATA_GENERATOR_INSTANCE;
+        return GLOBAL_DATA_GENERATOR_INSTANCE.get();
     }
 
     public static boolean hasConsumedGenerators() {
-        return HAS_CONSUMED_GENERATORS;
+        return hasConsumedGenerators;
     }
 
     private static void onGatherDataEvent(final GatherDataEvent event) {
@@ -100,7 +103,7 @@ public class ForgeDataGenerator implements DataGenerator {
         boolean onServer = event.includeServer();
 
         if (!hasConsumedGenerators()) { // Safeguard against potentially running this more than once for any reason
-            GLOBAL_DATA_GENERATOR_INSTANCE = primaryGen;
+            GLOBAL_DATA_GENERATOR_INSTANCE.set(primaryGen);
 
             // ModDataProvider types
             if (!ENQUEUED_MOD_PROVIDERS.isEmpty()) {
@@ -174,7 +177,7 @@ public class ForgeDataGenerator implements DataGenerator {
                 }
             });
 
-            HAS_CONSUMED_GENERATORS = true;
+            hasConsumedGenerators = true;
         }
     }
 }

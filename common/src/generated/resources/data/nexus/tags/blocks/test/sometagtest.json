@@ -1,7 +1,6 @@
 {
   "values": [
     "minecraft:andesite",
-    "nexus:test_block",
     "#minecraft:acacia_logs"
   ]
 }

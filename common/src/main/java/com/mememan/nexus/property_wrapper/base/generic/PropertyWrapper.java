@@ -1,6 +1,5 @@
 package com.mememan.nexus.property_wrapper.base.generic;
 
-import com.google.common.collect.ImmutableMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.world.item.Item;
@@ -114,12 +113,13 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
     boolean isTemplate();
 
     /**
-     * Gets an immutable view (via {@link ImmutableMap}) of {@link PropertyWrappersContainer#MAPPED_PROPERTY_WRAPPERS}.
+     * Gets a copied view (via {@link Object2ObjectOpenHashMap}) of {@link PropertyWrappersContainer#MAPPED_PROPERTY_WRAPPERS},
+     * primarily to allow for O(1) lookups while preventing modifications from being made to the original map.
      *
-     * @return An immutable copy of {@link PropertyWrappersContainer#MAPPED_PROPERTY_WRAPPERS}.
+     * @return A copy of {@link PropertyWrappersContainer#MAPPED_PROPERTY_WRAPPERS}.
      */
-    static ImmutableMap<Supplier<?>, PropertyWrapper<?, ? extends PropertyWrapper<?, ?, ?>, ? extends PropertyWrapperBuilder<?, ?, ?>>> getMappedPropertyWrappers() {
-        return ImmutableMap.copyOf(PropertyWrappersContainer.MAPPED_PROPERTY_WRAPPERS);
+    static Object2ObjectOpenHashMap<Supplier<?>, PropertyWrapper<?, ? extends PropertyWrapper<?, ?, ?>, ? extends PropertyWrapperBuilder<?, ?, ?>>> getMappedPropertyWrappers() {
+        return new Object2ObjectOpenHashMap<>(PropertyWrappersContainer.MAPPED_PROPERTY_WRAPPERS);
     }
 
     /**
@@ -177,6 +177,9 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
          * <b>NOTE:</b> For variable value setting, collections will have to define explicit type arguments that
          * correspond to {@code PW} and {@code PWB} due to how Java's generic type inference works. To bypass this
          * constraint, use the {@linkplain #getInferrableWrappersOfType(Class) wildcard variant} of this method.
+         * <br></br>
+         * If you're working with datagen, you should prefer {@link #getInferrableDataGennableWrappersOfType(Class, String)}
+         * instead.
          *
          * @param propertyWrapperTypeClass The {@link PropertyWrapper} type to filter by.
          *
@@ -206,6 +209,9 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
         /**
          * Alternate variant of {@link #getWrappersOfType(Class)} that allows for broader inference of generic type
          * arguments.
+         * <br></br>
+         * If you're working with datagen, you should prefer {@link #getInferrableDataGennableWrappersOfType(Class, String)}
+         * instead.
          *
          * @param propertyWrapperTypeClass The {@link PropertyWrapper} type to filter by.
          *
@@ -236,6 +242,9 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
          * <b>NOTE:</b> For variable value setting, collections will have to define explicit type arguments that
          * correspond to {@code PW} and {@code PWB} due to how Java's generic type inference works. To bypass this
          * constraint, use the {@linkplain #getInferrableWrappersFromMod(String) wildcard variant} of this method.
+         * <br></br>
+         * If you're working with datagen, you should prefer {@link #getInferrableDataGennableWrappersOfType(Class, String)}
+         * instead.
          *
          * @param modId The mod ID to filter by.
          *
@@ -264,6 +273,9 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
         /**
          * Alternate variant of {@link #getWrappersFromMod(String)} that allows for broader inference of generic type
          * arguments.
+         * <br></br>
+         * If you're working with datagen, you should prefer {@link #getInferrableDataGennableWrappersOfType(Class, String)}
+         * instead.
          *
          * @param modId The mod ID to filter by.
          *
@@ -292,6 +304,9 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
          * <b>NOTE:</b> For variable value setting, collections will have to define explicit type arguments that
          * correspond to {@code PW} and {@code PWB} due to how Java's generic type inference works. To bypass this
          * constraint, use the {@linkplain #getInferrableWrappersOfType(Class, String) wildcard variant} of this method.
+         * <br></br>
+         * If you're working with datagen, you should prefer {@link #getInferrableDataGennableWrappersOfType(Class, String)}
+         * instead.
          *
          * @param propertyWrapperTypeClass The {@link PropertyWrapper} type to filter by.
          * @param modId The mod ID to filter by.
@@ -324,6 +339,9 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
         /**
          * Alternate variant of {@link #getWrappersOfType(Class, String)} that allows for broader inference of generic type
          * arguments. Primarily helpful when defining field values using these methods.
+         * <br></br>
+         * If you're working with datagen, you should prefer {@link #getInferrableDataGennableWrappersOfType(Class, String)}
+         * instead.
          *
          * @param pwClazz The {@link PropertyWrapper} type to filter by.
          * @param modId The mod ID to filter by.
@@ -346,6 +364,28 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
                                     .map(pw -> (PW) pw)
                                     .collect(Collectors.toCollection(ObjectArrayList::new))
                     );
+        }
+
+        /**
+         * Overloaded variant of {@link #getInferrableWrappersOfType(Class, String)} that filters for only
+         * {@link DataGenPropertyWrapper} instances that are not excluded from data generation via
+         * {@link DataGenPropertyWrapper#isExcludedFromDataGen()}.
+         *
+         * @param pwClazz The {@link PropertyWrapper} type to filter by.
+         * @param modId The mod ID to filter by.
+         *
+         * @return A list of all {@link DataGenPropertyWrapper} instances corresponding to the provided type and mod ID,
+         * and that are not excluded from data generation. Includes subclasses. May be empty.
+         *
+         * @param <PW> The {@link PropertyWrapper} type.
+         *
+         * @see #getInferrableWrappersOfType(Class, String)
+         */
+        public static <PW extends PropertyWrapper<?, ?, ?>> ObjectArrayList<PW> getInferrableDataGennableWrappersOfType(Class<?> pwClazz, String modId) {
+            return getInferrableWrappersOfType(pwClazz, modId).stream()
+                    .filter(propertyWrapper -> pwClazz.isInstance(propertyWrapper) && propertyWrapper instanceof DataGenPropertyWrapper<?, ?, ?> dgpw && !dgpw.isExcludedFromDataGen())
+                    .map(propertyWrapper -> (PW) propertyWrapper)
+                    .collect(Collectors.toCollection(ObjectArrayList::new));
         }
     }
 }

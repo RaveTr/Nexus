@@ -95,6 +95,12 @@ public interface DefaultableLanguageBasedPropertyWrapperBuilder<T, SELF extends 
         return self();
     }
 
+    /**
+     * @implNote Implementations of this method for language wrappers usually copy
+     * {@link LanguageBasedPropertyWrapper#getAdditionalLocalizationKeys()}. This may result in duplicate language keys
+     * if direct copies are made (usually from non-templates). As such, if you're calling this on an LBPWB instance that
+     * is not a template, make sure that there are no collusions with the original additional localization keys.
+     */
     @Override
     default SELF copyFrom(LBPW propertyWrapper) {
         getSpecializedLanguageBuilder().ifPresent(builder -> builder.copyFrom(propertyWrapper));

@@ -53,7 +53,7 @@ public class StandardLanguageProvider implements ModDataProvider {
         this.dupeStrat = dupeStrat;
 
         this.outputPath = output.getOutputFolder(PackOutput.Target.RESOURCE_PACK).resolve(modId).resolve("lang").resolve(locale + ".json");
-        this.mappedLanguagePWs = PropertyWrapper.PropertyWrappersContainer.getInferrableWrappersOfType(LanguageBasedPropertyWrapper.class, modId);
+        this.mappedLanguagePWs = PropertyWrapper.PropertyWrappersContainer.getInferrableDataGennableWrappersOfType(LanguageBasedPropertyWrapper.class, modId);
     }
 
     /**

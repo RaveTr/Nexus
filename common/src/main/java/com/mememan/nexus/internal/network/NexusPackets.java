@@ -10,5 +10,5 @@ import com.mememan.nexus.platform.NexusServices;
 @NetworkRegistrarEntry
 public final class NexusPackets {
 
-    public static final BasePacket<DatapackEntriesSyncPacket> DATAPACK_ENTRIES_SYNC = NexusServices.NETWORK_MANAGER.registerPacket(new BasePacket<>(NexusConstants.MOD_ID, DatapackEntriesSyncPacket.class, DatapackEntriesSyncPacket::encode, DatapackEntriesSyncPacket::decode, DatapackEntriesSyncPacket::handlePacket, NetworkSide.S2C));
+    public static final BasePacket<DatapackEntriesSyncPacket> DATAPACK_ENTRIES_SYNC_PACKET = NexusServices.NETWORK_MANAGER.registerPacket(new BasePacket<>(NexusConstants.MOD_ID, DatapackEntriesSyncPacket.class, DatapackEntriesSyncPacket::encode, DatapackEntriesSyncPacket::decode, DatapackEntriesSyncPacket::handlePacket, NetworkSide.S2C));
 }
