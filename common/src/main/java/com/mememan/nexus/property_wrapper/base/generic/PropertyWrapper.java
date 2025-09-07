@@ -124,7 +124,8 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
 
     /**
      * Container {@code class} for storing an access-protected {@link Object2ObjectOpenHashMap} of PWs mapped
-     * to their parent objects.
+     * to their parent objects. Additionally, provides utility methods for registering and unregistering PWs, as well
+     * as performing efficient lookups based on type and/or mod ID.
      */
     class PropertyWrappersContainer {
         private static final Object2ObjectOpenHashMap<Supplier<?>, PropertyWrapper<?, ? extends PropertyWrapper<?, ?, ?>, ? extends PropertyWrapperBuilder<?, ?, ?>>> MAPPED_PROPERTY_WRAPPERS = new Object2ObjectOpenHashMap<>();
