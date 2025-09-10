@@ -43,7 +43,6 @@ public class StandardLootProvider extends LootTableProvider implements ModDataPr
 
     public StandardLootProvider(PackOutput targetOutput, String modId, boolean validateAllEntries, @Nullable DuplicateDataPolicy dupeStrat, Map<ProviderType, DuplicateDataPolicy> providerDupeStrats, Set<ProviderType> providersToValidate, Set<ProviderType> disabledProviders) {
         super(targetOutput, Set.of(), Util.make(new ObjectArrayList<>(), curList -> {
-            if (!disabledProviders.contains(NexusProviderTypes.BLOCK_LOOT_SUB_PROVIDER)) curList.add(new SubProviderEntry(() -> new StandardBlockLootSubProvider(modId, providersToValidate.contains(NexusProviderTypes.LOOT_TABLE_PROVIDER) || providersToValidate.contains(NexusProviderTypes.BLOCK_LOOT_SUB_PROVIDER), dupeStrat != null ? dupeStrat : providerDupeStrats.getOrDefault(NexusProviderTypes.BLOCK_LOOT_SUB_PROVIDER, DuplicateDataPolicy.CRASH)), LootContextParamSets.BLOCK));
         }));
 
         this.modId = modId;

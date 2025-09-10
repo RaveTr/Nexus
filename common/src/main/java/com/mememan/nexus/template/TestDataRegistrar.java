@@ -24,7 +24,6 @@ public class TestDataRegistrar {
             .builder()
             .withLocalizedDeathMessageComponent("%1$s was pricked to death by a Thorny Sun")
             .withTag(() -> DamageTypeTags.BYPASSES_ARMOR)
-            .requiresDatagenEntry(NexusProviderTypes.DAMAGE_TYPE_TAGS_PROVIDER, true)
             .build()
             .getOwnerDamageType();
 
