@@ -294,7 +294,7 @@ public interface ModelBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SE
         default List<ModelDefinition> getFlattenedModelDefinitions() {
             if (getOrdinalModelDefinitions().isEmpty()) return ObjectArrayList.of();
 
-            List<ModelDefinition> flattenedDefinitions = ObjectArrayList.of();
+            List<ModelDefinition> flattenedDefinitions = new ObjectArrayList<>();
             Queue<ModelDefinition> toProcess = new LinkedList<>(getOrdinalModelDefinitions());
 
             while (!toProcess.isEmpty()) { // Recursively flatten definitions all the way down
@@ -309,5 +309,4 @@ public interface ModelBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SE
             return flattenedDefinitions;
         }
     }
-
 }

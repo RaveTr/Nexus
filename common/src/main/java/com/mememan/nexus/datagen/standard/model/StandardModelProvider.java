@@ -3,12 +3,14 @@ package com.mememan.nexus.datagen.standard.model;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mememan.nexus.NexusConstants;
+import com.mememan.nexus.client.model.ModelTransform;
 import com.mememan.nexus.datagen.DuplicateDataPolicy;
 import com.mememan.nexus.datagen.NexusProviderTypes;
 import com.mememan.nexus.datagen.ProviderType;
 import com.mememan.nexus.datagen.standard.ModDataProvider;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.specialised.model.ModelBasedPropertyWrapper;
+import com.mememan.nexus.util.JsonUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.data.CachedOutput;
@@ -17,10 +19,12 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.data.models.ModelProvider;
 import net.minecraft.data.models.model.ModelTemplate;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemDisplayContext;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -171,10 +175,31 @@ public class StandardModelProvider extends ModelProvider implements ModDataProvi
                 (finalizedModelLoc, modelJsonFileSup) -> {
                     JsonObject baseSerializedModelJson = modelJsonFileSup.get().getAsJsonObject(); // Should always be a JsonObject based on ModelTemplate#createBaseTemplate
 
-                    if (!modelDefinition.hasAmbientOcclusion()) baseSerializedModelJson.addProperty("ambientocclusion", modelDefinition.hasAmbientOcclusion());
+                    boolean hasAO = modelDefinition.hasAmbientOcclusion();
+
+                    if (!hasAO) baseSerializedModelJson.addProperty("ambientocclusion", hasAO);
 
                     modelDefinition.getGuiLight().ifPresent(guiLight -> baseSerializedModelJson.addProperty("gui_light", guiLight.getSerializedName()));
                     modelDefinition.getRenderType().ifPresent(renderType -> baseSerializedModelJson.addProperty("render_type", renderType.toString()));
+
+                    Map<ItemDisplayContext, ModelTransform> modelTransforms = modelDefinition.getModelTransforms();
+
+                    if (!modelTransforms.isEmpty()) {
+                        JsonObject modelTransformsMap = new JsonObject();
+
+                        modelTransforms.forEach((transformName, transform) -> {
+                            JsonObject transformJsonObj = new JsonObject();
+
+                            if (transform.hasLeftRotation()) transformJsonObj.add(transform.hasRightRotation() ? "left_rotation" : "rotation", JsonUtil.createVec3fArray(transform.leftRotation()));
+                            if (transform.hasRightRotation()) transformJsonObj.add("right_rotation", JsonUtil.createVec3fArray(transform.rightRotation()));
+                            if (transform.hasTranslation()) transformJsonObj.add("translation", JsonUtil.createVec3fArray(transform.translation()));
+                            if (transform.hasScale()) transformJsonObj.add("scale", JsonUtil.createVec3fArray(transform.scale()));
+
+                            modelTransformsMap.add(transformName.getSerializedName(), transformJsonObj);
+                        });
+
+                        baseSerializedModelJson.add("display", modelTransformsMap);
+                    }
 
                     modelJson.set(baseSerializedModelJson);
                 }
