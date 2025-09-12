@@ -11,7 +11,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * Base class for all Property Wrappers, with base implementations from {@code interface}.
+ * Base {@code class} for all Property Wrappers, with base implementations from {@link PropertyWrapper}.
  *
  * @see BasePropertyWrapperBuilder
  */

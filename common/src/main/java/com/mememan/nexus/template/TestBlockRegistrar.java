@@ -2,6 +2,7 @@ package com.mememan.nexus.template;
 
 import com.mememan.nexus.asm.annotations.RegistrarEntry;
 import com.mememan.nexus.platform.NexusServices;
+import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapper;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -26,7 +27,7 @@ import java.util.function.Supplier;
 public class TestBlockRegistrar {
     private static final ObjectArrayList<Supplier<? extends Block>> BLOCKS = new ObjectArrayList<>();
 
-    public static final Supplier<SlabBlock> BLAH = new com.mememan.nexus.property_wrapper.BlockPropertyWrapper<>(registerBlock(new ResourceLocation("nexus", "test_block"), () -> new SlabBlock(BlockBehaviour.Properties.of())), "nexus")
+    public static final Supplier<SlabBlock> BLAH = new BlockPropertyWrapper<>(registerBlock(new ResourceLocation("nexus", "test_block"), () -> new SlabBlock(BlockBehaviour.Properties.of())), "nexus")
             .builder()
             .withTag(() -> BlockTags.ACACIA_LOGS)
             .withRecipe(r -> result -> ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, result.get())
@@ -39,7 +40,7 @@ public class TestBlockRegistrar {
                             .add(LootItem.lootTableItem(Items.ACACIA_BOAT))))
             .buildAndGet();
 
-    public static final Supplier<SlabBlock> BLAH_2 = new com.mememan.nexus.property_wrapper.BlockPropertyWrapper<>(registerBlock(new ResourceLocation("nexus", "test_able_block"), () -> new SlabBlock(BlockBehaviour.Properties.of())), "nexus")
+    public static final Supplier<SlabBlock> BLAH_2 = new BlockPropertyWrapper<>(registerBlock(new ResourceLocation("nexus", "test_able_block"), () -> new SlabBlock(BlockBehaviour.Properties.of())), "nexus")
             .builder()
             .copyFrom(BLAH)
             .literalTranslation()

@@ -13,11 +13,11 @@ import java.util.function.Supplier;
  * definitions.
  */
 public class BlockStateDefinition {
-    private final Supplier<Block> parentBlock;
+    protected final Supplier<Block> parentBlock;
     @Nullable
-    private BlockStateGenerator blockStateSupplier;
+    protected BlockStateGenerator blockStateSupplier;
 
-    private BlockStateDefinition(Supplier<Block> parentBlock) {
+    protected BlockStateDefinition(Supplier<Block> parentBlock) {
         this.parentBlock = parentBlock;
     }
 
@@ -41,7 +41,7 @@ public class BlockStateDefinition {
      * implementations you'll ever need. However, since you only need to pass their parent {@code interface} in, you're
      * not conformed to the 2 aforementioned types when working with BSDs.
      *
-     * @param blockStateSupplier The {@link BlockStateGenerator} parsed and used for blockstate datagen.
+     * @param blockStateSupplier The {@link BlockStateGenerator} used for blockstate datagen.
      *
      * @return {@code this} (builder method).
      *

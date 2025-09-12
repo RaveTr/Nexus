@@ -1,19 +1,20 @@
 package com.mememan.nexus.property_wrapper.base.specialised.model;
 
+import com.mememan.nexus.client.model.ModelGuiLight;
+import com.mememan.nexus.client.model.ModelTransform;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.data.models.model.ModelTemplate;
-import net.minecraft.data.models.model.TextureMapping;
-import net.minecraft.data.models.model.TextureSlot;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.data.models.model.*;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemDisplayContext;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Queue;
+import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Extension of {@link DataGenPropertyWrapper} with methods tailored towards handling models for the object being wrapped.
@@ -29,10 +30,9 @@ public interface ModelBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SE
      * the parent object as input and returning a {@link ModelDefinition}.
      *
      * @return A model definition for the object being wrapped. May be empty.
-     *
      * @see ModelBasedPropertyWrapperBuilder#withModelDefinition(Function)
      */
-    Optional<Function<T, ModelDefinition>> getModelDefinition();
+    Optional<Function<Supplier<T>, ModelDefinition>> getModelDefinition();
 
     /**
      * Nested data {@code interface} representing models for different types of objects.
@@ -83,6 +83,111 @@ public interface ModelBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SE
         }
 
         /**
+         * Sets a custom file name to use for this definition rather than defaulting to the owner object's formatted
+         * description ID.
+         *
+         * @param customName The custom file name to use for this model definition.
+         *
+         * @return {@code this} (builder method)
+         */
+        ModelDefinition withCustomName(String customName);
+
+        /**
+         * Appends an additional path to the {@linkplain #getBackingDirectory() backing directory} for this definition
+         * type.
+         * <br></br>
+         * This method does not typically perform any formatting of its own. As such, the {@code appendedDir} should
+         * be formatted like any normal {@link ResourceLocation} (see param list below). The resulting path will
+         * look something like {@code "assets/<mod_id>/models/<backing_directory>/<appended_directory>/"}.
+         *
+         * @param appendedDir The directory to append to the root {@linkplain #getBackingDirectory() backing directory}
+         *                    (e.g {@code "some/additional/set/of/paths"}).
+         *
+         * @return {@code this} (builder method)
+         */
+        ModelDefinition appendToBackingDirectory(String appendedDir);
+
+        /**
+         * Sets the texture map, conforming to the parent {@linkplain ModelTemplate ModelTemplate's} required
+         * {@linkplain TextureSlot TextureSlot(s)}. Any additional slots that have nothing to do with the parent
+         * {@linkplain ModelTemplate ModelTemplate's} required {@linkplain TextureSlot TextureSlot(s)} will be ignored.
+         * However, any missing slot mappings (as per the parent {@linkplain ModelTemplate ModelTemplate's} required
+         * {@linkplain TextureSlot TextureSlot(s)}) will end up throwing an {@link IllegalStateException}.
+         *
+         * @param texMapping The object representation of texture {@linkplain ResourceLocation ResourceLocation(s)} to
+         *                   the required {@linkplain TextureSlot TextureSlot(s)}.
+         *
+         * @return {@code this} (builder method)
+         *
+         * @see ModelTemplate#requiredSlots
+         * @see TexturedModel
+         * @see ModelTemplates
+         * @see TextureSlot
+         */
+        ModelDefinition withTextureMapping(TextureMapping texMapping);
+
+        /**
+         * Defines the GUI lighting to use for this model definition.
+         *
+         * @param guiLight The {@link ModelGuiLight} to use for this model definition.
+         *
+         * @return {@code this} (builder method)
+         *
+         * @see #getGuiLight()
+         */
+        ModelDefinition withGuiLight(ModelGuiLight guiLight);
+
+        /**
+         * Whether the resulting object model should exude ambient occlusion. Defaults to {@code true}.
+         *
+         * @param ambientOcclusion Whether the resulting block model should exude ambient occlusion.
+         *
+         * @return {@code this} (builder method)
+         */
+        ModelDefinition withAmbientOcclusion(boolean ambientOcclusion);
+
+        /**
+         * Defines the model transform to apply to this model definition, mapped to the provided {@code perspectiveContext}.
+         *
+         * @param perspectiveContext The perspective context to map the {@code applicableTransform} to.
+         * @param applicableTransform The model transform to apply to this model definition. Will not be applied if
+         *                            {@code null} or equivalent to {@link ModelTransform#defaultTransform()}.
+         *
+         * @return {@code this} (builder method)
+         *
+         * @see #getModelTransforms()
+         * @see #withTransforms(Map)
+         * @see #setTransforms(Map)
+         */
+        ModelDefinition withTransform(ItemDisplayContext perspectiveContext, ModelTransform applicableTransform);
+
+        /**
+         * Defines a {@link Map} of different perspective-aware transformations to apply to this model definition.
+         *
+         * @param transforms The {@link Map} describing a set of {@linkplain ItemDisplayContext ItemDisplayContexts}
+         *                   mapped to their respective {@linkplain ModelTransform ModelTransforms}.
+         *
+         * @return {@code this} (builder method)
+         *
+         * @see #withTransform(ItemDisplayContext, ModelTransform)
+         * @see #setTransforms(Map)
+         */
+        ModelDefinition withTransforms(Map<ItemDisplayContext, ModelTransform> transforms);
+
+        /**
+         * Sets the model transforms to apply to this model definition based on perspective context.
+         *
+         * @param transforms The {@link Map} describing a set of {@linkplain ItemDisplayContext ItemDisplayContexts}
+         *                   mapped to their respective {@linkplain ModelTransform ModelTransforms}.
+         *
+         * @return {@code this} (builder method)
+         *
+         * @see #withTransform(ItemDisplayContext, ModelTransform)
+         * @see #withTransforms(Map)
+         */
+        ModelDefinition setTransforms(Map<ItemDisplayContext, ModelTransform> transforms);
+
+        /**
          * Gets the parent model to use as a template for this definition's model.
          *
          * @return The parent model.
@@ -103,15 +208,70 @@ public interface ModelBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SE
          * Gets the custom model name to use for this definition's model file name.
          *
          * @return The custom model name. May be empty.
+         *
+         * @see #getBackingDirectory()
          */
         Optional<String> getCustomModelName();
 
         /**
-         * Gets whether this model definition should exude ambient occlusion.
+         * Gets the backing directory for this definition type.
+         * <br></br>
+         * By default, during model generation, objects are placed inside of
+         * {@code "assets/<mod_id>/models/"}. If this method returns a non-empty value, it will look something like
+         * {@code "assets/<mod_id>/models/<backing_directory>/"}.
+         * <br></br>
+         * This method should be overridden for custom implementations to allow for roper object segregation during
+         * model generation.
+         *
+         * @return The backing directory for this definition type. May be empty.
+         *
+         * @see #getCustomModelName()
+         */
+        Optional<String> getBackingDirectory();
+
+        /**
+         * Gets the custom {@link RenderType} to be passed into this model's JSON for custom rendering masks.
+         * <br></br>
+         * <b>List of built-in render types:</b>
+         * <ul>
+         *  <li>{@code minecraft:solid} -> Default, all solid/fully opaque pixels in textures.</li>
+         *  <li>{@code minecraft:cutout} -> For fully solid, or fully transparent pixels in textures. No translucency.</li>
+         *  <li>{@code minecraft:cutout_mipped} -> Same as above, but applies mipmapping (basically LODs). Does not apply to block item model for blocks.</li>
+         *  <li>{@code minecraft:cutout_mipped_all} -> Same as above, but applies to block item model for blocks.</li>
+         *  <li>{@code minecraft:translucent} -> For textures with translucent (i.e. Not fully opaque nor fully transparent) pixels.</li>
+         *  <li>{@code minecraft:tripwire} -> Uses a custom shader to render a tripwire.</li>
+         * </ul>
+         *
+         * @return The custom render type location. May be empty.
+         *
+         * @see RenderType
+         */
+        Optional<ResourceLocation> getRenderType();
+
+        /**
+         * Gets the custom GUI lighting to use for this model definition.
+         *
+         * @return The custom GUI lighting to use for this model definition. May be empty.
+         */
+        Optional<ModelGuiLight> getGuiLight();
+
+        /**
+         * Gets whether this model definition should exude ambient occlusion. Defaults to {@code true}.
          *
          * @return Whether this model definition should exude ambient occlusion.
          */
         boolean hasAmbientOcclusion();
+
+        /**
+         * Gets the model transforms to apply to this model definition based on perspective context.
+         *
+         * @return A {@link Map} of model transforms to apply to this model definition based on perspective context. May
+         * be empty.
+         *
+         * @apiNote This is primarily used for item model transformations, including item-representable models (e.g.
+         * block items).
+         */
+        Map<ItemDisplayContext, ModelTransform> getModelTransforms();
 
         /**
          * A {@link List} of all contained model definitions within this definition. Does not traverse down contained
@@ -149,4 +309,5 @@ public interface ModelBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SE
             return flattenedDefinitions;
         }
     }
+
 }

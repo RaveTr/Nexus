@@ -5,7 +5,9 @@
   "refmap": "${mod_id}.refmap.json",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "fabric_api.ResourceManagerHelperImplMixin",
+    "fabric_api.datagen.FabricDataGeneratorAccessor",
+    "fabric_api.datagen.PackAccessor",
+    "fabric_api.resource_loader.ResourceManagerHelperImplMixin",
     "server.PlayerListMixin"
   ],
   "client": [

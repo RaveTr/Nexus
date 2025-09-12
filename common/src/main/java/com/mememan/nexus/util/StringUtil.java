@@ -58,9 +58,9 @@ public final class StringUtil {
     }
 
     /**
-     * Overloaded variant of {@link #toTitleCase(String, char...)} with {@code delimiters} set to {@code '_'}. Capitalizes
-     * a {@link String} formatted in snake case into a title case {@link String}, e.g. {@code "some_lower_case_string"}
-     * -> {@code "Some Lower Case String"}.
+     * Overloaded variant of {@link #toTitleCase(String, char...)} with {@code delimiters} set to {@code ['_', '-', ' ']}.
+     * Capitalizes a {@link String} formatted in snake case into a title case {@link String}, e.g.
+     * {@code "some_lower_case_string"} -> {@code "Some Lower Case String"}.
      *
      * @param targetString the {@link String} to capitalize.
      *
@@ -69,17 +69,18 @@ public final class StringUtil {
      * @see #toTitleCase(String, char...)
      */
     public static String toTitleCase(String targetString) {
-        return toTitleCase(targetString, '_', ' ');
+        return toTitleCase(targetString, '_', '-', ' ');
     }
 
     /**
-     * Attempts to localize a string by removing all prefixed words behind {@code '.'} and capitalizing the remaining
-     * {@link String} using {@link #toTitleCase(String)}.
+     * Attempts to localize a string by removing all prefixed words behind the last {@code '.'} and capitalizing the
+     * remaining {@link String} using {@link #toTitleCase(String)}.
      *
      * @param unlocalizedInput The unlocalized key to localize.
      * @param separatorWords An optional {@link List} of words to un-capitalize from the unlocalized key.
      *
-     * @return The literally-localized {@link String}.
+     * @return The literally-localized {@link String}, or the original {@code unlocalizedInput} if it is {@code null},
+     * blank, or does not contain {@code '.'}.
      */
     public static String literallyLocalize(String unlocalizedInput, List<String> separatorWords) {
         if (unlocalizedInput == null || unlocalizedInput.isBlank() || !unlocalizedInput.contains(".")) return unlocalizedInput;

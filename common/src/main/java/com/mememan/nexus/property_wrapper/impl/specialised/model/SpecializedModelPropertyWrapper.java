@@ -23,7 +23,7 @@ public class SpecializedModelPropertyWrapper<T, SELF extends ModelBasedPropertyW
     }
 
     @Override
-    public Optional<Function<T, ModelDefinition>> getModelDefinition() {
+    public Optional<Function<Supplier<T>, ModelDefinition>> getModelDefinition() {
         return rawBuilder().flatMap(b -> b.modelDefinitionsMapper);
     }
 }

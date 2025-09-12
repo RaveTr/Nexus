@@ -21,6 +21,9 @@ public interface WrappedBlockColor {
      * @param tintIndex The computed tintIndex that represents the current tint of the block.
      *
      * @return The packed RGB color of the given {@link BlockState} at the given {@link BlockPos}.
+     *
+     * @see net.minecraft.client.color.block.BlockColor#getColor(BlockState, BlockAndTintGetter, BlockPos, int)
+     * @see net.minecraft.client.color.block.BlockColors
      */
     int getColor(BlockState targetState, @Nullable BlockAndTintGetter curLevel, @Nullable BlockPos targetPos, int tintIndex);
 }

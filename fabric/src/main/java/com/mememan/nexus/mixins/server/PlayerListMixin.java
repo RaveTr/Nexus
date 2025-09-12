@@ -3,7 +3,7 @@ package com.mememan.nexus.mixins.server;
 import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.internal.network.packets.s2c.DatapackEntriesSyncPacket;
 import com.mememan.nexus.internal.services.FabricRegistrar;
-import com.mememan.nexus.mixins.fabric_api.ResourceManagerHelperImplMixin;
+import com.mememan.nexus.mixins.fabric_api.resource_loader.ResourceManagerHelperImplMixin;
 import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.resource.config.ResourceReloadListenerConfig;
 import it.unimi.dsi.fastutil.Pair;

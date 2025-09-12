@@ -61,6 +61,9 @@ loom {
             setConfigName("${fabric_client_taskname}")
             ideConfigGenerated(true)
             runDir("run/client")
+
+            vmArg("-Dfabric.log.level=debug")
+
             vmArgs("-Xms12G", "-Xmx16G", "-XX:+UseG1GC", "-XX:+UnlockExperimentalVMOptions", "-XX:MaxGCPauseMillis=100", "-XX:+DisableExplicitGC", "-XX:TargetSurvivorRatio=90", "-XX:G1NewSizePercent=35", "-XX:G1MaxNewSizePercent=60", "-XX:G1MixedGCLiveThresholdPercent=50", "-XX:+AlwaysPreTouch", "-Dmixin.debug.export=true")
         }
         server {
@@ -69,6 +72,9 @@ loom {
             setConfigName("${fabric_server_taskname}")
             ideConfigGenerated(true)
             runDir("run/server")
+
+            vmArg("-Dfabric.log.level=debug")
+
             vmArgs("-Xms12G", "-Xmx16G", "-XX:+UseG1GC", "-XX:+UnlockExperimentalVMOptions", "-XX:MaxGCPauseMillis=100", "-XX:+DisableExplicitGC", "-XX:TargetSurvivorRatio=90", "-XX:G1NewSizePercent=35", "-XX:G1MaxNewSizePercent=60", "-XX:G1MixedGCLiveThresholdPercent=50", "-XX:+AlwaysPreTouch", "-Dmixin.debug.export=true")
         }
         datagen {
@@ -78,6 +84,7 @@ loom {
             vmArg("-Dfabric-api.datagen")
             vmArg("-Dfabric-api.datagen.output-dir=${project(':common').file('src/generated/resources')}")
             vmArg("-Dfabric-api.datagen.modid=${mod_id}")
+            vmArg("-Dfabric.log.level=debug")
 
             runDir("build/datagen")
 

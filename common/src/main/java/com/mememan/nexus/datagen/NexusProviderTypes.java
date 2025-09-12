@@ -3,13 +3,9 @@ package com.mememan.nexus.datagen;
 import com.mememan.nexus.datagen.standard.StandardLanguageProvider;
 import com.mememan.nexus.loader.ModSide;
 import net.minecraft.data.loot.LootTableProvider;
-import net.minecraft.data.models.BlockModelGenerators;
-import net.minecraft.data.models.ItemModelGenerators;
 import net.minecraft.data.models.ModelProvider;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.registries.RegistriesDatapackGenerator;
-import net.minecraft.data.tags.IntrinsicHolderTagsProvider;
-import net.minecraft.data.tags.TagsProvider;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -33,7 +29,7 @@ public enum NexusProviderTypes implements ProviderType {
      */
     LOOT_TABLE_PROVIDER(ModSide.SERVER),
     /**
-     * Represents the {@link ModelProvider} responsible for generating all types of model JSONs (including blockstates).
+     * Represents the {@link ModelProvider} responsible for generating all types of model JSONs.
      */
     MODEL_PROVIDER(ModSide.CLIENT),
     /**

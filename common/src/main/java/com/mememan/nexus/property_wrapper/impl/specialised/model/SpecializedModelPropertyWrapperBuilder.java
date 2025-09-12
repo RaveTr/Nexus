@@ -7,9 +7,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class SpecializedModelPropertyWrapperBuilder<T, SELF extends ModelBasedPropertyWrapperBuilder<T, SELF, MBPW>, MBPW extends ModelBasedPropertyWrapper<T, MBPW, SELF>> extends BaseDataGenPropertyWrapperBuilder<T, SELF, MBPW> implements ModelBasedPropertyWrapperBuilder<T, SELF, MBPW> {
-    protected Optional<Function<T, ModelBasedPropertyWrapper.ModelDefinition>> modelDefinitionsMapper = Optional.empty();
+    protected Optional<Function<Supplier<T>, ModelBasedPropertyWrapper.ModelDefinition>> modelDefinitionsMapper = Optional.empty();
 
     public SpecializedModelPropertyWrapperBuilder(@NotNull MBPW ownerWrapper) {
         super(ownerWrapper);
@@ -22,7 +23,7 @@ public class SpecializedModelPropertyWrapperBuilder<T, SELF extends ModelBasedPr
     }
 
     @Override
-    public SELF withModelDefinition(Function<T, ModelBasedPropertyWrapper.ModelDefinition> modelDefinition) {
+    public SELF withModelDefinition(Function<Supplier<T>, ModelBasedPropertyWrapper.ModelDefinition> modelDefinition) {
         this.modelDefinitionsMapper = Optional.ofNullable(modelDefinition);
         return self();
     }

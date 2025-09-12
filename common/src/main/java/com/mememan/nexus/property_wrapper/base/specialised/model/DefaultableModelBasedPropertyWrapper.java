@@ -4,6 +4,7 @@ import com.mememan.nexus.property_wrapper.impl.specialised.model.SpecializedMode
 
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Delegate extension for {@link ModelBasedPropertyWrapper} that adds default getter method implementations (for
@@ -16,7 +17,7 @@ public interface DefaultableModelBasedPropertyWrapper<T, SELF extends ModelBased
     Optional<SpecializedModelPropertyWrapper<T, ?, ?>> getSpecializedModelWrapper();
 
     @Override
-    default Optional<Function<T, ModelDefinition>> getModelDefinition() {
+    default Optional<Function<Supplier<T>, ModelDefinition>> getModelDefinition() {
         return getSpecializedModelWrapper().flatMap(SpecializedModelPropertyWrapper::getModelDefinition);
     }
 }

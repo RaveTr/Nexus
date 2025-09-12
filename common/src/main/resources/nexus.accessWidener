@@ -32,7 +32,7 @@ accessible field net/minecraft/data/models/blockstates/VariantProperties$Rotatio
 # RenderStateShard
 accessible field net/minecraft/client/renderer/RenderStateShard name Ljava/lang/String;
 
-# DoorBlock (Why is the constructor not public by default? WHY ARE THERE SO MANY DAMN ACCESS-PROTECTED BLOCK CONSTRUCTORS!?!?!?)
+# DoorBlock
 accessible method net/minecraft/world/level/block/DoorBlock <init> (Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;Lnet/minecraft/world/level/block/state/properties/BlockSetType;)V
 
 # TrapDoorBlock

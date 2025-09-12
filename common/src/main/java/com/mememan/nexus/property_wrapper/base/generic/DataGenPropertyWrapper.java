@@ -59,6 +59,12 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
      */
     Map<ProviderType, Boolean> getProviderTypeRequisites();
 
+    /**
+     * Optional definition of a registry key for the object being wrapped. This is primarily used during data generation
+     * for some provider types (such as loot table and tag providers) to properly
+     *
+     * @return
+     */
     default Optional<ResourceKey<Registry<? super T>>> getObjectRegistryKey() {
         return isTemplate() ? Optional.empty() : ofRegistryKey(null); //TODO
     }

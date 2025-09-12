@@ -7,7 +7,7 @@ import com.mememan.nexus.datagen.standard.StandardDatapackRegistryProvider;
 import com.mememan.nexus.datagen.standard.StandardLanguageProvider;
 import com.mememan.nexus.datagen.standard.StandardRecipeProvider;
 import com.mememan.nexus.datagen.standard.loot.StandardLootProvider;
-import com.mememan.nexus.datagen.standard.tag.*;
+import com.mememan.nexus.datagen.standard.model.StandardModelProvider;
 import com.mememan.nexus.loader.ModData;
 import com.mememan.nexus.loader.ModSide;
 import com.mememan.nexus.platform.NexusServices;
@@ -96,7 +96,7 @@ public class ForgeDataGenerator implements DataGenerator {
     private static void onGatherDataEvent(final GatherDataEvent event) {
         net.minecraft.data.DataGenerator primaryGen = event.getGenerator();
         PackOutput rootPackOutput = primaryGen.getPackOutput();
-        Path formattedOutputPath = rootPackOutput.getOutputFolder();
+        Path rootOutputPath = rootPackOutput.getOutputFolder();
         CompletableFuture<HolderLookup.Provider> regLookupProvider = event.getLookupProvider();
 
         boolean onClient = event.includeClient();
@@ -114,7 +114,7 @@ public class ForgeDataGenerator implements DataGenerator {
                     String targetModId = targetMod.getModMetadata().modId();
                     ModDatagenConfig targetModConfig = NexusServices.DATA_GENERATOR.getConfigForMod(targetModId);
                     boolean allowDatagenForMod = targetModConfig != null && targetModConfig.enableDatagen();
-                    ModSpecificPackOutput modSpecificPackOutput = new ModSpecificPackOutput(formattedOutputPath, targetMod, allowDatagenForMod);
+                    ModSpecificPackOutput modSpecificPackOutput = new ModSpecificPackOutput(rootOutputPath, targetMod, allowDatagenForMod);
 
                     if (allowDatagenForMod) {
                         ModDataProvider mappedModProvider = modProviderMapper.right().apply(modSpecificPackOutput, regLookupProvider);
@@ -122,7 +122,7 @@ public class ForgeDataGenerator implements DataGenerator {
                         boolean modProviderOnClient = mappedModProviderType.getSide() == ModSide.CLIENT;
                         boolean allowDatagenForProviderType = targetModConfig == null || !targetModConfig.disabledProviderTypes().contains(mappedModProviderType);
 
-                        if (allowDatagenForProviderType) primaryGen.addProvider(modProviderOnClient ? onClient : onServer, mappedModProvider);
+                        if (allowDatagenForProviderType) primaryGen.addProvider(mappedModProviderType.getSide() == ModSide.COMMON || (modProviderOnClient ? onClient : onServer), mappedModProvider);
                     }
                 }
             }
@@ -136,7 +136,7 @@ public class ForgeDataGenerator implements DataGenerator {
                     String targetModId = targetMod.getModMetadata().modId();
                     ModDatagenConfig targetModConfig = NexusServices.DATA_GENERATOR.getConfigForMod(targetModId);
                     boolean allowDatagenForMod = targetModConfig != null && targetModConfig.enableDatagen();
-                    ModSpecificPackOutput modSpecificPackOutput = new ModSpecificPackOutput(formattedOutputPath, targetMod, allowDatagenForMod);
+                    ModSpecificPackOutput modSpecificPackOutput = new ModSpecificPackOutput(rootOutputPath, targetMod, allowDatagenForMod);
 
                     if (allowDatagenForMod) {
                         Pair<Boolean, DataProvider> mappedDataProvider = (Pair<Boolean, DataProvider>) providerMapper.right().apply(modSpecificPackOutput, regLookupProvider);
@@ -151,7 +151,7 @@ public class ForgeDataGenerator implements DataGenerator {
                 String modId = curModData.getModMetadata().modId();
                 ModDatagenConfig modDatagenConfig = NexusServices.DATA_GENERATOR.getConfigForMod(modId);
                 boolean allowDatagenForMod = modDatagenConfig != null && modDatagenConfig.enableDatagen();
-                ModSpecificPackOutput modSpecificPackOutput = new ModSpecificPackOutput(formattedOutputPath, curModData, allowDatagenForMod);
+                ModSpecificPackOutput modSpecificPackOutput = new ModSpecificPackOutput(rootOutputPath, curModData, allowDatagenForMod);
 
                 if (allowDatagenForMod) {
                     Set<ProviderType> providersToValidate = modDatagenConfig == null || modDatagenConfig.providerTypesToFullyValidate() == null ? Set.of() : modDatagenConfig.providerTypesToFullyValidate();
@@ -160,6 +160,7 @@ public class ForgeDataGenerator implements DataGenerator {
 
                     // Client
                     primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.LANGUAGE_PROVIDER) && onClient, new StandardLanguageProvider(modSpecificPackOutput, modId, "en_us", providersToValidate.contains(NexusProviderTypes.LANGUAGE_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.LANGUAGE_PROVIDER, DuplicateDataPolicy.CRASH)));
+                    primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.MODEL_PROVIDER) && onClient, new StandardModelProvider(modSpecificPackOutput, modId, providersToValidate.contains(NexusProviderTypes.MODEL_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.MODEL_PROVIDER, DuplicateDataPolicy.CRASH)));
 
                     // Server
                     primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.DYNAMIC_REGISTRY_PROVIDER) && onServer, new StandardDatapackRegistryProvider(modSpecificPackOutput, regLookupProvider, NexusServices.REGISTRAR.getRegistrySetBuilder(), modId, providersToValidate.contains(NexusProviderTypes.DYNAMIC_REGISTRY_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.DYNAMIC_REGISTRY_PROVIDER, DuplicateDataPolicy.CRASH)));

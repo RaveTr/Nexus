@@ -268,7 +268,7 @@ public class BlockPropertyWrapper {
 
     /**
      * Gets the cached {@link BPWBuilder} instance from the {@link #builder} if it exists. May be {@code null}. Useful
-     * for overriding specific properties after having copied another BPW instance/already set a BPWBuilder.
+     * for overriding specific properties after having copied another BPW instance/already set a BlockPropertyWrapperBuilder.
      *
      * @return The cached {@link BPWBuilder} instance, or {@code null} if the {@link #builder} is {@code null}.
      *
@@ -730,7 +730,7 @@ public class BlockPropertyWrapper {
         }
 
         /**
-         * Whether this BPWBuilder instance should skip the translation process altogether.
+         * Whether this BlockPropertyWrapperBuilder instance should skip the translation process altogether.
          * <br></br>
          * Note that data won't be generated for this instance (NPEs may be thrown too, based on the validation policy
          * for your mod) unless {@link #literalTranslation(boolean)} is marked as {@code true} or {@link #withCustomName(String)}
@@ -787,7 +787,7 @@ public class BlockPropertyWrapper {
          * Assigns a given {@link LootTable.Builder} to this builder via the input function. Can be {@code null}.
          *
          * @param blockLootTableBuilder The mapping {@code Function<Supplier<Block>, LootTable.Builder>}
-         *                              used to build this BPWBuilder's parent block's loot table in datagen.
+         *                              used to build this BlockPropertyWrapperBuilder's parent block's loot table in datagen.
          *
          * @return {@code this} (builder method).
          *
@@ -799,7 +799,7 @@ public class BlockPropertyWrapper {
         }
 
         /**
-         * Tags this BPWBuilder's parent {@link Block} with the provided {@link TagKey<?>}.
+         * Tags this BlockPropertyWrapperBuilder's parent {@link Block} with the provided {@link TagKey<?>}.
          *
          * @param parentBlockTag The {@link TagKey<?>} with which this BPW's parent {@link Block} will be tagged. May
          *                       generally be of types {@link Item} or {@link Block}.
@@ -812,7 +812,7 @@ public class BlockPropertyWrapper {
         }
 
         /**
-         * Tags this BPWBuilder's parent {@link Block} with the provided {@linkplain TagKey<?> Tags}. Appends to the
+         * Tags this BlockPropertyWrapperBuilder's parent {@link Block} with the provided {@linkplain TagKey<?> Tags}. Appends to the
          * existing list.
          *
          * @param parentBlockTags The {@linkplain TagKey<?> TagKeys} with which this BPW's parent {@link Block} will be
@@ -828,7 +828,7 @@ public class BlockPropertyWrapper {
         }
 
         /**
-         * Tags this BPWBuilder's parent {@link Block} with the provided {@linkplain TagKey<?> Tags}. Overwrites the
+         * Tags this BlockPropertyWrapperBuilder's parent {@link Block} with the provided {@linkplain TagKey<?> Tags}. Overwrites the
          * existing list.
          *
          * @param parentBlockTags The {@linkplain TagKey<?> TagKeys} with which this BPW's parent {@link Block} will be
@@ -845,7 +845,7 @@ public class BlockPropertyWrapper {
         }
 
         /**
-         * Tags this BPWBuilder's parent {@link Block} with the provided {@link TagKey<Block>}. Useful for bypassing
+         * Tags this BlockPropertyWrapperBuilder's parent {@link Block} with the provided {@link TagKey<Block>}. Useful for bypassing
          * Java's generic type inference.
          *
          * @param parentBlockTag The {@link TagKey<Block>} with which this BPW's parent {@link Block} will be tagged.
@@ -858,7 +858,7 @@ public class BlockPropertyWrapper {
         }
 
         /**
-         * Tags this BPWBuilder's parent {@link Block} with the provided {@linkplain TagKey<Block> Tags}. Appends to the
+         * Tags this BlockPropertyWrapperBuilder's parent {@link Block} with the provided {@linkplain TagKey<Block> Tags}. Appends to the
          * existing list. Useful for bypassing Java's generic type inference.
          *
          * @param parentBlockTags The {@linkplain TagKey<Block> TagKeys} with which this BPW's parent {@link Block} will
@@ -874,7 +874,7 @@ public class BlockPropertyWrapper {
         }
 
         /**
-         * Tags this BPWBuilder's parent {@link Block} with the provided {@linkplain TagKey<Block> Tags}. Overwrites the
+         * Tags this BlockPropertyWrapperBuilder's parent {@link Block} with the provided {@linkplain TagKey<Block> Tags}. Overwrites the
          * existing list. Useful for bypassing Java's generic type inference.
          *
          * @param parentBlockTags The {@linkplain TagKey<Block> TagKeys} with which this BPW's parent {@link Block} will
@@ -891,7 +891,7 @@ public class BlockPropertyWrapper {
         }
 
         /**
-         * Tags this BPWBuilder's parent {@link Block} with the provided {@link TagKey<Item>}. Useful for bypassing
+         * Tags this BlockPropertyWrapperBuilder's parent {@link Block} with the provided {@link TagKey<Item>}. Useful for bypassing
          * Java's generic type inference.
          *
          * @param parentItemTag The {@link TagKey<Item>} with which this BPW's parent {@link Block} will be tagged.
@@ -904,7 +904,7 @@ public class BlockPropertyWrapper {
         }
 
         /**
-         * Tags this BPWBuilder's parent {@link Block} with the provided {@linkplain TagKey<Item> Tags}. Appends to the
+         * Tags this BlockPropertyWrapperBuilder's parent {@link Block} with the provided {@linkplain TagKey<Item> Tags}. Appends to the
          * existing list. Useful for bypassing Java's generic type inference.
          *
          * @param parentItemTags The {@linkplain TagKey<Item> TagKeys} with which this BPW's parent {@link Block} will
@@ -920,7 +920,7 @@ public class BlockPropertyWrapper {
         }
 
         /**
-         * Tags this BPWBuilder's parent {@link Block} with the provided {@linkplain TagKey<Item> Tags}. Overwrites the
+         * Tags this BlockPropertyWrapperBuilder's parent {@link Block} with the provided {@linkplain TagKey<Item> Tags}. Overwrites the
          * existing list. Useful for bypassing Java's generic type inference.
          *
          * @param parentItemTags The {@linkplain TagKey<Item> TagKeys} with which this BPW's parent {@link Block} will
@@ -937,10 +937,10 @@ public class BlockPropertyWrapper {
         }
 
         /**
-         * Sets the {@link #bmdMappingFunc} of this BPWBuilder. This is used in order to generate models for the parent
+         * Sets the {@link #bmdMappingFunc} of this BlockPropertyWrapperBuilder. This is used in order to generate models for the parent
          * BPW's {@link Block}.
          *
-         * @param bmdMappingFunc The mapping {@link Function} used to build this BPWBuilder's parent block's model in
+         * @param bmdMappingFunc The mapping {@link Function} used to build this BlockPropertyWrapperBuilder's parent block's model in
          *                       datagen.
          *
          * @return {@code this} (builder method).
@@ -955,7 +955,7 @@ public class BlockPropertyWrapper {
          * is handled based on a series of type checks (E.G. Doors, walls, fences, rotatable blocks, etc.). You can use
          * this method if your custom block requires a different blockstate definition that isn't natively handled.
          *
-         * @param bsdMappingFunction The {@link BlockStateDefinition} mapping function used to build this BPWBuilder's
+         * @param bsdMappingFunction The {@link BlockStateDefinition} mapping function used to build this BlockPropertyWrapperBuilder's
          *                           parent block's blockstate in datagen.
          *
          * @return {@code this} (builder method).
@@ -1161,7 +1161,7 @@ public class BlockPropertyWrapper {
         }
 
         /**
-         * Determines whether this BPWBuilder instance should be entirely excluded from Nexus' native datagen.
+         * Determines whether this BlockPropertyWrapperBuilder instance should be entirely excluded from Nexus' native datagen.
          * <br></br>
          * Fundamentally, all this does is flag this instance as not needing a data entry to be mapped to it. You may
          * choose to generate data for it yourself if needed, since Nexus won't handle datagen for this particular object.
@@ -1184,18 +1184,18 @@ public class BlockPropertyWrapper {
         }
 
         /**
-         * Determines whether this BPWBuilder instance is required to generate necessary block-related data based on the
+         * Determines whether this BlockPropertyWrapperBuilder instance is required to generate necessary block-related data based on the
          * {@link ProviderType} passed in.
          * <br></br>
-         * By default, unmapped providers will not require an entry for this BPWBuilder to be generated unless
+         * By default, unmapped providers will not require an entry for this BlockPropertyWrapperBuilder to be generated unless
          * {@link ModDataProvider#validateAllEntries()} is set to {@code true}.
          * <br></br>
          * Mapping the related provider passed in here to {@code requiresDatagenEntry}, set to {@code true}, will flag
-         * this BPWBuilder instance for requiring related data regardless of what
+         * this BlockPropertyWrapperBuilder instance for requiring related data regardless of what
          * {@link ModDataProvider#validateAllEntries()} is set to.
          *
          * @param targetProviderType The {@link ProviderType} to modify the data entry requirement for.
-         * @param requiresDatagenEntry Whether this BPWBuilder should require data related to the specified
+         * @param requiresDatagenEntry Whether this BlockPropertyWrapperBuilder should require data related to the specified
          *                             {@code targetProviderType} to be present.
          *
          * @return {@code this} (builder method).
@@ -1216,7 +1216,7 @@ public class BlockPropertyWrapper {
          *
          * @param targetProviderTypes The {@link List} of {@linkplain ProviderType ProviderTypes} to modify the data
          *                            entry requirements for.
-         * @param requiresDatagenEntry Whether this BPWBuilder should require data related to each of the
+         * @param requiresDatagenEntry Whether this BlockPropertyWrapperBuilder should require data related to each of the
          *                             specified {@code targetProviderTypes} to be present.
          *
          * @return {@code this} (builder method).
@@ -1238,7 +1238,7 @@ public class BlockPropertyWrapper {
          *
          * @param targetProviderTypes The {@link List} of {@linkplain ProviderType ProviderTypes} to modify the data
          *                            entry requirements for.
-         * @param requiresDatagenEntry Whether this BPWBuilder should require data related to each of the
+         * @param requiresDatagenEntry Whether this BlockPropertyWrapperBuilder should require data related to each of the
          *                             specified {@code targetProviderTypes} to be present.
          *
          * @return {@code this} (builder method).

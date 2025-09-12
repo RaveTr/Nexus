@@ -1,4 +1,4 @@
-package com.mememan.nexus.mixins.fabric_api;
+package com.mememan.nexus.mixins.fabric_api.resource_loader;
 
 import com.google.common.collect.ImmutableMap;
 import com.mememan.nexus.NexusConstants;

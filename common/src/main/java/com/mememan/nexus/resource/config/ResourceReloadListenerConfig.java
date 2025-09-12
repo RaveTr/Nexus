@@ -79,6 +79,31 @@ public record ResourceReloadListenerConfig<PRL extends PreparableReloadListener>
         return new ResourceReloadListenerConfig<>(listenerPackType, false, Optional.empty(), Optional.empty(), Optional.empty());
     }
 
+    /**
+     * Factory method for creating a datapack {@link ResourceReloadListenerConfig} that is syncable to the client.
+     *
+     * @param dataMapGetter A {@link Function} to specify the data map that should be synced to the client (if the associated
+     *                      listener can be synced).
+     *                      <br></br>
+     *                      The {@link Map} itself is usually comprised of {@linkplain ResourceLocation ResourceLocations}
+     *                      (for each file within the listener's target directory) mapped to data deserialized from said
+     *                      files. If this is not present, then syncing  will be skipped for the associated listener.
+     *                      <br></br>
+     *                      Nullity is most likely going to cause crashes from the packet itself since {@code null} cannot
+     *                      be de/serialized (obviously), so ensure that this at least outputs an empty {@link Map} by default.
+     * @param dataCodecMapper The {@link Codec} used to encode/decode data from the scanned files for the associated listener,
+     *                        only really used during syncing. If {@code dataMapGetter}'s presence check (and its preceding
+     *                        checks) passes and this is not present, an {@link IllegalArgumentException} will be thrown
+     *                        from within the {@link DatapackEntriesSyncPacket} itself.
+     * @param resourceSyncOperation A side-safe operation to run on the client once data is received. This should usually
+     *                              be a method that updates the client-side data of the associated listener. If this is not
+     *                              present, then nothing will be done on the target side.
+     *
+     * @return A datapack {@link ResourceReloadListenerConfig} that is syncable to the client.
+     *
+     * @param <PRL> The type of {@linkplain PreparableReloadListener PreparableReloadListener} that this configurator is
+     *              associated with.
+     */
     public static <PRL extends PreparableReloadListener> ResourceReloadListenerConfig<PRL> createSyncable(Function<PRL, Map<ResourceLocation, ?>> dataMapGetter, Function<PRL, Codec<?>> dataCodecMapper, BiConsumer<PRL, Map<ResourceLocation, ?>> resourceSyncOperation) {
         return new ResourceReloadListenerConfig<>(PackType.SERVER_DATA, true, Optional.of(dataMapGetter), Optional.of(dataCodecMapper), Optional.of(resourceSyncOperation));
     }

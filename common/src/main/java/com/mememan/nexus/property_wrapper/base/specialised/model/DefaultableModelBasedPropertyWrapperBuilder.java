@@ -4,6 +4,7 @@ import com.mememan.nexus.property_wrapper.impl.specialised.model.SpecializedMode
 
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Delegate extension for {@link ModelBasedPropertyWrapperBuilder} that adds default builder method implementations
@@ -16,7 +17,7 @@ public interface DefaultableModelBasedPropertyWrapperBuilder<T, SELF extends Mod
     Optional<SpecializedModelPropertyWrapperBuilder<T, SELF, MBPW>> getSpecializedModelBuilder();
 
     @Override
-    default SELF withModelDefinition(Function<T, ModelBasedPropertyWrapper.ModelDefinition> modelDefinition) {
+    default SELF withModelDefinition(Function<Supplier<T>, ModelBasedPropertyWrapper.ModelDefinition> modelDefinition) {
         getSpecializedModelBuilder().ifPresent(builder -> builder.withModelDefinition(modelDefinition));
         return self();
     }

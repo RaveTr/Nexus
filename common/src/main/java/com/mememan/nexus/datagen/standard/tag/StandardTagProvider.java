@@ -5,6 +5,8 @@ import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.datagen.DuplicateDataPolicy;
 import com.mememan.nexus.datagen.ProviderType;
 import com.mememan.nexus.datagen.standard.ModDataProvider;
+import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
+import com.mememan.nexus.property_wrapper.base.specialised.tag.TagBasedPropertyWrapper;
 import com.mememan.nexus.tag.TagWrapper;
 import com.mememan.nexus.util.StringUtil;
 import com.mojang.serialization.DataResult;
@@ -102,9 +104,31 @@ public abstract class StandardTagProvider<T> extends IntrinsicHolderTagsProvider
         });
     }
 
+    public @NotNull <O> CompletableFuture<?> dummy(CachedOutput output) {
+        List<? extends TagBasedPropertyWrapper<O, ?, ?>> propertyWrappers = PropertyWrapper.PropertyWrappersContainer.getInferrableDataGennableWrappersOfType(TagBasedPropertyWrapper.class, modId);
+
+        return createContentsProvider().thenApply((contentProvider) -> {
+            this.contentsDone.complete(null);
+            return contentProvider;
+        }).thenCombineAsync(parentProvider, (parentContentProvider, currentTag) -> {
+            record CombinedData<T>(HolderLookup.Provider currentContents, TagLookup<T> parentTagLookup) {}
+
+            return new CombinedData<T>(parentContentProvider, currentTag);
+        }).thenCompose((combinedTagLookupData) -> {
+            HolderLookup.RegistryLookup<T> regBasedContentLookup = combinedTagLookupData.currentContents.lookupOrThrow(registryKey);
+            Predicate<ResourceLocation> elementPresenceWithinRegistryValidator = (tagLoc) -> regBasedContentLookup.get(ResourceKey.create(registryKey, tagLoc)).isPresent();
+            Predicate<ResourceLocation> tagLocalOrParentPresenceValidator = (tagLoc) -> builders.containsKey(tagLoc) || combinedTagLookupData.parentTagLookup.contains(TagKey.create(registryKey, tagLoc));
+
+            return CompletableFuture.allOf(propertyWrappers.stream().map(pw -> {
+
+                return DataProvider.saveStable(null, null, null);
+            }).toArray(CompletableFuture[]::new));
+        });
+    }
+
     @Override
     public @NotNull String getName() {
-        return String.format("%s Tags [%s]", StringUtil.toTitleCase(registryKey.location().getPath()), getModId());
+        return String.format("Tags [%s]", getModId());
     }
 
     @Override

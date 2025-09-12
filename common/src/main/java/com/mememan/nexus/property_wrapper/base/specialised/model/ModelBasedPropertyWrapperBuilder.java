@@ -5,6 +5,7 @@ import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Extension of {@link DataGenPropertyWrapperBuilder} with builder methods tailored towards handling models for the
@@ -24,5 +25,5 @@ public interface ModelBasedPropertyWrapperBuilder<T, SELF extends PropertyWrappe
      *
      * @return {@link #self()} (builder method)
      */
-    SELF withModelDefinition(Function<T, ModelBasedPropertyWrapper.ModelDefinition> modelDefinition);
+    SELF withModelDefinition(Function<Supplier<T>, ModelBasedPropertyWrapper.ModelDefinition> modelDefinition);
 }
