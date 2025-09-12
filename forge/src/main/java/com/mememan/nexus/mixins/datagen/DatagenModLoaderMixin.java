@@ -21,6 +21,8 @@ import java.util.Objects;
  * In essence, it's running Nexus' data gatherer on its own alongside whatever mod(s) depend(s) on it without flipping
  * {@link GatherDataEvent.DataGeneratorConfig#isFlat()}, though it handles that edge case correctly (why would a
  * developer even want to run several data gatherers from external dependencies within their workspace?).
+ *
+ * @see NexusServices#DATA_GENERATOR
  */
 @Mixin(DatagenModLoader.class)
 public abstract class DatagenModLoaderMixin {
