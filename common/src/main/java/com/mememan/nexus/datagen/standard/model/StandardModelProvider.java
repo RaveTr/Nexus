@@ -190,8 +190,7 @@ public class StandardModelProvider extends ModelProvider implements ModDataProvi
                         modelTransforms.forEach((transformName, transform) -> {
                             JsonObject transformJsonObj = new JsonObject();
 
-                            if (transform.hasLeftRotation()) transformJsonObj.add(transform.hasRightRotation() ? "left_rotation" : "rotation", JsonUtil.createVec3fArray(transform.leftRotation()));
-                            if (transform.hasRightRotation()) transformJsonObj.add("right_rotation", JsonUtil.createVec3fArray(transform.rightRotation()));
+                            if (transform.hasRotation()) transformJsonObj.add("rotation", JsonUtil.createVec3fArray(transform.rotation()));
                             if (transform.hasTranslation()) transformJsonObj.add("translation", JsonUtil.createVec3fArray(transform.translation()));
                             if (transform.hasScale()) transformJsonObj.add("scale", JsonUtil.createVec3fArray(transform.scale()));
 
