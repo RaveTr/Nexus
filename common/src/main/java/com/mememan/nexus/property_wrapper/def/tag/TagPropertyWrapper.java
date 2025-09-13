@@ -1,0 +1,28 @@
+package com.mememan.nexus.property_wrapper.def.tag;
+
+import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
+import com.mememan.nexus.property_wrapper.impl.specialised.tag.SpecializedTagPropertyWrapper;
+import net.minecraft.tags.TagKey;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Supplier;
+
+public class TagPropertyWrapper<T, TK extends TagKey<T>> extends SpecializedTagPropertyWrapper<TK, TagPropertyWrapper<T, TK>, TagPropertyWrapperBuilder<T, TK>> {
+
+    public TagPropertyWrapper(Supplier<TK> parentObject, boolean isTemplate, String modId) {
+        super(parentObject, isTemplate, modId);
+    }
+
+    public TagPropertyWrapper(@NotNull Supplier<TK> parentObject, @NotNull String modId) {
+        super(parentObject, modId);
+    }
+
+    public TagPropertyWrapper() {
+        super();
+    }
+
+    @Override
+    public @NotNull PropertyWrapperBuilder<TK, TagPropertyWrapperBuilder<T, TK>, TagPropertyWrapper<T, TK>> constructBuilder() {
+        return new TagPropertyWrapperBuilder<>(this);
+    }
+}

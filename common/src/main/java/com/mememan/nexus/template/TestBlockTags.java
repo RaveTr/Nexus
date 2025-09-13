@@ -2,13 +2,11 @@ package com.mememan.nexus.template;
 
 import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.asm.annotations.RegistrarEntry;
-import com.mememan.nexus.tag.TagWrapper;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import com.mememan.nexus.property_wrapper.def.tag.TagPropertyWrapper;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 
 import java.util.function.Supplier;
 
@@ -16,13 +14,12 @@ import java.util.function.Supplier;
 public class TestBlockTags {
 
     public static final Supplier<TagKey<Block>> TEST = createWrappedBlockTag("test/sometagtest")
-            .withEntries(ObjectArrayList.of(() -> Blocks.ANDESITE))
-            .withTagEntry(() -> BlockTags.ACACIA_LOGS)
-            .withParentTagEntry(() -> BlockTags.ANVIL)
-            .getParentTag();
+            .builder()
+            .withAdditionalTag(() -> BlockTags.ACACIA_LOGS)
+            .buildAndGet();
 
-    private static TagWrapper<Block, TagKey<Block>> createWrappedBlockTag(String name) {
-        return TagWrapper.create(createBlockTag(name));
+    private static TagPropertyWrapper<Block, TagKey<Block>> createWrappedBlockTag(String name) {
+        return new TagPropertyWrapper<>(createBlockTag(name), NexusConstants.MOD_ID);
     }
 
     private static Supplier<TagKey<Block>> createBlockTag(String name) {

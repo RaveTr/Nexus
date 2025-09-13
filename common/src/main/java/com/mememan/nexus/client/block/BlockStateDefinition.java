@@ -1,4 +1,4 @@
-package com.mememan.nexus.block.data;
+package com.mememan.nexus.client.block;
 
 import net.minecraft.data.models.blockstates.BlockStateGenerator;
 import net.minecraft.data.models.blockstates.MultiPartGenerator;

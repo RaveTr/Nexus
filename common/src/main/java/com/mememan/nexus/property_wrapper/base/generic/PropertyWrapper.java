@@ -84,7 +84,7 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
 
     /**
      * Used to create a new builder instance for this {@link PropertyWrapper} instance. Uses a factory {@link Function}
-     * to create the builder.
+     * to create the builder. May be overridden to provide a custom builder instance otherwise.
      *
      * @return A new builder instance for this {@link PropertyWrapper} instance.
      *

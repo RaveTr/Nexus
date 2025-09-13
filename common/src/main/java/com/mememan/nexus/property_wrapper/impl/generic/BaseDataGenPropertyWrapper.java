@@ -43,7 +43,9 @@ public class BaseDataGenPropertyWrapper<T, SELF extends DataGenPropertyWrapper<T
 
     @Override
     public @NotNull String getObjectDescriptionId() {
-        return parentObject.get() instanceof ItemLike ilParent ? ilParent.asItem().getDescriptionId() : parentObject.get().toString();
+        return parentObject.get() instanceof ItemLike ilParent
+                ? ilParent.asItem().getDescriptionId()
+                : parentObject.get().toString();
     }
 
     @Override

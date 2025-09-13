@@ -23,6 +23,7 @@ public interface TagBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF
      *
      * @return A {@link List} of {@link TagKey} entries for the object being wrapped, or an empty {@link List} if no
      * tags are present.
+     *
      * @see TagBasedPropertyWrapperBuilder#withTag(java.util.function.Supplier)
      * @see TagBasedPropertyWrapperBuilder#withTags(List)
      * @see TagBasedPropertyWrapperBuilder#withTags(java.util.function.Supplier[])
@@ -34,11 +35,13 @@ public interface TagBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF
      * ambiguous.
      * <br></br>
      * Useful for cases like adding tags to blocks, where they may require item tags to be added to them for proper
-     * functionality too.
+     * functionality, too.
      *
      * @return A {@link List} of additional {@link TagKey} entries for the object being wrapped, or an empty {@link List}
      * if no tags are present.
+     *
      * @implNote Some PW types don't have a need for implementing this. Thus, they may always return an empty {@link List}.
+     *
      * @see TagBasedPropertyWrapperBuilder#withAdditionalTag(java.util.function.Supplier)
      * @see TagBasedPropertyWrapperBuilder#withAdditionalTags(List)
      * @see TagBasedPropertyWrapperBuilder#withAdditionalTags(java.util.function.Supplier[])

@@ -158,6 +158,7 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
      * at all.
      *
      * @see #isTemplate()
+     * @see RegistryLookupContainer#computeForObject(Object)
      */
     default Optional<ResourceKey<Registry<? super T>>> getObjectRegistryKey() {
         return isTemplate() ? Optional.empty() : RegistryLookupContainer.computeForObject(getParentObject().get());
@@ -270,7 +271,7 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
          *
          * @param registryKey The wildcard {@link ResourceKey} to typecast.
          *
-         * @return The {@link Optional} containing the typecasted {@link ResourceKey}. May be empty based on the
+         * @return The {@link Optional} containing the type-casted {@link ResourceKey}. May be empty based on the
          * provided {@code registryKey}.
          *
          * @param <T> The type of the parent object of the registry resource key.

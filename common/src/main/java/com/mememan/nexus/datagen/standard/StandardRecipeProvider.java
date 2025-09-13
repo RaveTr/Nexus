@@ -32,9 +32,9 @@ import java.util.function.Supplier;
  */
 public class StandardRecipeProvider extends RecipeProvider implements ModDataProvider {
     protected final String modId;
-    protected final List<? extends RecipeBasedPropertyWrapper<?, ?, ?>> mappedRecipePWs;
     protected final boolean validateAllEntries;
     protected final DuplicateDataPolicy dupeStrat;
+    protected final List<? extends RecipeBasedPropertyWrapper<?, ?, ?>> mappedRecipePWs;
 
     public StandardRecipeProvider(PackOutput targetPackOutput, String modId, boolean validateAllEntries, DuplicateDataPolicy dupeStrat) {
         super(targetPackOutput);

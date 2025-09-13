@@ -1,11 +1,12 @@
 package com.mememan.nexus.datagen;
 
+import com.mememan.nexus.datagen.standard.StandardDatapackRegistryProvider;
 import com.mememan.nexus.datagen.standard.StandardLanguageProvider;
+import com.mememan.nexus.datagen.standard.StandardRecipeProvider;
+import com.mememan.nexus.datagen.standard.loot.StandardLootProvider;
+import com.mememan.nexus.datagen.standard.model.StandardModelProvider;
+import com.mememan.nexus.datagen.standard.tag.StandardTagsProvider;
 import com.mememan.nexus.loader.ModSide;
-import net.minecraft.data.loot.LootTableProvider;
-import net.minecraft.data.models.ModelProvider;
-import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.data.registries.RegistriesDatapackGenerator;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -16,26 +17,33 @@ import org.jetbrains.annotations.NotNull;
  */
 public enum NexusProviderTypes implements ProviderType {
     /**
-     * Represents the {@link RegistriesDatapackGenerator} responsible for generating all datapack registry files.
+     * Represents the {@linkplain StandardDatapackRegistryProvider providers} responsible for generating all datapack
+     * registry files.
      */
     DYNAMIC_REGISTRY_PROVIDER(ModSide.SERVER),
     /**
-     * Represents the {@link StandardLanguageProvider} types responsible for generating localization files for objects.
+     * Represents the {@linkplain StandardLanguageProvider providers} types responsible for generating localization files
+     * for objects.
      */
     LANGUAGE_PROVIDER(ModSide.CLIENT),
     /**
-     * Represents the {@link LootTableProvider} responsible for running all loot sub-providers and generating loot table
-     * data. Configurations applied to this type take precedence over sub-providers.
+     * Represents the {@linkplain StandardLootProvider providers} responsible for running all loot sub-providers and
+     * generating loot table data. Configurations applied to this type take precedence over sub-providers.
      */
     LOOT_TABLE_PROVIDER(ModSide.SERVER),
     /**
-     * Represents the {@link ModelProvider} responsible for generating all types of model JSONs.
+     * Represents the {@linkplain StandardModelProvider providers} responsible for generating all types of model JSONs.
      */
     MODEL_PROVIDER(ModSide.CLIENT),
     /**
-     * Represents the general {@link RecipeProvider} responsible for generating both block and item recipes.
+     * Represents the general {@linkplain StandardRecipeProvider providers} responsible for generating both block and
+     * item (as well as any other object type) recipes.
      */
     RECIPE_PROVIDER(ModSide.SERVER),
+    /**
+     * Represents the general {@linkplain StandardTagsProvider providers} responsible for generating all types of tags.
+     */
+    TAG_PROVIDER(ModSide.SERVER),
     ;
 
     private final ModSide targetGenSide;
