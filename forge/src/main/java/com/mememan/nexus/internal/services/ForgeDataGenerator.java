@@ -154,9 +154,9 @@ public class ForgeDataGenerator implements DataGenerator {
                 ModSpecificPackOutput modSpecificPackOutput = new ModSpecificPackOutput(rootOutputPath, curModData, allowDatagenForMod);
 
                 if (allowDatagenForMod) {
-                    Set<ProviderType> providersToValidate = modDatagenConfig == null || modDatagenConfig.providerTypesToFullyValidate() == null ? Set.of() : modDatagenConfig.providerTypesToFullyValidate();
-                    Set<ProviderType> disabledProviders = modDatagenConfig == null || modDatagenConfig.disabledProviderTypes() == null ? Set.of() : modDatagenConfig.disabledProviderTypes();
-                    Map<ProviderType, DuplicateDataPolicy> mappedDupeStrats = modDatagenConfig == null || modDatagenConfig.mappedDupeStrats() == null ? Map.of() : modDatagenConfig.mappedDupeStrats();
+                    Set<ProviderType> providersToValidate = modDatagenConfig.providerTypesToFullyValidate() == null ? Set.of() : modDatagenConfig.providerTypesToFullyValidate();
+                    Set<ProviderType> disabledProviders = modDatagenConfig.disabledProviderTypes() == null ? Set.of() : modDatagenConfig.disabledProviderTypes();
+                    Map<ProviderType, DuplicateDataPolicy> mappedDupeStrats = modDatagenConfig.mappedDupeStrats() == null ? Map.of() : modDatagenConfig.mappedDupeStrats();
 
                     // Client
                     primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.LANGUAGE_PROVIDER) && onClient, new StandardLanguageProvider(modSpecificPackOutput, modId, "en_us", providersToValidate.contains(NexusProviderTypes.LANGUAGE_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.LANGUAGE_PROVIDER, DuplicateDataPolicy.CRASH)));
