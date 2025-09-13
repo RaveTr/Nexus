@@ -53,6 +53,13 @@ public record ModelElement(Vector3f from, Vector3f to, boolean shade, ElementRot
     public record ElementFaceData(FaceUVData uv, String formattedTextureKey, Direction cullFace, int tintIndex) {
         public static final int DEFAULT_TINT_INDEX = -1;
 
+        /**
+         * Checks whether this face has a tint index besides the default one.
+         *
+         * @return {@code true} if this face has a tint index besides the default one, {@code false} otherwise.
+         *
+         * @see ModelElement.ElementFaceData#DEFAULT_TINT_INDEX
+         */
         public boolean hasTintIndex() {
             return tintIndex != DEFAULT_TINT_INDEX;
         }
