@@ -1,0 +1,14 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "overrides": [
+    {
+      "model": "nexus:zamn_texture_path/zamn",
+      "predicate": {
+        "nexus:blud": 0.614
+      }
+    }
+  ],
+  "textures": {
+    "all": "nexus:test_able_block"
+  }
+}

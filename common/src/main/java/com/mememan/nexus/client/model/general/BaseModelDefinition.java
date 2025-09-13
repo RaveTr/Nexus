@@ -38,9 +38,9 @@ public class BaseModelDefinition<SELF extends BaseModelDefinition<SELF>> impleme
     @Nullable
     protected String modelCustomName;
     protected boolean hasAO = true;
-    protected Map<ItemDisplayContext, ModelTransform> modelTransforms = new Object2ObjectOpenHashMap<>();
-    protected List<ModelElement> modelElements = new ObjectArrayList<>();
-    protected List<ModelBasedPropertyWrapper.ModelDefinition> ordinalModelDefinitions = new ObjectArrayList<>();
+    protected final Map<ItemDisplayContext, ModelTransform> modelTransforms = new Object2ObjectOpenHashMap<>();
+    protected final List<ModelElement> modelElements = new ObjectArrayList<>();
+    protected final List<ModelBasedPropertyWrapper.ModelDefinition> ordinalModelDefinitions = new ObjectArrayList<>();
 
     public BaseModelDefinition(@NotNull ModelTemplate parentModel, @NotNull String customBackingDirectory) {
         this.parentModel = parentModel;

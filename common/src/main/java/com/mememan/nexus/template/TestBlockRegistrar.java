@@ -2,7 +2,7 @@ package com.mememan.nexus.template;
 
 import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.asm.annotations.RegistrarEntry;
-import com.mememan.nexus.client.model.block.BlockModelDefinition;
+import com.mememan.nexus.client.model.item.ItemModelDefinition;
 import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapper;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -25,6 +25,7 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 
+import java.util.Map;
 import java.util.function.Supplier;
 
 @RegistrarEntry
@@ -48,7 +49,9 @@ public class TestBlockRegistrar {
             .builder()
             .copyFrom(BLAH)
             .literalTranslation()
-            .withModelDefinition(suh -> new BlockModelDefinition(ModelTemplates.CUBE_ALL).withTextureMapping(TextureMapping.cube(NexusConstants.prefix("test_able_block"))))
+            .withModelDefinition(suh -> new ItemModelDefinition(ModelTemplates.CUBE_ALL)
+                    .withTextureMapping(TextureMapping.cube(NexusConstants.prefix("test_able_block")))
+                    .withItemModelTextureOverride(Map.of(NexusConstants.prefix("blud"), 0.614F), NexusConstants.prefix("zamn_texture_path/zamn")))
             .buildAndGet();
 
     private static <B extends Block> Supplier<B> registerBlock(ResourceLocation name, Supplier<B> block) {
