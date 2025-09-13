@@ -1,19 +1,29 @@
 package com.mememan.nexus.property_wrapper.base.specialised.model;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.mememan.nexus.client.model.general.ModelElement;
 import com.mememan.nexus.client.model.general.ModelGuiLight;
 import com.mememan.nexus.client.model.general.ModelTransform;
+import com.mememan.nexus.datagen.standard.model.StandardModelProvider;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
+import com.mememan.nexus.util.JsonUtil;
+import com.mememan.nexus.util.ResourceLocationUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.Direction;
 import net.minecraft.data.models.model.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -384,6 +394,117 @@ public interface ModelBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SE
             }
 
             return flattenedDefinitions;
+        }
+
+        /**
+         * Serializes all data within this model definition into a {@link JsonObject} based on the provided base model
+         * JSON. May be overridden to attach or override properties as needed.
+         *
+         * @param finalizedModelLoc The full {@link ResourceLocation} in which this definition will be saved.
+         * @param baseModelJson The base model JSON, typically created by
+         *                      {@link ModelTemplate#createBaseTemplate(ResourceLocation, Map)}.
+         *
+         * @return The full serialized model JSON.
+         *
+         * @see ModelTemplate#create(ResourceLocation, TextureMapping, BiConsumer)
+         * @see StandardModelProvider#constructModelJson(String, ModelDefinition)
+         */
+        default JsonObject constructJson(ResourceLocation finalizedModelLoc, Supplier<JsonElement> baseModelJson) {
+            JsonObject baseSerializedModelJson = baseModelJson.get().getAsJsonObject(); // Should always be a JsonObject based on ModelTemplate#createBaseTemplate
+
+            boolean hasAO = hasAmbientOcclusion();
+
+            if (!hasAO) baseSerializedModelJson.addProperty("ambientocclusion", hasAO);
+
+            getGuiLight().ifPresent(guiLight -> baseSerializedModelJson.addProperty("gui_light", guiLight.getSerializedName()));
+            getRenderType().ifPresent(renderType -> baseSerializedModelJson.addProperty("render_type", renderType.toString()));
+
+            Map<ItemDisplayContext, ModelTransform> modelTransforms = getModelTransforms();
+            List<ModelElement> modelElements = getModelElements();
+
+            if (!modelTransforms.isEmpty()) {
+                JsonObject modelTransformsMap = new JsonObject();
+
+                modelTransforms.forEach((transformName, transform) -> {
+                    JsonObject transformJsonObj = new JsonObject();
+
+                    if (transform.hasRotation()) transformJsonObj.add("rotation", JsonUtil.createVec3fArray(transform.rotation()));
+                    if (transform.hasTranslation()) transformJsonObj.add("translation", JsonUtil.createVec3fArray(transform.translation()));
+                    if (transform.hasScale()) transformJsonObj.add("scale", JsonUtil.createVec3fArray(transform.scale()));
+
+                    modelTransformsMap.add(transformName.getSerializedName(), transformJsonObj);
+                });
+
+                baseSerializedModelJson.add("display", modelTransformsMap);
+            }
+
+            if (!modelElements.isEmpty()) {
+                JsonArray modelElementsArray = new JsonArray();
+
+                modelElements.forEach(curElement -> {
+                    JsonObject elementObj = new JsonObject();
+
+                    Vector3f from = curElement.from();
+                    Vector3f to = curElement.to();
+                    boolean hasShade = curElement.shade();
+
+                    if (from != null) elementObj.add("from", JsonUtil.createVec3fArray(from));
+                    if (to != null) elementObj.add("to", JsonUtil.createVec3fArray(to));
+                    if (!hasShade) elementObj.addProperty("shade", hasShade);
+
+                    ModelElement.ElementRotationData rotationData = curElement.rotation();
+                    Map<Direction, ModelElement.ElementFaceData> elementFaces = curElement.faces();
+
+                    if (rotationData != null) {
+                        JsonObject rotationDataObj = new JsonObject();
+
+                        Vector3f origin = rotationData.origin();
+                        Direction.Axis axis = rotationData.axis();
+                        float angle = rotationData.angle();
+                        boolean shouldRescale = rotationData.rescale();
+
+                        if (origin != null) rotationDataObj.add("origin", JsonUtil.createVec3fArray(origin));
+                        if (axis != null) rotationDataObj.addProperty("axis", axis.getSerializedName());
+                        if (rotationData.hasValidAngle()) rotationDataObj.addProperty("angle", angle);
+                        if (shouldRescale) rotationDataObj.addProperty("rescale", shouldRescale);
+
+                        elementObj.add("rotation", rotationDataObj);
+                    }
+
+                    if (elementFaces != null && !elementFaces.isEmpty()) {
+                        JsonObject facesObj = new JsonObject();
+
+                        elementFaces.forEach((faceDir, faceData) -> {
+                            JsonObject faceDataObj = new JsonObject();
+
+                            ModelElement.FaceUVData uvData = faceData.uv();
+                            String targetTextureOrKey = faceData.formattedTextureKey();
+                            Direction cullFaceDir = faceData.cullFace();
+
+                            if (uvData != null) {
+                                Vector2f uvFrom = uvData.from();
+                                Vector2f uvTo = uvData.to();
+
+                                if (uvFrom != null && uvTo != null) faceDataObj.add("uv", JsonUtil.flatConcatVec2fArrays(uvFrom, uvTo));
+                            }
+
+                            if (targetTextureOrKey != null) faceDataObj.addProperty("texture", ResourceLocationUtil.formatModelUVTexture(targetTextureOrKey));
+                            if (cullFaceDir != null) faceDataObj.addProperty("cullface", cullFaceDir.getSerializedName());
+                            if (faceData.hasTintIndex()) faceDataObj.addProperty("tintindex", faceData.tintIndex());
+
+                            facesObj.add(faceDir.getSerializedName(), faceDataObj);
+                        });
+
+                        elementObj.add("faces", facesObj);
+                    }
+
+                    modelElementsArray.add(elementObj);
+                });
+
+                baseSerializedModelJson.add("elements", modelElementsArray);
+            }
+
+            return baseSerializedModelJson;
         }
     }
 }

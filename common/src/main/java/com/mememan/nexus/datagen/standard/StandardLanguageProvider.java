@@ -33,7 +33,8 @@ import java.util.function.Supplier;
  * localization of all different object types whose property wrappers implement {@link LanguageBasedPropertyWrapper}.
  *
  * @apiNote As it currently stands, this provider only supports {@code "en_us"} localization. Support for other locales
- * will be added sometime in the future.
+ * will be added sometime in the future. In the meantime, you can register your own extensions of this provider to add
+ * support for other locales.
  */
 public class StandardLanguageProvider implements ModDataProvider {
     protected final Object2ObjectRBTreeMap<String, String> localizationEntries = new Object2ObjectRBTreeMap<>();

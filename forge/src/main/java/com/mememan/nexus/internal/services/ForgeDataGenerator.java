@@ -166,7 +166,7 @@ public class ForgeDataGenerator implements DataGenerator {
                     primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.DYNAMIC_REGISTRY_PROVIDER) && onServer, new StandardDatapackRegistryProvider(modSpecificPackOutput, regLookupProvider, NexusServices.REGISTRAR.getRegistrySetBuilder(), modId, providersToValidate.contains(NexusProviderTypes.DYNAMIC_REGISTRY_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.DYNAMIC_REGISTRY_PROVIDER, DuplicateDataPolicy.CRASH)));
 
                     primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.RECIPE_PROVIDER) && onServer, new StandardRecipeProvider(modSpecificPackOutput, modId, providersToValidate.contains(NexusProviderTypes.RECIPE_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.RECIPE_PROVIDER, DuplicateDataPolicy.CRASH)));
-                    primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.LOOT_TABLE_PROVIDER) && onServer, new StandardLootProvider(modSpecificPackOutput, modId, providersToValidate.contains(NexusProviderTypes.LOOT_TABLE_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.LOOT_TABLE_PROVIDER, null), mappedDupeStrats, providersToValidate, disabledProviders));
+                    primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.LOOT_TABLE_PROVIDER) && onServer, new StandardLootProvider(modSpecificPackOutput, modId, providersToValidate.contains(NexusProviderTypes.LOOT_TABLE_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.LOOT_TABLE_PROVIDER, null)));
                 }
             });
 

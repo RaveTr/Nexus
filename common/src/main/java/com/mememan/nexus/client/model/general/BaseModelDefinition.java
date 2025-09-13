@@ -1,5 +1,7 @@
 package com.mememan.nexus.client.model.general;
 
+import com.mememan.nexus.client.model.block.BlockModelDefinition;
+import com.mememan.nexus.client.model.item.ItemModelDefinition;
 import com.mememan.nexus.property_wrapper.base.specialised.model.ModelBasedPropertyWrapper;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -16,8 +18,13 @@ import java.util.*;
  * Core implementation of {@link ModelBasedPropertyWrapper.ModelDefinition}.
  * <br></br>
  * Specialised implementations should be used (primarily for backing directories) when it comes to blocks and items, etc.
+ *
+ * @param <SELF> Self type, primarily used for builder method chaining.
+ *
+ * @see BlockModelDefinition
+ * @see ItemModelDefinition
  */
-public class BaseModelDefinition implements ModelBasedPropertyWrapper.ModelDefinition {
+public class BaseModelDefinition<SELF extends BaseModelDefinition<SELF>> implements ModelBasedPropertyWrapper.ModelDefinition {
     @NotNull
     protected final ModelTemplate parentModel;
     @NotNull
@@ -41,93 +48,96 @@ public class BaseModelDefinition implements ModelBasedPropertyWrapper.ModelDefin
     }
 
     @Override
-    public BaseModelDefinition withOrdinalModelDefinition(ModelBasedPropertyWrapper.ModelDefinition modelDefinition) {
+    public SELF withOrdinalModelDefinition(ModelBasedPropertyWrapper.ModelDefinition modelDefinition) {
         this.ordinalModelDefinitions.add(modelDefinition);
-        return this;
+        return self();
     }
 
     @Override
-    public BaseModelDefinition withOrdinalModelDefinitions(Collection<ModelBasedPropertyWrapper.ModelDefinition> modelDefinitions) {
+    public SELF withOrdinalModelDefinitions(Collection<ModelBasedPropertyWrapper.ModelDefinition> modelDefinitions) {
         this.ordinalModelDefinitions.addAll(modelDefinitions);
-        return this;
+        return self();
     }
 
     @Override
-    public BaseModelDefinition setOrdinalModelDefinitions(Collection<ModelBasedPropertyWrapper.ModelDefinition> modelDefinitions) {
-        this.ordinalModelDefinitions = new ObjectArrayList<>(modelDefinitions);
-        return this;
+    public SELF setOrdinalModelDefinitions(Collection<ModelBasedPropertyWrapper.ModelDefinition> modelDefinitions) {
+        this.ordinalModelDefinitions.clear();
+        this.ordinalModelDefinitions.addAll(modelDefinitions);
+        return self();
     }
 
     @Override
-    public BaseModelDefinition withCustomName(String customName) {
+    public SELF withCustomName(String customName) {
         this.modelCustomName = customName;
-        return this;
+        return self();
     }
 
     @Override
-    public BaseModelDefinition appendToBackingDirectory(String appendedDir) {
+    public SELF appendToBackingDirectory(String appendedDir) {
         this.modelCustomBackingDirectory += appendedDir;
-        return this;
+        return self();
     }
 
     @Override
-    public BaseModelDefinition withTextureMapping(TextureMapping texMapping) {
+    public SELF withTextureMapping(TextureMapping texMapping) {
         this.modelTextureMapping = texMapping;
-        return this;
+        return self();
     }
 
     @Override
-    public BaseModelDefinition withGuiLight(ModelGuiLight guiLight) {
+    public SELF withGuiLight(ModelGuiLight guiLight) {
         this.modelGuiLight = guiLight;
-        return this;
+        return self();
     }
 
     @Override
-    public BaseModelDefinition withAmbientOcclusion(boolean ambientOcclusion) {
+    public SELF withAmbientOcclusion(boolean ambientOcclusion) {
         this.hasAO = ambientOcclusion;
-        return this;
+        return self();
     }
 
     @Override
-    public BaseModelDefinition withTransform(ItemDisplayContext perspectiveContext, ModelTransform applicableTransform) {
+    public SELF withTransform(ItemDisplayContext perspectiveContext, ModelTransform applicableTransform) {
         this.modelTransforms.put(perspectiveContext, applicableTransform);
-        return this;
+        return self();
     }
 
     @Override
-    public BaseModelDefinition withTransforms(Map<ItemDisplayContext, ModelTransform> transforms) {
+    public SELF withTransforms(Map<ItemDisplayContext, ModelTransform> transforms) {
         this.modelTransforms.putAll(transforms);
-        return this;
+        return self();
     }
 
     @Override
-    public BaseModelDefinition setTransforms(Map<ItemDisplayContext, ModelTransform> transforms) {
-        this.modelTransforms = new Object2ObjectOpenHashMap<>(transforms);
-        return this;
+    public SELF setTransforms(Map<ItemDisplayContext, ModelTransform> transforms) {
+        this.modelTransforms.clear();
+        this.modelTransforms.putAll(transforms);
+        return self();
     }
 
     @Override
-    public BaseModelDefinition withElement(ModelElement element) {
+    public SELF withElement(ModelElement element) {
         this.modelElements.add(element);
-        return this;
+        return self();
     }
 
     @Override
-    public BaseModelDefinition withElements(Collection<ModelElement> elements) {
+    public SELF withElements(Collection<ModelElement> elements) {
         this.modelElements.addAll(elements);
-        return this;
+        return self();
     }
 
     @Override
-    public BaseModelDefinition withElements(ModelElement... elements) {
+    public SELF withElements(ModelElement... elements) {
         this.modelElements.addAll(new ObjectArrayList<>(elements));
-        return this;
+        return self();
     }
 
     @Override
-    public BaseModelDefinition setElements(Collection<ModelElement> elements) {
-        this.modelElements = new ObjectArrayList<>(elements);
-        return this;
+    public SELF setElements(Collection<ModelElement> elements) {
+        this.modelElements.clear();
+        this.modelElements.addAll(elements);
+        return self();
     }
 
     @Override
@@ -178,5 +188,14 @@ public class BaseModelDefinition implements ModelBasedPropertyWrapper.ModelDefin
     @Override
     public List<ModelBasedPropertyWrapper.ModelDefinition> getOrdinalModelDefinitions() {
         return ordinalModelDefinitions;
+    }
+
+    /**
+     * Generic helper method used to bypass builder method return types.
+     *
+     * @return {@code (SELF) this}.
+     */
+    public SELF self() {
+        return (SELF) this;
     }
 }

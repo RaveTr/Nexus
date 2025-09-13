@@ -24,7 +24,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -41,8 +40,9 @@ public class StandardLootProvider extends LootTableProvider implements ModDataPr
     protected final boolean validateAllEntries;
     protected final DuplicateDataPolicy dupeStrat;
 
-    public StandardLootProvider(PackOutput targetOutput, String modId, boolean validateAllEntries, @Nullable DuplicateDataPolicy dupeStrat, Map<ProviderType, DuplicateDataPolicy> providerDupeStrats, Set<ProviderType> providersToValidate, Set<ProviderType> disabledProviders) {
+    public StandardLootProvider(PackOutput targetOutput, String modId, boolean validateAllEntries, @Nullable DuplicateDataPolicy dupeStrat) {
         super(targetOutput, Set.of(), Util.make(new ObjectArrayList<>(), curList -> {
+
         }));
 
         this.modId = modId;

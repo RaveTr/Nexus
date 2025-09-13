@@ -1,11 +1,15 @@
 package com.mememan.nexus.template;
 
+import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.asm.annotations.RegistrarEntry;
+import com.mememan.nexus.client.model.block.BlockModelDefinition;
 import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapper;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.models.model.ModelTemplates;
+import net.minecraft.data.models.model.TextureMapping;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
@@ -44,6 +48,7 @@ public class TestBlockRegistrar {
             .builder()
             .copyFrom(BLAH)
             .literalTranslation()
+            .withModelDefinition(suh -> new BlockModelDefinition(ModelTemplates.CUBE_ALL).withTextureMapping(TextureMapping.cube(NexusConstants.prefix("test_able_block"))))
             .buildAndGet();
 
     private static <B extends Block> Supplier<B> registerBlock(ResourceLocation name, Supplier<B> block) {
