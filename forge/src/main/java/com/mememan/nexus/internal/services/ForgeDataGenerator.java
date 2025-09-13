@@ -120,7 +120,7 @@ public class ForgeDataGenerator implements DataGenerator {
                         ModDataProvider mappedModProvider = modProviderMapper.right().apply(modSpecificPackOutput, regLookupProvider);
                         ProviderType mappedModProviderType = mappedModProvider.getProviderType();
                         boolean modProviderOnClient = mappedModProviderType.getSide() == ModSide.CLIENT;
-                        boolean allowDatagenForProviderType = targetModConfig == null || !targetModConfig.disabledProviderTypes().contains(mappedModProviderType);
+                        boolean allowDatagenForProviderType = !targetModConfig.disabledProviderTypes().contains(mappedModProviderType);
 
                         if (allowDatagenForProviderType) primaryGen.addProvider(mappedModProviderType.getSide() == ModSide.COMMON || (modProviderOnClient ? onClient : onServer), mappedModProvider);
                     }

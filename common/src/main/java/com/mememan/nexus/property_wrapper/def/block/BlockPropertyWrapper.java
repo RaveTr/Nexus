@@ -1,6 +1,5 @@
 package com.mememan.nexus.property_wrapper.def.block;
 
-import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.DefaultableDataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
 import com.mememan.nexus.property_wrapper.impl.generic.BaseDataGenPropertyWrapper;
@@ -9,9 +8,6 @@ import com.mememan.nexus.property_wrapper.impl.specialised.loot.SpecializedLootP
 import com.mememan.nexus.property_wrapper.impl.specialised.model.SpecializedModelPropertyWrapper;
 import com.mememan.nexus.property_wrapper.impl.specialised.recipe.SpecializedRecipePropertyWrapper;
 import com.mememan.nexus.property_wrapper.impl.specialised.tag.SpecializedTagPropertyWrapper;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 
@@ -84,11 +80,6 @@ public class BlockPropertyWrapper<B extends Block> extends BaseDataGenPropertyWr
         this.compositeModelWrapper = new SpecializedModelPropertyWrapper<>();
         this.compositeRecipeWrapper = new SpecializedRecipePropertyWrapper<>();
         this.compositeTagWrapper = new SpecializedTagPropertyWrapper<>();
-    }
-
-    @Override
-    public Optional<ResourceKey<Registry<? super B>>> getObjectRegistryKey() {
-        return DataGenPropertyWrapper.ofRegistryKey(Registries.BLOCK);
     }
 
     @Override

@@ -110,7 +110,7 @@ public class FabricDataGenerator implements DataGenerator, DataGeneratorEntrypoi
                             ModDataProvider mappedModProvider = modProviderMapper.right().apply(modSpecificPackOutput, regLookupProvider);
                             ProviderType mappedModProviderType = mappedModProvider.getProviderType();
                             boolean modProviderOnClient = mappedModProviderType.getSide() == ModSide.CLIENT;
-                            boolean allowDatagenForProviderType = (targetModConfig == null || !targetModConfig.disabledProviderTypes().contains(mappedModProviderType)) && (mappedModProviderType.getSide() == ModSide.COMMON || (modProviderOnClient ? onClient : onServer));
+                            boolean allowDatagenForProviderType = !targetModConfig.disabledProviderTypes().contains(mappedModProviderType) && (mappedModProviderType.getSide() == ModSide.COMMON || (modProviderOnClient ? onClient : onServer));
 
                             addProvider(modSpecificPack, allowDatagenForProviderType, mappedModProvider);
                         }
