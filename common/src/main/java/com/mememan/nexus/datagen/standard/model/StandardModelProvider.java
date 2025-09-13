@@ -50,8 +50,9 @@ public class StandardModelProvider extends ModelProvider implements ModDataProvi
     /**
      * The primary method responsible for generating all model serialization tasks and populating the provided
      * {@code serializedModelDefinitions}.
-     * <br></br> Actual processing is delegated to {@link #populateModelDefinitions(CachedOutput, List)}, which handles
-     * both duplicates (based on the specified {@link #dupeStrat}) and non-nullity enforcement (based on
+     * <br></br>
+     * Actual processing is delegated to {@link #populateModelDefinitions(CachedOutput, List)}, which handles both
+     * duplicates (based on the specified {@link #dupeStrat}) and non-nullity enforcement (based on
      * {@link #validateAllEntries}/provider requisites).
      *
      * @param cachedOutput The {@link CachedOutput} instance to use for saving generated data to disk.
