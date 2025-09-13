@@ -301,6 +301,15 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
          * registry {@link ResourceKey} is found, an {@link Optional} containing {@link #UNMAPPED_REGISTRY} is returned.
          *
          * @param <T> The parent object type.
+         *
+         * @apiNote This method has time complexity between O(1) - O(k + m + n), where it's O(1) if the registry key is
+         * already cached, and O(k + m + n) if it has to traverse all the way down to try and find any corresponding
+         * registry resource keys - where k is the number of entries in {@link #NATIVE_REGISTRY_KEY_LOOKUP}, m is the
+         * number of entries (post-filter) in {@link BuiltInRegistries#REGISTRY}, and n is the number of flattened
+         * elements per registry (m). Oftentimes better than O(k + m + n) as long as the registry resource key being
+         * looked up actually exists, and only O(k + m + n) on first lookup otherwise.
+         *
+         * @see #ofRegistryKey(ResourceKey)
          */
         public static <T> Optional<ResourceKey<Registry<? super T>>> computeForObject(T targetObj) {
             return ofRegistryKey(NATIVE_REGISTRY_KEY_LOOKUP.computeIfAbsent(targetObj.getClass(), objClazz -> NATIVE_REGISTRY_KEY_LOOKUP.entrySet().stream()
