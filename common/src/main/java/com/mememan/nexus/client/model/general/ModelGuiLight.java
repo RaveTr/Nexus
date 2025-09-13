@@ -1,4 +1,4 @@
-package com.mememan.nexus.client.model;
+package com.mememan.nexus.client.model.general;
 
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;

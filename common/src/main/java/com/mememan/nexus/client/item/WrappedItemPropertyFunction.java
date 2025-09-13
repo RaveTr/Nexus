@@ -26,8 +26,8 @@ public interface WrappedItemPropertyFunction {
      *
      * @return An unclamped {@code float} value representing the validity of the model predicate.
      *
-     * @see net.minecraft.client.gui.Gui#renderHotbar(float, GuiGraphics) GUI#renderHotbar for more info on how seed is
-     * computed.
+     * @see net.minecraft.client.gui.Gui#renderHotbar(float, GuiGraphics) GUI#renderHotbar for more info on how
+     * {@code seed} is computed.
      */
     float getValueForStack(ItemStack targetStack, @Nullable Level curLevel, @Nullable LivingEntity livingOwner, int seed);
 }

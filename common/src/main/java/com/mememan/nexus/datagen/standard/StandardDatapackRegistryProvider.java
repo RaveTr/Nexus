@@ -125,7 +125,7 @@ public class StandardDatapackRegistryProvider extends RegistriesDatapackGenerato
                     })
                     .map((holderRef) -> {
                         NexusConstants.LOGGER.debug("Serializing registry entry: {} (from mod of ID: {})", holderRef.key(), getModId());
-                        return dumpValue(datapackOutputPathProvider.json(holderRef.key().location()), cachedOutput, encoderOps, regData.elementCodec(), holderRef.value()); // Basically serializes the current element using its provided registry file codec, I ain't copying a static method just for a whole javadoc on that
+                        return dumpValue(datapackOutputPathProvider.json(holderRef.key().location()), cachedOutput, encoderOps, regData.elementCodec(), holderRef.value()); // Basically serializes the current element using its provided registry file codec. I ain't copying a static method just for a whole javadoc on that
                     })
                     .toArray(CompletableFuture[]::new));
         });

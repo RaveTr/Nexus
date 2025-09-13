@@ -25,4 +25,17 @@ public final class ResourceLocationUtil {
     public static String formatPath(ResourceLocation targetLoc) {
         return targetLoc.getNamespace().equals("minecraft") ? targetLoc.getPath() : targetLoc.getNamespace() + "/" + targetLoc.getPath();
     }
+
+    /**
+     * Formats the given input based on whether it's a model texture key (e.g. {@code "#slab"}) or a literal texture
+     * location (in which case, it's wrapped in a {@link ResourceLocation}).
+     *
+     * @param texInput The input to verify and format.
+     *
+     * @return The input if it's a model texture key, or the input wrapped in a {@link ResourceLocation} if it's a
+     * literal texture location.
+     */
+    public static String formatModelUVTexture(String texInput) {
+        return texInput.startsWith("#") ? texInput : new ResourceLocation(texInput).toString();
+    }
 }

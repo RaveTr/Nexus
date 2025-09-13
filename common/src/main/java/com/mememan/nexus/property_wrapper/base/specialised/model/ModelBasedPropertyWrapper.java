@@ -1,7 +1,8 @@
 package com.mememan.nexus.property_wrapper.base.specialised.model;
 
-import com.mememan.nexus.client.model.ModelGuiLight;
-import com.mememan.nexus.client.model.ModelTransform;
+import com.mememan.nexus.client.model.general.ModelElement;
+import com.mememan.nexus.client.model.general.ModelGuiLight;
+import com.mememan.nexus.client.model.general.ModelTransform;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
@@ -50,8 +51,9 @@ public interface ModelBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SE
          *
          * @return {@code this} (builder method)
          *
-         * @see #withOrdinalModelDefinitions(List)
+         * @see #withOrdinalModelDefinitions(Collection)
          * @see #withOrdinalModelDefinitions(ModelDefinition...)
+         * @see #setOrdinalModelDefinitions(Collection)
          */
         ModelDefinition withOrdinalModelDefinition(ModelDefinition modelDefinition);
 
@@ -64,11 +66,25 @@ public interface ModelBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SE
          *
          * @see #withOrdinalModelDefinition(ModelDefinition)
          * @see #withOrdinalModelDefinitions(ModelDefinition...)
+         * @see #setOrdinalModelDefinitions(Collection)
          */
-        ModelDefinition withOrdinalModelDefinitions(List<ModelDefinition> modelDefinitions);
+        ModelDefinition withOrdinalModelDefinitions(Collection<ModelDefinition> modelDefinitions);
 
         /**
-         * Overloaded variant of {@link #withOrdinalModelDefinitions(List)}. Defines an array of model definitions to be
+         * Sets the list of model definitions to be used after this one as children/contained definitions.
+         *
+         * @param modelDefinitions The model definitions to set.
+         *
+         * @return {@code this} (builder method)
+         *
+         * @see #withOrdinalModelDefinitions(Collection)
+         * @see #withOrdinalModelDefinitions(ModelDefinition...)
+         * @see #withOrdinalModelDefinition(ModelDefinition)
+         */
+        ModelDefinition setOrdinalModelDefinitions(Collection<ModelDefinition> modelDefinitions);
+
+        /**
+         * Overloaded variant of {@link #withOrdinalModelDefinitions(Collection)}. Defines an array of model definitions to be
          * used after this one as children/contained definitions.
          *
          * @param modelDefinition The model definitions to add and apply after this one.
@@ -76,7 +92,8 @@ public interface ModelBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SE
          * @return {@code this} (builder method)
          *
          * @see #withOrdinalModelDefinition(ModelDefinition)
-         * @see #withOrdinalModelDefinitions(List)
+         * @see #withOrdinalModelDefinitions(Collection)
+         * @see #setOrdinalModelDefinitions(Collection)
          */
         default ModelDefinition withOrdinalModelDefinitions(ModelDefinition... modelDefinition) {
             return withOrdinalModelDefinitions(ObjectArrayList.of(modelDefinition));
@@ -104,6 +121,8 @@ public interface ModelBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SE
          *                    (e.g {@code "some/additional/set/of/paths"}).
          *
          * @return {@code this} (builder method)
+         *
+         * @see #getBackingDirectory()
          */
         ModelDefinition appendToBackingDirectory(String appendedDir);
 
@@ -188,6 +207,58 @@ public interface ModelBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SE
         ModelDefinition setTransforms(Map<ItemDisplayContext, ModelTransform> transforms);
 
         /**
+         * Defines a {@link ModelElement} to add to this model definition.
+         *
+         * @param element The {@link ModelElement} to add.
+         *
+         * @return {@code this} (builder method)
+         *
+         * @see #withElements(Collection)
+         * @see #withElements(ModelElement...)
+         * @see #setElements(Collection)
+         */
+        ModelDefinition withElement(ModelElement element);
+
+        /**
+         * Defines a {@link Iterable} of {@link ModelElement ModelElements} to add to this model definition.
+         *
+         * @param elements The {@link Iterable} of {@link ModelElement ModelElements} to add.
+         *
+         * @return {@code this} (builder method)
+         *
+         * @see #withElement(ModelElement)
+         * @see #withElements(ModelElement...)
+         * @see #setElements(Collection)
+         */
+        ModelDefinition withElements(Collection<ModelElement> elements);
+
+        /**
+         * Defines an array of {@link ModelElement ModelElements} to add to this model definition.
+         *
+         * @param elements The array of {@link ModelElement ModelElements} to add to this model definition.
+         *
+         * @return {@code this} (builder method)
+         *
+         * @see #withElement(ModelElement)
+         * @see #withElements(Collection)
+         * @see #setElements(Collection)
+         */
+        ModelDefinition withElements(ModelElement... elements);
+
+        /**
+         * Sets the element data stored in this model definition.
+         *
+         * @param elements The {@link Iterable} of {@linkplain ModelElement ModelElements} to set the current ones to.
+         *
+         * @return {@code this} (builder method)
+         *
+         * @see #withElement(ModelElement)
+         * @see #withElements(Collection)
+         * @see #withElements(ModelElement...)
+         */
+        ModelDefinition setElements(Collection<ModelElement> elements);
+
+        /**
          * Gets the parent model to use as a template for this definition's model.
          *
          * @return The parent model.
@@ -201,8 +272,7 @@ public interface ModelBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SE
          *
          * @return The texture mapping to use for this definition's model, influenced by the parent model.
          */
-        @NotNull
-        TextureMapping getTextureMapping();
+        Optional<TextureMapping> getTextureMapping();
 
         /**
          * Gets the custom model name to use for this definition's model file name.
@@ -272,6 +342,13 @@ public interface ModelBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SE
          * block items).
          */
         Map<ItemDisplayContext, ModelTransform> getModelTransforms();
+
+        /**
+         * Gets the element data stored in this model definition.
+         *
+         * @return A {@link List} of all element data stored in this model definition.
+         */
+        List<ModelElement> getModelElements();
 
         /**
          * A {@link List} of all contained model definitions within this definition. Does not traverse down contained

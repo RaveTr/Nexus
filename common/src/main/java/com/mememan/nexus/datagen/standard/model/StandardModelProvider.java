@@ -1,9 +1,11 @@
 package com.mememan.nexus.datagen.standard.model;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mememan.nexus.NexusConstants;
-import com.mememan.nexus.client.model.ModelTransform;
+import com.mememan.nexus.client.model.general.ModelElement;
+import com.mememan.nexus.client.model.general.ModelTransform;
 import com.mememan.nexus.datagen.DuplicateDataPolicy;
 import com.mememan.nexus.datagen.NexusProviderTypes;
 import com.mememan.nexus.datagen.ProviderType;
@@ -11,8 +13,11 @@ import com.mememan.nexus.datagen.standard.ModDataProvider;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.specialised.model.ModelBasedPropertyWrapper;
 import com.mememan.nexus.util.JsonUtil;
+import com.mememan.nexus.util.ModelUtil;
+import com.mememan.nexus.util.ResourceLocationUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import net.minecraft.core.Direction;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
@@ -21,6 +26,8 @@ import net.minecraft.data.models.model.ModelTemplate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -29,6 +36,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
+/**
+ * Standard loader-agnostic mod-specific model provider in Nexus API. Instanced based on the provided mod ID. Handles
+ * generation of all model types based on {@link ModelBasedPropertyWrapper.ModelDefinition} spec.
+ */
 public class StandardModelProvider extends ModelProvider implements ModDataProvider {
     protected final String modId;
     protected final boolean validateAllEntries;
@@ -76,7 +87,7 @@ public class StandardModelProvider extends ModelProvider implements ModDataProvi
      *                                   populated with model serialization tasks (typically
      *                                   {@link DataProvider#saveStable(CachedOutput, JsonElement, Path)} calls).
      *
-     * @param <T> The object type for each model-based property wrapper.
+     * @param <T> The parent object type for each model-based property wrapper.
      */
     protected <T> void populateModelDefinitions(CachedOutput cachedOutput, List<CompletableFuture<?>> serializedModelDefinitions) {
         mappedModelPWs.stream()
@@ -153,11 +164,15 @@ public class StandardModelProvider extends ModelProvider implements ModDataProvi
     protected @NotNull ResourceLocation formatModelResourceLocation(String descId, ModelBasedPropertyWrapper.ModelDefinition convertedDefinition) {
         String weaklyFormattedDescId = descId.contains(".") ? descId.substring(descId.lastIndexOf(".") + 1) : descId; //TODO Actually replace this with a stronger backing check/formatting method (this will suffice for now, though)
 
-        return new ResourceLocation(modId, convertedDefinition.getBackingDirectory().orElse("").concat(convertedDefinition.getCustomModelName().orElse(weaklyFormattedDescId)));
+        return new ResourceLocation(modId, convertedDefinition.getBackingDirectory()
+                .map(curDir -> curDir.endsWith("/") ? curDir : curDir.concat("/"))
+                .orElse("")
+                .concat(convertedDefinition.getCustomModelName()
+                        .orElse(weaklyFormattedDescId)));
     }
 
     /**
-     * Leniently serializes the {@code modelDefinition} passed in into a {@link JsonObject} ready for serialization.
+     * Leniently serializes the {@code modelDefinition} passed in into a {@link JsonObject} ready for disk saving.
      * Child definitions should recursively call this method separately.
      *
      * @param modelDefinition The {@link ModelBasedPropertyWrapper.ModelDefinition} to serialize.
@@ -171,7 +186,7 @@ public class StandardModelProvider extends ModelProvider implements ModDataProvi
 
         parentModel.create(
                 formatModelResourceLocation(defaultedModelDefName, modelDefinition),
-                modelDefinition.getTextureMapping(),
+                modelDefinition.getTextureMapping().orElse(ModelUtil.EMPTY_TEXTURE_MAPPING),
                 (finalizedModelLoc, modelJsonFileSup) -> {
                     JsonObject baseSerializedModelJson = modelJsonFileSup.get().getAsJsonObject(); // Should always be a JsonObject based on ModelTemplate#createBaseTemplate
 
@@ -183,6 +198,7 @@ public class StandardModelProvider extends ModelProvider implements ModDataProvi
                     modelDefinition.getRenderType().ifPresent(renderType -> baseSerializedModelJson.addProperty("render_type", renderType.toString()));
 
                     Map<ItemDisplayContext, ModelTransform> modelTransforms = modelDefinition.getModelTransforms();
+                    List<ModelElement> modelElements = modelDefinition.getModelElements();
 
                     if (!modelTransforms.isEmpty()) {
                         JsonObject modelTransformsMap = new JsonObject();
@@ -198,6 +214,70 @@ public class StandardModelProvider extends ModelProvider implements ModDataProvi
                         });
 
                         baseSerializedModelJson.add("display", modelTransformsMap);
+                    }
+
+                    if (!modelElements.isEmpty()) {
+                        JsonArray modelElementsArray = new JsonArray();
+
+                        modelElements.forEach(curElement -> {
+                            JsonObject elementObj = new JsonObject();
+
+                            Vector3f from = curElement.from();
+                            Vector3f to = curElement.to();
+                            boolean hasShade = curElement.shade();
+
+                            if (from != null) elementObj.add("from", JsonUtil.createVec3fArray(from));
+                            if (to != null) elementObj.add("to", JsonUtil.createVec3fArray(to));
+                            if (!hasShade) elementObj.addProperty("shade", hasShade);
+
+                            ModelElement.ElementRotationData rotationData = curElement.rotation();
+                            Map<Direction, ModelElement.ElementFaceData> elementFaces = curElement.faces();
+
+                            if (rotationData != null) {
+                                JsonObject rotationDataObj = new JsonObject();
+
+                                Vector3f origin = rotationData.origin();
+                                Direction.Axis axis = rotationData.axis();
+                                float angle = rotationData.angle();
+                                boolean shouldRescale = rotationData.rescale();
+
+                                if (origin != null) rotationDataObj.add("origin", JsonUtil.createVec3fArray(origin));
+                                if (axis != null) rotationDataObj.addProperty("axis", axis.getSerializedName());
+                                if (rotationData.hasValidAngle()) rotationDataObj.addProperty("angle", angle);
+                                if (shouldRescale) rotationDataObj.addProperty("rescale", shouldRescale);
+
+                                elementObj.add("rotation", rotationDataObj);
+                            }
+
+                            if (elementFaces != null && !elementFaces.isEmpty()) {
+                                JsonObject facesObj = new JsonObject();
+
+                                elementFaces.forEach((faceDir, faceData) -> {
+                                    JsonObject faceDataObj = new JsonObject();
+
+                                    ModelElement.FaceUVData uvData = faceData.uv();
+                                    String targetTextureOrKey = faceData.formattedTextureKey();
+                                    Direction cullFaceDir = faceData.cullFace();
+
+                                    if (uvData != null) {
+                                        Vector2f uvFrom = uvData.from();
+                                        Vector2f uvTo = uvData.to();
+
+                                        if (uvFrom != null && uvTo != null) faceDataObj.add("uv", JsonUtil.flatConcatVec2fArrays(uvFrom, uvTo));
+                                    }
+
+                                    if (targetTextureOrKey != null) faceDataObj.addProperty("texture", ResourceLocationUtil.formatModelUVTexture(targetTextureOrKey));
+                                    if (cullFaceDir != null) faceDataObj.addProperty("cullface", cullFaceDir.getSerializedName());
+                                    if (faceData.hasTintIndex()) faceDataObj.addProperty("tintindex", faceData.tintIndex());
+
+                                    facesObj.add(faceDir.getSerializedName(), faceDataObj);
+                                });
+
+                                elementObj.add("faces", facesObj);
+                            }
+                        });
+
+                        baseSerializedModelJson.add("elements", modelElementsArray);
                     }
 
                     modelJson.set(baseSerializedModelJson);
