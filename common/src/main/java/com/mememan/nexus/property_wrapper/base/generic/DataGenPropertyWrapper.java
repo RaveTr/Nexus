@@ -111,95 +111,6 @@ import java.util.Optional;
  * @see DataGenPropertyWrapperBuilder
  */
 public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDER>, BUILDER extends PropertyWrapperBuilder<T, BUILDER, SELF>> extends PropertyWrapper<T, SELF, BUILDER> {
-    ResourceKey<? extends Registry<?>> UNMAPPED_REGISTRY = ResourceKey.createRegistryKey(NexusConstants.prefix("unknown"));
-    Map<Class<?>, ResourceKey<? extends Registry<?>>> NATIVE_REGISTRY_KEY_LOOKUP = Util.make(new Object2ObjectOpenHashMap<>(), regKeyMap -> {
-        regKeyMap.put(Activity.class, Registries.ACTIVITY);
-        regKeyMap.put(Attribute.class, Registries.ATTRIBUTE);
-        regKeyMap.put(BannerPattern.class, Registries.BANNER_PATTERN);
-        regKeyMap.put(BiomeSource.class, Registries.BIOME_SOURCE);
-        regKeyMap.put(Block.class, Registries.BLOCK);
-        regKeyMap.put(BlockEntityType.class, Registries.BLOCK_ENTITY_TYPE);
-        regKeyMap.put(BlockPredicateType.class, Registries.BLOCK_PREDICATE_TYPE);
-        regKeyMap.put(BlockStateProviderType.class, Registries.BLOCK_STATE_PROVIDER_TYPE);
-        regKeyMap.put(WorldCarver.class, Registries.CARVER);
-        regKeyMap.put(CatVariant.class, Registries.CAT_VARIANT);
-        regKeyMap.put(ChunkGenerator.class, Registries.CHUNK_GENERATOR);
-        regKeyMap.put(ChunkStatus.class, Registries.CHUNK_STATUS);
-        regKeyMap.put(ArgumentTypeInfo.class, Registries.COMMAND_ARGUMENT_TYPE);
-        regKeyMap.put(CreativeModeTab.class, Registries.CREATIVE_MODE_TAB);
-        regKeyMap.put(ResourceLocation.class, Registries.CUSTOM_STAT);
-        regKeyMap.put(DamageType.class, Registries.DAMAGE_TYPE);
-        regKeyMap.put(DensityFunction.class, Registries.DENSITY_FUNCTION_TYPE);
-        regKeyMap.put(Enchantment.class, Registries.ENCHANTMENT);
-        regKeyMap.put(EntityType.class, Registries.ENTITY_TYPE);
-        regKeyMap.put(Feature.class, Registries.FEATURE);
-        regKeyMap.put(FeatureSizeType.class, Registries.FEATURE_SIZE_TYPE);
-        regKeyMap.put(FloatProviderType.class, Registries.FLOAT_PROVIDER_TYPE);
-        regKeyMap.put(Fluid.class, Registries.FLUID);
-        regKeyMap.put(FoliagePlacerType.class, Registries.FOLIAGE_PLACER_TYPE);
-        regKeyMap.put(FrogVariant.class, Registries.FROG_VARIANT);
-        regKeyMap.put(GameEvent.class, Registries.GAME_EVENT);
-        regKeyMap.put(HeightProviderType.class, Registries.HEIGHT_PROVIDER_TYPE);
-        regKeyMap.put(Instrument.class, Registries.INSTRUMENT);
-        regKeyMap.put(IntProviderType.class, Registries.INT_PROVIDER_TYPE);
-        regKeyMap.put(Item.class, Registries.ITEM);
-        regKeyMap.put(LootItemConditionType.class, Registries.LOOT_CONDITION_TYPE);
-        regKeyMap.put(LootItemFunctionType.class, Registries.LOOT_FUNCTION_TYPE);
-        regKeyMap.put(LootNbtProviderType.class, Registries.LOOT_NBT_PROVIDER_TYPE);
-        regKeyMap.put(LootNumberProviderType.class, Registries.LOOT_NUMBER_PROVIDER_TYPE);
-        regKeyMap.put(LootPoolEntryType.class, Registries.LOOT_POOL_ENTRY_TYPE);
-        regKeyMap.put(LootScoreProviderType.class, Registries.LOOT_SCORE_PROVIDER_TYPE);
-        regKeyMap.put(SurfaceRules.ConditionSource.class, Registries.MATERIAL_CONDITION);
-        regKeyMap.put(SurfaceRules.RuleSource.class, Registries.MATERIAL_RULE);
-        regKeyMap.put(MemoryModuleType.class, Registries.MEMORY_MODULE_TYPE);
-        regKeyMap.put(MenuType.class, Registries.MENU);
-        regKeyMap.put(MobEffect.class, Registries.MOB_EFFECT);
-        regKeyMap.put(PaintingVariant.class, Registries.PAINTING_VARIANT);
-        regKeyMap.put(ParticleType.class, Registries.PARTICLE_TYPE);
-        regKeyMap.put(PlacementModifierType.class, Registries.PLACEMENT_MODIFIER_TYPE);
-        regKeyMap.put(PoiType.class, Registries.POINT_OF_INTEREST_TYPE);
-        regKeyMap.put(PositionSourceType.class, Registries.POSITION_SOURCE_TYPE);
-        regKeyMap.put(PosRuleTestType.class, Registries.POS_RULE_TEST);
-        regKeyMap.put(Potion.class, Registries.POTION);
-        regKeyMap.put(RecipeSerializer.class, Registries.RECIPE_SERIALIZER);
-        regKeyMap.put(RecipeType.class, Registries.RECIPE_TYPE);
-        regKeyMap.put(RootPlacerType.class, Registries.ROOT_PLACER_TYPE);
-        regKeyMap.put(RuleTestType.class, Registries.RULE_TEST);
-        regKeyMap.put(RuleBlockEntityModifierType.class, Registries.RULE_BLOCK_ENTITY_MODIFIER);
-        regKeyMap.put(Schedule.class, Registries.SCHEDULE);
-        regKeyMap.put(SensorType.class, Registries.SENSOR_TYPE);
-        regKeyMap.put(SoundEvent.class, Registries.SOUND_EVENT);
-        regKeyMap.put(StatType.class, Registries.STAT_TYPE);
-        regKeyMap.put(StructurePieceType.class, Registries.STRUCTURE_PIECE);
-        regKeyMap.put(StructurePlacementType.class, Registries.STRUCTURE_PLACEMENT);
-        regKeyMap.put(StructurePoolElementType.class, Registries.STRUCTURE_POOL_ELEMENT);
-        regKeyMap.put(StructureProcessorType.class, Registries.STRUCTURE_PROCESSOR);
-        regKeyMap.put(StructureType.class, Registries.STRUCTURE_TYPE);
-        regKeyMap.put(TreeDecoratorType.class, Registries.TREE_DECORATOR_TYPE);
-        regKeyMap.put(TrunkPlacerType.class, Registries.TRUNK_PLACER_TYPE);
-        regKeyMap.put(VillagerProfession.class, Registries.VILLAGER_PROFESSION);
-        regKeyMap.put(VillagerType.class, Registries.VILLAGER_TYPE);
-        regKeyMap.put(String.class, Registries.DECORATED_POT_PATTERNS);
-        regKeyMap.put(Biome.class, Registries.BIOME);
-        regKeyMap.put(ChatType.class, Registries.CHAT_TYPE);
-        regKeyMap.put(ConfiguredWorldCarver.class, Registries.CONFIGURED_CARVER);
-        regKeyMap.put(ConfiguredFeature.class, Registries.CONFIGURED_FEATURE);
-        regKeyMap.put(DimensionType.class, Registries.DIMENSION_TYPE);
-        regKeyMap.put(FlatLevelGeneratorPreset.class, Registries.FLAT_LEVEL_GENERATOR_PRESET);
-        regKeyMap.put(NoiseGeneratorSettings.class, Registries.NOISE_SETTINGS);
-        regKeyMap.put(NormalNoise.NoiseParameters.class, Registries.NOISE);
-        regKeyMap.put(PlacedFeature.class, Registries.PLACED_FEATURE);
-        regKeyMap.put(Structure.class, Registries.STRUCTURE);
-        regKeyMap.put(StructureProcessorList.class, Registries.PROCESSOR_LIST);
-        regKeyMap.put(StructureSet.class, Registries.STRUCTURE_SET);
-        regKeyMap.put(StructureTemplatePool.class, Registries.TEMPLATE_POOL);
-        regKeyMap.put(TrimMaterial.class, Registries.TRIM_MATERIAL);
-        regKeyMap.put(TrimPattern.class, Registries.TRIM_PATTERN);
-        regKeyMap.put(WorldPreset.class, Registries.WORLD_PRESET);
-        regKeyMap.put(MultiNoiseBiomeSourceParameterList.class, Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
-        regKeyMap.put(Level.class, Registries.DIMENSION);
-        regKeyMap.put(LevelStem.class, Registries.LEVEL_STEM);
-    });
 
     /**
      * Gets the description ID for the object being wrapped. Used for the object's key during automatic localization,
@@ -249,25 +160,162 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
      * @see #isTemplate()
      */
     default Optional<ResourceKey<Registry<? super T>>> getObjectRegistryKey() {
-        return isTemplate() ? Optional.empty() : computeForObject(getParentObject().get());
+        return isTemplate() ? Optional.empty() : RegistryLookupContainer.computeForObject(getParentObject().get());
     }
 
-    static <T> Optional<ResourceKey<Registry<? super T>>> ofRegistryKey(ResourceKey<?> registryKey) {
-        return Optional.of((ResourceKey<Registry<? super T>>) registryKey);
-    }
+    /**
+     * Container {@code class} for registry key lookups, primarily used to determine which registry a given PW's parent
+     * object belongs to (if any).
+     */
+    class RegistryLookupContainer {
+        public static final ResourceKey<? extends Registry<?>> UNMAPPED_REGISTRY = ResourceKey.createRegistryKey(NexusConstants.prefix("unknown"));
+        private static final Map<Class<?>, ResourceKey<? extends Registry<?>>> NATIVE_REGISTRY_KEY_LOOKUP = Util.make(new Object2ObjectOpenHashMap<>(), regKeyMap -> {
+            regKeyMap.put(Activity.class, Registries.ACTIVITY);
+            regKeyMap.put(Attribute.class, Registries.ATTRIBUTE);
+            regKeyMap.put(BannerPattern.class, Registries.BANNER_PATTERN);
+            regKeyMap.put(BiomeSource.class, Registries.BIOME_SOURCE);
+            regKeyMap.put(Block.class, Registries.BLOCK);
+            regKeyMap.put(BlockEntityType.class, Registries.BLOCK_ENTITY_TYPE);
+            regKeyMap.put(BlockPredicateType.class, Registries.BLOCK_PREDICATE_TYPE);
+            regKeyMap.put(BlockStateProviderType.class, Registries.BLOCK_STATE_PROVIDER_TYPE);
+            regKeyMap.put(WorldCarver.class, Registries.CARVER);
+            regKeyMap.put(CatVariant.class, Registries.CAT_VARIANT);
+            regKeyMap.put(ChunkGenerator.class, Registries.CHUNK_GENERATOR);
+            regKeyMap.put(ChunkStatus.class, Registries.CHUNK_STATUS);
+            regKeyMap.put(ArgumentTypeInfo.class, Registries.COMMAND_ARGUMENT_TYPE);
+            regKeyMap.put(CreativeModeTab.class, Registries.CREATIVE_MODE_TAB);
+            regKeyMap.put(ResourceLocation.class, Registries.CUSTOM_STAT);
+            regKeyMap.put(DamageType.class, Registries.DAMAGE_TYPE);
+            regKeyMap.put(DensityFunction.class, Registries.DENSITY_FUNCTION_TYPE);
+            regKeyMap.put(Enchantment.class, Registries.ENCHANTMENT);
+            regKeyMap.put(EntityType.class, Registries.ENTITY_TYPE);
+            regKeyMap.put(Feature.class, Registries.FEATURE);
+            regKeyMap.put(FeatureSizeType.class, Registries.FEATURE_SIZE_TYPE);
+            regKeyMap.put(FloatProviderType.class, Registries.FLOAT_PROVIDER_TYPE);
+            regKeyMap.put(Fluid.class, Registries.FLUID);
+            regKeyMap.put(FoliagePlacerType.class, Registries.FOLIAGE_PLACER_TYPE);
+            regKeyMap.put(FrogVariant.class, Registries.FROG_VARIANT);
+            regKeyMap.put(GameEvent.class, Registries.GAME_EVENT);
+            regKeyMap.put(HeightProviderType.class, Registries.HEIGHT_PROVIDER_TYPE);
+            regKeyMap.put(Instrument.class, Registries.INSTRUMENT);
+            regKeyMap.put(IntProviderType.class, Registries.INT_PROVIDER_TYPE);
+            regKeyMap.put(Item.class, Registries.ITEM);
+            regKeyMap.put(LootItemConditionType.class, Registries.LOOT_CONDITION_TYPE);
+            regKeyMap.put(LootItemFunctionType.class, Registries.LOOT_FUNCTION_TYPE);
+            regKeyMap.put(LootNbtProviderType.class, Registries.LOOT_NBT_PROVIDER_TYPE);
+            regKeyMap.put(LootNumberProviderType.class, Registries.LOOT_NUMBER_PROVIDER_TYPE);
+            regKeyMap.put(LootPoolEntryType.class, Registries.LOOT_POOL_ENTRY_TYPE);
+            regKeyMap.put(LootScoreProviderType.class, Registries.LOOT_SCORE_PROVIDER_TYPE);
+            regKeyMap.put(SurfaceRules.ConditionSource.class, Registries.MATERIAL_CONDITION);
+            regKeyMap.put(SurfaceRules.RuleSource.class, Registries.MATERIAL_RULE);
+            regKeyMap.put(MemoryModuleType.class, Registries.MEMORY_MODULE_TYPE);
+            regKeyMap.put(MenuType.class, Registries.MENU);
+            regKeyMap.put(MobEffect.class, Registries.MOB_EFFECT);
+            regKeyMap.put(PaintingVariant.class, Registries.PAINTING_VARIANT);
+            regKeyMap.put(ParticleType.class, Registries.PARTICLE_TYPE);
+            regKeyMap.put(PlacementModifierType.class, Registries.PLACEMENT_MODIFIER_TYPE);
+            regKeyMap.put(PoiType.class, Registries.POINT_OF_INTEREST_TYPE);
+            regKeyMap.put(PositionSourceType.class, Registries.POSITION_SOURCE_TYPE);
+            regKeyMap.put(PosRuleTestType.class, Registries.POS_RULE_TEST);
+            regKeyMap.put(Potion.class, Registries.POTION);
+            regKeyMap.put(RecipeSerializer.class, Registries.RECIPE_SERIALIZER);
+            regKeyMap.put(RecipeType.class, Registries.RECIPE_TYPE);
+            regKeyMap.put(RootPlacerType.class, Registries.ROOT_PLACER_TYPE);
+            regKeyMap.put(RuleTestType.class, Registries.RULE_TEST);
+            regKeyMap.put(RuleBlockEntityModifierType.class, Registries.RULE_BLOCK_ENTITY_MODIFIER);
+            regKeyMap.put(Schedule.class, Registries.SCHEDULE);
+            regKeyMap.put(SensorType.class, Registries.SENSOR_TYPE);
+            regKeyMap.put(SoundEvent.class, Registries.SOUND_EVENT);
+            regKeyMap.put(StatType.class, Registries.STAT_TYPE);
+            regKeyMap.put(StructurePieceType.class, Registries.STRUCTURE_PIECE);
+            regKeyMap.put(StructurePlacementType.class, Registries.STRUCTURE_PLACEMENT);
+            regKeyMap.put(StructurePoolElementType.class, Registries.STRUCTURE_POOL_ELEMENT);
+            regKeyMap.put(StructureProcessorType.class, Registries.STRUCTURE_PROCESSOR);
+            regKeyMap.put(StructureType.class, Registries.STRUCTURE_TYPE);
+            regKeyMap.put(TreeDecoratorType.class, Registries.TREE_DECORATOR_TYPE);
+            regKeyMap.put(TrunkPlacerType.class, Registries.TRUNK_PLACER_TYPE);
+            regKeyMap.put(VillagerProfession.class, Registries.VILLAGER_PROFESSION);
+            regKeyMap.put(VillagerType.class, Registries.VILLAGER_TYPE);
+            regKeyMap.put(String.class, Registries.DECORATED_POT_PATTERNS);
+            regKeyMap.put(Biome.class, Registries.BIOME);
+            regKeyMap.put(ChatType.class, Registries.CHAT_TYPE);
+            regKeyMap.put(ConfiguredWorldCarver.class, Registries.CONFIGURED_CARVER);
+            regKeyMap.put(ConfiguredFeature.class, Registries.CONFIGURED_FEATURE);
+            regKeyMap.put(DimensionType.class, Registries.DIMENSION_TYPE);
+            regKeyMap.put(FlatLevelGeneratorPreset.class, Registries.FLAT_LEVEL_GENERATOR_PRESET);
+            regKeyMap.put(NoiseGeneratorSettings.class, Registries.NOISE_SETTINGS);
+            regKeyMap.put(NormalNoise.NoiseParameters.class, Registries.NOISE);
+            regKeyMap.put(PlacedFeature.class, Registries.PLACED_FEATURE);
+            regKeyMap.put(Structure.class, Registries.STRUCTURE);
+            regKeyMap.put(StructureProcessorList.class, Registries.PROCESSOR_LIST);
+            regKeyMap.put(StructureSet.class, Registries.STRUCTURE_SET);
+            regKeyMap.put(StructureTemplatePool.class, Registries.TEMPLATE_POOL);
+            regKeyMap.put(TrimMaterial.class, Registries.TRIM_MATERIAL);
+            regKeyMap.put(TrimPattern.class, Registries.TRIM_PATTERN);
+            regKeyMap.put(WorldPreset.class, Registries.WORLD_PRESET);
+            regKeyMap.put(MultiNoiseBiomeSourceParameterList.class, Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
+            regKeyMap.put(Level.class, Registries.DIMENSION);
+            regKeyMap.put(LevelStem.class, Registries.LEVEL_STEM);
+        });
 
-    static <T> Optional<ResourceKey<Registry<? super T>>> computeForObject(T targetObj) {
-        return ofRegistryKey(NATIVE_REGISTRY_KEY_LOOKUP.computeIfAbsent(targetObj.getClass(), objClazz -> NATIVE_REGISTRY_KEY_LOOKUP.entrySet().stream()
-                .filter(regEntry -> regEntry.getKey().isAssignableFrom(objClazz))
-                .map(Map.Entry::getValue)
-                .findFirst()
-                .flatMap(DataGenPropertyWrapper::ofRegistryKey)
-                .orElseGet(() -> BuiltInRegistries.REGISTRY.entrySet().stream()
-                        .flatMap(curRegEntry -> curRegEntry.getValue().entrySet().stream())
-                        .filter(regEntry -> regEntry.getValue().getClass().isAssignableFrom(objClazz))
-                        .map(Map.Entry::getKey)
-                        .findFirst()
-                        .flatMap(DataGenPropertyWrapper::ofRegistryKey)
-                        .orElse((ResourceKey<Registry<? super Object>>) UNMAPPED_REGISTRY))));
+        private RegistryLookupContainer() {
+            throw new IllegalAccessError("Attempted to construct instance of container class! (RegistryLookupContainer)");
+        }
+
+        /**
+         * {@code static} helper method for getting around Java's generic type invariance by typecasting to some generic
+         * {@code T} pertaining to the parent object type.
+         * <br></br>
+         * Intended for use with registry resource keys. This will fail to typecast otherwise.
+         *
+         * @param registryKey The wildcard {@link ResourceKey} to typecast.
+         *
+         * @return The {@link Optional} containing the typecasted {@link ResourceKey}. May be empty based on the
+         * provided {@code registryKey}.
+         *
+         * @param <T> The type of the parent object of the registry resource key.
+         *
+         * @see Registries
+         * @see #computeForObject(Object)
+         */
+        public static <T> Optional<ResourceKey<Registry<? super T>>> ofRegistryKey(ResourceKey<?> registryKey) {
+            return Optional.ofNullable((ResourceKey<Registry<? super T>>) registryKey);
+        }
+
+        /**
+         * Attempts to compute a registry {@link ResourceKey} for the provided {@code targetObj}.
+         * <br></br>
+         * First attempts to find a registry key for the provided {@code targetObj} in the base
+         * {@link #NATIVE_REGISTRY_KEY_LOOKUP} {@link Map}. If no exact match is found, then a value is looked up from
+         * the same {@link Map} and provided based on whether any of the base types are assignable from the provided
+         * {@code targetObj} (i.e. {@link Class#isAssignableFrom(Class)}).
+         * <br></br>
+         * If no match is found, it is assumed that the registry may be a custom one added by a mod. In that case,
+         * {@link BuiltInRegistries#REGISTRY} is used for registry lookup based on element type for each element within
+         * each (appropriate) registry. Finally, if no match is found at all, {@link #UNMAPPED_REGISTRY} is mapped to the
+         * provided object's {@code class} to indicate that it has no registry {@link ResourceKey}.
+         *
+         * @param targetObj The object to use as base for registry lookup.
+         *
+         * @return An {@link Optional} containing the registry {@link ResourceKey} for the provided object. If no
+         * registry {@link ResourceKey} is found, an {@link Optional} containing {@link #UNMAPPED_REGISTRY} is returned.
+         *
+         * @param <T> The parent object type.
+         */
+        public static <T> Optional<ResourceKey<Registry<? super T>>> computeForObject(T targetObj) {
+            return ofRegistryKey(NATIVE_REGISTRY_KEY_LOOKUP.computeIfAbsent(targetObj.getClass(), objClazz -> NATIVE_REGISTRY_KEY_LOOKUP.entrySet().stream()
+                    .filter(regEntry -> regEntry.getKey().isAssignableFrom(objClazz))
+                    .map(Map.Entry::getValue)
+                    .findFirst()
+                    .flatMap(RegistryLookupContainer::ofRegistryKey)
+                    .orElseGet(() -> BuiltInRegistries.REGISTRY.entrySet().stream()
+                            .filter(curRegEntry -> !NATIVE_REGISTRY_KEY_LOOKUP.containsValue(curRegEntry.getKey()))
+                            .flatMap(curRegEntry -> curRegEntry.getValue().entrySet().stream())
+                            .filter(regEntry -> regEntry.getValue().getClass().isAssignableFrom(objClazz))
+                            .map(Map.Entry::getKey)
+                            .findFirst()
+                            .flatMap(RegistryLookupContainer::ofRegistryKey)
+                            .orElse((ResourceKey<Registry<? super Object>>) UNMAPPED_REGISTRY))));
+        }
     }
 }
