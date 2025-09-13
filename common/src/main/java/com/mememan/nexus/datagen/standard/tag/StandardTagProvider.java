@@ -121,6 +121,7 @@ public abstract class StandardTagProvider<T> extends IntrinsicHolderTagsProvider
 
             return CompletableFuture.allOf(propertyWrappers.stream().map(pw -> {
 
+
                 return DataProvider.saveStable(null, null, null);
             }).toArray(CompletableFuture[]::new));
         });

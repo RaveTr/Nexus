@@ -1,10 +1,99 @@
 package com.mememan.nexus.property_wrapper.base.generic;
 
+import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.datagen.ProviderType;
 import com.mememan.nexus.datagen.standard.ModDataProvider;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.Util;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.core.Registry;
+import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.ChatType;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.stats.StatType;
+import net.minecraft.util.valueproviders.FloatProviderType;
+import net.minecraft.util.valueproviders.IntProviderType;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.sensing.SensorType;
+import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.entity.animal.CatVariant;
+import net.minecraft.world.entity.animal.FrogVariant;
+import net.minecraft.world.entity.decoration.PaintingVariant;
+import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.entity.npc.VillagerType;
+import net.minecraft.world.entity.schedule.Activity;
+import net.minecraft.world.entity.schedule.Schedule;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Instrument;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.armortrim.TrimMaterial;
+import net.minecraft.world.item.armortrim.TrimPattern;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterList;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BannerPattern;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.gameevent.PositionSourceType;
+import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.SurfaceRules;
+import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicateType;
+import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
+import net.minecraft.world.level.levelgen.carver.WorldCarver;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.featuresize.FeatureSizeType;
+import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacerType;
+import net.minecraft.world.level.levelgen.feature.rootplacers.RootPlacerType;
+import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProviderType;
+import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecoratorType;
+import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacerType;
+import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorPreset;
+import net.minecraft.world.level.levelgen.heightproviders.HeightProviderType;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
+import net.minecraft.world.level.levelgen.presets.WorldPreset;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructureSet;
+import net.minecraft.world.level.levelgen.structure.StructureType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
+import net.minecraft.world.level.levelgen.structure.placement.StructurePlacementType;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElementType;
+import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
+import net.minecraft.world.level.levelgen.structure.templatesystem.PosRuleTestType;
+import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTestType;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
+import net.minecraft.world.level.levelgen.structure.templatesystem.rule.blockentity.RuleBlockEntityModifierType;
+import net.minecraft.world.level.levelgen.synth.NormalNoise;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
+import net.minecraft.world.level.storage.loot.providers.nbt.LootNbtProviderType;
+import net.minecraft.world.level.storage.loot.providers.number.LootNumberProviderType;
+import net.minecraft.world.level.storage.loot.providers.score.LootScoreProviderType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -22,6 +111,95 @@ import java.util.Optional;
  * @see DataGenPropertyWrapperBuilder
  */
 public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDER>, BUILDER extends PropertyWrapperBuilder<T, BUILDER, SELF>> extends PropertyWrapper<T, SELF, BUILDER> {
+    ResourceKey<? extends Registry<?>> UNMAPPED_REGISTRY = ResourceKey.createRegistryKey(NexusConstants.prefix("unknown"));
+    Map<Class<?>, ResourceKey<? extends Registry<?>>> NATIVE_REGISTRY_KEY_LOOKUP = Util.make(new Object2ObjectOpenHashMap<>(), regKeyMap -> {
+        regKeyMap.put(Activity.class, Registries.ACTIVITY);
+        regKeyMap.put(Attribute.class, Registries.ATTRIBUTE);
+        regKeyMap.put(BannerPattern.class, Registries.BANNER_PATTERN);
+        regKeyMap.put(BiomeSource.class, Registries.BIOME_SOURCE);
+        regKeyMap.put(Block.class, Registries.BLOCK);
+        regKeyMap.put(BlockEntityType.class, Registries.BLOCK_ENTITY_TYPE);
+        regKeyMap.put(BlockPredicateType.class, Registries.BLOCK_PREDICATE_TYPE);
+        regKeyMap.put(BlockStateProviderType.class, Registries.BLOCK_STATE_PROVIDER_TYPE);
+        regKeyMap.put(WorldCarver.class, Registries.CARVER);
+        regKeyMap.put(CatVariant.class, Registries.CAT_VARIANT);
+        regKeyMap.put(ChunkGenerator.class, Registries.CHUNK_GENERATOR);
+        regKeyMap.put(ChunkStatus.class, Registries.CHUNK_STATUS);
+        regKeyMap.put(ArgumentTypeInfo.class, Registries.COMMAND_ARGUMENT_TYPE);
+        regKeyMap.put(CreativeModeTab.class, Registries.CREATIVE_MODE_TAB);
+        regKeyMap.put(ResourceLocation.class, Registries.CUSTOM_STAT);
+        regKeyMap.put(DamageType.class, Registries.DAMAGE_TYPE);
+        regKeyMap.put(DensityFunction.class, Registries.DENSITY_FUNCTION_TYPE);
+        regKeyMap.put(Enchantment.class, Registries.ENCHANTMENT);
+        regKeyMap.put(EntityType.class, Registries.ENTITY_TYPE);
+        regKeyMap.put(Feature.class, Registries.FEATURE);
+        regKeyMap.put(FeatureSizeType.class, Registries.FEATURE_SIZE_TYPE);
+        regKeyMap.put(FloatProviderType.class, Registries.FLOAT_PROVIDER_TYPE);
+        regKeyMap.put(Fluid.class, Registries.FLUID);
+        regKeyMap.put(FoliagePlacerType.class, Registries.FOLIAGE_PLACER_TYPE);
+        regKeyMap.put(FrogVariant.class, Registries.FROG_VARIANT);
+        regKeyMap.put(GameEvent.class, Registries.GAME_EVENT);
+        regKeyMap.put(HeightProviderType.class, Registries.HEIGHT_PROVIDER_TYPE);
+        regKeyMap.put(Instrument.class, Registries.INSTRUMENT);
+        regKeyMap.put(IntProviderType.class, Registries.INT_PROVIDER_TYPE);
+        regKeyMap.put(Item.class, Registries.ITEM);
+        regKeyMap.put(LootItemConditionType.class, Registries.LOOT_CONDITION_TYPE);
+        regKeyMap.put(LootItemFunctionType.class, Registries.LOOT_FUNCTION_TYPE);
+        regKeyMap.put(LootNbtProviderType.class, Registries.LOOT_NBT_PROVIDER_TYPE);
+        regKeyMap.put(LootNumberProviderType.class, Registries.LOOT_NUMBER_PROVIDER_TYPE);
+        regKeyMap.put(LootPoolEntryType.class, Registries.LOOT_POOL_ENTRY_TYPE);
+        regKeyMap.put(LootScoreProviderType.class, Registries.LOOT_SCORE_PROVIDER_TYPE);
+        regKeyMap.put(SurfaceRules.ConditionSource.class, Registries.MATERIAL_CONDITION);
+        regKeyMap.put(SurfaceRules.RuleSource.class, Registries.MATERIAL_RULE);
+        regKeyMap.put(MemoryModuleType.class, Registries.MEMORY_MODULE_TYPE);
+        regKeyMap.put(MenuType.class, Registries.MENU);
+        regKeyMap.put(MobEffect.class, Registries.MOB_EFFECT);
+        regKeyMap.put(PaintingVariant.class, Registries.PAINTING_VARIANT);
+        regKeyMap.put(ParticleType.class, Registries.PARTICLE_TYPE);
+        regKeyMap.put(PlacementModifierType.class, Registries.PLACEMENT_MODIFIER_TYPE);
+        regKeyMap.put(PoiType.class, Registries.POINT_OF_INTEREST_TYPE);
+        regKeyMap.put(PositionSourceType.class, Registries.POSITION_SOURCE_TYPE);
+        regKeyMap.put(PosRuleTestType.class, Registries.POS_RULE_TEST);
+        regKeyMap.put(Potion.class, Registries.POTION);
+        regKeyMap.put(RecipeSerializer.class, Registries.RECIPE_SERIALIZER);
+        regKeyMap.put(RecipeType.class, Registries.RECIPE_TYPE);
+        regKeyMap.put(RootPlacerType.class, Registries.ROOT_PLACER_TYPE);
+        regKeyMap.put(RuleTestType.class, Registries.RULE_TEST);
+        regKeyMap.put(RuleBlockEntityModifierType.class, Registries.RULE_BLOCK_ENTITY_MODIFIER);
+        regKeyMap.put(Schedule.class, Registries.SCHEDULE);
+        regKeyMap.put(SensorType.class, Registries.SENSOR_TYPE);
+        regKeyMap.put(SoundEvent.class, Registries.SOUND_EVENT);
+        regKeyMap.put(StatType.class, Registries.STAT_TYPE);
+        regKeyMap.put(StructurePieceType.class, Registries.STRUCTURE_PIECE);
+        regKeyMap.put(StructurePlacementType.class, Registries.STRUCTURE_PLACEMENT);
+        regKeyMap.put(StructurePoolElementType.class, Registries.STRUCTURE_POOL_ELEMENT);
+        regKeyMap.put(StructureProcessorType.class, Registries.STRUCTURE_PROCESSOR);
+        regKeyMap.put(StructureType.class, Registries.STRUCTURE_TYPE);
+        regKeyMap.put(TreeDecoratorType.class, Registries.TREE_DECORATOR_TYPE);
+        regKeyMap.put(TrunkPlacerType.class, Registries.TRUNK_PLACER_TYPE);
+        regKeyMap.put(VillagerProfession.class, Registries.VILLAGER_PROFESSION);
+        regKeyMap.put(VillagerType.class, Registries.VILLAGER_TYPE);
+        regKeyMap.put(String.class, Registries.DECORATED_POT_PATTERNS);
+        regKeyMap.put(Biome.class, Registries.BIOME);
+        regKeyMap.put(ChatType.class, Registries.CHAT_TYPE);
+        regKeyMap.put(ConfiguredWorldCarver.class, Registries.CONFIGURED_CARVER);
+        regKeyMap.put(ConfiguredFeature.class, Registries.CONFIGURED_FEATURE);
+        regKeyMap.put(DimensionType.class, Registries.DIMENSION_TYPE);
+        regKeyMap.put(FlatLevelGeneratorPreset.class, Registries.FLAT_LEVEL_GENERATOR_PRESET);
+        regKeyMap.put(NoiseGeneratorSettings.class, Registries.NOISE_SETTINGS);
+        regKeyMap.put(NormalNoise.NoiseParameters.class, Registries.NOISE);
+        regKeyMap.put(PlacedFeature.class, Registries.PLACED_FEATURE);
+        regKeyMap.put(Structure.class, Registries.STRUCTURE);
+        regKeyMap.put(StructureProcessorList.class, Registries.PROCESSOR_LIST);
+        regKeyMap.put(StructureSet.class, Registries.STRUCTURE_SET);
+        regKeyMap.put(StructureTemplatePool.class, Registries.TEMPLATE_POOL);
+        regKeyMap.put(TrimMaterial.class, Registries.TRIM_MATERIAL);
+        regKeyMap.put(TrimPattern.class, Registries.TRIM_PATTERN);
+        regKeyMap.put(WorldPreset.class, Registries.WORLD_PRESET);
+        regKeyMap.put(MultiNoiseBiomeSourceParameterList.class, Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
+        regKeyMap.put(Level.class, Registries.DIMENSION);
+        regKeyMap.put(LevelStem.class, Registries.LEVEL_STEM);
+    });
 
     /**
      * Gets the description ID for the object being wrapped. Used for the object's key during automatic localization,
@@ -61,15 +239,35 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
 
     /**
      * Optional definition of a registry key for the object being wrapped. This is primarily used during data generation
-     * for some provider types (such as loot table and tag providers) to properly
+     * for some provider types (such as loot table and tag providers) to properly discover objects' locations and types,
+     * and map them out appropriately.
      *
-     * @return
+     * @return An {@link Optional} containing the registry key for the object being wrapped, or an empty {@link Optional}
+     * if the object is a template. The registry key itself may be unmapped if the object has no pertaining registries
+     * at all.
+     *
+     * @see #isTemplate()
      */
     default Optional<ResourceKey<Registry<? super T>>> getObjectRegistryKey() {
-        return isTemplate() ? Optional.empty() : ofRegistryKey(null); //TODO
+        return isTemplate() ? Optional.empty() : computeForObject(getParentObject().get());
     }
 
     static <T> Optional<ResourceKey<Registry<? super T>>> ofRegistryKey(ResourceKey<?> registryKey) {
         return Optional.of((ResourceKey<Registry<? super T>>) registryKey);
+    }
+
+    static <T> Optional<ResourceKey<Registry<? super T>>> computeForObject(T targetObj) {
+        return ofRegistryKey(NATIVE_REGISTRY_KEY_LOOKUP.computeIfAbsent(targetObj.getClass(), objClazz -> NATIVE_REGISTRY_KEY_LOOKUP.entrySet().stream()
+                .filter(regEntry -> regEntry.getKey().isAssignableFrom(objClazz))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .flatMap(DataGenPropertyWrapper::ofRegistryKey)
+                .orElseGet(() -> BuiltInRegistries.REGISTRY.entrySet().stream()
+                        .flatMap(curRegEntry -> curRegEntry.getValue().entrySet().stream())
+                        .filter(regEntry -> regEntry.getValue().getClass().isAssignableFrom(objClazz))
+                        .map(Map.Entry::getKey)
+                        .findFirst()
+                        .flatMap(DataGenPropertyWrapper::ofRegistryKey)
+                        .orElse((ResourceKey<Registry<? super Object>>) UNMAPPED_REGISTRY))));
     }
 }

@@ -300,7 +300,7 @@ public interface ModelBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SE
          * {@code "assets/<mod_id>/models/"}. If this method returns a non-empty value, it will look something like
          * {@code "assets/<mod_id>/models/<backing_directory>/"}.
          * <br></br>
-         * This method should be overridden for custom implementations to allow for roper object segregation during
+         * This method should be overridden for custom implementations to allow for proper object segregation during
          * model generation.
          *
          * @return The backing directory for this definition type. May be empty.
