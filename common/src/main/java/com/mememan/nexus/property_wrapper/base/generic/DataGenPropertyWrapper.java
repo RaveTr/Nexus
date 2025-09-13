@@ -287,7 +287,7 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
          * <br></br>
          * First attempts to find a registry key for the provided {@code targetObj} in the base
          * {@link #NATIVE_REGISTRY_KEY_LOOKUP} {@link Map}. If no exact match is found, then a value is looked up from
-         * the same {@link Map} and provided based on whether any of the base types are assignable from the provided
+         * the same {@link Map} and returned based on whether any of the base types are assignable from the provided
          * {@code targetObj} (i.e. {@link Class#isAssignableFrom(Class)}).
          * <br></br>
          * If no match is found, it is assumed that the registry may be a custom one added by a mod. In that case,
@@ -299,6 +299,7 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
          *
          * @return An {@link Optional} containing the registry {@link ResourceKey} for the provided object. If no
          * registry {@link ResourceKey} is found, an {@link Optional} containing {@link #UNMAPPED_REGISTRY} is returned.
+         * If the provided {@code targetObj} is {@code null}, an empty {@link Optional} is returned.
          *
          * @param <T> The parent object type.
          *
@@ -312,7 +313,7 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
          * @see #ofRegistryKey(ResourceKey)
          */
         public static <T> Optional<ResourceKey<Registry<? super T>>> computeForObject(T targetObj) {
-            return ofRegistryKey(NATIVE_REGISTRY_KEY_LOOKUP.computeIfAbsent(targetObj.getClass(), objClazz -> NATIVE_REGISTRY_KEY_LOOKUP.entrySet().stream()
+            return targetObj == null ? Optional.empty() : ofRegistryKey(NATIVE_REGISTRY_KEY_LOOKUP.computeIfAbsent(targetObj.getClass(), objClazz -> NATIVE_REGISTRY_KEY_LOOKUP.entrySet().stream()
                     .filter(regEntry -> regEntry.getKey().isAssignableFrom(objClazz))
                     .map(Map.Entry::getValue)
                     .findFirst()
