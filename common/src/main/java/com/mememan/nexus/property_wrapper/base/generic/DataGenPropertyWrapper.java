@@ -16,6 +16,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.StatType;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.valueproviders.FloatProviderType;
 import net.minecraft.util.valueproviders.IntProviderType;
 import net.minecraft.world.damagesource.DamageType;
@@ -42,6 +43,7 @@ import net.minecraft.world.item.armortrim.TrimPattern;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
@@ -113,15 +115,6 @@ import java.util.Optional;
 public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDER>, BUILDER extends PropertyWrapperBuilder<T, BUILDER, SELF>> extends PropertyWrapper<T, SELF, BUILDER> {
 
     /**
-     * Gets the description ID for the object being wrapped. Used for the object's key during automatic localization,
-     * logging, and general identification.
-     *
-     * @return The description ID for the object being wrapped.
-     */
-    @NotNull
-    String getObjectDescriptionId();
-
-    /**
      * Whether this DGPW instance should be excluded from Nexus data generation entirely.
      * <br></br>
      * This takes precedence over {@link #getProviderTypeRequisites()} in determining whether a DGPW instance contain
@@ -149,6 +142,22 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
     Map<ProviderType, Boolean> getProviderTypeRequisites();
 
     /**
+     * Gets the description ID for the object being wrapped. Used for the object's key during automatic localization,
+     * logging, and general identification.
+     *
+     * @return The description ID for the object being wrapped, or "Template " concatenated with the {@code class} name
+     * if the object is a template.
+     */
+    @NotNull
+    default String getObjectDescriptionId() {
+        return isTemplate()
+                ? "Template ".concat(getClass().getSimpleName())
+                : getParentObject().get() instanceof ItemLike ilParent
+                ? ilParent.asItem().getDescriptionId()
+                : getParentObject().get().toString();
+    }
+
+    /**
      * Optional definition of a registry key for the object being wrapped. This is primarily used during data generation
      * for some provider types (such as loot table and tag providers) to properly discover objects' locations and types,
      * and map them out appropriately.
@@ -169,7 +178,7 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
      * object belongs to (if any).
      */
     class RegistryLookupContainer {
-        public static final ResourceKey<? extends Registry<?>> UNMAPPED_REGISTRY = ResourceKey.createRegistryKey(NexusConstants.prefix("unknown"));
+        public static final ResourceKey<? extends Registry<? super Object>> UNMAPPED_REGISTRY = ResourceKey.createRegistryKey(NexusConstants.prefix("unknown"));
         private static final Map<Class<?>, ResourceKey<? extends Registry<?>>> NATIVE_REGISTRY_KEY_LOOKUP = Util.make(new Object2ObjectOpenHashMap<>(), regKeyMap -> {
             regKeyMap.put(Activity.class, Registries.ACTIVITY);
             regKeyMap.put(Attribute.class, Registries.ATTRIBUTE);
@@ -296,7 +305,7 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
          * each (appropriate) registry. Finally, if no match is found at all, {@link #UNMAPPED_REGISTRY} is mapped to the
          * provided object's {@code class} to indicate that it has no registry {@link ResourceKey}.
          *
-         * @param targetObj The object to use as base for registry lookup.
+         * @param targetObj The object to use as base for registry key lookup.
          *
          * @return An {@link Optional} containing the registry {@link ResourceKey} for the provided object. If no
          * registry {@link ResourceKey} is found, an {@link Optional} containing {@link #UNMAPPED_REGISTRY} is returned.
@@ -327,6 +336,62 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
                             .findFirst()
                             .flatMap(RegistryLookupContainer::ofRegistryKey)
                             .orElse((ResourceKey<Registry<? super Object>>) UNMAPPED_REGISTRY))));
+        }
+
+        /**
+         * Attempts to find the literal {@link Registry} associated with the provided object's type by querying
+         * {@link #NATIVE_REGISTRY_KEY_LOOKUP} via {@link #computeForObject(Object)}, then using the resultant
+         * registry {@link ResourceKey} (if found) to find the literal {@link Registry} via {@link BuiltInRegistries#REGISTRY}.
+         *
+         * @param targetObj The object to use as base for registry lookup.
+         *
+         * @return An {@link Optional} containing the literal {@link Registry} associated with the provided object's type,
+         * or {@link Optional#empty()} if the provided object is {@code null}.
+         *
+         * @throws IllegalArgumentException If the provided object is not associable with any registry {@link ResourceKey}.
+         *
+         * @param <T> The parent object type.
+         *
+         * @see #computeForObject(Object)
+         * @see BuiltInRegistries#REGISTRY
+         */
+        public static <T> Optional<Registry<T>> getRegistryForObject(T targetObj) {
+            return targetObj == null
+                    ? Optional.empty()
+                    : Optional.ofNullable(((Registry<T>) BuiltInRegistries.REGISTRY.get(computeForObject(targetObj) // Registries are ultimately backed by and stored in a HashMap, which should average O(1) time complexity if present
+                    .filter(regResourceKey -> !regResourceKey.location().equals(RegistryLookupContainer.UNMAPPED_REGISTRY.location()))
+                    .orElseThrow(() -> new IllegalArgumentException(String.format("Attempted to find registry resource key for non-registry object of type %s: %s", targetObj.getClass().getSimpleName(), targetObj))).location())));
+        }
+
+        /**
+         * Attempts to map the provided {@code targetObj} with a {@linkplain ResourceLocation registry identifier key}
+         * based on its type.
+         * <br></br>
+         * If the provided {@code targetObj} is a {@link ResourceKey}, then it is directly returned. If it is a
+         * {@link TagKey}, then {@link TagKey#location()} is returned.
+         * <br></br>
+         * Otherwise, a lookup is performed via {@link #getRegistryForObject(Object)} to attempt to find the registry for
+         * the provided {@code targetObj}, with {@link Registry#getResourceKey(Object)} being used to find the
+         * {@link ResourceLocation} of the provided {@code targetObj}.
+         *
+         * @param targetObj The parent object type whose key should be looked up.
+         *
+         * @return An {@link Optional} containing the {@link ResourceLocation} of the provided {@code targetObj}, or
+         * {@link Optional#empty()} if the provided {@code targetObj} is {@code null}.
+         *
+         * @throws IllegalArgumentException If the provided {@code targetObj} is not associable with any {@link Registry}.
+         *
+         * @param <T> The parent object type.
+         */
+        public static <T> Optional<ResourceLocation> getObjectRegistryId(T targetObj) {
+            return targetObj instanceof ResourceKey<?>
+                    ? Optional.of(((ResourceKey<T>) targetObj).location())
+                    : targetObj instanceof TagKey<?>
+                    ? Optional.of(((TagKey<T>) targetObj).location())
+                    : getRegistryForObject(targetObj)
+                    .orElseThrow(() -> new IllegalArgumentException(String.format("Attempted to find registry for unregistered or unmapped object of type %s: %s", targetObj.getClass().getSimpleName(), targetObj)))
+                    .getResourceKey(targetObj)
+                    .map(ResourceKey::location);
         }
     }
 }

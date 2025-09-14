@@ -26,6 +26,9 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends PropertyWrapperB
      *
      * @return {@link #self()} (builder method).
      *
+     * @apiNote If you're getting compile-time errors due to the oddities of Java generic type invariance, consider
+     * using {@link #withAdditionalTag(Supplier)} (and/or its overloads) instead.
+     *
      * @see #withTags(List)
      * @see #withTags(Supplier[])
      * @see #setTags(List)
@@ -39,6 +42,9 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends PropertyWrapperB
      *
      * @return {@link #self()} (builder method).
      *
+     * @apiNote If you're getting compile-time errors due to the oddities of Java generic type invariance, consider
+     * using {@link #withAdditionalTags(List)} (and/or its overloads) instead.
+     *
      * @see #withTag(Supplier)
      * @see #withTags(Supplier[])
      * @see #setTags(List)
@@ -51,6 +57,9 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends PropertyWrapperB
      * @param targetTags The tags to append.
      *
      * @return {@link #self()} (builder method).
+     *
+     * @apiNote If you're getting compile-time errors due to the oddities of Java generic type invariance, consider
+     * using {@link #withAdditionalTags(Supplier[])} (and/or its overloads) instead.
      *
      * @see #withTag(Supplier)
      * @see #withTags(List)
@@ -67,6 +76,9 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends PropertyWrapperB
      *
      * @return {@link #self()} (builder method).
      *
+     * @apiNote If you're getting compile-time errors due to the oddities of Java generic type invariance, consider
+     * using {@link #setAdditionalTags(List)} (and/or its overloads) instead.
+     *
      * @see #withTag(Supplier)
      * @see #withTags(List)
      * @see #withTags(Supplier[])
@@ -80,8 +92,8 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends PropertyWrapperB
      *
      * @return {@link #self()} (builder method).
      *
-     * @implNote Additional tags are used for cases like adding tags to blocks, where they may require item tags to be
-     * added to them for proper functionality too. Some PW types don't have a need for implementing this.
+     * @apiNote Additional tags are used for cases like adding tags to blocks, where they may require item tags to be
+     * added to them for proper functionality too. Some PW types may not have a need for implementing this.
      *
      * @see #withAdditionalTags(List)
      * @see #withAdditionalTags(Supplier[])
@@ -96,8 +108,8 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends PropertyWrapperB
      *
      * @return {@link #self()} (builder method).
      *
-     * @implNote Additional tags are used for cases like adding tags to blocks, where they may require item tags to be
-     * added to them for proper functionality too. Some PW types don't have a need for implementing this.
+     * @apiNote Additional tags are used for cases like adding tags to blocks, where they may require item tags to be
+     * added to them for proper functionality too. Some PW types may not have a need for implementing this.
      *
      * @see #withAdditionalTag(Supplier)
      * @see #withAdditionalTags(Supplier[])
@@ -112,8 +124,8 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends PropertyWrapperB
      *
      * @return {@link #self()} (builder method).
      *
-     * @implNote Additional tags are used for cases like adding tags to blocks, where they may require item tags to be
-     * added to them for proper functionality too. Some PW types don't have a need for implementing this.
+     * @apiNote Additional tags are used for cases like adding tags to blocks, where they may require item tags to be
+     * added to them for proper functionality too. Some PW types may not have a need for implementing this.
      *
      * @see #withAdditionalTag(Supplier)
      * @see #withAdditionalTags(List)
@@ -130,8 +142,8 @@ public interface TagBasedPropertyWrapperBuilder<T, SELF extends PropertyWrapperB
      *
      * @return {@link #self()} (builder method).
      *
-     * @implNote Additional tags are used for cases like adding tags to blocks, where they may require item tags to be
-     * added to them for proper functionality too. Some PW types don't have a need for implementing this.
+     * @apiNote Additional tags are used for cases like adding tags to blocks, where they may require item tags to be
+     * added to them for proper functionality too. Some PW types may not have a need for implementing this.
      *
      * @see #withAdditionalTag(Supplier)
      * @see #withAdditionalTags(List)

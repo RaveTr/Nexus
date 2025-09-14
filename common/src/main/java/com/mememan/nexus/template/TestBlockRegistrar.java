@@ -54,6 +54,11 @@ public class TestBlockRegistrar {
                     .withItemModelTextureOverride(Map.of(NexusConstants.prefix("blud"), 0.614F), NexusConstants.prefix("zamn_texture_path/zamn")))
             .buildAndGet();
 
+    public static final Supplier<Block> BLAH_3 = new BlockPropertyWrapper<>(registerBlock(new ResourceLocation("nexus", "test_block_3"), () -> new Block(BlockBehaviour.Properties.of())), "nexus")
+            .builder()
+            .withTags(() -> BlockTags.ACACIA_LOGS, TestBlockTags.TEST::get)
+            .buildAndGet();
+
     private static <B extends Block> Supplier<B> registerBlock(ResourceLocation name, Supplier<B> block) {
         Supplier<B> registeredItem = NexusServices.REGISTRAR.registerObject(name, block, BuiltInRegistries.BLOCK);
         NexusServices.REGISTRAR.registerObject(name, () -> new BlockItem(registeredItem.get(), new Item.Properties()), BuiltInRegistries.ITEM);

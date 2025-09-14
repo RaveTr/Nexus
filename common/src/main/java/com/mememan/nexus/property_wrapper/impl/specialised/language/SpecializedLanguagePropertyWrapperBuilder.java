@@ -31,8 +31,8 @@ public class SpecializedLanguagePropertyWrapperBuilder<T, SELF extends LanguageB
                 .literalTranslation(propertyWrapper.hasLiteralTranslation())
                 .withLocalization(propertyWrapper.getObjectPostTranslationMapper().orElse(null))
                 .bypassDefaultTranslation(propertyWrapper.bypassesDefaultTranslation())
-                .setCustomSeparatorWords(List.copyOf(propertyWrapper.getCustomSeparatorWords()))
-                .setAdditionalLocalizationKeys(Map.copyOf(propertyWrapper.getAdditionalLocalizationKeys()));
+                .setCustomSeparatorWords(new ObjectArrayList<>(propertyWrapper.getCustomSeparatorWords()))
+                .setAdditionalLocalizationKeys(new Object2ObjectOpenHashMap<>(propertyWrapper.getAdditionalLocalizationKeys()));
     }
 
     @Override

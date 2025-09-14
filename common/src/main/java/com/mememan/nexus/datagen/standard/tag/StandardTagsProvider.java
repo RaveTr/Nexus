@@ -15,7 +15,6 @@ import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
@@ -45,7 +44,7 @@ public class StandardTagsProvider extends TagsProvider<Object> implements ModDat
     protected final Map<ResourceKey<? extends Registry<?>>, Map<ResourceLocation, TagBuilder>> registryMappedBuilders = new Object2ObjectOpenHashMap<>();
 
     public StandardTagsProvider(PackOutput targetOutput, CompletableFuture<HolderLookup.Provider> regLookup, String modId, boolean validateAllEntries, DuplicateDataPolicy dupeStrat) {
-        super(targetOutput, (ResourceKey<? extends Registry<Object>>) DataGenPropertyWrapper.RegistryLookupContainer.UNMAPPED_REGISTRY, regLookup);
+        super(targetOutput, DataGenPropertyWrapper.RegistryLookupContainer.UNMAPPED_REGISTRY, regLookup);
 
         this.rootOutput = targetOutput;
 
@@ -57,7 +56,7 @@ public class StandardTagsProvider extends TagsProvider<Object> implements ModDat
     }
 
     public StandardTagsProvider(PackOutput targetOutput, CompletableFuture<HolderLookup.Provider> regLookup, CompletableFuture<TagLookup<Object>> tagLookupFuture, String modId, boolean validateAllEntries, DuplicateDataPolicy dupeStrat) {
-        super(targetOutput, (ResourceKey<? extends Registry<Object>>) DataGenPropertyWrapper.RegistryLookupContainer.UNMAPPED_REGISTRY, regLookup, tagLookupFuture);
+        super(targetOutput, DataGenPropertyWrapper.RegistryLookupContainer.UNMAPPED_REGISTRY, regLookup, tagLookupFuture);
 
         this.rootOutput = targetOutput;
 
@@ -98,29 +97,57 @@ public class StandardTagsProvider extends TagsProvider<Object> implements ModDat
                         String objectName = curPW.getObjectDescriptionId();
                         String objectClassName = parentObject.get().getClass().getSimpleName();
                         AtomicBoolean isTag = new AtomicBoolean();
-                        ResourceLocation parentObjLoc = parentObject.get() instanceof ResourceKey<?>
-                                ? ((ResourceKey<T>) parentObject.get()).location()
-                                : ((Registry<T>) BuiltInRegistries.REGISTRY.get(curPW.getObjectRegistryKey()
-                                .orElseThrow(() -> new IllegalArgumentException(String.format("Attempted to tag a non-registry object of type %s: %s", objectClassName, objectName))).location()))
-                                .getResourceKey(parentObject.get())
-                                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for object of type %s: %s", objectClassName, objectName)))
-                                .location();
+                        AtomicBoolean tagHasNoExclusiveData = new AtomicBoolean();
 
                         if (curPW instanceof TagPropertyWrapper<?, ?> curTPW) { // Do tag-specific processing here
-                            TagPropertyWrapper<T, TagKey<T>> curTagPW = (TagPropertyWrapper<T, TagKey<T>>) curPW;
+                            TagPropertyWrapper<T, TagKey<T>> curTagPW = (TagPropertyWrapper<T, TagKey<T>>) curTPW;
+                            Supplier<TagKey<T>> parentTag = curTagPW.getParentObject();
+                            TagKey<T> parentTagObj = parentTag.get();
+                            List<Supplier<T>> taggedObjects = curTagPW.getTaggedObjects();
+                            List<Supplier<TagKey<T>>> tagKeys = curTagPW.getChildTags();
+
+                            if (taggedObjects.isEmpty() && tagKeys.isEmpty()) tagHasNoExclusiveData.set(true);
+                            else {
+                                taggedObjects.forEach(curTaggedObject -> {
+                                    T taggedObject = curTaggedObject.get();
+                                    String taggedObjClassName = taggedObject.getClass().getSimpleName();
+                                    ResourceLocation childObjLoc = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(taggedObject)
+                                            .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for object of type %s: %s", taggedObjClassName, taggedObject)));
+
+                                    if (validateDupeObjectTag(parentTagObj, taggedObjClassName, childObjLoc)) {
+                                        NexusConstants.LOGGER.debug("[{}] [Tagging {}]: {} -> {}", getModId(), taggedObjClassName, childObjLoc, parentTagObj);
+
+                                        trackTag(parentTagObj).addElement(childObjLoc);
+                                    }
+                                });
+
+                                tagKeys.forEach(curTagKey -> {
+                                    TagKey<T> taggedTagKey = curTagKey.get();
+                                    ResourceLocation taggedTagKeyLoc = taggedTagKey.location();
+
+                                    if (validateDupeObjectTag(taggedTagKey, objectClassName, taggedTagKeyLoc)) {
+                                        NexusConstants.LOGGER.debug("[{}] [Tagging TagKey]: {} -> {}", getModId(), taggedTagKeyLoc, parentTagObj);
+
+                                        trackTag(parentTagObj).addTag(taggedTagKeyLoc);
+                                    }
+                                });
+                            }
 
                             isTag.set(true);
                         }
 
-                        if (!isTag.get() && objectTags.isEmpty() && additionalTags.isEmpty() && (validateAllEntries() || curPW.getProviderTypeRequisites().getOrDefault(getProviderType(), false))) {
+                        if ((!isTag.get() || tagHasNoExclusiveData.get()) && objectTags.isEmpty() && additionalTags.isEmpty() && (validateAllEntries() || curPW.getProviderTypeRequisites().getOrDefault(getProviderType(), false))) {
                             throw new NullPointerException(String.format("Missing tag entry for %s: %s, required by mod: %s, either because validateAllEntries is set to true for this provider or the object itself requires validation through DataGenBasedPropertyWrapper#getProviderTypeRequisites().", objectClassName, curPW.getObjectDescriptionId(), modId));
                         }
+
+                        ResourceLocation parentObjLoc = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentObject.get())
+                                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for object of type %s: %s", objectClassName, objectName)));
 
                         objectTags.forEach(tK -> {
                             TagKey<? super T> parentTagKey = tK.get();
 
                             if (validateDupeObjectTag(parentTagKey, objectClassName, parentObjLoc)) {
-                                NexusConstants.LOGGER.debug("[{}] [Tagging {}]: {} -> {}", getModId(), objectClassName, objectName, parentTagKey);
+                                NexusConstants.LOGGER.debug("[{}] [Tagging {}]: {} -> {}", getModId(), objectClassName, parentObjLoc, parentTagKey);
 
                                 if (isTag.get()) trackTag(parentTagKey).addTag(parentObjLoc);
                                 else trackTag(parentTagKey).addElement(parentObjLoc);
@@ -131,7 +158,7 @@ public class StandardTagsProvider extends TagsProvider<Object> implements ModDat
                             TagKey<?> parentTagKey = tK.get();
 
                             if (validateDupeObjectTag(parentTagKey, objectClassName, parentObjLoc)) {
-                                NexusConstants.LOGGER.debug("[{}] [Tagging {}]: {} -> {} (Additional Tag for Registry: {})", getModId(), objectClassName, objectName, parentTagKey, parentTagKey.registry());
+                                NexusConstants.LOGGER.debug("[{}] [Tagging {}]: {} -> {} (Additional Tag for Registry: {})", getModId(), objectClassName, parentObjLoc, parentTagKey, parentTagKey.registry());
 
                                 if (isTag.get()) trackTag(parentTagKey).addTag(parentObjLoc);
                                 else trackTag(parentTagKey).addElement(parentObjLoc);
@@ -183,7 +210,7 @@ public class StandardTagsProvider extends TagsProvider<Object> implements ModDat
         Map<ResourceLocation, TagBuilder> mappedTagBuilders = registryMappedBuilders.get(tagKeyToTrack.registry());
 
         if (mappedTagBuilders != null) {
-            boolean objectAlreadyTaggedWithSameTag = mappedTagBuilders.get(tagKeyToTrack.location()).build().stream().anyMatch(curEntry -> curEntry.verifyIfPresent(objectLoc::equals, objectLoc::equals));
+            boolean objectAlreadyTaggedWithSameTag = mappedTagBuilders.get(tagKeyToTrack.location()) != null && mappedTagBuilders.get(tagKeyToTrack.location()).build().stream().anyMatch(curEntry -> curEntry.verifyIfPresent(objectLoc::equals, objectLoc::equals));
 
             if (objectAlreadyTaggedWithSameTag) {
                 String objectName = objectLoc.toString();
@@ -212,11 +239,6 @@ public class StandardTagsProvider extends TagsProvider<Object> implements ModDat
         }
 
         return true;
-    }
-
-    protected <T> ResourceLocation makeAndMarkTag(TagKey<T> targetKey, AtomicBoolean tagFlag) {
-        tagFlag.set(true);
-        return targetKey.location();
     }
 
     @Override

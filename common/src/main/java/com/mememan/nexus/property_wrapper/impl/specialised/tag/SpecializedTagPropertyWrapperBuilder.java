@@ -21,8 +21,8 @@ public class SpecializedTagPropertyWrapperBuilder<T, SELF extends TagBasedProper
     @Override
     public SELF copyFrom(TBPW propertyWrapper) {
         return super.copyFrom(propertyWrapper)
-                .setTags(List.copyOf(propertyWrapper.getObjectTags()))
-                .setAdditionalTags(List.copyOf(propertyWrapper.getAdditionalTags()));
+                .setTags(new ObjectArrayList<>(propertyWrapper.getObjectTags()))
+                .setAdditionalTags(new ObjectArrayList<>(propertyWrapper.getAdditionalTags()));
     }
 
     @Override
