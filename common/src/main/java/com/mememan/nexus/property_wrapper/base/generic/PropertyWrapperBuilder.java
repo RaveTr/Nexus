@@ -44,9 +44,26 @@ public interface PropertyWrapperBuilder<T, SELF extends PropertyWrapperBuilder<T
      * @param associatedPWObject The parent object mapped to another PW.
      *
      * @return {@link #copyFrom(PropertyWrapper)}.
+     *
+     * @see #copyFromType(Supplier) 
      */
     default SELF copyFrom(Supplier<T> associatedPWObject) {
         return copyFrom((PW) PropertyWrapper.getMappedPropertyWrappers().get(associatedPWObject));
+    }
+
+    /**
+     * Overloaded variant of {@link #copyFrom(Supplier)} that copies data from the {@link PropertyWrapper}
+     * mapped to the provided {@link Supplier} (retrieved through {@link PropertyWrapper#getMappedPropertyWrappers()}).
+     * <br></br>
+     * This variant primarily exists to bypass Java's generic type invariance when dealing with compatible PW objects
+     * that conform to the same type parameter as this builder.
+     *
+     * @param associatedPWObject The parent object mapped to another PW.
+     *
+     * @return {@link #copyFrom(Supplier)}
+     */
+    default SELF copyFromType(Supplier<? extends T> associatedPWObject) {
+        return copyFrom((Supplier<T>) associatedPWObject);
     }
 
     /**

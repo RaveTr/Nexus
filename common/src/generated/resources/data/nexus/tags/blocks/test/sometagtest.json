@@ -1,8 +1,8 @@
 {
   "values": [
-    "nexus:test_block_3",
     "nexus:test_block",
     "minecraft:acacia_button",
-    "#minecraft:acacia_logs"
+    "#minecraft:acacia_logs",
+    "nexus:test_block_3"
   ]
 }

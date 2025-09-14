@@ -43,7 +43,6 @@ import net.minecraft.world.item.armortrim.TrimPattern;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
@@ -150,11 +149,13 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
      */
     @NotNull
     default String getObjectDescriptionId() {
+        Optional<ResourceLocation> parentObjRegId = getObjectRegistryKey().map(ResourceKey::location);
+
         return isTemplate()
                 ? "Template ".concat(getClass().getSimpleName())
-                : getParentObject().get() instanceof ItemLike ilParent
-                ? ilParent.asItem().getDescriptionId()
-                : getParentObject().get().toString();
+                : parentObjRegId
+                .map(regLoc -> Util.makeDescriptionId(regLoc.getPath(), RegistryLookupContainer.getObjectRegistryId(getParentObject().get()).get()))
+                .orElseGet(() -> getParentObject().get().toString());
     }
 
     /**
@@ -371,7 +372,7 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
          * {@link TagKey}, then {@link TagKey#location()} is returned.
          * <br></br>
          * Otherwise, a lookup is performed via {@link #getRegistryForObject(Object)} to attempt to find the registry for
-         * the provided {@code targetObj}, with {@link Registry#getResourceKey(Object)} being used to find the
+         * the provided {@code targetObj}, with {@link Registry#getKey(Object)} being used to find the
          * {@link ResourceLocation} of the provided {@code targetObj}.
          *
          * @param targetObj The parent object type whose key should be looked up.
@@ -388,10 +389,9 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
                     ? Optional.of(((ResourceKey<T>) targetObj).location())
                     : targetObj instanceof TagKey<?>
                     ? Optional.of(((TagKey<T>) targetObj).location())
-                    : getRegistryForObject(targetObj)
+                    : Optional.ofNullable(getRegistryForObject(targetObj)
                     .orElseThrow(() -> new IllegalArgumentException(String.format("Attempted to find registry for unregistered or unmapped object of type %s: %s", targetObj.getClass().getSimpleName(), targetObj)))
-                    .getResourceKey(targetObj)
-                    .map(ResourceKey::location);
+                    .getKey(targetObj));
         }
     }
 }

@@ -1,8 +1,13 @@
 package com.mememan.nexus.util;
 
+import com.google.common.hash.Hashing;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import net.minecraft.data.HashCache;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * Utility {@code class} providing shortcut helper methods for converting objects to JSON directly, as well as some other
@@ -82,5 +87,17 @@ public final class JsonUtil {
         }
 
         return vec2fArray;
+    }
+
+    /**
+     * Generates a consistent hash for the given {@code json} using SHA-1 (which is what {@link HashCache} uses for its
+     * own hash gen and comparisons).
+     *
+     * @param json The {@link JsonElement} to hash.
+     *
+     * @return The SHA-1 hash of the JSON string.
+     */
+    public static String hashJson(JsonElement json) {
+        return Hashing.sha1().hashString(json.toString(), StandardCharsets.UTF_8).toString();
     }
 }

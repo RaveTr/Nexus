@@ -8,7 +8,7 @@ import com.mememan.nexus.datagen.standard.StandardLanguageProvider;
 import com.mememan.nexus.datagen.standard.StandardRecipeProvider;
 import com.mememan.nexus.datagen.standard.loot.StandardLootProvider;
 import com.mememan.nexus.datagen.standard.model.StandardModelProvider;
-import com.mememan.nexus.datagen.standard.tag.StandardTagsProvider;
+import com.mememan.nexus.datagen.standard.tag.StandardTagProvider;
 import com.mememan.nexus.loader.ModData;
 import com.mememan.nexus.loader.ModSide;
 import com.mememan.nexus.platform.NexusServices;
@@ -169,7 +169,7 @@ public class ForgeDataGenerator implements DataGenerator {
                     primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.RECIPE_PROVIDER) && onServer, new StandardRecipeProvider(modSpecificPackOutput, modId, providersToValidate.contains(NexusProviderTypes.RECIPE_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.RECIPE_PROVIDER, DuplicateDataPolicy.CRASH)));
                     primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.LOOT_TABLE_PROVIDER) && onServer, new StandardLootProvider(modSpecificPackOutput, modId, providersToValidate.contains(NexusProviderTypes.LOOT_TABLE_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.LOOT_TABLE_PROVIDER, DuplicateDataPolicy.CRASH)));
 
-                    primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.TAG_PROVIDER) && onServer, new StandardTagsProvider(modSpecificPackOutput, regLookupProvider, modId, providersToValidate.contains(NexusProviderTypes.TAG_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.TAG_PROVIDER, DuplicateDataPolicy.CRASH)));
+                    primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.TAG_PROVIDER) && onServer, new StandardTagProvider(modSpecificPackOutput, regLookupProvider, modId, providersToValidate.contains(NexusProviderTypes.TAG_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.TAG_PROVIDER, DuplicateDataPolicy.CRASH)));
                 }
             });
 

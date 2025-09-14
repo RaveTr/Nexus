@@ -8,6 +8,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 /**
@@ -25,8 +26,8 @@ public interface LanguageBasedPropertyWrapperBuilder<T, SELF extends PropertyWra
      * Assigns a custom translation key for datagen. By default, a basic regex algorithm is used to automatically localize
      * the object name into something more legible (I.E. The names you see in-game). This property is simply an override
      * mechanic which aims to give the end-developer more control over the resulting name instead of being forced to rely
-     * on the aforementioned algorithm (note that {@link LanguageBasedPropertyWrapper#getLocalizedObjectKey()} can be used to modify
-     * this step).
+     * on the aforementioned algorithm (note that {@link LanguageBasedPropertyWrapper#getLocalizedObjectKey(BiConsumer)}
+     * can be used to modify this step).
      * <br></br>
      * The algorithm in question, in a nutshell, works as follows (the code block below is purely demonstrative of the
      * localization process and has nothing to do with how the algorithm is actually written):

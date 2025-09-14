@@ -36,6 +36,6 @@ public abstract class FabricDataGenHelperMixin {
     @Expression("id.equals(MOD_ID_FILTER)")
     @ModifyExpressionValue(method = "runInternal", at = @At("MIXINEXTRAS:EXPRESSION"))
     private static boolean nexus$generateDataFromNexus(boolean original, @Local(name = "id") String modId) {
-        return original || (Objects.equals(modId, NexusConstants.MOD_ID) && !NexusServices.DATA_GENERATOR.getModDatagenConfigs().isEmpty());
+        return original || Objects.equals(modId, NexusConstants.MOD_ID);
     }
 }

@@ -3,128 +3,329 @@ package com.mememan.nexus.datagen.standard.tag;
 import com.google.gson.JsonElement;
 import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.datagen.DuplicateDataPolicy;
+import com.mememan.nexus.datagen.NexusProviderTypes;
 import com.mememan.nexus.datagen.ProviderType;
 import com.mememan.nexus.datagen.standard.ModDataProvider;
+import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.specialised.tag.TagBasedPropertyWrapper;
-import com.mememan.nexus.tag.TagWrapper;
-import com.mememan.nexus.util.StringUtil;
+import com.mememan.nexus.property_wrapper.def.tag.TagPropertyWrapper;
+import com.mememan.nexus.util.DataGenUtil;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.tags.IntrinsicHolderTagsProvider;
+import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagBuilder;
-import net.minecraft.tags.TagEntry;
-import net.minecraft.tags.TagFile;
-import net.minecraft.tags.TagKey;
+import net.minecraft.tags.*;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public abstract class StandardTagProvider<T> extends IntrinsicHolderTagsProvider<T> implements ModDataProvider {
+public class StandardTagProvider extends TagsProvider<Object> implements ModDataProvider {
+    protected final PackOutput rootOutput;
     protected final String modId;
     protected final boolean validateAllEntries;
     protected final DuplicateDataPolicy dupeStrat;
-    protected final ObjectArrayList<TagWrapper<? extends T, TagKey<T>>> mappedModObjectTags;
-    protected final Object2ObjectOpenHashMap<T, ObjectArrayList<TagKey<T>>> trackedTaggedObjects = new Object2ObjectOpenHashMap<>();
-    protected final Object2ObjectOpenHashMap<TagKey<T>, ObjectArrayList<TagKey<T>>> trackedTags = new Object2ObjectOpenHashMap<>();
+    protected final List<? extends TagBasedPropertyWrapper<?, ?, ?>> mappedTagPWs;
+    protected final Map<ResourceKey<? extends Registry<?>>, Map<ResourceLocation, TagBuilder>> registryMappedBuilders = new Object2ObjectOpenHashMap<>();
 
-    public StandardTagProvider(PackOutput output, ResourceKey<? extends Registry<T>> targetTagObjectRegistry, CompletableFuture<HolderLookup.Provider> objectLookupProvider, Function<T, ResourceKey<T>> objectKeyExtractor, String modId, boolean validateAllEntries, DuplicateDataPolicy dupeStrat) {
-        super(output, targetTagObjectRegistry, objectLookupProvider, objectKeyExtractor);
+    public StandardTagProvider(PackOutput targetOutput, CompletableFuture<HolderLookup.Provider> regLookup, String modId, boolean validateAllEntries, DuplicateDataPolicy dupeStrat) {
+        super(targetOutput, DataGenPropertyWrapper.RegistryLookupContainer.UNMAPPED_REGISTRY, regLookup);
 
-        this.modId = modId;
-        this.validateAllEntries = validateAllEntries;
-        this.dupeStrat = dupeStrat;
-
-        this.mappedModObjectTags = TagWrapper.getCachedTWEntries().stream()
-                .filter(curTW -> !curTW.excludeFromNativeDatagen() && curTW.getParentTag().get().isFor(registryKey) && curTW.getParentTag().get().location().getNamespace().equals(modId))
-                .map(curTW -> (TagWrapper<? extends T, TagKey<T>>) curTW)
-                .collect(Collectors.toCollection(ObjectArrayList::new));
-    }
-
-    public StandardTagProvider(PackOutput output, ResourceKey<? extends Registry<T>> targetTagObjectRegistry, CompletableFuture<HolderLookup.Provider> objectLookupProvider, CompletableFuture<TagLookup<T>> tagLookup, Function<T, ResourceKey<T>> objectKeyExtractor, String modId, boolean validateAllEntries, DuplicateDataPolicy dupeStrat) {
-        super(output, targetTagObjectRegistry, objectLookupProvider, tagLookup, objectKeyExtractor);
+        this.rootOutput = targetOutput;
 
         this.modId = modId;
         this.validateAllEntries = validateAllEntries;
         this.dupeStrat = dupeStrat;
 
-        this.mappedModObjectTags = TagWrapper.getCachedTWEntries().stream()
-                .filter(curTW -> !curTW.excludeFromNativeDatagen() && curTW.getParentTag().get().isFor(registryKey) && curTW.getParentTag().get().location().getNamespace().equals(modId))
-                .map(curTW -> (TagWrapper<? extends T, TagKey<T>>) curTW)
-                .collect(Collectors.toCollection(ObjectArrayList::new));
+        this.mappedTagPWs = PropertyWrapper.PropertyWrappersContainer.getInferrableDataGennableWrappersOfType(TagBasedPropertyWrapper.class, modId);
     }
 
+    public StandardTagProvider(PackOutput targetOutput, CompletableFuture<HolderLookup.Provider> regLookup, CompletableFuture<TagLookup<Object>> tagLookupFuture, String modId, boolean validateAllEntries, DuplicateDataPolicy dupeStrat) {
+        super(targetOutput, DataGenPropertyWrapper.RegistryLookupContainer.UNMAPPED_REGISTRY, regLookup, tagLookupFuture);
+
+        this.rootOutput = targetOutput;
+
+        this.modId = modId;
+        this.validateAllEntries = validateAllEntries;
+        this.dupeStrat = dupeStrat;
+
+        this.mappedTagPWs = PropertyWrapper.PropertyWrappersContainer.getInferrableDataGennableWrappersOfType(TagBasedPropertyWrapper.class, modId);
+    }
+
+    /**
+     * Main entrypoint responsible for chaining all operations for this data provider.
+     * <br></br>
+     * First, {@link #createContentsProvider()} is called to generate a {@link CompletableFuture} that will
+     * generate all tag contents and signal {@link #contentsDone} when it's finished to allow for proper value retrieval
+     * from {@link #contentsGetter()}.
+     * <br></br>
+     * Then, a dummy object is generated to allow for querying registry entries from both the resultant
+     * {@link HolderLookup.Provider} and {@link TagLookup}.
+     * <br></br>
+     * Finally, all tag entries mapped to their respective registry {@linkplain ResourceKey ResourceKeys} are serialized
+     * and saved to disk appropriately, with missing references and such handled by the same method (see references
+     * below).
+     *
+     * @param output The {@link CachedOutput} instance to use for saving generated data to disk.
+     *
+     * @return A {@link CompletableFuture} representing the completion of all tag serialization tasks.
+     *
+     * @see #serializeTagEntries(CachedOutput, HolderLookup.Provider, TagLookup)
+     * @see #addTags(HolderLookup.Provider)
+     */
     @Override
     public @NotNull CompletableFuture<?> run(CachedOutput output) {
         return createContentsProvider().thenApply((contentProvider) -> {
-            this.contentsDone.complete(null);
+            this.contentsDone.complete(null); // Allow for actual behaviour in #contentsGetter()
             return contentProvider;
         }).thenCombineAsync(parentProvider, (parentContentProvider, currentTag) -> {
             record CombinedData<T>(HolderLookup.Provider currentContents, TagLookup<T> parentTagLookup) {}
 
-            return new CombinedData<T>(parentContentProvider, currentTag);
-        }).thenCompose((combinedTagLookupData) -> {
-            HolderLookup.RegistryLookup<T> regBasedContentLookup = combinedTagLookupData.currentContents.lookupOrThrow(registryKey);
-            Predicate<ResourceLocation> elementPresenceWithinRegistryValidator = (tagLoc) -> regBasedContentLookup.get(ResourceKey.create(registryKey, tagLoc)).isPresent();
-            Predicate<ResourceLocation> tagLocalOrParentPresenceValidator = (tagLoc) -> builders.containsKey(tagLoc) || combinedTagLookupData.parentTagLookup.contains(TagKey.create(registryKey, tagLoc));
-
-            return CompletableFuture.allOf(builders.entrySet().stream().map((tagEntry) -> {
-                ResourceLocation tagLoc = tagEntry.getKey();
-                TagBuilder tagBuilder = tagEntry.getValue();
-                List<TagEntry> serializedTagEntries = tagBuilder.build();
-                List<TagEntry> missingSerializedTags = serializedTagEntries.stream().filter((curTagEntry) -> !curTagEntry.verifyIfPresent(elementPresenceWithinRegistryValidator, tagLocalOrParentPresenceValidator)).toList();
-                boolean shouldCrash = validateAllEntries() && !missingSerializedTags.isEmpty();
-
-                if (shouldCrash) throw new IllegalArgumentException(String.format(Locale.ROOT, "Couldn't define tag %s as it is missing following references: %s (required by mod of ID %s). Please ensure that these tags are registered and/or that their JSON files are generated beforehand (they don't have to be physically present, this primarily refers to generation order).", tagLoc, missingSerializedTags.stream().map(Objects::toString).collect(Collectors.joining(",")), modId));
-                else {
-                    DataResult<JsonElement> serializedTagResult = TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(serializedTagEntries, false));
-                    JsonElement serializedTagJson = serializedTagResult.getOrThrow(false, LOGGER::error);
-                    Path targetTagPath = pathProvider.json(tagLoc);
-
-                    return DataProvider.saveStable(output, serializedTagJson, targetTagPath);
-                }
-            }).toArray(CompletableFuture[]::new));
-        });
+            return new CombinedData<>(parentContentProvider, currentTag);
+        }).thenCompose((combinedTagLookupData) -> serializeTagEntries(output, combinedTagLookupData.currentContents, combinedTagLookupData.parentTagLookup));
     }
 
-    public @NotNull <O> CompletableFuture<?> dummy(CachedOutput output) {
-        List<? extends TagBasedPropertyWrapper<O, ?, ?>> propertyWrappers = PropertyWrapper.PropertyWrappersContainer.getInferrableDataGennableWrappersOfType(TagBasedPropertyWrapper.class, modId);
+    /**
+     * Primary entrypoint responsible for refreshing and regenerating data for {@link #registryMappedBuilders}. Called
+     * in {@link #createContentsProvider()} to allow for {@link CompletableFuture} chaining and updates for
+     * {@link #contentsGetter()} via {@link #contentsDone}.
+     *
+     * @param provider The {@link HolderLookup.Provider} to use for lookups. Currently unused.
+     *
+     * @see #addObjectTags(HolderLookup.Provider)
+     * @see #run(CachedOutput)
+     */
+    @Override
+    protected void addTags(HolderLookup.@NotNull Provider provider) {
+        registryMappedBuilders.clear();
 
-        return createContentsProvider().thenApply((contentProvider) -> {
-            this.contentsDone.complete(null);
-            return contentProvider;
-        }).thenCombineAsync(parentProvider, (parentContentProvider, currentTag) -> {
-            record CombinedData<T>(HolderLookup.Provider currentContents, TagLookup<T> parentTagLookup) {}
+        addObjectTags(provider);
+    }
 
-            return new CombinedData<T>(parentContentProvider, currentTag);
-        }).thenCompose((combinedTagLookupData) -> {
-            HolderLookup.RegistryLookup<T> regBasedContentLookup = combinedTagLookupData.currentContents.lookupOrThrow(registryKey);
-            Predicate<ResourceLocation> elementPresenceWithinRegistryValidator = (tagLoc) -> regBasedContentLookup.get(ResourceKey.create(registryKey, tagLoc)).isPresent();
-            Predicate<ResourceLocation> tagLocalOrParentPresenceValidator = (tagLoc) -> builders.containsKey(tagLoc) || combinedTagLookupData.parentTagLookup.contains(TagKey.create(registryKey, tagLoc));
+    /**
+     * Generic delegator variant of {@link #addTags(HolderLookup.Provider)}. Responsible for populating
+     * {@link #registryMappedBuilders} based on data from {@link #mappedTagPWs}. Additionally, handles nullity checks
+     * for any required PW entries.
+     *
+     * @param provider Lookup provider, in case dynamic entry lookups and/or the likes are needed. Currently unused,
+     *                 primarily here for convenience.
+     *
+     * @param <T> The parent object type.
+     *
+     * @see #addTags(HolderLookup.Provider)
+     * @see #validateDupeObjectTag(TagKey, String, ResourceLocation)
+     */
+    protected <T> void addObjectTags(HolderLookup.Provider provider) {
+        if (!mappedTagPWs.isEmpty()) {
+            mappedTagPWs.stream()
+                    .map(curPW -> (TagBasedPropertyWrapper<T, ?, ?>) curPW)
+                    .forEach(curPW -> {
+                        List<Supplier<TagKey<? super T>>> objectTags = curPW.getObjectTags();
+                        List<Supplier<TagKey<?>>> additionalTags = curPW.getAdditionalTags();
+                        Supplier<T> parentObject = curPW.getParentObject();
+                        String objectName = curPW.getObjectDescriptionId();
+                        String objectClassName = parentObject.get().getClass().getSimpleName();
+                        AtomicBoolean isTag = new AtomicBoolean();
+                        AtomicBoolean tagHasNoExclusiveData = new AtomicBoolean();
 
-            return CompletableFuture.allOf(propertyWrappers.stream().map(pw -> {
+                        if (curPW instanceof TagPropertyWrapper<?, ?> curTPW) { // Do tag-specific processing here
+                            TagPropertyWrapper<T, TagKey<T>> curTagPW = (TagPropertyWrapper<T, TagKey<T>>) curTPW;
+                            Supplier<TagKey<T>> parentTag = curTagPW.getParentObject();
+                            TagKey<T> parentTagObj = parentTag.get();
+                            List<Supplier<T>> taggedObjects = curTagPW.getTaggedObjects();
+                            List<Supplier<TagKey<T>>> tagKeys = curTagPW.getChildTags();
 
+                            if (taggedObjects.isEmpty() && tagKeys.isEmpty()) tagHasNoExclusiveData.set(true);
+                            else {
+                                taggedObjects.forEach(curTaggedObject -> {
+                                    T taggedObject = curTaggedObject.get();
+                                    String taggedObjClassName = taggedObject.getClass().getSimpleName();
+                                    ResourceLocation childObjLoc = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(taggedObject)
+                                            .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for object of type %s: %s", taggedObjClassName, taggedObject)));
 
-                return DataProvider.saveStable(null, null, null);
-            }).toArray(CompletableFuture[]::new));
-        });
+                                    if (validateDupeObjectTag(parentTagObj, taggedObjClassName, childObjLoc)) {
+                                        NexusConstants.LOGGER.debug("[{}] [Tagging {}]: {} -> {}", getModId(), taggedObjClassName, childObjLoc, parentTagObj);
+
+                                        trackTag(parentTagObj).addElement(childObjLoc);
+                                    }
+                                });
+
+                                tagKeys.forEach(curTagKey -> {
+                                    TagKey<T> taggedTagKey = curTagKey.get();
+                                    ResourceLocation taggedTagKeyLoc = taggedTagKey.location();
+
+                                    if (validateDupeObjectTag(taggedTagKey, objectClassName, taggedTagKeyLoc)) {
+                                        NexusConstants.LOGGER.debug("[{}] [Tagging TagKey]: {} -> {}", getModId(), taggedTagKeyLoc, parentTagObj);
+
+                                        trackTag(parentTagObj).addTag(taggedTagKeyLoc);
+                                    }
+                                });
+                            }
+
+                            isTag.set(true);
+                        }
+
+                        if ((!isTag.get() || tagHasNoExclusiveData.get()) && objectTags.isEmpty() && additionalTags.isEmpty() && (validateAllEntries() || curPW.getProviderTypeRequisites().getOrDefault(getProviderType(), false))) {
+                            throw new NullPointerException(String.format("Missing tag entry for %s: %s, required by mod: %s, either because validateAllEntries is set to true for this provider or the object itself requires validation through DataGenBasedPropertyWrapper#getProviderTypeRequisites().", objectClassName, curPW.getObjectDescriptionId(), modId));
+                        }
+
+                        ResourceLocation parentObjLoc = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentObject.get())
+                                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for object of type %s: %s", objectClassName, objectName)));
+
+                        objectTags.forEach(tK -> {
+                            TagKey<? super T> parentTagKey = tK.get();
+
+                            if (validateDupeObjectTag(parentTagKey, objectClassName, parentObjLoc)) {
+                                NexusConstants.LOGGER.debug("[{}] [Tagging {}]: {} -> {}", getModId(), objectClassName, parentObjLoc, parentTagKey);
+
+                                if (isTag.get()) trackTag(parentTagKey).addTag(parentObjLoc);
+                                else trackTag(parentTagKey).addElement(parentObjLoc);
+                            }
+                        });
+
+                        additionalTags.forEach(tK -> {
+                            TagKey<?> parentTagKey = tK.get();
+
+                            if (validateDupeObjectTag(parentTagKey, objectClassName, parentObjLoc)) {
+                                NexusConstants.LOGGER.debug("[{}] [Tagging {}]: {} -> {} (Additional Tag for Registry: {})", getModId(), objectClassName, parentObjLoc, parentTagKey, parentTagKey.registry());
+
+                                if (isTag.get()) trackTag(parentTagKey).addTag(parentObjLoc);
+                                else trackTag(parentTagKey).addElement(parentObjLoc);
+                            }
+                        });
+                    });
+        }
+    }
+
+    /**
+     * Queries and processes all entries in {@link #registryMappedBuilders}. Handles tags and their respective
+     * {@linkplain ResourceLocation ResourceLocations} according to their key {@linkplain ResourceKey registry keys}.
+     *
+     * @param targetOutput The {@link CachedOutput} used to write the tag files to disk.
+     * @param currentContents The {@link HolderLookup.Provider} used to query the registry for the presence of objects.
+     * @param parentTagLookup Miscellaneous {@code interface} to allow for alternate tag lookups in order to verify tag
+     *                        presence alongside {@code currentContents}.
+     *
+     * @return A {@link CompletableFuture} that is completed when all tag entries have been processed.
+     *
+     * @param <T> The parent {@link Registry} type, pertaining to its respective {@link TagKey} type(s).
+     *
+     * @throws IllegalArgumentException If a tag entry is missing a required reference (i.e. missing registry entry for
+     * a tag or object within said defined tag entry).
+     *
+     * @see #trackTag(TagKey)
+     */
+    protected <T> CompletableFuture<?> serializeTagEntries(CachedOutput targetOutput, HolderLookup.Provider currentContents, TagLookup<T> parentTagLookup) {
+        return CompletableFuture.allOf(registryMappedBuilders.entrySet().stream()
+                .flatMap(curEntry -> {
+                    ResourceKey<? extends Registry<T>> registryKey = (ResourceKey<? extends Registry<T>>) curEntry.getKey();
+                    Map<ResourceLocation, TagBuilder> tagBuilders = curEntry.getValue();
+
+                    HolderLookup.RegistryLookup<T> regBasedContentLookup = currentContents.lookupOrThrow(registryKey);
+                    Predicate<ResourceLocation> elementPresenceWithinRegistryValidator = (tagLoc) -> regBasedContentLookup.get(ResourceKey.create(registryKey, tagLoc)).isPresent();
+                    Predicate<ResourceLocation> tagLocalOrParentPresenceValidator = (tagLoc) -> builders.containsKey(tagLoc) || parentTagLookup.contains(TagKey.create(registryKey, tagLoc));
+
+                    return tagBuilders.entrySet().stream()
+                            .map(curTagEntry -> {
+                                ResourceLocation tagLoc = curTagEntry.getKey();
+                                TagBuilder tagBuilder = curTagEntry.getValue();
+                                List<TagEntry> serializedTagEntries = tagBuilder.build();
+                                List<TagEntry> missingSerializedTags = serializedTagEntries.stream().filter((tagEntry) -> !tagEntry.verifyIfPresent(elementPresenceWithinRegistryValidator, tagLocalOrParentPresenceValidator)).toList();
+                                boolean shouldCrash = validateAllEntries() && !missingSerializedTags.isEmpty();
+
+                                if (shouldCrash) throw new IllegalArgumentException(String.format(Locale.ROOT, "Couldn't define tag %s as it is missing following references: %s (required by mod of ID %s). Please ensure that these tags are registered and/or that their JSON files are generated beforehand (they don't have to be physically present, this primarily refers to generation order).", tagLoc, missingSerializedTags.stream().map(Objects::toString).collect(Collectors.joining(",")), modId));
+                                else {
+                                    DataResult<JsonElement> serializedTagResult = TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(serializedTagEntries, false));
+                                    JsonElement serializedTagJson = serializedTagResult.getOrThrow(false, LOGGER::error);
+                                    PackOutput.PathProvider actualPathProvider = rootOutput.createPathProvider(PackOutput.Target.DATA_PACK, TagManager.getTagDir(registryKey));
+                                    Path targetTagPath = actualPathProvider.json(tagLoc);
+
+                                    return DataGenUtil.saveStableAndMerge(targetOutput, serializedTagJson, targetTagPath, DataGenUtil.TAG_FILE_MERGER);
+                                }
+                            });
+                })
+                .toArray(CompletableFuture[]::new));
+    }
+
+    /**
+     * Native variant of {@link #tag(TagKey)} that directly returns a {@link TagBuilder} for the given tag key. Also
+     * tracks keys by their registry {@link ResourceKey ResourceKeys} in {@link #registryMappedBuilders}.
+     *
+     * @param tagKeyToTrack The {@link TagKey} to potentially compute a {@link TagBuilder} for.
+     *
+     * @return The {@link TagBuilder} for the given {@link TagKey}.
+     *
+     * @param <T> The provided {@link TagKey} type, pertaining to its respective object type(s).
+     *
+     * @see #serializeTagEntries(CachedOutput, HolderLookup.Provider, TagLookup)
+     */
+    protected <T> TagBuilder trackTag(TagKey<T> tagKeyToTrack) {
+        return registryMappedBuilders
+                .computeIfAbsent(tagKeyToTrack.registry(), (tkRegLoc) -> new Object2ObjectOpenHashMap<>())
+                .computeIfAbsent(tagKeyToTrack.location(), (tkLoc) -> TagBuilder.create());
+    }
+
+    /**
+     * Validates the given {@code objectLoc} based on the {@code tagKeyToTrack} against the presence of duplicates, and
+     * handles duplicate cases according to the specified {@link #dupeStrat}.
+     *
+     * @param tagKeyToTrack The {@link TagKey} to check the presence of {@code objectLoc} within.
+     * @param objectClassName The {@code class} name for the backing object. Primarily used for logging.
+     * @param objectLoc The {@link ResourceLocation} representing the registry entry of an object.
+     *
+     * @return {@code true} if the {@code objectLoc} is not already tagged with the same {@code tagKeyToTrack},
+     * {@code false} otherwise.
+     *
+     * @param <T> The provided {@link TagKey} type, pertaining to its respective object type.
+     */
+    protected <T> boolean validateDupeObjectTag(TagKey<T> tagKeyToTrack, String objectClassName, ResourceLocation objectLoc) {
+        Map<ResourceLocation, TagBuilder> mappedTagBuilders = registryMappedBuilders.get(tagKeyToTrack.registry());
+
+        if (mappedTagBuilders != null) {
+            boolean objectAlreadyTaggedWithSameTag = mappedTagBuilders.get(tagKeyToTrack.location()) != null && mappedTagBuilders.get(tagKeyToTrack.location()).build().stream().anyMatch(curEntry -> curEntry.verifyIfPresent(objectLoc::equals, objectLoc::equals));
+
+            if (objectAlreadyTaggedWithSameTag) {
+                String objectName = objectLoc.toString();
+
+                switch (getDuplicateDataPolicy()) {
+                    case CRASH -> throw new IllegalStateException(String.format("Attempted to tag %s %s with duplicate tag key %s (from mod of ID %s), specified DuplicateDataPolicy is CRASH.", objectClassName, objectName, tagKeyToTrack.location(), getModId()));
+                    case EXCLUDE_WARN -> {
+                        NexusConstants.LOGGER.warn("Attempted to tag {} {} with duplicate tag key {} (from mod of ID {}), specified DuplicateDataPolicy is EXCLUDE_WARN. Skipping...", objectClassName, objectName, tagKeyToTrack.location(), getModId());
+                        return false;
+                    }
+                    case EXCLUDE_SILENT -> {
+                        return false;
+                    }
+                    case OVERRIDE_WARN -> {
+                        NexusConstants.LOGGER.warn("Overriding duplicate tag key {} for {} {} (from mod of ID {}), specified DuplicateDataPolicy is OVERRIDE_WARN.", tagKeyToTrack.location(), objectClassName, objectName, getModId());
+                        mappedTagBuilders.put(tagKeyToTrack.location(), TagBuilder.create()); // Force override even though we compute the specific tag key after (usually)
+
+                        return true;
+                    }
+                    case OVERRIDE_SILENT -> {
+                        mappedTagBuilders.put(tagKeyToTrack.location(), TagBuilder.create());
+                        return true;
+                    }
+                }
+            } else return true;
+        }
+
+        return true;
     }
 
     @Override
@@ -143,132 +344,12 @@ public abstract class StandardTagProvider<T> extends IntrinsicHolderTagsProvider
     }
 
     @Override
+    public @NotNull ProviderType getProviderType() {
+        return NexusProviderTypes.TAG_PROVIDER;
+    }
+
+    @Override
     public @NotNull DuplicateDataPolicy getDuplicateDataPolicy() {
         return dupeStrat;
-    }
-
-    protected abstract void addObjectTags(HolderLookup.Provider provider);
-
-    @NotNull
-    @Override
-    public abstract ProviderType getProviderType();
-
-    @Nullable
-    protected abstract String getObjectName(T targetObj);
-
-    @Override
-    protected void addTags(HolderLookup.Provider provider) {
-        refreshTrackedTagData();
-
-        addObjectTags(provider);
-        addTagWrappers();
-    }
-
-    protected void refreshTrackedTagData() {
-        this.trackedTaggedObjects.clear();
-        this.trackedTags.clear();
-    }
-
-    protected void addTagWrappers() {
-        if (!mappedModObjectTags.isEmpty()) {
-            String potentialTypeName = StringUtil.toTitleCase(registryKey.location().getPath());
-
-            mappedModObjectTags.forEach(twEntry -> {
-                TagKey<T> parentTagKey = twEntry.getParentTag().get();
-
-                twEntry.getPredefinedTagEntries().forEach(tagEntry -> {
-                    T objectTagEntry = tagEntry.get();
-
-                    if (objectTagEntry != null) {
-                        if (validateDupeObjectTag(objectTagEntry, parentTagKey)) {
-                            NexusConstants.LOGGER.debug("[Tagging {}}]: {} -> {} (For mod of ID: {})", potentialTypeName, objectTagEntry, parentTagKey, modId);
-                            tag(parentTagKey).add(objectTagEntry);
-                        }
-                    }
-                });
-
-                twEntry.getStoredTags().forEach(tagKeyEntry -> {
-                    TagKey<T> storedTagKeyEntry = tagKeyEntry.get();
-
-                    if (storedTagKeyEntry != null) {
-                        if (validateDupeTag(parentTagKey, storedTagKeyEntry)) {
-                            NexusConstants.LOGGER.debug("[Tagging {} Tag]: {} -> {} (For mod of ID: {})", potentialTypeName, storedTagKeyEntry, parentTagKey, modId);
-
-                            if (validateAllEntries()) tag(storedTagKeyEntry); // At least have the file for the tag present so that we can actually reference it without crashing if validateAllEntries is true
-                            tag(parentTagKey).addTag(storedTagKeyEntry);
-                        }
-                    }
-                });
-
-                twEntry.getParentTags().forEach(parentTagKeyEntry -> {
-                    TagKey<T> storedParentTagKeyEntry = parentTagKeyEntry.get();
-
-                    if (storedParentTagKeyEntry != null) {
-                        if (validateDupeTag(storedParentTagKeyEntry, parentTagKey)) {
-                            NexusConstants.LOGGER.debug("[Tagging {} Tag]: {} -> {} (For mod of ID: {})", potentialTypeName, parentTagKey, storedParentTagKeyEntry, modId);
-
-                            if (validateAllEntries()) tag(parentTagKey); // At least have the file for the tag present so that we can actually reference it without crashing if validateAllEntries is true
-                            tag(storedParentTagKeyEntry).addTag(parentTagKey);
-                        }
-                    }
-                });
-            });
-        }
-    }
-
-    protected boolean validateDupeObjectTag(T targetObject, TagKey<T> targetTagKey) {
-        ObjectArrayList<TagKey<T>> targetObjTags = trackedTaggedObjects.computeIfAbsent(targetObject, oK -> new ObjectArrayList<>());
-        ResourceLocation tagLoc = targetTagKey.location();
-        String potentialTypeName = registryKey.location().getPath();
-
-        if (targetObjTags.stream().map(TagKey::location).anyMatch(tagLoc::equals)) {
-            switch (getDuplicateDataPolicy()) {
-                case CRASH -> throw new IllegalStateException(String.format("Attempted to tag %s %s with duplicate tag key %s from mod of ID %s, specified DuplicateDataPolicy is CRASH.", potentialTypeName, getObjectName(targetObject), tagLoc, getModId()));
-                case EXCLUDE_WARN -> {
-                    NexusConstants.LOGGER.warn("Attempted to tag {} {} with duplicate tag key {} from mod of ID {}, specified DuplicateDataPolicy is EXCLUDE_WARN. Skipping...", potentialTypeName, getObjectName(targetObject), tagLoc, getModId());
-                    return false;
-                }
-                case EXCLUDE_SILENT -> {
-                    return false;
-                }
-                case OVERRIDE_WARN -> {
-                    NexusConstants.LOGGER.warn("Overriding duplicate {} tag {} for {} {} from mod of ID {}, specified DuplicateDataPolicy is OVERRIDE_WARN.", potentialTypeName, tagLoc, potentialTypeName, getObjectName(targetObject), getModId());
-                    return true;
-                }
-                case OVERRIDE_SILENT -> {
-                    return true;
-                }
-            }
-        } else targetObjTags.add(targetTagKey);
-
-        return true;
-    }
-
-    protected boolean validateDupeTag(TagKey<T> targetTagKey, TagKey<T> containedTagKey) {
-        ObjectArrayList<TagKey<T>> targetTags = trackedTags.computeIfAbsent(targetTagKey, oK -> new ObjectArrayList<>());
-        ResourceLocation parentTagLoc = targetTagKey.location();
-        ResourceLocation tagLoc = containedTagKey.location();
-
-        if (targetTags.stream().map(TagKey::location).anyMatch(tagLoc::equals)) {
-            switch (getDuplicateDataPolicy()) {
-                case CRASH -> throw new IllegalStateException(String.format("Attempted to tag TagKey %s with duplicate tag key %s from mod of ID %s, specified DuplicateDataPolicy is CRASH.", parentTagLoc, tagLoc, getModId()));
-                case EXCLUDE_WARN -> {
-                    NexusConstants.LOGGER.warn("Attempted to tag TagKey {} with duplicate tag key {} from mod of ID {}, specified DuplicateDataPolicy is EXCLUDE_WARN. Skipping...", parentTagLoc, tagLoc, getModId());
-                    return false;
-                }
-                case EXCLUDE_SILENT -> {
-                    return false;
-                }
-                case OVERRIDE_WARN -> {
-                    NexusConstants.LOGGER.warn("Overriding duplicate tag {} for TagKey {} from mod of ID {}, specified DuplicateDataPolicy is OVERRIDE_WARN.", tagLoc, parentTagLoc, getModId());
-                    return true;
-                }
-                case OVERRIDE_SILENT -> {
-                    return true;
-                }
-            }
-        } else targetTags.add(containedTagKey);
-
-        return true;
     }
 }

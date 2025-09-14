@@ -24,7 +24,7 @@ import java.util.Objects;
  *
  * @see NexusServices#DATA_GENERATOR
  */
-@Mixin(DatagenModLoader.class)
+@Mixin(value = DatagenModLoader.class, remap = false)
 public abstract class DatagenModLoaderMixin {
 
     private DatagenModLoaderMixin() {

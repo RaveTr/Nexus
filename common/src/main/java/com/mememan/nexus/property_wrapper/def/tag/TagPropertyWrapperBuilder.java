@@ -1,8 +1,12 @@
 package com.mememan.nexus.property_wrapper.def.tag;
 
+import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.impl.specialised.tag.SpecializedTagPropertyWrapperBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -23,6 +27,22 @@ public class TagPropertyWrapperBuilder<T, TK extends TagKey<T>> extends Speciali
                 .setChildTags(propertyWrapper.getChildTags());
     }
 
+    /**
+     * Specifies an object to be tagged with this instance's parent {@link TagKey} (via its owner
+     * {@link TagPropertyWrapper}).
+     * <br></br>
+     * It should be noted that the object should be a valid, retrievable type from any registry ({@link Block},
+     * {@link Item}, {@link EntityType}, etc.)
+     *
+     * @param taggedObject The object to tag with this instance's parent {@link TagKey}.
+     *
+     * @return {@code this} (builder method).
+     *
+     * @see DataGenPropertyWrapper.RegistryLookupContainer#getObjectRegistryId(Object)
+     * @see #withTaggedObjects(Supplier[])
+     * @see #withTaggedObjects(List)
+     * @see #setTaggedObjects(List)
+     */
     public TagPropertyWrapperBuilder<T, TK> withTaggedObject(Supplier<T> taggedObject) {
         this.storedTaggedObjects.add(taggedObject);
         return this;

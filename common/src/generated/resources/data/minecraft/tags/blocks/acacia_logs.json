@@ -1,8 +1,8 @@
 {
   "values": [
+    "#nexus:test/sometagtest",
     "nexus:test_block_3",
     "nexus:test_block",
-    "#nexus:test/sometagtest",
     "nexus:test_able_block"
   ]
 }

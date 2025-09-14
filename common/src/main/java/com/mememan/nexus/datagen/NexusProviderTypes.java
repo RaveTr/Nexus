@@ -5,7 +5,7 @@ import com.mememan.nexus.datagen.standard.StandardLanguageProvider;
 import com.mememan.nexus.datagen.standard.StandardRecipeProvider;
 import com.mememan.nexus.datagen.standard.loot.StandardLootProvider;
 import com.mememan.nexus.datagen.standard.model.StandardModelProvider;
-import com.mememan.nexus.datagen.standard.tag.StandardTagsProvider;
+import com.mememan.nexus.datagen.standard.tag.StandardTagProvider;
 import com.mememan.nexus.loader.ModSide;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,7 +41,7 @@ public enum NexusProviderTypes implements ProviderType {
      */
     RECIPE_PROVIDER(ModSide.SERVER),
     /**
-     * Represents the general {@linkplain StandardTagsProvider providers} responsible for generating all types of tags.
+     * Represents the general {@linkplain StandardTagProvider providers} responsible for generating all types of tags.
      */
     TAG_PROVIDER(ModSide.SERVER),
     ;

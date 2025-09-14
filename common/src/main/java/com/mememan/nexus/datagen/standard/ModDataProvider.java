@@ -68,7 +68,7 @@ public interface ModDataProvider extends DataProvider {
      * actually been generated. By conventional standard, this method returns {@code CompletableFuture.completedFuture(null)}
      * if no data was generated. Otherwise, it returns a {@code CompletableFuture#allOf(...)} that maps data to
      * {@link DataProvider#saveStable(CachedOutput, JsonElement, Path)}, then gathers the stream of these futures
-     * into a single array.
+     * into a single array (or similar).
      */
     @Override
     @NotNull
