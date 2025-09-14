@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -64,13 +65,26 @@ public class StandardLanguageProvider implements ModDataProvider {
     protected void addTranslations() {
         if (!mappedLanguagePWs.isEmpty()) {
             mappedLanguagePWs.forEach(curPW -> {
-                Optional<String> localizedValue = curPW.getLocalizedObjectKey((locVal, postMappedVal) -> NexusConstants.LOGGER.debug("[{}] [Applying Post-Translation Mapping for {}]: '{}' -> '{}' -> '{}'", modId, curPW.getParentObject().get().getClass().getSimpleName(), curPW.getObjectDescriptionId(), locVal, postMappedVal));
+                AtomicReference<String> locValRef = new AtomicReference<>();
+                AtomicReference<String> postMappedValueRef = new AtomicReference<>();
+                Optional<String> localizedValue = curPW.getLocalizedObjectKey((locVal, postMappedVal) -> {
+                    locValRef.set(locVal); // Keep track of the previous localized value
+                    postMappedValueRef.set(postMappedVal);
+                });
                 String objectClassName = curPW.getParentObject().get().getClass().getSimpleName();
 
                 localizedValue.ifPresentOrElse(locVal -> {
                     String unlocalizedKey = curPW.getObjectDescriptionId();
 
-                    NexusConstants.LOGGER.debug("[{}] [Generating Translation for {}]: '{}' -> '{}'", modId, objectClassName, unlocalizedKey, locVal);
+                    String prevLocVal = locValRef.get();
+
+                    NexusConstants.LOGGER.debug("[{}] [Generating Translation for {}]: '{}' -> '{}'", modId, objectClassName, unlocalizedKey, prevLocVal != null ? prevLocVal : locVal);
+
+                    String postMappedVal = postMappedValueRef.get();
+
+                    if (prevLocVal != null && postMappedVal != null) { // Ensure correct logging order (minimal overhead, doesn't really matter)
+                        NexusConstants.LOGGER.debug("[{}] [Applying Post-Translation Mapping for {}]: '{}' -> '{}' -> '{}'", modId, objectClassName, curPW.getObjectDescriptionId(), prevLocVal, postMappedVal);
+                    }
 
                     add(unlocalizedKey, locVal);
                 }, () -> {

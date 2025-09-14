@@ -25,6 +25,7 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -52,6 +53,7 @@ public class TestBlockRegistrar {
             .withModelDefinition(suh -> new ItemModelDefinition(ModelTemplates.CUBE_ALL)
                     .withTextureMapping(TextureMapping.cube(NexusConstants.prefix("test_able_block")))
                     .withItemModelTextureOverride(Map.of(NexusConstants.prefix("blud"), 0.614F), NexusConstants.prefix("zamn_texture_path/zamn")))
+            .withLocalization(v -> v.toUpperCase(Locale.ROOT))
             .buildAndGet();
 
     public static final Supplier<Block> BLAH_3 = new BlockPropertyWrapper<>(registerBlock(new ResourceLocation("nexus", "test_block_3"), () -> new Block(BlockBehaviour.Properties.of())), "nexus")
