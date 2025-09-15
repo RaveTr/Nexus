@@ -161,8 +161,6 @@ public interface PlatformManager {
      * to the game's startup time, and that's only on its first call when nothing's cached yet.
      *
      * @return A {@link Set} of all loaded mods, represented as {@link ModData} objects.
-     *
-     * @implNote Mind that this collection doesn't include Minecraft or Java, as some loader implementations do.
      */
     Set<ModData> getModData();
 

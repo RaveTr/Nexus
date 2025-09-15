@@ -95,13 +95,13 @@ public class StandardModelProvider extends ModelProvider implements ModDataProvi
                         Runnable serializationAction = () -> serializedModelDefinitions.add(DataProvider.saveStable(cachedOutput, constructModelJson(descId, convertedDefinition), modelPathProvider.json(modelRL)));
 
                         // Primary model definition
-                        handleModelGeneration(modelRL, objectClassName, serializationAction);
+                        handleModelGeneration(modelRL, descId, objectClassName, serializationAction);
 
                         // Rest of the nested model definitions
                         if (!flattenedModelDefinitions.isEmpty()) {
                             flattenedModelDefinitions.stream()
                                     .map(curDef -> formatModelResourceLocation(descId, curDef))
-                                    .forEach(curModelRL -> handleModelGeneration(curModelRL, objectClassName, serializationAction));
+                                    .forEach(curModelRL -> handleModelGeneration(curModelRL, descId, objectClassName, serializationAction));
                         }
                     }, () -> {
                         if (validateAllEntries() || curPW.getProviderTypeRequisites().getOrDefault(getProviderType(), false)) {
@@ -115,13 +115,14 @@ public class StandardModelProvider extends ModelProvider implements ModDataProvi
      * Processes the given {@code modelRL} and handles duplicate cases based on {@link #dupeStrat}.
      *
      * @param modelRL The finalized {@link ResourceLocation} of the model being serialized.
+     * @param objectDescId The object description ID for the model being serialized. Only really used for logging purposes.
      * @param objectClassName The object type for the model being serialized. Only really used for logging purposes.
      * @param serializationAction The action to perform if the model is not a duplicate (or if it is a duplicate and the
      *                            specified {@link #dupeStrat} is {@link DuplicateDataPolicy#OVERRIDE_WARN} or
      *                            {@link DuplicateDataPolicy#OVERRIDE_SILENT}).
      */
-    protected void handleModelGeneration(ResourceLocation modelRL, String objectClassName, Runnable serializationAction) {
-        NexusConstants.LOGGER.debug("[{}] [Generating Model for {}]: {}", getModId(), objectClassName, modelRL);
+    protected void handleModelGeneration(ResourceLocation modelRL, String objectDescId, String objectClassName, Runnable serializationAction) {
+        NexusConstants.LOGGER.debug("[{}] [Generating Model for {}]: {} (Model File ResourceLocation: {})", getModId(), objectClassName, objectDescId, modelRL);
 
         if (!trackedModels.add(modelRL)) {
             switch (getDuplicateDataPolicy()) {

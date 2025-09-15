@@ -38,7 +38,11 @@ public interface ModData {
      * startup.
      * <br></br>
      * Mind that when using the word "formatted" in this case, it refers to paths that go something like
-     * {@code "com.mememan.nexus.loader.ModData"} (I.E. NOT the canonical system path to any given class file).
+     * {@code "com.mememan.nexus.loader.ModData.class"} (I.E. NOT the canonical system path to any given {@code class}
+     * file).
+     * <br></br>
+     * Mind that only {@code class} file paths are formatted. Paths that lead to other file types remain separated
+     * by {@code '/'}.
      *
      * @return A {@link List} of every single formatted path within this instance's owning mod's JAR file.
      *
@@ -53,12 +57,50 @@ public interface ModData {
      *
      * @return A lexicographically-sorted {@link List} of all {@code class} files within this instance's owning mod's
      * JAR file.
+     *
+     * @see #getAllResourcePaths(String)
      */
     default List<String> getAllClassPaths() {
         return getAllFilePaths().stream()
                 .filter(path -> path.endsWith(".class"))
                 .sorted(String::compareTo)
                 .toList();
+    }
+
+    /**
+     * Overloaded variant of {@link #getAllFilePaths()} that computes/gets a lexicographically-sorted {@link List} of
+     * all resource files within this instance's owning mod's JAR file. Does not prune their extensions. Excludes
+     * {@code class} files.
+     *
+     * @param resourceFileType The file type of the resource files to be retrieved. May be {@code null} to indicate
+     *                         that all resource files should be retrieved.
+     *
+     * @return A lexicographically-sorted {@link List} of all resource files within this instance's owning mod's
+     * JAR file, corresponding to the specified resource file type.
+     *
+     * @see #getAllClassPaths()
+     * @see #getAllResourcePaths()
+     */
+    default List<String> getAllResourcePaths(@Nullable String resourceFileType) {
+        return getAllFilePaths().stream()
+                .filter(curPath -> (resourceFileType == null || curPath.endsWith(resourceFileType)) && !curPath.endsWith(".class"))
+                .sorted(String::compareTo)
+                .toList();
+    }
+
+    /**
+     * Overloaded variant of {@link #getAllResourcePaths(String)} that computes/gets a lexicographically-sorted
+     * {@link List} of all resource files within this instance's owning mod's JAR file. Does not prune their
+     * extensions. Excludes {@code class} files.
+     *
+     * @return A lexicographically-sorted {@link List} of all resource files within this instance's owning mod's
+     * JAR file.
+     *
+     * @see #getAllClassPaths()
+     * @see #getAllResourcePaths(String)
+     */
+    default List<String> getAllResourcePaths() {
+        return getAllResourcePaths(null);
     }
 
     /**

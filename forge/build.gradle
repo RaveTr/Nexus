@@ -26,7 +26,6 @@ mixin {
 minecraft {
     mappings channel: "${forge_mappings_channel}", version: "${forge_mappings_channel_version}"
 
-    reobf = false
     copyIdeResources = true
 
     if (file('src/main/resources/META-INF/accesstransformer.cfg').exists()) {

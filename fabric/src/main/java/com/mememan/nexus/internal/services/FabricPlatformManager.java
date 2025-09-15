@@ -19,7 +19,6 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.annotation.Annotation;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -30,7 +29,6 @@ import java.util.stream.Collectors;
 public class FabricPlatformManager implements PlatformManager {
     private static final FabricGamePathWrapper FABRIC_GAME_PATH_WRAPPER = new FabricGamePathWrapper();
     private static final ObjectOpenHashSet<ModData> MOD_DATA_CACHE = FabricLoader.getInstance().getAllMods().stream()
-            .filter(curContainer -> !Objects.equals(curContainer.getMetadata().getId(), "minecraft") && !Objects.equals(curContainer.getMetadata().getId(), "java")) // Fabric considers Minecraft to be a mod, which unnecessarily adds upwards of 1 minute to startup time. Funny enough, Java usually adds a mere ~300ms on its own, but we obviously still don't want to index that either.
             .map(FabricModData::new)
             .collect(Collectors.toCollection(ObjectOpenHashSet::new));
 

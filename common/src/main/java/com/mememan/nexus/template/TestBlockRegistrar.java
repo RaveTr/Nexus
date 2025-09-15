@@ -5,6 +5,7 @@ import com.mememan.nexus.asm.annotations.RegistrarEntry;
 import com.mememan.nexus.client.model.item.ItemModelDefinition;
 import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapper;
+import com.mememan.nexus.template.property_wrapper.BlockPropertyWrapperTemplates;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -34,6 +35,7 @@ public class TestBlockRegistrar {
 
     public static final Supplier<SlabBlock> BLAH = new BlockPropertyWrapper<>(registerBlock(new ResourceLocation("nexus", "test_block"), () -> new SlabBlock(BlockBehaviour.Properties.of())), "nexus")
             .builder()
+            .copyFrom((BlockPropertyWrapper<SlabBlock>) BlockPropertyWrapperTemplates.BASIC)
             .withRecipe(r -> result -> ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, result.get())
                     .requires(Items.ACACIA_BOAT)
                     .unlockedBy("has_" + BuiltInRegistries.ITEM.getKey(Items.ACACIA_BOAT).getPath(), InventoryChangeTrigger.TriggerInstance.hasItems(Items.ACACIA_BOAT))

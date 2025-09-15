@@ -111,7 +111,7 @@ public class ForgeModData implements ModData {
             return rootJarStream
                     .filter(curPath -> curPath.getNameCount() > 0)
                     .filter(Files::isRegularFile)
-                    .map(curPath -> curPath.toString().replace('/','.'))
+                    .map(curPath -> curPath.toString().endsWith(".class") ? curPath.toString().replace('/','.') : curPath.toString())
                     .filter(pkg-> !pkg.isEmpty())
                     .collect(Collectors.toCollection(ObjectArrayList::new));
         } catch (IOException e) {

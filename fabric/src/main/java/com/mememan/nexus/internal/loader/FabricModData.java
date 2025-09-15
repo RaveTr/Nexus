@@ -23,7 +23,10 @@ import org.objectweb.asm.Opcodes;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.Annotation;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -110,6 +113,10 @@ public class FabricModData implements ModData {
     /**
      * Path-mapping method capable of handling both standard and nested mods within scanned JAR files. Additionally,
      * handles caching annotation data.
+     * <br></br>
+     * Has an overall O(m * (n + p)) time complexity (where {@code m} is the number of root paths in the given {@code
+     * targetModContainer}, {@code n} is the number of files/paths per root path (usually 1), and {@code p} is the number
+     * of {@code class} files scanned (for annotation parsing)).
      *
      * @param targetModContainer The {@link ModContainer} to index the paths of. Typically defaults to the owning JAR
      *                           file of this instance's {@link #ownerModContainer}.
@@ -120,78 +127,10 @@ public class FabricModData implements ModData {
     public ObjectArrayList<String> mapAllFilePaths(ModContainer targetModContainer) {
         ObjectArrayList<String> allFilePathsLocal = new ObjectArrayList<>();
 
-        targetModContainer.getRootPaths().forEach(rootPath -> { // We can handle all edge-cases for both standard and nested mods
-            try (Stream<Path> allPaths = Files.walk(rootPath)) {
-                allPaths.forEach(curSuperPath -> {
-                    if (curSuperPath.endsWith(".jar")) { // In prod (or a nested mod JAR)
-                        try (Stream<Path> nestedPaths = Files.walk(curSuperPath)) {
-                            nestedPaths
-                                    .filter(curPath -> curPath.getNameCount() > 0)
-                                    .filter(Files::isRegularFile)
-                                    .map(curPath -> curPath.toString().replace('/', '.'))
-                                    .map(curPathString -> curPathString.substring(1)) // The very first char is always going to be an unnecessary '.'
-                                    .filter(pkg-> !pkg.isEmpty())
-                                    .peek(curPathString -> {
-                                        if (curPathString.endsWith(".class")) {
-                                            String formattedPathString = curPathString.substring(0, curPathString.lastIndexOf("."));
-
-                                            try {
-                                                ClassReader targetClassReader = new ClassReader(formattedPathString);
-                                                ClassVisitor targetClassVisitor = new ClassVisitor(Opcodes.ASM9) {
-
-                                                    @Override
-                                                    public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-                                                        cachedAnnotatedClasses.computeIfAbsent(descriptor, (oK) -> new ObjectArrayList<>())
-                                                                .add(formattedPathString);
-                                                        return super.visitAnnotation(descriptor, visible);
-                                                    }
-                                                };
-
-                                                targetClassReader.accept(targetClassVisitor, 0);
-                                            } catch (IOException e) {
-                                                NexusConstants.LOGGER.error("Failed to initialize ClassReader for class {} in mod {}", formattedPathString, targetModContainer.getMetadata().getId(), e);
-                                            }
-                                        }
-                                    })
-                                    .forEach(allFilePathsLocal::add);
-                        } catch (IOException e) {
-                            NexusConstants.LOGGER.error("Failed to load mod data for mod {}", targetModContainer.getMetadata().getId(), e);
-                        }
-                    } else if (Files.isDirectory(curSuperPath)) { // In the dev environment
-                        try (Stream<Path> nestedPaths = Files.walk(curSuperPath)) {
-                            nestedPaths
-                                    .filter(Files::isRegularFile)
-                                    .map(curPath -> curSuperPath.relativize(curPath).toString().replace(File.separatorChar, '.').replace('/', '.')) // We need that last replace call if we're in the dev environment
-                                    .filter(pkg-> !pkg.isEmpty())
-                                    .filter(curPathString -> allFilePathsLocal.stream().noneMatch(curNestedPathString -> curNestedPathString.contains(curPathString))) // Patch: In-dev, for whatever reason, directories are recursively added with one package name pruned each time, so we want to avoid that
-                                    .peek(curPathString -> {
-                                        if (curPathString.endsWith(".class")) {
-                                            String formattedPathString = curPathString.substring(0, curPathString.lastIndexOf("."));
-
-                                            try {
-                                                ClassReader targetClassReader = new ClassReader(formattedPathString);
-                                                ClassVisitor targetClassVisitor = new ClassVisitor(Opcodes.ASM9) {
-
-                                                    @Override
-                                                    public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-                                                        cachedAnnotatedClasses.computeIfAbsent(descriptor, (oK) -> new ObjectArrayList<>())
-                                                                .add(formattedPathString);
-                                                        return super.visitAnnotation(descriptor, visible);
-                                                    }
-                                                };
-
-                                                targetClassReader.accept(targetClassVisitor, 0);
-                                            } catch (IOException e) {
-                                                NexusConstants.LOGGER.error("Failed to initialize ClassReader for class {} within in-dev mod {}", formattedPathString, targetModContainer.getMetadata().getId(), e);
-                                            }
-                                        }
-                                    })
-                                    .forEach(allFilePathsLocal::add);
-                        } catch (IOException e) {
-                            NexusConstants.LOGGER.error("Failed to load mod data for in-dev mod {}", targetModContainer.getMetadata().getId(), e);
-                        }
-                    }
-                });
+        targetModContainer.getRootPaths().forEach(rootPath -> {
+            try {
+                if (Files.isDirectory(rootPath)) processDirectory(rootPath, allFilePathsLocal, targetModContainer);
+                else if (rootPath.toString().endsWith(".jar")) processJar(rootPath, allFilePathsLocal, targetModContainer);
             } catch (IOException e) {
                 NexusConstants.LOGGER.error("Failed to load mod data for mod {}", targetModContainer.getMetadata().getId(), e);
             }
@@ -227,5 +166,162 @@ public class FabricModData implements ModData {
                 })
                 .map(ClassFinder::forName)
                 .collect(Collectors.toCollection(ObjectArrayList::new));
+    }
+
+    /**
+     * Delegator method for processing paths found within a directory, primarily intended for use in-dev (particularly
+     * for scanning the {@code "build/"} directory).
+     * <br></br>
+     * Handles edge cases, formats files, and caches annotation data. Additionally, deduplicates paths (which for some
+     * reason happen to be on Fabric - where paths are recursively added with 1 package pruned from the left) with
+     * roughly O(n * log(n) + n * k) time complexity (where {@code n} is the number of files/paths, including
+     * subdirectories, and {@code k} is the average length of all file paths).
+     *
+     * @param rootDir The mod's root directory (usually {@code "build/"}, but anything goes).
+     * @param allFilePathsLocal The {@link ObjectArrayList} to store all formatted paths found within the mod's JAR file.
+     * @param targetModContainer The {@link ModContainer} to index the paths of (typically just the {@code main} mod
+     *                           in the dev environment, AKA your current mod).
+     *
+     * @throws IOException If some exception is caught while reading the mod's root directory.
+     *
+     * @see #processClassAnnotations(String, InputStream, ModContainer)
+     */
+    protected void processDirectory(Path rootDir, ObjectArrayList<String> allFilePathsLocal, ModContainer targetModContainer) throws IOException {
+        ObjectArrayList<String> potentialPaths; // All paths found in the directory, including the weird duplicates Fabric slaps in there for some reason
+
+        try (Stream<Path> paths = Files.walk(rootDir)) {
+            potentialPaths = paths
+                    .filter(Files::isRegularFile)
+                    .map(rootDir::relativize)
+                    .map(Path::toString)
+                    .collect(Collectors.toCollection(ObjectArrayList::new));
+        } catch (IOException e) {
+            NexusConstants.LOGGER.error("Failed to load mod data for mod {} (Failed to read data from mod's root directory)", targetModContainer.getMetadata().getId(), e);
+            return;
+        }
+
+        potentialPaths.sort(Comparator.comparingInt(String::length).reversed()); // Sort recursive paths by length (longest to shortest)
+
+        ObjectArrayList<String> acceptedPaths = filterDuplicates(potentialPaths);
+
+        for (String pathStr : acceptedPaths) {
+            if (pathStr.endsWith(".class")) {
+                String className = pathStr.substring(0, pathStr.length() - 6).replace('/', '.');
+
+                try (InputStream is = Files.newInputStream(rootDir.resolve(pathStr.replace('/', File.separatorChar)))) {
+                    processClassAnnotations(className, is, targetModContainer);
+                } catch (IOException e) {
+                    NexusConstants.LOGGER.error("Failed to read class file {} in mod {}", pathStr, targetModContainer.getMetadata().getId(), e);
+                }
+                allFilePathsLocal.add(className);
+            } else allFilePathsLocal.add(pathStr);
+        }
+    }
+
+    /**
+     * Delegator method for processing paths found within a JAR file (typically for prod).
+     * <br></br>
+     * Handles edge cases, formats files, and caches annotation data. Unlike
+     * {@link #processDirectory(Path, ObjectArrayList, ModContainer)}, this doesn't have to deal with Fabric's odd path
+     * recursive duplication, and it thus has a time complexity of roughly O(n * k), where {@code n} is the number of
+     * files/paths within the target JAR, and {@code k} is the average processing time of each JAR file (if any nested
+     * JARs are present).
+     *
+     * @param jarPath The {@link Path} to the root JAR file.
+     * @param allFilePathsLocal The {@link ObjectArrayList} to store all formatted paths found within the mod's JAR file.
+     * @param targetModContainer The target {@link ModContainer} to index the paths of.
+     *
+     * @throws IOException If some exception is caught while reading the mod's root JAR file.
+     */
+    protected void processJar(Path jarPath, ObjectArrayList<String> allFilePathsLocal, ModContainer targetModContainer) throws IOException {
+        try (FileSystem fs = FileSystems.newFileSystem(jarPath, (ClassLoader) null)) {
+            for (Path root : fs.getRootDirectories()) {
+                try (Stream<Path> paths = Files.walk(root)) {
+                    paths
+                            .filter(Files::isRegularFile)
+                            .map(root::relativize)
+                            .map(Path::toString)
+                            .filter(pathStr -> !pathStr.isEmpty())
+                            .forEach(pathStr -> {
+                                if (pathStr.endsWith(".class")) {
+                                    String className = pathStr.substring(0, pathStr.length() - 6).replace('/', '.');
+
+                                    try (InputStream is = Files.newInputStream(root.resolve(pathStr))) {
+                                        processClassAnnotations(className, is, targetModContainer);
+                                    } catch (IOException e) {
+                                        NexusConstants.LOGGER.error("Failed to read class file {} from JAR {} in mod {}", pathStr, jarPath, targetModContainer.getMetadata().getId(), e);
+                                    }
+                                    allFilePathsLocal.add(className);
+                                } else allFilePathsLocal.add(pathStr);
+                            });
+                }
+            }
+        }
+    }
+
+    /**
+     * Directly processes a {@code class} file's annotations using {@link ClassReader} and {@link ClassVisitor}.
+     * <br></br>
+     * Prunes all {@code class} byte code metadata to only retain the name and annotations for maximum O(n) performance.
+     *
+     * @param className The name of the target {@code class} file.
+     * @param classInputStream The converted {@code class} file's byte code.
+     * @param targetModContainer The target {@link ModContainer} to index the paths of (primarily for logging purposes).
+     */
+    protected void processClassAnnotations(String className, InputStream classInputStream, ModContainer targetModContainer) {
+        try {
+            ClassReader targetClassReader = new ClassReader(classInputStream);
+            ClassVisitor targetClassVisitor = new ClassVisitor(Opcodes.ASM9) {
+                @Override
+                public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
+                    cachedAnnotatedClasses.computeIfAbsent(descriptor, (oK) -> new ObjectArrayList<>())
+                            .add(className);
+                    return super.visitAnnotation(descriptor, visible);
+                }
+            };
+
+            targetClassReader.accept(targetClassVisitor, ClassReader.SKIP_CODE | ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES); // Retain only name and annotation metadata per class
+        } catch (IOException e) {
+            NexusConstants.LOGGER.error("Failed to initialize ClassReader for class {} in mod {}", className, targetModContainer.getMetadata().getId(), e);
+        }
+    }
+
+    /**
+     * De-duplicates paths found within the provided {@code potentialPaths} (typically from a mod's JAR file).
+     * <br></br>
+     * Averages approximately O(n * log(n)) time complexity, where {@code n} is the total number of paths.
+     *
+     * @param potentialPaths The overall path {@link ObjectArrayList}.
+     *
+     * @return The de-duplicated path {@link ObjectArrayList}.
+     */
+    protected static @NotNull ObjectArrayList<String> filterDuplicates(ObjectArrayList<String> potentialPaths) {
+        ObjectArrayList<String> acceptedPaths = new ObjectArrayList<>();
+        StringBuilder pathBuilder = new StringBuilder(256); // Re-use StringBuilder to reduce memory allocation
+
+        for (String rawPath : potentialPaths) {
+            if (rawPath.isEmpty()) continue;
+
+            pathBuilder.setLength(0);
+
+            for (int i = 0; i < rawPath.length(); i++) {
+                char c = rawPath.charAt(i);
+                pathBuilder.append(c == File.separatorChar ? '/' : c);
+            }
+
+            String currentPath = pathBuilder.toString();
+
+            boolean isContained = false;
+
+            for (String acceptedPath : acceptedPaths) {
+                if (acceptedPath.contains(currentPath)) {
+                    isContained = true;
+                    break;
+                }
+            }
+
+            if (!isContained) acceptedPaths.add(currentPath);
+        }
+        return acceptedPaths;
     }
 }
