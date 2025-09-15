@@ -365,11 +365,11 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
         }
 
         /**
-         * Attempts to map the provided {@code targetObj} with a {@linkplain ResourceLocation registry identifier key}
+         * Attempts to map the provided {@code targetObj} with a {@linkplain ResourceLocation registry location key}
          * based on its type.
          * <br></br>
-         * If the provided {@code targetObj} is a {@link ResourceKey}, then it is directly returned. If it is a
-         * {@link TagKey}, then {@link TagKey#location()} is returned.
+         * If the provided {@code targetObj} is a {@link ResourceKey}, then it is directly returned via
+         * {@link ResourceKey#location()}. If it is a {@link TagKey}, then {@link TagKey#location()} is returned.
          * <br></br>
          * Otherwise, a lookup is performed via {@link #getRegistryForObject(Object)} to attempt to find the registry for
          * the provided {@code targetObj}, with {@link Registry#getKey(Object)} being used to find the
@@ -383,6 +383,9 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
          * @throws IllegalArgumentException If the provided {@code targetObj} is not associable with any {@link Registry}.
          *
          * @param <T> The parent object type.
+         *
+         * @see #getRegistryForObject(Object)
+         * @see #getObjectRegistryResourceKey(Object)
          */
         public static <T> Optional<ResourceLocation> getObjectRegistryId(T targetObj) {
             return targetObj instanceof ResourceKey<?>
@@ -392,6 +395,40 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
                     : Optional.ofNullable(getRegistryForObject(targetObj)
                     .orElseThrow(() -> new IllegalArgumentException(String.format("Attempted to find registry for unregistered or unmapped object of type %s: %s", targetObj.getClass().getSimpleName(), targetObj)))
                     .getKey(targetObj));
+        }
+
+        /**
+         * Attempts to map the provided {@code targetObj} with a {@linkplain ResourceKey registry identifier key}
+         * based on its type.
+         * <br></br>
+         * If the provided {@code targetObj} is a {@link ResourceKey}, then it is directly returned. If it is a
+         * {@link TagKey}, then a {@link ResourceKey} is created using {@link TagKey#registry()} and
+         * {@link TagKey#location()}, then returned.
+         * <br></br>
+         * Otherwise, a lookup is performed via {@link #getRegistryForObject(Object)} to attempt to find the registry for
+         * the provided {@code targetObj}, with {@link Registry#getResourceKey(Object)} being used to find the
+         * {@link ResourceKey} of the provided {@code targetObj}.
+         *
+         * @param targetObj The parent object type whose key should be looked up.
+         *
+         * @return An {@link Optional} containing the {@link ResourceKey} of the provided {@code targetObj}, or
+         * {@link Optional#empty()} if the provided {@code targetObj} is {@code null}.
+         *
+         * @throws IllegalArgumentException If the provided {@code targetObj} is not associable with any {@link Registry}.
+         *
+         * @param <T> The parent object type.
+         *
+         * @see #getRegistryForObject(Object)
+         * @see #getObjectRegistryId(Object)
+         */
+        public static <T> Optional<ResourceKey<T>> getObjectRegistryResourceKey(T targetObj) {
+            return targetObj instanceof ResourceKey<?>
+                    ? Optional.of(((ResourceKey<T>) targetObj))
+                    : targetObj instanceof TagKey<?>
+                    ? Optional.of(ResourceKey.create(((TagKey<T>) targetObj).registry(), ((TagKey<T>) targetObj).location()))
+                    : getRegistryForObject(targetObj)
+                    .orElseThrow(() -> new IllegalArgumentException(String.format("Attempted to find registry for unregistered or unmapped object of type %s: %s", targetObj.getClass().getSimpleName(), targetObj)))
+                    .getResourceKey(targetObj);
         }
     }
 }

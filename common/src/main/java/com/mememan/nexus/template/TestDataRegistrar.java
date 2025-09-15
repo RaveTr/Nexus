@@ -3,9 +3,8 @@ package com.mememan.nexus.template;
 import com.google.common.collect.ImmutableList;
 import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.asm.annotations.RegistrarEntry;
-import com.mememan.nexus.damage_type.DamageTypePropertyWrapper;
-import com.mememan.nexus.datagen.NexusProviderTypes;
 import com.mememan.nexus.platform.NexusServices;
+import com.mememan.nexus.property_wrapper.def.damage_type.DamageTypePropertyWrapper;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -19,29 +18,27 @@ import java.util.function.Supplier;
 public class TestDataRegistrar {
     private static final ObjectArrayList<Supplier<ResourceKey<DamageType>>> DAMAGE_TYPES = new ObjectArrayList<>();
 
-    // Block
-    public static final Supplier<ResourceKey<DamageType>> THORNY_SUN = DamageTypePropertyWrapper.create(registerDamageType("thorny_sun", () -> new DamageType("thorny_sun", 0.1F)))
+    // Damage Types
+    public static final Supplier<ResourceKey<DamageType>> THORNY_SUN = new DamageTypePropertyWrapper<>(registerDamageType("thorny_sun", () -> new DamageType("thorny_sun", 0.1F)), NexusConstants.MOD_ID)
             .builder()
-            .withLocalizedDeathMessageComponent("%1$s was pricked to death by a Thorny Sun")
-            .withTag(() -> DamageTypeTags.BYPASSES_ARMOR)
-            .build()
-            .getOwnerDamageType();
+            .withAdditionalTag(() -> DamageTypeTags.BYPASSES_ARMOR)
+            .buildAndGet();
 
-    public static final Supplier<ResourceKey<DamageType>> BIG_CARNIVOROUS_PLANT = DamageTypePropertyWrapper.create(registerDamageType("big_carnivorous_plant", () -> new DamageType("big_carnivorous_plant", 0.1F)))
+    public static final Supplier<ResourceKey<DamageType>> BIG_CARNIVOROUS_PLANT = new DamageTypePropertyWrapper<>(registerDamageType("big_carnivorous_plant", () -> new DamageType("big_carnivorous_plant", 0.1F)), NexusConstants.MOD_ID)
             .builder()
-            .withLocalizedDeathMessageComponent("%1$s was bitten to death by a Big Carnivorous Plant")
-            .build()
-            .getOwnerDamageType();
+            .copyFrom(THORNY_SUN)
+            .withAdditionalTag(() -> DamageTypeTags.ALWAYS_MOST_SIGNIFICANT_FALL)
+            .buildAndGet();
 
 
-    private static Supplier<ResourceKey<DamageType>> registerConfiguredFeature(ResourceLocation id, Supplier<DamageType> actualDamageTypeSup) {
+    private static Supplier<ResourceKey<DamageType>> registerDamageType(ResourceLocation id, Supplier<DamageType> actualDamageTypeSup) {
         Supplier<ResourceKey<DamageType>> damageTypeSup = NexusServices.REGISTRAR.registerDatapackObject(id, b -> actualDamageTypeSup, Registries.DAMAGE_TYPE);
         DAMAGE_TYPES.add(damageTypeSup);
         return damageTypeSup;
     }
 
     private static Supplier<ResourceKey<DamageType>> registerDamageType(String id, Supplier<DamageType> actualDamageTypeSup) {
-        return registerConfiguredFeature(NexusConstants.prefix(id), actualDamageTypeSup);
+        return registerDamageType(NexusConstants.prefix(id), actualDamageTypeSup);
     }
 
     public static ImmutableList<Supplier<ResourceKey<DamageType>>> getDamageTypes() {

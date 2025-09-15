@@ -85,7 +85,7 @@ public interface PropertyWrapperBuilder<T, SELF extends PropertyWrapperBuilder<T
      *
      * @see PropertyWrapper#getParentObject()
      *
-     * @implNote Typically, if this PW is a template, this method will return {@code Suppliers#ofInstance(null)}.
+     * @implSpec Typically, if this PW is a template, this method should return {@code Suppliers#ofInstance(null)}.
      */
     @NotNull
     default Supplier<T> buildAndGet() {

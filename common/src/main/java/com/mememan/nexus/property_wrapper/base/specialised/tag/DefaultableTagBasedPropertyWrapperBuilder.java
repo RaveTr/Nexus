@@ -29,7 +29,6 @@ public interface DefaultableTagBasedPropertyWrapperBuilder<T, SELF extends TagBa
         return self();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     default SELF withTags(Supplier<TagKey<? super T>>... targetTags) {
         getSpecializedTagBuilder().ifPresent(builder -> builder.withTags(targetTags));
