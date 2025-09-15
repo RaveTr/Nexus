@@ -100,7 +100,7 @@ public class FabricModData implements ModData {
 
         NexusConstants.LOGGER.info("Loaded mod data for mod {} (within{} file {}) in {} ms", ownerFabricModMetadata.getId(),
                 ownerModContainer.getContainingMod().isPresent() ? " nested" : "",
-                targetFileLoc.substring(targetFileLoc.lastIndexOf('\\') + 1), milliDuration);
+                targetFileLoc.substring(targetFileLoc.lastIndexOf(File.separatorChar) + 1), milliDuration);
     }
 
     public ModContainer getOwnerModContainer() {

@@ -13,7 +13,6 @@ import net.minecraft.data.models.model.TextureMapping;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -35,7 +34,6 @@ public class TestBlockRegistrar {
 
     public static final Supplier<SlabBlock> BLAH = new BlockPropertyWrapper<>(registerBlock(new ResourceLocation("nexus", "test_block"), () -> new SlabBlock(BlockBehaviour.Properties.of())), "nexus")
             .builder()
-            .withTag(() -> BlockTags.ACACIA_LOGS)
             .withRecipe(r -> result -> ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, result.get())
                     .requires(Items.ACACIA_BOAT)
                     .unlockedBy("has_" + BuiltInRegistries.ITEM.getKey(Items.ACACIA_BOAT).getPath(), InventoryChangeTrigger.TriggerInstance.hasItems(Items.ACACIA_BOAT))
@@ -58,7 +56,7 @@ public class TestBlockRegistrar {
 
     public static final Supplier<Block> BLAH_3 = new BlockPropertyWrapper<>(registerBlock(new ResourceLocation("nexus", "test_block_3"), () -> new Block(BlockBehaviour.Properties.of())), "nexus")
             .builder()
-            .withTags(() -> BlockTags.ACACIA_LOGS, TestBlockTags.TEST::get)
+            .withTags(TestBlockTags.TEST::get)
             .buildAndGet();
 
     private static <B extends Block> Supplier<B> registerBlock(ResourceLocation name, Supplier<B> block) {

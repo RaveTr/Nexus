@@ -16,7 +16,6 @@ public class TestBlockTags {
 
     public static final Supplier<TagKey<Block>> TEST = createWrappedBlockTag("test/sometagtest")
             .builder()
-            .withAdditionalTag(() -> BlockTags.ACACIA_LOGS)
             .withChildTag(() -> BlockTags.ACACIA_LOGS)
             .withTaggedObjectsOfType(TestBlockRegistrar.BLAH, () -> Blocks.ACACIA_BUTTON)
             .buildAndGet();

@@ -33,17 +33,17 @@ public final class DataGenUtil {
 
         if (existingObj.has("values")) {  // Add existing values (if any)
             existingObj.getAsJsonArray("values").forEach(value -> {
-                String valueStr = value.getAsString();
+                String valueStr = value.toString();
 
-                if (existingValues.add(valueStr)) values.add(valueStr);
+                if (existingValues.add(valueStr)) values.add(value);
             });
         }
 
         if (newObj.has("values")) { // Add new values (if any)
             newObj.getAsJsonArray("values").forEach(value -> {
-                String valueStr = value.getAsString();
+                String valueStr = value.toString();
 
-                if (existingValues.add(valueStr)) values.add(valueStr);
+                if (existingValues.add(valueStr)) values.add(value);
             });
         }
 
@@ -96,7 +96,7 @@ public final class DataGenUtil {
                 String existingHash = JsonUtil.hashJson(existingContent);
                 String newHash = JsonUtil.hashJson(newContent);
 
-                if (Objects.equals(existingHash, newHash)) return CompletableFuture.completedFuture(null); // Skip doing anything entirely and just return a completed future if both files are the exact same
+                if (Objects.equals(existingHash, newHash)) return DataProvider.saveStable(targetOutput, existingContent, outputPath); // Skip doing anything entirely and just return the existing content (avoid un-writing from disk in cases of re-generation)
 
                 // Otherwise, perform merge and save
                 JsonElement mergedContent = mergerFunc.apply(existingContent, newContent);
