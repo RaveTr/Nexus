@@ -26,6 +26,9 @@ public interface PropertyWrapperBuilder<T, SELF extends PropertyWrapperBuilder<T
     /**
      * Copies data from the provided {@link PropertyWrapper} instance into this builder. Overrides all existing data
      * for this builder.
+     * <br></br>
+     * If you're attempting to inherit from a template whose parent object type is a supertype of this instance's parent
+     * object (all as specified by {@link T}), you should use {@link #copyFromType(PropertyWrapper)} instead.
      *
      * @param propertyWrapper The {@link PropertyWrapper} instance to copy data from.
      *
@@ -34,8 +37,26 @@ public interface PropertyWrapperBuilder<T, SELF extends PropertyWrapperBuilder<T
      * @implSpec Implementations should ensure that properties are deep-copied rather than shallow-copied from the
      * provided {@code propertyWrapper} (e.g. instead of {@code #setSomeList(propertyWrapper.getSomeList())}, use
      * {@code #setSomeList(List.copyOf(propertyWrapper.getSomeList()))}).
+     *
+     * @see #copyFromType(PropertyWrapper)
      */
     SELF copyFrom(PW propertyWrapper);
+
+    /**
+     * Overloaded variant of {@link #copyFrom(PropertyWrapper)} that attempts to perform an unsafe cast on the provided
+     * {@code propertyWrapper}.
+     * <br></br>
+     * Primarily useful in cases where copying from a template results in a compile-time error due to generic type
+     * invariance for the 2 recursive generic types {@link SELF} and {@link PW}.
+     *
+     * @param propertyWrapper The wrapper whose properties should be deep-copied according to the spec of
+     *                        {@link #copyFrom(PropertyWrapper)}.
+     *
+     * @return {@link #copyFrom(PropertyWrapper)} (builder method).
+     */
+    default SELF copyFromType(PropertyWrapper<? super T, ?, ?> propertyWrapper) {
+        return copyFrom((PW) propertyWrapper);
+    }
 
     /**
      * Overloaded variant of {@link #copyFrom(PropertyWrapper)} that copies data from the {@link PropertyWrapper}

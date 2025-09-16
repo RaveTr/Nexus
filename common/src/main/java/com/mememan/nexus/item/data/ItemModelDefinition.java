@@ -1,6 +1,5 @@
 package com.mememan.nexus.item.data;
 
-import com.mememan.nexus.block.data.BlockModelDefinition;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemTransform;

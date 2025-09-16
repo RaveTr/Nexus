@@ -40,7 +40,7 @@ public class StandardTagProvider extends TagsProvider<Object> implements ModData
     protected final String modId;
     protected final boolean validateAllEntries;
     protected final DuplicateDataPolicy dupeStrat;
-    protected final List<? extends TagBasedPropertyWrapper<?, ?, ?>> mappedTagPWs;
+    protected final List<TagBasedPropertyWrapper<?, ?, ?>> mappedTagPWs;
     protected final Map<ResourceKey<? extends Registry<?>>, Map<ResourceLocation, TagBuilder>> registryMappedBuilders = new Object2ObjectOpenHashMap<>();
 
     public StandardTagProvider(PackOutput targetOutput, CompletableFuture<HolderLookup.Provider> regLookup, String modId, boolean validateAllEntries, DuplicateDataPolicy dupeStrat) {

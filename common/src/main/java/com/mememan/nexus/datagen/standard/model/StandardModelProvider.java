@@ -24,6 +24,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -34,7 +36,7 @@ public class StandardModelProvider extends ModelProvider implements ModDataProvi
     protected final String modId;
     protected final boolean validateAllEntries;
     protected final DuplicateDataPolicy dupeStrat;
-    protected final List<ModelBasedPropertyWrapper<?, ?, ?>> mappedModelPWs;
+    protected final List<? extends ModelBasedPropertyWrapper<?, ?, ?>> mappedModelPWs;
     protected final ObjectOpenHashSet<ResourceLocation> trackedModels = new ObjectOpenHashSet<>();
 
     public StandardModelProvider(PackOutput targetPackOutput, String modId, boolean validateAllEntries, DuplicateDataPolicy dupeStrat) {
@@ -91,17 +93,17 @@ public class StandardModelProvider extends ModelProvider implements ModDataProvi
                         ModelBasedPropertyWrapper.ModelDefinition convertedDefinition = modelDefMapper.apply(parentObj);
                         List<ModelBasedPropertyWrapper.ModelDefinition> flattenedModelDefinitions = convertedDefinition.getFlattenedModelDefinitions();
                         String descId = curPW.getObjectDescriptionId();
-                        ResourceLocation modelRL = formatModelResourceLocation(descId, convertedDefinition);
-                        Runnable serializationAction = () -> serializedModelDefinitions.add(DataProvider.saveStable(cachedOutput, constructModelJson(descId, convertedDefinition), modelPathProvider.json(modelRL)));
+                        ResourceLocation primaryModelRL = formatModelResourceLocation(descId, convertedDefinition);
+                        Function<ModelBasedPropertyWrapper.ModelDefinition, ResourceLocation> rlFormatter = (modelDef) -> formatModelResourceLocation(descId, modelDef);
+                        Consumer<ModelBasedPropertyWrapper.ModelDefinition> serializationAction = (modelDef) -> serializedModelDefinitions.add(DataProvider.saveStable(cachedOutput, constructModelJson(descId, modelDef), modelPathProvider.json(rlFormatter.apply(modelDef))));
 
                         // Primary model definition
-                        handleModelGeneration(modelRL, descId, objectClassName, serializationAction);
+                        handleModelGeneration(primaryModelRL, descId, objectClassName, () -> serializationAction.accept(convertedDefinition));
 
                         // Rest of the nested model definitions
                         if (!flattenedModelDefinitions.isEmpty()) {
-                            flattenedModelDefinitions.stream()
-                                    .map(curDef -> formatModelResourceLocation(descId, curDef))
-                                    .forEach(curModelRL -> handleModelGeneration(curModelRL, descId, objectClassName, serializationAction));
+                            flattenedModelDefinitions
+                                    .forEach(curDef -> handleModelGeneration(rlFormatter.apply(curDef), descId, objectClassName, () -> serializationAction.accept(curDef)));
                         }
                     }, () -> {
                         if (validateAllEntries() || curPW.getProviderTypeRequisites().getOrDefault(getProviderType(), false)) {

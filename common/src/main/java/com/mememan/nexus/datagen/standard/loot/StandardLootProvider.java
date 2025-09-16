@@ -7,8 +7,8 @@ import com.mememan.nexus.datagen.DuplicateDataPolicy;
 import com.mememan.nexus.datagen.NexusProviderTypes;
 import com.mememan.nexus.datagen.ProviderType;
 import com.mememan.nexus.datagen.standard.ModDataProvider;
+import com.mememan.nexus.property_wrapper.base.specialised.loot.LootBasedPropertyWrapper;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.Util;
 import net.minecraft.data.CachedOutput;
@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -32,8 +33,9 @@ import java.util.function.Consumer;
  * Loader-agnostic mod-specific loot table provider in Nexus API. Instanced based on the provided mod ID. Handles
  * the generation of mod-specific loot tables, with additional modifications to allow for standard Nexus configurability.
  * <br></br>
- * Configurations made to this provider's type ({@link NexusProviderTypes#LOOT_TABLE_PROVIDER}) take precedence over
- * any configurations made to the individual sub-providers.
+ * Unlike the original {@link LootTableProvider}, this provider processes loot table entries directly via
+ * {@link LootBasedPropertyWrapper} rather than taking an input of sub-providers and using those to generate loot
+ * table JSONs.
  */
 public class StandardLootProvider extends LootTableProvider implements ModDataProvider {
     protected final String modId;
@@ -41,9 +43,7 @@ public class StandardLootProvider extends LootTableProvider implements ModDataPr
     protected final DuplicateDataPolicy dupeStrat;
 
     public StandardLootProvider(PackOutput targetOutput, String modId, boolean validateAllEntries, @Nullable DuplicateDataPolicy dupeStrat) {
-        super(targetOutput, Set.of(), Util.make(new ObjectArrayList<>(), curList -> {
-
-        }));
+        super(targetOutput, Set.of(), List.of());
 
         this.modId = modId;
         this.validateAllEntries = validateAllEntries;

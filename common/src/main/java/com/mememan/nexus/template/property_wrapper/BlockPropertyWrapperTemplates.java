@@ -1,11 +1,12 @@
 package com.mememan.nexus.template.property_wrapper;
 
-import com.mememan.nexus.client.model.block.BlockModelDefinition;
 import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapper;
+import com.mememan.nexus.util.LootUtil;
+import com.mememan.nexus.util.ModelUtil;
 import com.mememan.nexus.util.RegistryUtil;
-import net.minecraft.data.models.model.ModelTemplates;
-import net.minecraft.data.models.model.TextureMapping;
 import net.minecraft.world.level.block.Block;
+
+import java.util.function.Supplier;
 
 /**
  * Template utility {@code class} containing common {@link BlockPropertyWrapper} templates, as well as some helper
@@ -13,12 +14,18 @@ import net.minecraft.world.level.block.Block;
  */
 public final class BlockPropertyWrapperTemplates {
     /**
-     * Basic BPW template using {@link ModelTemplates#CUBE_ALL}, with default configurations for all other properties.
+     * Basic BPW template for plain blocks.
+     * <ul>
+     *     <li><b>Model</b>: Uses {@link ModelUtil#cubeAll(Supplier)}, with the input being
+     *     {@link RegistryUtil#getBlockTextureLocationOrDefault(Supplier)}.</li>
+     *     <li><b>Loot Table</b>: Uses {@link LootUtil#dropSelf(Supplier)}, with the input being the parent
+     *     {@link Block}.</li>
+     * </ul>
      */
-    public static final BlockPropertyWrapper<? extends Block> BASIC = new BlockPropertyWrapper<>()
+    public static final BlockPropertyWrapper<Block> BASIC = new BlockPropertyWrapper<>()
             .builder()
-            .withModelDefinition(ownerBlockSup -> new BlockModelDefinition(ModelTemplates.CUBE_ALL)
-                    .withTextureMapping(TextureMapping.cube(RegistryUtil.getTextureLocation(ownerBlockSup).orElse(TextureMapping.getBlockTexture(ownerBlockSup.get())))))
+            .withModelDefinition(ModelUtil::cubeAll)
+            .withLootTable(LootUtil::dropSelf)
             .build();
 
     private BlockPropertyWrapperTemplates() {

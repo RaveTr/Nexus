@@ -4,7 +4,10 @@ import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.Util;
+import net.minecraft.data.models.model.TextureMapping;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -43,5 +46,65 @@ public final class RegistryUtil {
 
     public static <T> Optional<ResourceLocation> getTextureLocation(Supplier<T> targetObj) {
         return getTextureLocation(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetObj.get()).orElse(null));
+    }
+
+    @NotNull
+    public static <T> ResourceLocation getTextureLocationOrDefault(Supplier<T> targetObj, @NotNull ResourceLocation defaultTextureLocation) {
+        return getTextureLocation(targetObj).orElse(defaultTextureLocation);
+    }
+
+    @NotNull
+    public static <B extends Block> ResourceLocation getBlockTextureLocationOrDefault(Supplier<B> targetBlock) {
+        return getTextureLocationOrDefault(targetBlock, TextureMapping.getBlockTexture(targetBlock.get()));
+    }
+
+    /**
+     * Modifies the {@link ResourceLocation} passed in by prepending the provided {@code prefix} to its path if it isn't
+     * already... prefixed with said {@code prefix} (duh).
+     *
+     * @param baseLoc The {@link ResourceLocation} to pick the provided {@code prefix} for.
+     * @param prefix The path prefix to search for/prepend the provided {@code baseLoc} with.
+     *
+     * @return A modified variant of the provided {@code baseLoc} with the provided {@code prefix} picked/appropriately
+     * and safely prepended.
+     *
+     * @see #pickBlockPrefix(ResourceLocation)
+     * @see #pickItemPrefix(ResourceLocation)
+     */
+    public static ResourceLocation pickPrefix(ResourceLocation baseLoc, String prefix) {
+        return baseLoc.getPath().startsWith(prefix) ? baseLoc : baseLoc.withPrefix(prefix);
+    }
+
+    /**
+     * Overloaded variant of {@link #pickPrefix(ResourceLocation, String)}. Modifies the {@link ResourceLocation} passed
+     * in by prepending the {@code "block/"} prefix to its path if it isn't already prefixed with said prefix (duh).
+     *
+     * @param baseBlockLoc The {@link ResourceLocation} to pick the {@code "block/"} prefix for.
+     *
+     * @return A modified variant of the provided {@code baseBlockLoc} with the {@code "block/"} prefix
+     * picked/appropriately and safely prepended.
+     *
+     * @see #pickPrefix(ResourceLocation, String)
+     * @see #pickItemPrefix(ResourceLocation)
+     */
+    public static ResourceLocation pickBlockPrefix(ResourceLocation baseBlockLoc) {
+        return pickPrefix(baseBlockLoc, "block/");
+    }
+
+    /**
+     * Overloaded variant of {@link #pickPrefix(ResourceLocation, String)}. Modifies the {@link ResourceLocation} passed
+     * in by prepending the {@code "item/"} prefix to its path if it isn't already prefixed
+     * with said prefix (duh).
+     *
+     * @param baseItemLoc The {@link ResourceLocation} to pick the {@code "item/"} prefix for.
+     *
+     * @return A modified variant of the provided {@code baseItemLoc} with the {@code "item/"} prefix
+     * picked/appropriately and safely prepended.
+     *
+     * @see #pickPrefix(ResourceLocation, String)
+     * @see #pickBlockPrefix(ResourceLocation)
+     */
+    public static ResourceLocation pickItemPrefix(ResourceLocation baseItemLoc) {
+        return pickPrefix(baseItemLoc, "item/");
     }
 }

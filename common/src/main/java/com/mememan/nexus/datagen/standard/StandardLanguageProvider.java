@@ -45,7 +45,7 @@ public class StandardLanguageProvider implements ModDataProvider {
     protected final boolean validateAllEntries;
     protected final DuplicateDataPolicy dupeStrat;
     protected final Path outputPath;
-    protected final List<? extends LanguageBasedPropertyWrapper<?, ?, ?>> mappedLanguagePWs;
+    protected final List<LanguageBasedPropertyWrapper<?, ?, ?>> mappedLanguagePWs;
 
     public StandardLanguageProvider(PackOutput output, String modId, String locale, boolean validateAllEntries, DuplicateDataPolicy dupeStrat) {
         this.output = output;

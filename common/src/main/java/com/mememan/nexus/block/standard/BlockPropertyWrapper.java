@@ -1,12 +1,13 @@
 package com.mememan.nexus.block.standard;
 
 import com.google.common.collect.ImmutableMap;
-import com.mememan.nexus.block.data.BlockModelDefinition;
 import com.mememan.nexus.client.block.BlockStateDefinition;
 import com.mememan.nexus.client.block.WrappedBlockColor;
+import com.mememan.nexus.client.model.block.BlockModelDefinition;
 import com.mememan.nexus.datagen.ProviderType;
 import com.mememan.nexus.datagen.standard.ModDataProvider;
 import com.mememan.nexus.platform.NexusServices;
+import com.mememan.nexus.util.LootUtil;
 import it.unimi.dsi.fastutil.ints.IntIntMutablePair;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;

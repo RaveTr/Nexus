@@ -17,20 +17,8 @@ public class BlockStateDefinition {
     @Nullable
     protected BlockStateGenerator blockStateSupplier;
 
-    protected BlockStateDefinition(Supplier<Block> parentBlock) {
+    public BlockStateDefinition(Supplier<Block> parentBlock) {
         this.parentBlock = parentBlock;
-    }
-
-    /**
-     * Creates a new {@link BlockStateDefinition}.
-     *
-     * @param parentBlock The parent {@code Supplier<Block>} targeted for blockstate datagen,
-     *                    stored in the newly-initialized {@link BlockStateDefinition} instance.
-     *
-     * @return A new {@link BlockStateDefinition}.
-     */
-    public static BlockStateDefinition of(Supplier<Block> parentBlock) {
-        return new BlockStateDefinition(parentBlock);
     }
 
     /**
