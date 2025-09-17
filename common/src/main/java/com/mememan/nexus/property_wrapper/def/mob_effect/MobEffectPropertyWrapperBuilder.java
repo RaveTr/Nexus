@@ -6,35 +6,35 @@ import com.mememan.nexus.property_wrapper.impl.specialised.language.SpecializedL
 import com.mememan.nexus.property_wrapper.impl.specialised.language.SpecializedLanguagePropertyWrapperBuilder;
 import com.mememan.nexus.property_wrapper.impl.specialised.tag.SpecializedTagPropertyWrapper;
 import com.mememan.nexus.property_wrapper.impl.specialised.tag.SpecializedTagPropertyWrapperBuilder;
-import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.effect.MobEffect;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-public class MobEffectPropertyWrapperBuilder<E extends Enchantment> extends BaseDataGenPropertyWrapperBuilder<E, MobEffectPropertyWrapperBuilder<E>, MobEffectPropertyWrapper<E>> implements DefaultableBareDataGenPropertyWrapperBuilder<E, MobEffectPropertyWrapperBuilder<E>, MobEffectPropertyWrapper<E>> {
-    protected final SpecializedLanguagePropertyWrapperBuilder<E, MobEffectPropertyWrapperBuilder<E>, MobEffectPropertyWrapper<E>> compositeLanguageBuilder;
-    protected final SpecializedTagPropertyWrapperBuilder<E, MobEffectPropertyWrapperBuilder<E>, MobEffectPropertyWrapper<E>> compositeTagBuilder;
+public class MobEffectPropertyWrapperBuilder<ME extends MobEffect> extends BaseDataGenPropertyWrapperBuilder<ME, MobEffectPropertyWrapperBuilder<ME>, MobEffectPropertyWrapper<ME>> implements DefaultableBareDataGenPropertyWrapperBuilder<ME, MobEffectPropertyWrapperBuilder<ME>, MobEffectPropertyWrapper<ME>> {
+    protected final SpecializedLanguagePropertyWrapperBuilder<ME, MobEffectPropertyWrapperBuilder<ME>, MobEffectPropertyWrapper<ME>> compositeLanguageBuilder;
+    protected final SpecializedTagPropertyWrapperBuilder<ME, MobEffectPropertyWrapperBuilder<ME>, MobEffectPropertyWrapper<ME>> compositeTagBuilder;
 
-    public MobEffectPropertyWrapperBuilder(@NotNull MobEffectPropertyWrapper<E> ownerWrapper) {
+    public MobEffectPropertyWrapperBuilder(@NotNull MobEffectPropertyWrapper<ME> ownerWrapper) {
         super(ownerWrapper);
 
-        this.compositeLanguageBuilder = (SpecializedLanguagePropertyWrapperBuilder<E, MobEffectPropertyWrapperBuilder<E>, MobEffectPropertyWrapper<E>>) ownerWrapper.getSpecializedLanguageWrapper().map(SpecializedLanguagePropertyWrapper::builder).get();
-        this.compositeTagBuilder = (SpecializedTagPropertyWrapperBuilder<E, MobEffectPropertyWrapperBuilder<E>, MobEffectPropertyWrapper<E>>) ownerWrapper.getSpecializedTagWrapper().map(SpecializedTagPropertyWrapper::builder).get();
+        this.compositeLanguageBuilder = (SpecializedLanguagePropertyWrapperBuilder<ME, MobEffectPropertyWrapperBuilder<ME>, MobEffectPropertyWrapper<ME>>) ownerWrapper.getSpecializedLanguageWrapper().map(SpecializedLanguagePropertyWrapper::builder).get();
+        this.compositeTagBuilder = (SpecializedTagPropertyWrapperBuilder<ME, MobEffectPropertyWrapperBuilder<ME>, MobEffectPropertyWrapper<ME>>) ownerWrapper.getSpecializedTagWrapper().map(SpecializedTagPropertyWrapper::builder).get();
     }
 
     @Override
-    public MobEffectPropertyWrapperBuilder<E> copyFrom(MobEffectPropertyWrapper<E> propertyWrapper) {
+    public MobEffectPropertyWrapperBuilder<ME> copyFrom(MobEffectPropertyWrapper<ME> propertyWrapper) {
         DefaultableBareDataGenPropertyWrapperBuilder.super.copyFrom(propertyWrapper);
         return super.copyFrom(propertyWrapper);
     }
 
     @Override
-    public Optional<SpecializedLanguagePropertyWrapperBuilder<E, MobEffectPropertyWrapperBuilder<E>, MobEffectPropertyWrapper<E>>> getSpecializedLanguageBuilder() {
+    public Optional<SpecializedLanguagePropertyWrapperBuilder<ME, MobEffectPropertyWrapperBuilder<ME>, MobEffectPropertyWrapper<ME>>> getSpecializedLanguageBuilder() {
         return Optional.empty();
     }
 
     @Override
-    public Optional<SpecializedTagPropertyWrapperBuilder<E, MobEffectPropertyWrapperBuilder<E>, MobEffectPropertyWrapper<E>>> getSpecializedTagBuilder() {
+    public Optional<SpecializedTagPropertyWrapperBuilder<ME, MobEffectPropertyWrapperBuilder<ME>, MobEffectPropertyWrapper<ME>>> getSpecializedTagBuilder() {
         return Optional.empty();
     }
 }

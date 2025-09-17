@@ -4,24 +4,24 @@ import com.mememan.nexus.property_wrapper.base.specialised.misc.DefaultableBareD
 import com.mememan.nexus.property_wrapper.impl.generic.BaseDataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.impl.specialised.language.SpecializedLanguagePropertyWrapper;
 import com.mememan.nexus.property_wrapper.impl.specialised.tag.SpecializedTagPropertyWrapper;
-import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.effect.MobEffect;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public class MobEffectPropertyWrapper<E extends Enchantment> extends BaseDataGenPropertyWrapper<E, MobEffectPropertyWrapper<E>, MobEffectPropertyWrapperBuilder<E>> implements DefaultableBareDataGenPropertyWrapper<E, MobEffectPropertyWrapper<E>, MobEffectPropertyWrapperBuilder<E>> {
-    protected final SpecializedLanguagePropertyWrapper<E, ?, ?> compositeLanguageWrapper;
-    protected final SpecializedTagPropertyWrapper<E, ?, ?> compositeTagWrapper;
+public class MobEffectPropertyWrapper<ME extends MobEffect> extends BaseDataGenPropertyWrapper<ME, MobEffectPropertyWrapper<ME>, MobEffectPropertyWrapperBuilder<ME>> implements DefaultableBareDataGenPropertyWrapper<ME, MobEffectPropertyWrapper<ME>, MobEffectPropertyWrapperBuilder<ME>> {
+    protected final SpecializedLanguagePropertyWrapper<ME, ?, ?> compositeLanguageWrapper;
+    protected final SpecializedTagPropertyWrapper<ME, ?, ?> compositeTagWrapper;
 
-    public MobEffectPropertyWrapper(Supplier<E> parentObject, boolean isTemplate, String modId) {
+    public MobEffectPropertyWrapper(Supplier<ME> parentObject, boolean isTemplate, String modId) {
         super(parentObject, isTemplate, MobEffectPropertyWrapperBuilder::new, modId);
 
         this.compositeLanguageWrapper = new SpecializedLanguagePropertyWrapper<>(parentObject, isTemplate, modId);
         this.compositeTagWrapper = new SpecializedTagPropertyWrapper<>(parentObject, isTemplate, modId);
     }
 
-    public MobEffectPropertyWrapper(@NotNull Supplier<E> parentObject, String modId) {
+    public MobEffectPropertyWrapper(@NotNull Supplier<ME> parentObject, String modId) {
         super(parentObject, MobEffectPropertyWrapperBuilder::new, modId);
 
         this.compositeLanguageWrapper = new SpecializedLanguagePropertyWrapper<>(parentObject, modId);
@@ -41,12 +41,12 @@ public class MobEffectPropertyWrapper<E extends Enchantment> extends BaseDataGen
     }
 
     @Override
-    public Optional<SpecializedLanguagePropertyWrapper<E, ?, ?>> getSpecializedLanguageWrapper() {
+    public Optional<SpecializedLanguagePropertyWrapper<ME, ?, ?>> getSpecializedLanguageWrapper() {
         return Optional.of(compositeLanguageWrapper);
     }
 
     @Override
-    public Optional<SpecializedTagPropertyWrapper<E, ?, ?>> getSpecializedTagWrapper() {
+    public Optional<SpecializedTagPropertyWrapper<ME, ?, ?>> getSpecializedTagWrapper() {
         return Optional.of(compositeTagWrapper);
     }
 }
