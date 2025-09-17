@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class SpecializedTagPropertyWrapperBuilder<T, SELF extends TagBasedPropertyWrapperBuilder<T, SELF, TBPW>, TBPW extends TagBasedPropertyWrapper<T, TBPW, SELF>> extends BaseDataGenPropertyWrapperBuilder<T, SELF, TBPW> implements TagBasedPropertyWrapperBuilder<T, SELF, TBPW> {
-    protected final List<Supplier<TagKey<? super T>>> objectTagKeys = ObjectArrayList.of();
-    protected final List<Supplier<TagKey<?>>> additionalTagKeys = ObjectArrayList.of();
+    protected final List<Supplier<TagKey<? super T>>> objectTagKeys = new ObjectArrayList<>();
+    protected final List<Supplier<TagKey<?>>> additionalTagKeys = new ObjectArrayList<>();
 
     public SpecializedTagPropertyWrapperBuilder(@NotNull TBPW ownerWrapper) {
         super(ownerWrapper);

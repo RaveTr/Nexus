@@ -1,4 +1,4 @@
-package com.mememan.nexus.property_wrapper.base.specialised.misc;
+package com.mememan.nexus.property_wrapper.base.generic.misc;
 
 import com.mememan.nexus.property_wrapper.base.specialised.language.DefaultableLanguageBasedPropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.specialised.tag.DefaultableTagBasedPropertyWrapper;

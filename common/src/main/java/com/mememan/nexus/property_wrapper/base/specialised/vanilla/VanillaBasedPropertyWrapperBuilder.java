@@ -1,7 +1,9 @@
 package com.mememan.nexus.property_wrapper.base.specialised.vanilla;
 
+import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.ItemLike;
 
@@ -9,6 +11,16 @@ import java.util.Collection;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * Extension of {@link DataGenPropertyWrapper} with builder methods tailored towards handling generic Vanilla hooks that
+ * can be generalised for {@linkplain ItemLike ItemLikes}.
+ * <br></br>
+ * This PW extension goes hand-in-hand with {@link VanillaBasedPropertyWrapper}.
+ *
+ * @param <IL> Any {@link ItemLike} type.
+ *
+ * @see VanillaBasedPropertyWrapper
+ */
 public interface VanillaBasedPropertyWrapperBuilder<IL extends ItemLike, SELF extends PropertyWrapperBuilder<IL, SELF, VBPW>, VBPW extends PropertyWrapper<IL, VBPW, SELF>> extends PropertyWrapperBuilder<IL, SELF, VBPW> {
 
     /**
@@ -35,7 +47,7 @@ public interface VanillaBasedPropertyWrapperBuilder<IL extends ItemLike, SELF ex
      *
      * @return
      */
-    SELF withParentTab(CreativeModeTab parentTab);
+    SELF withParentTab(Supplier<CreativeModeTab> parentTab);
 
     /**
      *
@@ -43,7 +55,7 @@ public interface VanillaBasedPropertyWrapperBuilder<IL extends ItemLike, SELF ex
      *
      * @return
      */
-    SELF withParentTabs(Collection<CreativeModeTab> parentTabs);
+    SELF withParentTabs(Collection<Supplier<CreativeModeTab>> parentTabs);
 
     /**
      *
@@ -51,14 +63,16 @@ public interface VanillaBasedPropertyWrapperBuilder<IL extends ItemLike, SELF ex
      *
      * @return
      */
-    SELF withParentTabs(CreativeModeTab... parentTabs);
+    default SELF withParentTabs(Supplier<CreativeModeTab>... parentTabs) {
+        return withParentTabs(ObjectArrayList.of(parentTabs));
+    }
 
     /**
      *
      *
      * @param parentTabs
-     * 
+     *
      * @return
      */
-    SELF setParentTabs(Collection<CreativeModeTab> parentTabs);
+    SELF setParentTabs(Collection<Supplier<CreativeModeTab>> parentTabs);
 }
