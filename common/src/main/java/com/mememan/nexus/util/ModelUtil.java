@@ -60,12 +60,6 @@ public final class ModelUtil {
      * @return A new {@link BlockStateDefinition} with a {@code simpleBlock} template.
      *
      * @see #cubeAll(Supplier)
-     * @see #cubeBottomTop(ResourceLocation)
-     * @see #cubeBottomTop(ResourceLocation, ResourceLocation, ResourceLocation)
-     * @see #cubeBottomTop(ResourceLocation, ResourceLocation, ResourceLocation)
-     * @see #cross(ResourceLocation)
-     * @see #crossCutout(ResourceLocation)
-     * @see #sign(ResourceLocation, ResourceLocation)
      */
     public static BlockStateDefinition simpleBlock(Supplier<Block> targetBlock) {
         return new BlockStateDefinition(targetBlock)

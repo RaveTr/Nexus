@@ -7,6 +7,7 @@ import com.mememan.nexus.datagen.DuplicateDataPolicy;
 import com.mememan.nexus.datagen.NexusProviderTypes;
 import com.mememan.nexus.datagen.ProviderType;
 import com.mememan.nexus.datagen.standard.ModDataProvider;
+import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.specialised.loot.LootBasedPropertyWrapper;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
@@ -25,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -41,6 +43,7 @@ public class StandardLootProvider extends LootTableProvider implements ModDataPr
     protected final String modId;
     protected final boolean validateAllEntries;
     protected final DuplicateDataPolicy dupeStrat;
+    protected final List<LootBasedPropertyWrapper<?, ?, ?>> mappedLootPWs;
 
     public StandardLootProvider(PackOutput targetOutput, String modId, boolean validateAllEntries, @Nullable DuplicateDataPolicy dupeStrat) {
         super(targetOutput, Set.of(), List.of());
@@ -48,6 +51,8 @@ public class StandardLootProvider extends LootTableProvider implements ModDataPr
         this.modId = modId;
         this.validateAllEntries = validateAllEntries;
         this.dupeStrat = dupeStrat;
+
+        this.mappedLootPWs = PropertyWrapper.PropertyWrappersContainer.getInferrableDataGennableWrappersOfType(LootBasedPropertyWrapper.class, modId);
     }
 
     @Override
@@ -101,7 +106,7 @@ public class StandardLootProvider extends LootTableProvider implements ModDataPr
                     });
                 });
 
-        for (ResourceLocation curLootTableLoc : Sets.difference(requiredTables, mappedLootTables.keySet())) { // This should literally never be reached (as in run (duh)), but in case it somehow is, we can still handle it ig
+        for (ResourceLocation curLootTableLoc : Sets.difference(requiredTables, mappedLootTables.keySet())) { // This should literally never be reached (as in run (duh)), but in case it somehow is, we can still handle it
             lootMiscValidationCtx.reportProblem(String.format("Missing loot table: %s (required by mod of ID: %s)", curLootTableLoc, modId));
         }
 
@@ -121,6 +126,14 @@ public class StandardLootProvider extends LootTableProvider implements ModDataPr
                 return DataProvider.saveStable(output, LootDataType.TABLE.parser().toJsonTree(lootTable), targetPath);
             }).toArray(CompletableFuture[]::new));
         }
+    }
+
+    protected <T> void populateLootTables(CachedOutput targetOutput, Map<ResourceLocation, LootTable> mappedLootTables, Set<ResourceLocation> requiredLootTables, ValidationContext lootMiscValidationCtx) {
+        this.mappedLootPWs.stream()
+                .map(curPW -> (LootBasedPropertyWrapper<T, ?, ?>) curPW)
+                .forEach(curPW -> {
+                    
+                });
     }
 
     @Override

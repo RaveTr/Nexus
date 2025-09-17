@@ -116,7 +116,7 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
      * Gets a copied view (via {@link Object2ObjectOpenHashMap}) of {@link PropertyWrappersContainer#MAPPED_PROPERTY_WRAPPERS},
      * primarily to allow for O(1) lookups while preventing modifications from being made to the original map.
      *
-     * @return A copy of {@link PropertyWrappersContainer#MAPPED_PROPERTY_WRAPPERS}.
+     * @return An immutable copy of {@link PropertyWrappersContainer#MAPPED_PROPERTY_WRAPPERS}.
      */
     static Object2ObjectOpenHashMap<Supplier<?>, PropertyWrapper<?, ? extends PropertyWrapper<?, ?, ?>, ? extends PropertyWrapperBuilder<?, ?, ?>>> getMappedPropertyWrappers() {
         return new Object2ObjectOpenHashMap<>(PropertyWrappersContainer.MAPPED_PROPERTY_WRAPPERS);

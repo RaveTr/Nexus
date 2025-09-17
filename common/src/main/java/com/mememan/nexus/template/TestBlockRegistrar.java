@@ -42,6 +42,7 @@ public class TestBlockRegistrar {
 
     public static final Supplier<Block> BLAH_3 = new BlockPropertyWrapper<>(registerBlock(new ResourceLocation("nexus", "test_block_3"), () -> new Block(BlockBehaviour.Properties.of())), "nexus")
             .builder()
+            .copyFromType(BlockPropertyWrapperTemplates.BASIC)
             .withTag(TestBlockTags.TEST::get)
             .buildAndGet();
 
