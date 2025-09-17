@@ -1,10 +1,11 @@
-package com.mememan.nexus.datagen.standard;
+package com.mememan.nexus.datagen.standard.data_pack;
 
 import com.google.gson.JsonElement;
 import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.datagen.DuplicateDataPolicy;
 import com.mememan.nexus.datagen.NexusProviderTypes;
 import com.mememan.nexus.datagen.ProviderType;
+import com.mememan.nexus.datagen.standard.ModDataProvider;
 import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.platform.services.Registrar;
 import com.mememan.nexus.util.ResourceLocationUtil;

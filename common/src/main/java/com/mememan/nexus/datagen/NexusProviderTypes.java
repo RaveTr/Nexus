@@ -1,11 +1,12 @@
 package com.mememan.nexus.datagen;
 
-import com.mememan.nexus.datagen.standard.StandardDatapackRegistryProvider;
-import com.mememan.nexus.datagen.standard.StandardLanguageProvider;
-import com.mememan.nexus.datagen.standard.StandardRecipeProvider;
-import com.mememan.nexus.datagen.standard.loot.StandardLootProvider;
-import com.mememan.nexus.datagen.standard.model.StandardModelProvider;
-import com.mememan.nexus.datagen.standard.tag.StandardTagProvider;
+import com.mememan.nexus.datagen.standard.data_pack.StandardDatapackRegistryProvider;
+import com.mememan.nexus.datagen.standard.data_pack.StandardRecipeProvider;
+import com.mememan.nexus.datagen.standard.data_pack.StandardTagProvider;
+import com.mememan.nexus.datagen.standard.data_pack.loot.StandardLootProvider;
+import com.mememan.nexus.datagen.standard.resource_pack.StandardBlockStateProvider;
+import com.mememan.nexus.datagen.standard.resource_pack.StandardLanguageProvider;
+import com.mememan.nexus.datagen.standard.resource_pack.StandardModelProvider;
 import com.mememan.nexus.loader.ModSide;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,6 +17,10 @@ import org.jetbrains.annotations.NotNull;
  * their namespaces by Nexus API.
  */
 public enum NexusProviderTypes implements ProviderType {
+    /**
+     * Represents the {@linkplain StandardBlockStateProvider providers} responsible for generating blockstate JSONs.
+     */
+    BLOCK_STATE_PROVIDER(ModSide.CLIENT),
     /**
      * Represents the {@linkplain StandardDatapackRegistryProvider providers} responsible for generating all datapack
      * registry files.

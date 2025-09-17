@@ -1,4 +1,4 @@
-package com.mememan.nexus.datagen.standard;
+package com.mememan.nexus.datagen.standard.resource_pack;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -6,6 +6,7 @@ import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.datagen.DuplicateDataPolicy;
 import com.mememan.nexus.datagen.NexusProviderTypes;
 import com.mememan.nexus.datagen.ProviderType;
+import com.mememan.nexus.datagen.standard.ModDataProvider;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.specialised.language.LanguageBasedPropertyWrapper;
 import com.mememan.nexus.util.StringUtil;
@@ -59,6 +60,30 @@ public class StandardLanguageProvider implements ModDataProvider {
     }
 
     /**
+     * Handles populating the language provider with translations, then directly serializing the newly-filled {@link Map}
+     * to JSON.
+     *
+     * @param cachedOutput The {@link CachedOutput} instance to use for saving generated data to disk.
+     *
+     * @return {@link DataProvider#saveStable(CachedOutput, JsonElement, Path)} if the {@link Map} is not empty, otherwise
+     * returns an empty {@link CompletableFuture#allOf(CompletableFuture[])}.
+     */
+    @Override
+    public @NotNull CompletableFuture<?> run(CachedOutput cachedOutput) {
+        addTranslations();
+
+        if (!localizationEntries.isEmpty()) { // Effectively taken from Forge (well, rest of the provider is rewritten to fit our purposes in this case)
+            JsonObject targetJson = new JsonObject();
+
+            localizationEntries.forEach(targetJson::addProperty);
+
+            return DataProvider.saveStable(cachedOutput, targetJson, outputPath);
+        }
+
+        return CompletableFuture.allOf();
+    }
+
+    /**
      * Backing method responsible for populating {@link #localizationEntries} with translations from
      * {@link #mappedLanguagePWs}, if applicable. Handles missing translation entries appropriately.
      */
@@ -108,30 +133,6 @@ public class StandardLanguageProvider implements ModDataProvider {
                 }
             });
         }
-    }
-
-    /**
-     * Handles populating the language provider with translations, then directly serializing the newly-filled {@link Map}
-     * to JSON.
-     *
-     * @param cachedOutput The {@link CachedOutput} instance to use for saving generated data to disk.
-     *
-     * @return {@link DataProvider#saveStable(CachedOutput, JsonElement, Path)} if the {@link Map} is not empty, otherwise
-     * returns an empty {@link CompletableFuture#allOf(CompletableFuture[])}.
-     */
-    @Override
-    public @NotNull CompletableFuture<?> run(CachedOutput cachedOutput) {
-        addTranslations();
-
-        if (!localizationEntries.isEmpty()) { // Effectively taken from Forge (well, rest of the provider is rewritten to fit our purposes in this case)
-            JsonObject targetJson = new JsonObject();
-
-            localizationEntries.forEach(targetJson::addProperty);
-
-            return DataProvider.saveStable(cachedOutput, targetJson, outputPath);
-        }
-
-        return CompletableFuture.allOf();
     }
 
     @Override

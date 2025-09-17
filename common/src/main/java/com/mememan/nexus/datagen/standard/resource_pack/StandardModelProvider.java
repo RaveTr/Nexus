@@ -1,4 +1,4 @@
-package com.mememan.nexus.datagen.standard.model;
+package com.mememan.nexus.datagen.standard.resource_pack;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -142,14 +142,15 @@ public class StandardModelProvider extends ModelProvider implements ModDataProvi
 
     /**
      * Processes and returns the {@link ResourceLocation} in which the specified {@code curPW} should be saved,
-     * corresponding to {@link #modelPathProvider}.
+     * relative to {@link #modelPathProvider}.
      * <br></br>
      * The location generated uses this provider's {@link #modId} as the namespace, then generates a path based on
      * both {@link ModelBasedPropertyWrapper.ModelDefinition#getBackingDirectory()} and
      * {@link ModelBasedPropertyWrapper.ModelDefinition#getCustomModelName()}.
      *
-     * @param descId The file name to fall back to if no custom name is present for this model. Typically, the parent
-     *               object's description ID.
+     * @param descId The parent object's full description ID (e.g. {@code "block.mod_id.block_name"}). Used to fall
+     *               back to a default file name for the resultant model file if no custom name is present for the
+     *               {@code convertedDefinition} passed in.
      * @param convertedDefinition The {@link ModelBasedPropertyWrapper.ModelDefinition} whose name should be used to
      *                            generate the appropriate {@link ResourceLocation}.
      *

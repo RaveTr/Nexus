@@ -1,4 +1,4 @@
-package com.mememan.nexus.datagen.standard.loot;
+package com.mememan.nexus.datagen.standard.data_pack.loot;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;

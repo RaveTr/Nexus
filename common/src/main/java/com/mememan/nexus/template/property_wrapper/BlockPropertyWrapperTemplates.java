@@ -18,6 +18,8 @@ public final class BlockPropertyWrapperTemplates {
      * <ul>
      *     <li><b>Model</b>: Uses {@link ModelUtil#cubeAll(Supplier)}, with the input being
      *     {@link RegistryUtil#getBlockTextureLocationOrDefault(Supplier)}.</li>
+     *     <li><b>Block State</b>: Uses {@link ModelUtil#simpleBlock(Supplier)}, with the input being the parent
+     *     {@link Block}.</li>
      *     <li><b>Loot Table</b>: Uses {@link LootUtil#dropSelf(Supplier)}, with the input being the parent
      *     {@link Block}.</li>
      * </ul>
@@ -25,6 +27,7 @@ public final class BlockPropertyWrapperTemplates {
     public static final BlockPropertyWrapper<Block> BASIC = new BlockPropertyWrapper<>()
             .builder()
             .withModelDefinition(ModelUtil::cubeAll)
+            .withBlockStateDefinition(ModelUtil::simpleBlock)
             .withLootTable(LootUtil::dropSelf)
             .build();
 

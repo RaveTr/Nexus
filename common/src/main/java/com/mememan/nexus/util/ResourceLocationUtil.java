@@ -1,6 +1,6 @@
 package com.mememan.nexus.util;
 
-import com.mememan.nexus.datagen.standard.StandardDatapackRegistryProvider;
+import com.mememan.nexus.datagen.standard.data_pack.StandardDatapackRegistryProvider;
 import net.minecraft.resources.ResourceLocation;
 
 /**

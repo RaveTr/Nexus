@@ -3,7 +3,7 @@ package com.mememan.nexus.datagen.standard;
 import com.google.gson.JsonElement;
 import com.mememan.nexus.datagen.DuplicateDataPolicy;
 import com.mememan.nexus.datagen.ProviderType;
-import com.mememan.nexus.item.standard.ItemPropertyWrapper;
+import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import org.jetbrains.annotations.NotNull;
@@ -33,7 +33,7 @@ public interface ModDataProvider extends DataProvider {
      * {@link #getModId()}'s namespace have at least 1 generated block model, throwing a {@link NullPointerException} or
      * {@link IllegalStateException} otherwise.
      * <br></br>
-     * Property wrappers excluded from datagen (e.g. via {@link ItemPropertyWrapper#excludeFromNativeDatagen()}) will be
+     * Property wrappers excluded from datagen (e.g. via {@link DataGenPropertyWrapper#isExcludedFromDataGen()}) will be
      * ignored.
      *
      * @return Whether object entries pertaining to this provider should validate the existence of at least 1 mapped data

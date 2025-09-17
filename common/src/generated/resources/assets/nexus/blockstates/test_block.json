@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "nexus:block/test_block"
+    }
+  }
+}

@@ -1,4 +1,4 @@
-package com.mememan.nexus.datagen.standard;
+package com.mememan.nexus.datagen.standard.data_pack;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -6,6 +6,7 @@ import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.datagen.DuplicateDataPolicy;
 import com.mememan.nexus.datagen.NexusProviderTypes;
 import com.mememan.nexus.datagen.ProviderType;
+import com.mememan.nexus.datagen.standard.ModDataProvider;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.specialised.recipe.RecipeBasedPropertyWrapper;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -44,50 +45,6 @@ public class StandardRecipeProvider extends RecipeProvider implements ModDataPro
         this.dupeStrat = dupeStrat;
 
         this.mappedRecipePWs = PropertyWrapper.PropertyWrappersContainer.getInferrableDataGennableWrappersOfType(RecipeBasedPropertyWrapper.class, modId);
-    }
-
-    /**
-     * Automatically generates all block and item recipes for the specified mod id, if any. Handles {@code null}/missing
-     * recipes.
-     *
-     * @param recipeActionConsumer The recipe action consumer used to serialize recipes.
-     *
-     * @see #run(CachedOutput)
-     *
-     * @see #processRecipesGenerically(Consumer)
-     */
-    @Override
-    public void buildRecipes(Consumer<FinishedRecipe> recipeActionConsumer) {
-        processRecipesGenerically(recipeActionConsumer);
-    }
-
-    /**
-     * Helper delegate method to work around Java's generic type testing (especially for wildcards). Actually does all
-     * the recipe processing work. Additionally, handles missing recipe entries appropriately.
-     *
-     * @param recipeActionConsumer The recipe action consumer used to serialize recipes.
-     *
-     * @param <T> The object type for each recipe-based property wrapper.
-     */
-    protected <T> void processRecipesGenerically(Consumer<FinishedRecipe> recipeActionConsumer) {
-        if (!mappedRecipePWs.isEmpty()) {
-            mappedRecipePWs.stream()
-                    .map(curPW -> (RecipeBasedPropertyWrapper<T, ?, ?>) curPW)
-                    .forEach(curPW -> {
-                        Optional<Function<Consumer<FinishedRecipe>, Consumer<Supplier<T>>>> mappedRecipe = curPW.getRecipeConsumer();
-                        String objectClassName = curPW.getParentObject().get().getClass().getSimpleName();
-
-                        mappedRecipe.ifPresentOrElse(recipeMapperFunc -> {
-                            NexusConstants.LOGGER.debug("[{}] [Generating Recipe for {}]: {}", modId, objectClassName, curPW.getObjectDescriptionId());
-
-                            recipeMapperFunc.apply(recipeActionConsumer).accept(curPW.getParentObject());
-                        }, () -> {
-                            if (validateAllEntries() || curPW.getProviderTypeRequisites().getOrDefault(getProviderType(), false)) {
-                                throw new NullPointerException(String.format("Missing recipe mapper for %s: %s, required by mod: %s, either because validateAllEntries is set to true for this provider or the object itself requires validation through DataGenBasedPropertyWrapper#getProviderTypeRequisites().", objectClassName, curPW.getObjectDescriptionId(), modId));
-                            }
-                        });
-                    });
-        }
     }
 
     /**
@@ -134,6 +91,51 @@ public class StandardRecipeProvider extends RecipeProvider implements ModDataPro
 
         return CompletableFuture.allOf(recipesAndAdvancements.toArray(CompletableFuture[]::new));
     }
+
+    /**
+     * Automatically generates all block and item recipes for the specified mod id, if any. Handles {@code null}/missing
+     * recipes.
+     *
+     * @param recipeActionConsumer The recipe action consumer used to serialize recipes.
+     *
+     * @see #run(CachedOutput)
+     *
+     * @see #processRecipesGenerically(Consumer)
+     */
+    @Override
+    public void buildRecipes(Consumer<FinishedRecipe> recipeActionConsumer) {
+        processRecipesGenerically(recipeActionConsumer);
+    }
+
+    /**
+     * Helper delegate method to work around Java's generic type testing (especially for wildcards). Actually does all
+     * the recipe processing work. Additionally, handles missing recipe entries appropriately.
+     *
+     * @param recipeActionConsumer The recipe action consumer used to serialize recipes.
+     *
+     * @param <T> The object type for each recipe-based property wrapper.
+     */
+    protected <T> void processRecipesGenerically(Consumer<FinishedRecipe> recipeActionConsumer) {
+        if (!mappedRecipePWs.isEmpty()) {
+            mappedRecipePWs.stream()
+                    .map(curPW -> (RecipeBasedPropertyWrapper<T, ?, ?>) curPW)
+                    .forEach(curPW -> {
+                        Optional<Function<Consumer<FinishedRecipe>, Consumer<Supplier<T>>>> mappedRecipe = curPW.getRecipeConsumer();
+                        String objectClassName = curPW.getParentObject().get().getClass().getSimpleName();
+
+                        mappedRecipe.ifPresentOrElse(recipeMapperFunc -> {
+                            NexusConstants.LOGGER.debug("[{}] [Generating Recipe for {}]: {}", modId, objectClassName, curPW.getObjectDescriptionId());
+
+                            recipeMapperFunc.apply(recipeActionConsumer).accept(curPW.getParentObject());
+                        }, () -> {
+                            if (validateAllEntries() || curPW.getProviderTypeRequisites().getOrDefault(getProviderType(), false)) {
+                                throw new NullPointerException(String.format("Missing recipe mapper for %s: %s, required by mod: %s, either because validateAllEntries is set to true for this provider or the object itself requires validation through DataGenBasedPropertyWrapper#getProviderTypeRequisites().", objectClassName, curPW.getObjectDescriptionId(), modId));
+                            }
+                        });
+                    });
+        }
+    }
+
 
     @Override
     public @NotNull String getName() {

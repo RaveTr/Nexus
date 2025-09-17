@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import com.mememan.nexus.client.model.general.ModelElement;
 import com.mememan.nexus.client.model.general.ModelGuiLight;
 import com.mememan.nexus.client.model.general.ModelTransform;
-import com.mememan.nexus.datagen.standard.model.StandardModelProvider;
+import com.mememan.nexus.datagen.standard.resource_pack.StandardModelProvider;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
@@ -37,10 +37,11 @@ import java.util.function.Supplier;
 public interface ModelBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDER>, BUILDER extends PropertyWrapperBuilder<T, BUILDER, SELF>> extends DataGenPropertyWrapper<T, SELF, BUILDER> {
 
     /**
-     * Gets the {@link List} of model definitions for the object being wrapped, represented as a {@link Function} taking
-     * the parent object as input and returning a {@link ModelDefinition}.
+     * Gets the {@link ModelDefinition} for the parent block, represented as a {@link Function} taking the parent object
+     * as input and returning a {@link ModelDefinition}.
      *
      * @return A model definition for the object being wrapped. May be empty.
+     *
      * @see ModelBasedPropertyWrapperBuilder#withModelDefinition(Function)
      */
     Optional<Function<Supplier<T>, ModelDefinition>> getModelDefinition();

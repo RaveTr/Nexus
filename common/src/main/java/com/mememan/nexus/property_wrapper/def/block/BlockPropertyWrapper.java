@@ -1,5 +1,6 @@
 package com.mememan.nexus.property_wrapper.def.block;
 
+import com.mememan.nexus.client.block.BlockStateDefinition;
 import com.mememan.nexus.property_wrapper.base.generic.DefaultableDataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.impl.generic.BaseDataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.impl.specialised.language.SpecializedLanguagePropertyWrapper;
@@ -11,6 +12,7 @@ import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class BlockPropertyWrapper<B extends Block> extends BaseDataGenPropertyWrapper<B, BlockPropertyWrapper<B>, BlockPropertyWrapperBuilder<B>> implements DefaultableDataGenPropertyWrapper<B, BlockPropertyWrapper<B>, BlockPropertyWrapperBuilder<B>> {
@@ -48,6 +50,18 @@ public class BlockPropertyWrapper<B extends Block> extends BaseDataGenPropertyWr
         this.compositeModelWrapper = new SpecializedModelPropertyWrapper<>();
         this.compositeRecipeWrapper = new SpecializedRecipePropertyWrapper<>();
         this.compositeTagWrapper = new SpecializedTagPropertyWrapper<>();
+    }
+
+    /**
+     * Gets the {@link BlockStateDefinition} mapping function used to build this BlockPropertyWrapper's parent block's
+     * blockstate in datagen, with the parent block as the input.
+     *
+     * @return The {@link BlockStateDefinition} mapping function. May be empty.
+     *
+     * @see BlockPropertyWrapperBuilder#withBlockStateDefinition(Function)
+     */
+    public Optional<Function<Supplier<B>, BlockStateDefinition>> getBlockStateDefinition() {
+        return rawBuilder().flatMap(builder -> builder.blockStateDefMapperFunc);
     }
 
     @Override

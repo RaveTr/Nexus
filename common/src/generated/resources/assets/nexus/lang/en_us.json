@@ -1,5 +1,6 @@
 {
   "block.nexus.test_able_block": "TEST ABLE BLOCK",
   "block.nexus.test_block": "Block of Test",
-  "block.nexus.test_block_3": "Test Block 3"
+  "block.nexus.test_block_3": "Test Block 3",
+  "enchantment.nexus.test_enchantment": "Test Enchantment"
 }

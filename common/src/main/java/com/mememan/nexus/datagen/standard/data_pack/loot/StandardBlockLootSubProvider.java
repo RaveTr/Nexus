@@ -1,4 +1,4 @@
-package com.mememan.nexus.datagen.standard.loot;
+package com.mememan.nexus.datagen.standard.data_pack.loot;
 
 import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.block.standard.BlockPropertyWrapper;

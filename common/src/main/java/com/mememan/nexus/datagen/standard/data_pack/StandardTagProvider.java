@@ -1,4 +1,4 @@
-package com.mememan.nexus.datagen.standard.tag;
+package com.mememan.nexus.datagen.standard.data_pack;
 
 import com.google.gson.JsonElement;
 import com.mememan.nexus.NexusConstants;
@@ -226,7 +226,7 @@ public class StandardTagProvider extends TagsProvider<Object> implements ModData
      * @param <T> The parent {@link Registry} type, pertaining to its respective {@link TagKey} type(s).
      *
      * @throws IllegalArgumentException If a tag entry is missing a required reference (i.e. missing registry entry for
-     * a tag or object within said defined tag entry).
+     * a tag or object within said defined tag entry) and {@link #validateAllEntries} is set to {@code true}.
      *
      * @see #trackTag(TagKey)
      */

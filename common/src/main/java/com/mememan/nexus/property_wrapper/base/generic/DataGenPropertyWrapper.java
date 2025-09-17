@@ -11,6 +11,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -141,11 +142,31 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
     Map<ProviderType, Boolean> getProviderTypeRequisites();
 
     /**
+     * Convenience method for configuring a custom prefix for the parent object's description ID, if needed (is empty
+     * by default).
+     * <br></br>
+     * This is needed due to the fact that some of Minecraft's objects are not mapped 1:1 with their corresponding
+     * registries' names when their description IDs are constructed, then parsed and checked against in the global
+     * {@link Language} instance (e.g. entity type description IDs are prefixed with {@code "entity"}, not
+     * {@code "entity_type"}).
+     *
+     * @return The custom prefix to use when retrieving the parent object's description ID (if possible). Empty by
+     * default.
+     *
+     * @see #getObjectDescriptionId()
+     */
+    default Optional<String> getDescriptionIdPrefix() {
+        return Optional.empty();
+    }
+
+    /**
      * Gets the description ID for the object being wrapped. Used for the object's key during automatic localization,
      * logging, and general identification.
      *
      * @return The description ID for the object being wrapped, or "Template " concatenated with the {@code class} name
      * if the object is a template.
+     *
+     * @see #getDescriptionIdPrefix()
      */
     @NotNull
     default String getObjectDescriptionId() {
@@ -154,7 +175,7 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
         return isTemplate()
                 ? "Template ".concat(getClass().getSimpleName())
                 : parentObjRegId
-                .map(regLoc -> Util.makeDescriptionId(regLoc.getPath(), RegistryLookupContainer.getObjectRegistryId(getParentObject().get()).get()))
+                .map(regLoc -> Util.makeDescriptionId(getDescriptionIdPrefix().orElse(regLoc.getPath()), RegistryLookupContainer.getObjectRegistryId(getParentObject().get()).get()))
                 .orElseGet(() -> getParentObject().get().toString());
     }
 

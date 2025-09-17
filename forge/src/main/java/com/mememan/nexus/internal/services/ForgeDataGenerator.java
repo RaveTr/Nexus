@@ -3,12 +3,13 @@ package com.mememan.nexus.internal.services;
 import com.mememan.nexus.asm.annotations.DatagenRegistrarEntry;
 import com.mememan.nexus.datagen.*;
 import com.mememan.nexus.datagen.standard.ModDataProvider;
-import com.mememan.nexus.datagen.standard.StandardDatapackRegistryProvider;
-import com.mememan.nexus.datagen.standard.StandardLanguageProvider;
-import com.mememan.nexus.datagen.standard.StandardRecipeProvider;
-import com.mememan.nexus.datagen.standard.loot.StandardLootProvider;
-import com.mememan.nexus.datagen.standard.model.StandardModelProvider;
-import com.mememan.nexus.datagen.standard.tag.StandardTagProvider;
+import com.mememan.nexus.datagen.standard.data_pack.StandardDatapackRegistryProvider;
+import com.mememan.nexus.datagen.standard.data_pack.StandardRecipeProvider;
+import com.mememan.nexus.datagen.standard.data_pack.StandardTagProvider;
+import com.mememan.nexus.datagen.standard.data_pack.loot.StandardLootProvider;
+import com.mememan.nexus.datagen.standard.resource_pack.StandardBlockStateProvider;
+import com.mememan.nexus.datagen.standard.resource_pack.StandardLanguageProvider;
+import com.mememan.nexus.datagen.standard.resource_pack.StandardModelProvider;
 import com.mememan.nexus.loader.ModData;
 import com.mememan.nexus.loader.ModSide;
 import com.mememan.nexus.platform.NexusServices;
@@ -162,6 +163,8 @@ public class ForgeDataGenerator implements DataGenerator {
                     // Client
                     primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.LANGUAGE_PROVIDER) && onClient, new StandardLanguageProvider(modSpecificPackOutput, modId, "en_us", providersToValidate.contains(NexusProviderTypes.LANGUAGE_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.LANGUAGE_PROVIDER, DuplicateDataPolicy.CRASH)));
                     primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.MODEL_PROVIDER) && onClient, new StandardModelProvider(modSpecificPackOutput, modId, providersToValidate.contains(NexusProviderTypes.MODEL_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.MODEL_PROVIDER, DuplicateDataPolicy.CRASH)));
+
+                    primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.BLOCK_STATE_PROVIDER) && onClient, new StandardBlockStateProvider(modSpecificPackOutput, modId, providersToValidate.contains(NexusProviderTypes.BLOCK_STATE_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.BLOCK_STATE_PROVIDER, DuplicateDataPolicy.CRASH)));
 
                     // Server
                     primaryGen.addProvider(!disabledProviders.contains(NexusProviderTypes.DYNAMIC_REGISTRY_PROVIDER) && onServer, new StandardDatapackRegistryProvider(modSpecificPackOutput, regLookupProvider, NexusServices.REGISTRAR.getRegistrySetBuilder(), modId, providersToValidate.contains(NexusProviderTypes.DYNAMIC_REGISTRY_PROVIDER), mappedDupeStrats.getOrDefault(NexusProviderTypes.DYNAMIC_REGISTRY_PROVIDER, DuplicateDataPolicy.CRASH)));
