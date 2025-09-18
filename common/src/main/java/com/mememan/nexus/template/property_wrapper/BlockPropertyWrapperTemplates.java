@@ -31,6 +31,7 @@ public final class BlockPropertyWrapperTemplates {
             .withLootTable(LootUtil::dropSelf)
             .build();
 
+
     private BlockPropertyWrapperTemplates() {
         throw new UnsupportedOperationException("Attempted to construct instance of template utility class! (BlockPropertyWrapperTemplates)");
     }
