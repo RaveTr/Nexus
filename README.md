@@ -64,7 +64,7 @@ the exception of networking and ``PropertyWrapper`` implementations).
 
 After testing startup performance impact, I've 
 found that in lightweight modpacks across all loaders, the startup impact was a negligible amount of ms (variable based 
-on the mods in the pack), whilst heavier modpacks (390+ mods) tended to float around < 20 seconds of added startup time, 
+on the mods in the pack), whilst heavier modpacks (390+ mods) tended to float around < 10 seconds of added startup time, 
 which is negligible due to the fact that the game would already take minutes at a time to launch anyway. Optimization 
 mods obviously remedy this in proportion. It's essentially context-dependent.
 
