@@ -7,7 +7,7 @@ import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.asm.ClassFinder;
 import com.mememan.nexus.asm.annotations.RegistrarEntry;
 import com.mememan.nexus.loader.StandardRegistryBuilder;
-import com.mememan.nexus.mixins.forge.DataPackRegistriesHooksAccessor;
+import com.mememan.nexus.mixins.forge.registries.DataPackRegistriesHooksAccessor;
 import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.platform.services.Registrar;
 import com.mememan.nexus.resource.config.ResourceReloadListenerConfig;
@@ -190,7 +190,8 @@ public class ForgeRegistrar implements Registrar {
 
     public static <PRL extends PreparableReloadListener> ImmutableMap<ResourceLocation, Pair<PRL, Optional<ResourceReloadListenerConfig<PRL>>>> getCachedResourceReloadListeners() {
         Map<ResourceLocation, Pair<PRL, Optional<ResourceReloadListenerConfig<PRL>>>> result = new Object2ObjectOpenHashMap<>();
-        CACHED_RESOURCE_RELOAD_LISTENERS.forEach((key, value) ->
+
+        CACHED_RESOURCE_RELOAD_LISTENERS.forEach((key, value) -> // Avoid generic type invariance screwing us at compile-time
                 result.put(key, ObjectObjectImmutablePair.of((PRL) value.left(), value.right().flatMap(config -> Optional.of((ResourceReloadListenerConfig<PRL>) config))))
         );
 

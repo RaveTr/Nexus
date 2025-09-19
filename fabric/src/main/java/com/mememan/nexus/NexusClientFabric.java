@@ -1,22 +1,26 @@
 package com.mememan.nexus;
 
-import com.mememan.nexus.block.standard.BlockPropertyWrapper;
 import com.mememan.nexus.client.item.WrappedClampedItemPropertyFunction;
 import com.mememan.nexus.internal.services.FabricNetworkManager;
-import com.mememan.nexus.item.standard.ItemPropertyWrapper;
 import com.mememan.nexus.network.BasePacket;
 import com.mememan.nexus.network.NetworkSide;
+import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
+import com.mememan.nexus.property_wrapper.base.specialised.vanilla.VanillaBasedPropertyWrapper;
+import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapper;
+import com.mememan.nexus.property_wrapper.def.item.ItemPropertyWrapper;
 import com.mememan.nexus.util.ClientUtil;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.minecraft.client.color.block.BlockColor;
+import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 
+import java.util.Map;
 import java.util.function.Supplier;
 
 /**
@@ -29,9 +33,7 @@ public class NexusClientFabric implements ClientModInitializer {
     public void onInitializeClient() {
         registerClientNetworkReceivers();
 
-        registerBlockColorProviders();
-        registerItemColorProviders();
-
+        registerColorProviders();
         registerItemModelPredicates();
     }
 
@@ -48,32 +50,49 @@ public class NexusClientFabric implements ClientModInitializer {
                 });
     }
 
-    private static void registerBlockColorProviders() {
-        BlockPropertyWrapper.getMappedBpws().entrySet().stream().filter(curBwpEntry -> curBwpEntry.getValue().getBlockColorMappingFunc() != null).forEach(curBwpEntry -> {
-            Supplier<Block> blockSupEntry = curBwpEntry.getKey();
-            BlockColor curMappedBlockColor = ClientUtil.toBlockColor(curBwpEntry.getValue().getBlockColorMappingFunc().apply(blockSupEntry));
+    private static <IL extends ItemLike> void registerColorProviders() {
+        PropertyWrapper.PropertyWrappersContainer.getInferrableWrappersOfType(VanillaBasedPropertyWrapper.class).stream()
+                .map(curPW -> (VanillaBasedPropertyWrapper<IL, ?, ?>) curPW)
+                .forEach(curPW -> {
+                    if (curPW instanceof BlockPropertyWrapper<?> curBPW) registerBlockColorProvider(curBPW);
+                    if (curPW instanceof ItemPropertyWrapper<?> curIPW) registerItemColorProvider(curIPW);
+                });
+    }
 
-            ColorProviderRegistry.BLOCK.register(curMappedBlockColor, blockSupEntry.get());
+    private static <B extends Block> void registerBlockColorProvider(BlockPropertyWrapper<B> targetBPW) {
+        targetBPW.getBlockColorMapper().ifPresent(curMapper -> {
+            Supplier<B> parentBlockSup = targetBPW.getParentObject();
+            B parentBlock = parentBlockSup.get();
+
+            BlockColor resultBlockColor = ClientUtil.toBlockColor(curMapper.apply(parentBlockSup));
+
+            if (resultBlockColor != null) {
+                ColorProviderRegistry.BLOCK.register(resultBlockColor, parentBlock);
+                ColorProviderRegistry.ITEM.register((curStack, tintIdx) -> resultBlockColor.getColor(parentBlock.defaultBlockState(), null, null, tintIdx),parentBlock);
+            }
         });
     }
 
-    private static void registerItemColorProviders() {
-        BlockPropertyWrapper.getMappedBpws().entrySet().stream().filter(curBwpEntry -> curBwpEntry.getValue().getBlockColorMappingFunc() != null).forEach(curBwpEntry -> { // Need to isolate both methods (in terms of blocks), since otherwise block is null within the same method's scope when retrieved from the ColorProviderRegistry
-            Supplier<Block> blockSupEntry = curBwpEntry.getKey();
-            BlockColor curMappedBlockColor = ClientUtil.toBlockColor(curBwpEntry.getValue().getBlockColorMappingFunc().apply(blockSupEntry));
+    private static <I extends Item> void registerItemColorProvider(ItemPropertyWrapper<I> targetIPW) {
+        targetIPW.getItemColorMapper().ifPresent(curMapper -> {
+            Supplier<I> parentItemSup = targetIPW.getParentObject();
+            I parentItem = parentItemSup.get();
 
-            if (curMappedBlockColor == null) return; // Failsafe for initial nullity (how)
+            ItemColor resultItemColor = ClientUtil.toItemColor(curMapper.apply(parentItemSup));
 
-            ColorProviderRegistry.ITEM.register((curStack, tintIdx) -> curMappedBlockColor.getColor(blockSupEntry.get().defaultBlockState(), null, null, tintIdx), blockSupEntry.get());
+            if (resultItemColor != null) ColorProviderRegistry.ITEM.register(resultItemColor, parentItem);
         });
     }
 
-    private static void registerItemModelPredicates() {
-        ItemPropertyWrapper.getMappedIpws().entrySet().stream().filter(curEntry -> !curEntry.getValue().getItemModelPredicates().isEmpty()).forEach(curEntry -> {
-            Supplier<Item> itemSupEntry = curEntry.getKey();
-            Object2ObjectOpenHashMap<ResourceLocation, WrappedClampedItemPropertyFunction> definedModelPredicateFunctions = curEntry.getValue().getItemModelPredicates();
+    private static <I extends Item> void registerItemModelPredicates() {
+        PropertyWrapper.PropertyWrappersContainer.getInferrableWrappersOfType(ItemPropertyWrapper.class).stream()
+                .map(curPW -> (ItemPropertyWrapper<I>) curPW)
+                .forEach(curPW -> {
+                    Map<ResourceLocation, WrappedClampedItemPropertyFunction> itemModelPredicates = curPW.getItemModelPredicates();
 
-            definedModelPredicateFunctions.forEach((curName, curFunc) -> ItemProperties.register(itemSupEntry.get(), curName, ClientUtil.toClampedItemPropertyFunction(curFunc)));
-        });
+                    if (!itemModelPredicates.isEmpty()) {
+                        itemModelPredicates.forEach((predicateId, curItemPropertyFunc) -> ItemProperties.register(curPW.getParentObject().get(), predicateId, ClientUtil.toClampedItemPropertyFunction(curItemPropertyFunc)));
+                    }
+                });
     }
 }

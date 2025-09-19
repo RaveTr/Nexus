@@ -8,7 +8,7 @@ import com.mememan.nexus.datagen.standard.ModDataProvider;
 import com.mememan.nexus.datagen.standard.data_pack.StandardDatapackRegistryProvider;
 import com.mememan.nexus.datagen.standard.data_pack.StandardRecipeProvider;
 import com.mememan.nexus.datagen.standard.data_pack.StandardTagProvider;
-import com.mememan.nexus.datagen.standard.data_pack.loot.StandardLootProvider;
+import com.mememan.nexus.datagen.standard.data_pack.StandardLootProvider;
 import com.mememan.nexus.datagen.standard.resource_pack.StandardBlockStateProvider;
 import com.mememan.nexus.datagen.standard.resource_pack.StandardLanguageProvider;
 import com.mememan.nexus.datagen.standard.resource_pack.StandardModelProvider;

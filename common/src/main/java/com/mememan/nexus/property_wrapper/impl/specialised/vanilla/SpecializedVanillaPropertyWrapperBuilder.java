@@ -26,19 +26,19 @@ public class SpecializedVanillaPropertyWrapperBuilder<IL extends ItemLike, SELF 
     @Override
     public SELF copyFrom(Supplier<IL> associatedPWObject) {
         return super.copyFrom(associatedPWObject)
-                .withCompostMapper(ownerWrapper.getCompostMapper().orElse(null))
-                .withFuelMapper(ownerWrapper.getFuelMapper().orElse(null))
+                .asCompostable(ownerWrapper.getCompostMapper().orElse(null))
+                .asFuel(ownerWrapper.getFuelMapper().orElse(null))
                 .setParentTabs(ownerWrapper.getParentCreativeModeTabs());
     }
 
     @Override
-    public SELF withCompostMapper(Function<Supplier<IL>, Float> compostMapper) {
+    public SELF asCompostable(Function<Supplier<IL>, Float> compostMapper) {
         this.compostMapperFunc = Optional.ofNullable(compostMapper);
         return self();
     }
 
     @Override
-    public SELF withFuelMapper(Function<Supplier<IL>, Integer> fuelTimeMapper) {
+    public SELF asFuel(Function<Supplier<IL>, Integer> fuelTimeMapper) {
         this.fuelMapperFunc = Optional.ofNullable(fuelTimeMapper);
         return self();
     }

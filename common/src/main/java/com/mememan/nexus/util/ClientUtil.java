@@ -2,11 +2,13 @@ package com.mememan.nexus.util;
 
 import com.mememan.nexus.client.block.WrappedBlockColor;
 import com.mememan.nexus.client.item.WrappedClampedItemPropertyFunction;
+import com.mememan.nexus.client.item.WrappedItemColor;
 import com.mememan.nexus.client.item.WrappedItemPropertyFunction;
 import com.mememan.nexus.loader.EnvironmentSide;
 import com.mememan.nexus.platform.NexusServices;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColor;
+import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
@@ -15,8 +17,14 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 /**
  * Utility {@code class} that provides side-safe methods to avoid accidental classloading via imports or other means.
+ * <br></br>
+ * <b>Note</b>: For object conversion methods, we avoid using {@link Optional} to prevent unnecessary object allocation,
+ * and the pattern-enforcement of {@link Optional} provides diminishing returns in this context compared to raw
+ * nullability.
  */
 public class ClientUtil {
 
@@ -100,5 +108,18 @@ public class ClientUtil {
     @Nullable
     public static BlockColor toBlockColor(WrappedBlockColor targetBlockColor) {
         return onClient() && targetBlockColor != null ? targetBlockColor::getColor : null;
+    }
+
+    /**
+     * Side-safe object conversion method that attempts to convert a {@link WrappedItemColor} to a {@link ItemColor}
+     * only if on the client. May be {@code null}.
+     *
+     * @param targetItemColor The {@link WrappedItemColor} to convert.
+     *
+     * @return The converted {@link ItemColor} if on the client. May be {@code null}.
+     */
+    @Nullable
+    public static ItemColor toItemColor(WrappedItemColor targetItemColor) {
+        return onClient() && targetItemColor != null ? targetItemColor::getColor : null;
     }
 }

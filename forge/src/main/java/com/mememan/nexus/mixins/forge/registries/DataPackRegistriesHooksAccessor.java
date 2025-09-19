@@ -1,4 +1,4 @@
-package com.mememan.nexus.mixins.forge;
+package com.mememan.nexus.mixins.forge.registries;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistrySynchronization;
@@ -13,7 +13,7 @@ import java.util.Map;
  * Accessor {@code interface} primarily designed to access {@link DataPackRegistriesHooks#NETWORKABLE_REGISTRIES} without
  * weird reflection/asm shenanigans.
  */
-@Mixin(DataPackRegistriesHooks.class)
+@Mixin(value = DataPackRegistriesHooks.class, remap = false)
 public interface DataPackRegistriesHooksAccessor {
 
     @Accessor("NETWORKABLE_REGISTRIES")

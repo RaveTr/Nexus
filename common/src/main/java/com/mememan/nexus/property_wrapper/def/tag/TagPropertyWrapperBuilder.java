@@ -2,6 +2,7 @@ package com.mememan.nexus.property_wrapper.def.tag;
 
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.impl.specialised.tag.SpecializedTagPropertyWrapperBuilder;
+import it.unimi.dsi.fastutil.ints.IntIntMutablePair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
@@ -10,11 +11,14 @@ import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class TagPropertyWrapperBuilder<T, TK extends TagKey<T>> extends SpecializedTagPropertyWrapperBuilder<TK, TagPropertyWrapperBuilder<T, TK>, TagPropertyWrapper<T, TK>> {
     protected final List<Supplier<T>> storedTaggedObjects = new ObjectArrayList<>();
     protected final List<Supplier<TK>> storedTags = new ObjectArrayList<>();
+    protected Optional<Integer> cookTime = Optional.empty();
+    protected Optional<IntIntMutablePair> flammabilityPair = Optional.empty();
 
     public TagPropertyWrapperBuilder(@NotNull TagPropertyWrapper<T, TK> ownerWrapper) {
         super(ownerWrapper);
@@ -24,7 +28,9 @@ public class TagPropertyWrapperBuilder<T, TK extends TagKey<T>> extends Speciali
     public TagPropertyWrapperBuilder<T, TK> copyFrom(TagPropertyWrapper<T, TK> propertyWrapper) {
         return super.copyFrom(propertyWrapper)
                 .setTaggedObjects(propertyWrapper.getTaggedObjects())
-                .setChildTags(propertyWrapper.getChildTags());
+                .setChildTags(propertyWrapper.getChildTags())
+                .withCookTime(propertyWrapper.getCookTime().orElse(null))
+                .withFlammability(propertyWrapper.getFlammabilityPair().orElse(null));
     }
 
     /**
@@ -121,5 +127,19 @@ public class TagPropertyWrapperBuilder<T, TK extends TagKey<T>> extends Speciali
         this.storedTags.clear();
         this.storedTags.addAll((List) tags);
         return this;
+    }
+
+    public TagPropertyWrapperBuilder<T, TK> withCookTime(Integer cookTime) {
+        this.cookTime = Optional.ofNullable(Math.abs(cookTime) > 0 ? cookTime : null);
+        return this;
+    }
+
+    public TagPropertyWrapperBuilder<T, TK> withFlammability(IntIntMutablePair flammabilityPair) {
+        this.flammabilityPair = Optional.ofNullable(flammabilityPair);
+        return this;
+    }
+
+    public TagPropertyWrapperBuilder<T, TK> withFlammability(int burnTime, int spread) {
+        return withFlammability(IntIntMutablePair.of(burnTime, spread));
     }
 }

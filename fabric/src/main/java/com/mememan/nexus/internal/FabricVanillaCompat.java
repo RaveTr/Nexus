@@ -3,12 +3,11 @@ package com.mememan.nexus.internal;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.specialised.vanilla.VanillaBasedPropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapper;
-import com.mememan.nexus.tag.TagWrapper;
+import com.mememan.nexus.property_wrapper.def.tag.TagPropertyWrapper;
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.IntIntMutablePair;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.fabricmc.fabric.api.registry.CompostingChanceRegistry;
-import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
-import net.fabricmc.fabric.api.registry.FuelRegistry;
+import net.fabricmc.fabric.api.registry.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -16,12 +15,14 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -31,10 +32,12 @@ public final class FabricVanillaCompat {
 
     /**
      * Internal method responsible for the registration of hardcoded Vanilla compatibility features from Block/Item/Tag
-     * Property Wrappers. Additionally, handles registration of blocks and items to their respective
+     * Property Wrappers. Additionally, handles registration of {@linkplain ItemLike ItemLikes} to their respective
      * {@linkplain CreativeModeTab CreativeModeTabs}.
      *
      * @param <IL> Any {@link ItemLike} type. Primarily used for compile-time generic type safety.
+     *
+     * @see #registerBlockVanillaCompat(BlockPropertyWrapper)
      */
     public static <IL extends ItemLike> void registerVanillaCompat() {
         // General (ItemLikes)
@@ -44,12 +47,11 @@ public final class FabricVanillaCompat {
                 .forEach(curPW -> {
                     Supplier<IL> parentItemLikeSup = curPW.getParentObject();
                     IL parentItemLike = parentItemLikeSup.get();
-                    Optional<Function<Supplier<IL>, Float>> compostMapperFunc = curPW.getCompostMapper();
-                    Optional<Function<Supplier<IL>, Integer>> fuelMapperFunc = curPW.getFuelMapper();
-                    List<Supplier<CreativeModeTab>> parentTabs = curPW.getParentCreativeModeTabs();
 
-                    compostMapperFunc.ifPresent(compostMapper -> CompostingChanceRegistry.INSTANCE.add(parentItemLike, Math.abs(compostMapper.apply(parentItemLikeSup))));
-                    fuelMapperFunc.ifPresent(fuelMapper -> FuelRegistry.INSTANCE.add(parentItemLike, Math.abs(fuelMapper.apply(parentItemLikeSup))));
+                    curPW.getCompostMapper().ifPresent(compostMapper -> CompostingChanceRegistry.INSTANCE.add(parentItemLike, Math.abs(compostMapper.apply(parentItemLikeSup))));
+                    curPW.getFuelMapper().ifPresent(fuelMapper -> FuelRegistry.INSTANCE.add(parentItemLike, Math.abs(fuelMapper.apply(parentItemLikeSup))));
+
+                    List<Supplier<CreativeModeTab>> parentTabs = curPW.getParentCreativeModeTabs();
 
                     if (!parentTabs.isEmpty()) {
                         ItemStack parentStack = parentItemLike.asItem().getDefaultInstance();
@@ -68,43 +70,53 @@ public final class FabricVanillaCompat {
                         }
                     }
 
-                    if (curPW instanceof BlockPropertyWrapper<?> curBPW) { // Special handling for blocks
-                        Supplier<? extends Block> parentBlockSup = curBPW.getParentObject();
-                        Block parentBlock = parentBlockSup.get();
-
-
-                    }
+                    if (curPW instanceof BlockPropertyWrapper<?> curBPW) registerBlockVanillaCompat(curBPW);
                 });
 
-        // Blocks
-   /*     BlockPropertyWrapper.getMappedBpws().forEach((parentBlockSup, curBpw) -> {
-            IntIntMutablePair flammabilityPair = curBpw.getFlammabilityMappingFunc() == null ? null : curBpw.getFlammabilityMappingFunc().apply(parentBlockSup);
-            Supplier<Block> strippedBlockVariant = curBpw.getBlockStrippingMappingFunc() == null ? null : curBpw.getBlockStrippingMappingFunc().apply(parentBlockSup);
-            ObjectObjectMutablePair<Predicate<UseOnContext>, Consumer<UseOnContext>> parentBlockTillingBehaviourPair = curBpw.getBlockTillingMappingFunc() == null ? null : curBpw.getBlockTillingMappingFunc().apply(parentBlockSup);
-            BlockState flattenedBlockVariant = curBpw.getBlockFlatteningMappingFunc() == null ? null : curBpw.getBlockFlatteningMappingFunc().apply(parentBlockSup);
-            Supplier<Block> oxidizedBlockVariant = curBpw.getBlockOxidizationMappingFunc() == null ? null : curBpw.getBlockOxidizationMappingFunc().apply(parentBlockSup);
-            Supplier<Block> waxedBlockVariant = curBpw.getBlockWaxingMappingFunc() == null ? null : curBpw.getBlockWaxingMappingFunc().apply(parentBlockSup);
-            Float blockCompostChance = curBpw.getBlockCompostingMappingFunc() == null ? null : Math.abs(curBpw.getBlockCompostingMappingFunc().apply(parentBlockSup));
-            Integer blockFuelCookTime = curBpw.getBlockFuelMappingFunc() == null ? null : Math.abs(curBpw.getBlockFuelMappingFunc().apply(parentBlockSup));
+        // Tags (Blocks/Items)
+        PropertyWrapper.PropertyWrappersContainer.getInferrableWrappersOfType(TagPropertyWrapper.class)
+                .stream()
+                .map(curPW -> (TagPropertyWrapper<?, ? extends TagKey<?>>) curPW)
+                .forEach(curPW -> {
+                    Optional<Integer> tagCookTime = curPW.getCookTime();
+                    Optional<IntIntMutablePair> tagFlammabilityProperties = curPW.getFlammabilityPair();
+                    Supplier<? extends TagKey<?>> parentTagKeySup = curPW.getParentObject();
+                    TagKey<?> parentTagKey = parentTagKeySup.get();
 
-            if (flammabilityPair != null) FlammableBlockRegistry.getDefaultInstance().add(parentBlockSup.get(), Math.abs(flammabilityPair.leftInt()), Math.abs(flammabilityPair.rightInt()));
-            if (strippedBlockVariant != null && strippedBlockVariant.get() != null) StrippableBlockRegistry.register(parentBlockSup.get(), strippedBlockVariant.get());
-            if (parentBlockTillingBehaviourPair != null && parentBlockTillingBehaviourPair.left() != null && parentBlockTillingBehaviourPair.right() != null) TillableBlockRegistry.register(parentBlockSup.get(), parentBlockTillingBehaviourPair.left(), parentBlockTillingBehaviourPair.right());
-            if (flattenedBlockVariant != null) FlattenableBlockRegistry.register(parentBlockSup.get(), flattenedBlockVariant);
-            if (oxidizedBlockVariant != null && oxidizedBlockVariant.get() != null) OxidizableBlocksRegistry.registerOxidizableBlockPair(parentBlockSup.get(), oxidizedBlockVariant.get());
-            if (waxedBlockVariant != null && waxedBlockVariant.get() != null) OxidizableBlocksRegistry.registerWaxableBlockPair(parentBlockSup.get(), waxedBlockVariant.get());
-            if (blockCompostChance != null && blockCompostChance != 0) CompostingChanceRegistry.INSTANCE.add(parentBlockSup.get(), blockCompostChance);
-            if (blockFuelCookTime != null && blockFuelCookTime != 0) FuelRegistry.INSTANCE.add(parentBlockSup.get(), blockFuelCookTime);
-        }); */
+                    tagCookTime
+                            .filter(cookTime -> parentTagKey.isFor(Registries.ITEM))
+                            .ifPresent(cookTime -> FuelRegistry.INSTANCE.add((TagKey<Item>) parentTagKey, Math.abs(cookTime)));
+                    tagFlammabilityProperties
+                            .filter(flammabilityProperties -> parentTagKey.isFor(Registries.BLOCK))
+                            .ifPresent(flammabilityProperties -> FlammableBlockRegistry.getDefaultInstance().add((TagKey<Block>) parentTagKey, Math.abs(flammabilityProperties.leftInt()), Math.abs(flammabilityProperties.rightInt())));
+                });
+    }
 
-        // Tags
-        TagWrapper.getCachedTWEntries().forEach(curTw -> {
-            int tagFuelCookTime = Math.abs(curTw.getCookTime());
-            IntIntMutablePair tagFlammabilitySettings = curTw.getFlammabilitySettings();
-            TagKey<?> curTagKey = curTw.getParentTag().get();
+    /**
+     * Handles explicit {@link Block} compat with Vanilla features using the provided {@link BlockPropertyWrapper}. This
+     * includes flammability, stripping, tilling, flattening, oxidation, and waxing.
+     *
+     * @param targetBPW The {@link BlockPropertyWrapper} whose properties should be registered.
+     *
+     * @param <B> Any {@link Block} type. Primarily used for compile-time generic type safety.
+     */
+    private static <B extends Block> void registerBlockVanillaCompat(BlockPropertyWrapper<B> targetBPW) {
+        Supplier<B> parentBlockSup = targetBPW.getParentObject();
+        B parentBlock = parentBlockSup.get();
 
-            if (tagFuelCookTime != 0 && curTagKey.isFor(Registries.ITEM)) FuelRegistry.INSTANCE.add((TagKey<Item>) curTagKey, tagFuelCookTime);
-            if (tagFlammabilitySettings != null && curTagKey.isFor(Registries.BLOCK)) FlammableBlockRegistry.getDefaultInstance().add((TagKey<Block>) curTagKey, Math.abs(tagFlammabilitySettings.leftInt()), Math.abs(tagFlammabilitySettings.rightInt()));
+        targetBPW.getFlammabilityMapper().ifPresent(flammabilityMapper -> {
+            IntIntMutablePair flammabilityProperties = flammabilityMapper.apply(parentBlockSup);
+
+            FlammableBlockRegistry.getDefaultInstance().add(parentBlock, Math.abs(flammabilityProperties.leftInt()), Math.abs(flammabilityProperties.rightInt()));
         });
+        targetBPW.getBlockStrippingMapper().ifPresent(strippedBlockMapper -> StrippableBlockRegistry.register(parentBlock, strippedBlockMapper.apply(parentBlockSup).getBlock()));
+        targetBPW.getBlockTillingMapper().ifPresent(tillingMapper -> {
+            Pair<Predicate<UseOnContext>, Consumer<UseOnContext>> mappedTillingBehaviourPair = tillingMapper.apply(parentBlockSup);
+
+            TillableBlockRegistry.register(parentBlock, mappedTillingBehaviourPair.left(), mappedTillingBehaviourPair.right());
+        });
+        targetBPW.getBlockFlatteningMapper().ifPresent(flatteningMapper -> FlattenableBlockRegistry.register(parentBlock, flatteningMapper.apply(parentBlockSup)));
+        targetBPW.getBlockOxidizationMapper().ifPresent(oxidizationMapper -> OxidizableBlocksRegistry.registerOxidizableBlockPair(parentBlock, oxidizationMapper.apply(parentBlockSup).get()));
+        targetBPW.getBlockWaxingMapper().ifPresent(waxingMapper -> OxidizableBlocksRegistry.registerWaxableBlockPair(parentBlock, waxingMapper.apply(parentBlockSup).get()));
     }
 }

@@ -1,8 +1,7 @@
-package com.mememan.nexus.datagen.standard.data_pack.loot;
+package com.mememan.nexus.datagen.standard.data_pack;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.datagen.DuplicateDataPolicy;
 import com.mememan.nexus.datagen.NexusProviderTypes;
 import com.mememan.nexus.datagen.ProviderType;
@@ -11,13 +10,11 @@ import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.specialised.loot.LootBasedPropertyWrapper;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import net.minecraft.Util;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.RandomSequence;
 import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.storage.loot.*;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
@@ -29,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Loader-agnostic mod-specific loot table provider in Nexus API. Instanced based on the provided mod ID. Handles
@@ -68,7 +65,9 @@ public class StandardLootProvider extends LootTableProvider implements ModDataPr
             }
         });
 
-        this.subProviders.stream()
+        populateLootTables(output, mappedLootTables, requiredTables, lootMiscValidationCtx);
+
+    /*    this.subProviders.stream()
                 .filter(curSubProviderEntry -> curSubProviderEntry.provider().get() instanceof ModLootTableSubProvider)
                 .forEach((curSubProviderEntry) -> {
                     ModLootTableSubProvider modLootTableSubProvider = (ModLootTableSubProvider) curSubProviderEntry.provider().get();
@@ -104,7 +103,7 @@ public class StandardLootProvider extends LootTableProvider implements ModDataPr
 
                         if (validateAllEntries() || modLootTableSubProvider.validateAllEntries()) requiredTables.add(curLootTableLoc);
                     });
-                });
+                }); */
 
         for (ResourceLocation curLootTableLoc : Sets.difference(requiredTables, mappedLootTables.keySet())) { // This should literally never be reached (as in run (duh)), but in case it somehow is, we can still handle it
             lootMiscValidationCtx.reportProblem(String.format("Missing loot table: %s (required by mod of ID: %s)", curLootTableLoc, modId));
@@ -132,8 +131,17 @@ public class StandardLootProvider extends LootTableProvider implements ModDataPr
         this.mappedLootPWs.stream()
                 .map(curPW -> (LootBasedPropertyWrapper<T, ?, ?>) curPW)
                 .forEach(curPW -> {
-                    
+                    Supplier<T> parentObjSup = curPW.getParentObject();
+                    T parentObj = parentObjSup.get();
+                    String objectDescId = curPW.getObjectDescriptionId();
+                    String objectClassName = parentObj.getClass().getSimpleName();
+
+                    handeDuplicateLootTables(null, requiredLootTables, objectClassName, objectDescId);
                 });
+    }
+
+    protected void handeDuplicateLootTables(ResourceLocation targetLootTable, Set<ResourceLocation> requiredLootTables, String objectClassName, String objectName) {
+
     }
 
     @Override

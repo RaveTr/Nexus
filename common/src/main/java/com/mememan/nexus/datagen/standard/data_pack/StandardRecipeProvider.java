@@ -121,15 +121,16 @@ public class StandardRecipeProvider extends RecipeProvider implements ModDataPro
                     .map(curPW -> (RecipeBasedPropertyWrapper<T, ?, ?>) curPW)
                     .forEach(curPW -> {
                         Optional<Function<Consumer<FinishedRecipe>, Consumer<Supplier<T>>>> mappedRecipe = curPW.getRecipeConsumer();
+                        String objectDescId = curPW.getObjectDescriptionId();
                         String objectClassName = curPW.getParentObject().get().getClass().getSimpleName();
 
                         mappedRecipe.ifPresentOrElse(recipeMapperFunc -> {
-                            NexusConstants.LOGGER.debug("[{}] [Generating Recipe for {}]: {}", modId, objectClassName, curPW.getObjectDescriptionId());
+                            NexusConstants.LOGGER.debug("[{}] [Generating Recipe for {}]: {}", modId, objectClassName, objectDescId);
 
                             recipeMapperFunc.apply(recipeActionConsumer).accept(curPW.getParentObject());
                         }, () -> {
                             if (validateAllEntries() || curPW.getProviderTypeRequisites().getOrDefault(getProviderType(), false)) {
-                                throw new NullPointerException(String.format("Missing recipe mapper for %s: %s, required by mod: %s, either because validateAllEntries is set to true for this provider or the object itself requires validation through DataGenBasedPropertyWrapper#getProviderTypeRequisites().", objectClassName, curPW.getObjectDescriptionId(), modId));
+                                throw new NullPointerException(String.format("Missing recipe mapper for %s: %s, required by mod: %s, either because validateAllEntries is set to true for this provider or the object itself requires validation through DataGenBasedPropertyWrapper#getProviderTypeRequisites().", objectClassName, objectDescId, modId));
                             }
                         });
                     });

@@ -30,7 +30,7 @@ public interface VanillaBasedPropertyWrapperBuilder<IL extends ItemLike, SELF ex
      *
      * @return
      */
-    SELF withCompostMapper(Function<Supplier<IL>, Float> compostMapper);
+    SELF asCompostable(Function<Supplier<IL>, Float> compostMapper);
 
     /**
      *
@@ -39,7 +39,7 @@ public interface VanillaBasedPropertyWrapperBuilder<IL extends ItemLike, SELF ex
      *
      * @return
      */
-    SELF withFuelMapper(Function<Supplier<IL>, Integer> fuelTimeMapper);
+    SELF asFuel(Function<Supplier<IL>, Integer> fuelTimeMapper);
 
     /**
      *

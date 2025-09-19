@@ -1,5 +1,6 @@
 package com.mememan.nexus.template;
 
+import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.asm.annotations.RegistrarEntry;
 import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapper;
@@ -22,7 +23,7 @@ import java.util.function.Supplier;
 
 @RegistrarEntry
 public class TestBlockRegistrar {
-    private static final ObjectArrayList<Supplier<? extends Block>> BLOCKS = new ObjectArrayList<>();
+    private static final ObjectArrayList<Supplier<Block>> BLOCKS = new ObjectArrayList<>();
 
     public static final Supplier<SlabBlock> BLAH = new BlockPropertyWrapper<>(registerBlock(new ResourceLocation("nexus", "test_block"), () -> new SlabBlock(BlockBehaviour.Properties.of())), "nexus")
             .builder()
@@ -40,16 +41,17 @@ public class TestBlockRegistrar {
             .withLocalization(v -> v.toUpperCase(Locale.ROOT))
             .buildAndGet();
 
-    public static final Supplier<Block> BLAH_3 = new BlockPropertyWrapper<>(registerBlock(new ResourceLocation("nexus", "test_block_3"), () -> new Block(BlockBehaviour.Properties.of())), "nexus")
-            .builder()
-            .copyFromType(BlockPropertyWrapperTemplates.BASIC)
+    public static final Supplier<Block> BLAH_3 = BlockPropertyWrapperTemplates.registerAndChain(NexusConstants.prefix("test_block_3"), () -> new Block(BlockBehaviour.Properties.of()), BlockPropertyWrapperTemplates.BASIC, BLOCKS)
             .withTag(TestBlockTags.TEST::get)
+            .withBlockFlattening(parentBlock -> BLAH.get().defaultBlockState())
+            .asCompostable(parentBlock -> 45.0F)
+            .asFuel(parentBlock -> 12000)
             .buildAndGet();
 
     private static <B extends Block> Supplier<B> registerBlock(ResourceLocation name, Supplier<B> block) {
         Supplier<B> registeredItem = NexusServices.REGISTRAR.registerObject(name, block, BuiltInRegistries.BLOCK);
         NexusServices.REGISTRAR.registerObject(name, () -> new BlockItem(registeredItem.get(), new Item.Properties()), BuiltInRegistries.ITEM);
-        BLOCKS.add(registeredItem);
+        BLOCKS.add((Supplier<Block>) registeredItem);
         return registeredItem;
     }
 }

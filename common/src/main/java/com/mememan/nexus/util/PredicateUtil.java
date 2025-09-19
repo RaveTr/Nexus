@@ -1,7 +1,5 @@
 package com.mememan.nexus.util;
 
-import com.mememan.nexus.block.standard.BlockPropertyWrapper;
-import com.mememan.nexus.item.standard.ItemPropertyWrapper;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 
@@ -37,7 +35,7 @@ public final class PredicateUtil {
     public static boolean hasParentTab(ItemStack stackToTest, Supplier<CreativeModeTab> targetParentTab) { // Necessary workaround for preservation of order. Works since display items are apparently cached when tabs are opened the first time.
         AtomicBoolean foundMatch = new AtomicBoolean(false);
 
-        ItemPropertyWrapper.getMappedIpws().forEach((itemSup, ipwEntry) -> {
+    /*    ItemPropertyWrapper.getMappedIpws().forEach((itemSup, ipwEntry) -> {
             if (foundMatch.get()) return; // Break
 
             foundMatch.set(itemSup.get().getDescriptionId().equals(stackToTest.getItem().getDescriptionId()) && ipwEntry.getParentCreativeModeTabs().contains(targetParentTab));
@@ -49,7 +47,7 @@ public final class PredicateUtil {
 
                 foundMatch.set(blockSup.get().asItem().getDescriptionId().equals(stackToTest.getItem().getDescriptionId()) && bpwEntry.getParentCreativeModeTabs().contains(targetParentTab));
             });
-        }
+        } */
 
         if (!foundMatch.get()) foundMatch.set(targetParentTab.get().getDisplayItems().contains(stackToTest));
 

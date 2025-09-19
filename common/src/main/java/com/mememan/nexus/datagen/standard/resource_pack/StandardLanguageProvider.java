@@ -96,25 +96,24 @@ public class StandardLanguageProvider implements ModDataProvider {
                     locValRef.set(locVal); // Keep track of the previous localized value
                     postMappedValueRef.set(postMappedVal);
                 });
+                String objectDescId = curPW.getObjectDescriptionId();
                 String objectClassName = curPW.getParentObject().get().getClass().getSimpleName();
 
                 localizedValue.ifPresentOrElse(locVal -> {
-                    String unlocalizedKey = curPW.getObjectDescriptionId();
-
                     String prevLocVal = locValRef.get();
 
-                    NexusConstants.LOGGER.debug("[{}] [Generating Translation for {}]: '{}' -> '{}'", modId, objectClassName, unlocalizedKey, prevLocVal != null ? prevLocVal : locVal);
+                    NexusConstants.LOGGER.debug("[{}] [Generating Translation for {}]: '{}' -> '{}'", modId, objectClassName, objectDescId, prevLocVal != null ? prevLocVal : locVal);
 
                     String postMappedVal = postMappedValueRef.get();
 
                     if (prevLocVal != null && postMappedVal != null) { // Ensure correct logging order (minimal overhead, doesn't really matter)
-                        NexusConstants.LOGGER.debug("[{}] [Applying Post-Translation Mapping for {}]: '{}' -> '{}' -> '{}'", modId, objectClassName, curPW.getObjectDescriptionId(), prevLocVal, postMappedVal);
+                        NexusConstants.LOGGER.debug("[{}] [Applying Post-Translation Mapping for {}]: '{}' -> '{}' -> '{}'", modId, objectClassName, objectDescId, prevLocVal, postMappedVal);
                     }
 
-                    add(unlocalizedKey, locVal);
+                    add(objectDescId, locVal);
                 }, () -> {
                     if (validateAllEntries() || curPW.getProviderTypeRequisites().getOrDefault(getProviderType(), false)) {
-                        throw new NullPointerException(String.format("Missing localized key for %s: %s, required by mod: %s, either because validateAllEntries is set to true for this provider or the object itself requires validation through DataGenBasedPropertyWrapper#getProviderTypeRequisites().", objectClassName, curPW.getObjectDescriptionId(), modId));
+                        throw new NullPointerException(String.format("Missing localized key for %s: %s, required by mod: %s, either because validateAllEntries is set to true for this provider or the object itself requires validation through DataGenBasedPropertyWrapper#getProviderTypeRequisites().", objectClassName, objectDescId, modId));
                     }
                 });
 

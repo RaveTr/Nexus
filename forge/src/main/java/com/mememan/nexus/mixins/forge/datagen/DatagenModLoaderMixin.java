@@ -1,4 +1,4 @@
-package com.mememan.nexus.mixins.datagen;
+package com.mememan.nexus.mixins.forge.datagen;
 
 import com.llamalad7.mixinextras.expression.Definition;
 import com.llamalad7.mixinextras.expression.Expression;

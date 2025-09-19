@@ -31,6 +31,11 @@ public class CreativeModeTabPropertyWrapper<CMT extends CreativeModeTab> extends
     }
 
     @Override
+    public Optional<String> getDescriptionIdPrefix() {
+        return super.getDescriptionIdPrefix().map(regId -> regId.replaceAll("_", ""));
+    }
+
+    @Override
     public Optional<SpecializedLanguagePropertyWrapper<CMT, ?, ?>> getSpecializedLanguageWrapper() {
         return Optional.of(compositeLanguageWrapper);
     }

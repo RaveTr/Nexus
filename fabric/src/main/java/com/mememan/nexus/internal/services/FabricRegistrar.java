@@ -88,7 +88,7 @@ public class FabricRegistrar implements Registrar {
 
     @Override
     public <V, T extends V> Supplier<T> registerObject(ResourceLocation objId, Supplier<T> objSup, Registry<V> targetRegistry) {
-        T targetObject = Registry.register(targetRegistry, objId, objSup.get()); // Must store in a local field beforehand cuz... for some reason it's null if inlined
+        T targetObject = Registry.register(targetRegistry, objId, objSup.get()); // Must store in a local field beforehand cuz... it's null if inlined
         return () -> targetObject;
     }
 
@@ -171,7 +171,8 @@ public class FabricRegistrar implements Registrar {
 
     public static <PRL extends PreparableReloadListener> ImmutableMap<ResourceLocation, Pair<PRL, Optional<ResourceReloadListenerConfig<PRL>>>> getCachedResourceReloadListeners() {
         Map<ResourceLocation, Pair<PRL, Optional<ResourceReloadListenerConfig<PRL>>>> result = new Object2ObjectOpenHashMap<>();
-        CACHED_RESOURCE_RELOAD_LISTENERS.forEach((key, value) ->
+
+        CACHED_RESOURCE_RELOAD_LISTENERS.forEach((key, value) -> // Avoid generic type invariance screwing us at compile-time
                 result.put(key, ObjectObjectImmutablePair.of((PRL) value.left(), value.right().flatMap(config -> Optional.of((ResourceReloadListenerConfig<PRL>) config))))
         );
 

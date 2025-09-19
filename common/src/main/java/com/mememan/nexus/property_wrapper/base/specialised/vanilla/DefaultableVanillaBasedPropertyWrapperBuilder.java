@@ -20,14 +20,14 @@ public interface DefaultableVanillaBasedPropertyWrapperBuilder<IL extends ItemLi
     Optional<SpecializedVanillaPropertyWrapperBuilder<IL, SELF, VBPW>> getSpecializedVanillaBuilder();
 
     @Override
-    default SELF withCompostMapper(Function<Supplier<IL>, Float> compostMapper) {
-        getSpecializedVanillaBuilder().ifPresent(builder -> builder.withCompostMapper(compostMapper));
+    default SELF asCompostable(Function<Supplier<IL>, Float> compostMapper) {
+        getSpecializedVanillaBuilder().ifPresent(builder -> builder.asCompostable(compostMapper));
         return self();
     }
 
     @Override
-    default SELF withFuelMapper(Function<Supplier<IL>, Integer> fuelMapper) {
-        getSpecializedVanillaBuilder().ifPresent(builder -> builder.withFuelMapper(fuelMapper));
+    default SELF asFuel(Function<Supplier<IL>, Integer> fuelMapper) {
+        getSpecializedVanillaBuilder().ifPresent(builder -> builder.asFuel(fuelMapper));
         return self();
     }
 

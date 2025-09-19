@@ -138,7 +138,7 @@ public class StandardTagProvider extends TagsProvider<Object> implements ModData
                         List<Supplier<TagKey<? super T>>> objectTags = curPW.getObjectTags();
                         List<Supplier<TagKey<?>>> additionalTags = curPW.getAdditionalTags();
                         Supplier<T> parentObject = curPW.getParentObject();
-                        String objectName = curPW.getObjectDescriptionId();
+                        String objectDescId = curPW.getObjectDescriptionId();
                         String objectClassName = parentObject.get().getClass().getSimpleName();
                         AtomicBoolean isTag = new AtomicBoolean();
                         AtomicBoolean tagHasNoExclusiveData = new AtomicBoolean();
@@ -185,7 +185,7 @@ public class StandardTagProvider extends TagsProvider<Object> implements ModData
                         }
 
                         ResourceLocation parentObjLoc = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentObject.get())
-                                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for object of type %s: %s", objectClassName, objectName)));
+                                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for object of type %s: %s", objectClassName, objectDescId)));
 
                         objectTags.forEach(tK -> {
                             TagKey<? super T> parentTagKey = tK.get();

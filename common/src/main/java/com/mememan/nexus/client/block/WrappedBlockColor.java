@@ -18,7 +18,7 @@ public interface WrappedBlockColor {
      * @param targetState The {@link BlockState} to compute the color of.
      * @param curLevel The current {@linkplain BlockAndTintGetter level}, if applicable. May be {@code null}.
      * @param targetPos The {@link BlockPos} of the {@link BlockState} to compute the color of. May be {@code null}.
-     * @param tintIndex The computed tintIndex that represents the current tint of the block.
+     * @param tintIndex The computed {@code tintIndex} that represents the current tint of the {@link BlockState}.
      *
      * @return The packed RGB color of the given {@link BlockState} at the given {@link BlockPos}.
      *
