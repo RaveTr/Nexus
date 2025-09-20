@@ -103,7 +103,7 @@ public class StandardLootProvider extends LootTableProvider implements ModDataPr
 
                         if (validateAllEntries() || modLootTableSubProvider.validateAllEntries()) requiredTables.add(curLootTableLoc);
                     });
-                }); */
+                }); ***/
 
         for (ResourceLocation curLootTableLoc : Sets.difference(requiredTables, mappedLootTables.keySet())) { // This should literally never be reached (as in run (duh)), but in case it somehow is, we can still handle it
             lootMiscValidationCtx.reportProblem(String.format("Missing loot table: %s (required by mod of ID: %s)", curLootTableLoc, modId));
