@@ -2,10 +2,12 @@ package com.mememan.nexus.datagen.standard.data_pack;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.datagen.DuplicateDataPolicy;
 import com.mememan.nexus.datagen.NexusProviderTypes;
 import com.mememan.nexus.datagen.ProviderType;
 import com.mememan.nexus.datagen.standard.ModDataProvider;
+import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.specialised.loot.LootBasedPropertyWrapper;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -56,6 +58,7 @@ public class StandardLootProvider extends LootTableProvider implements ModDataPr
     public @NotNull CompletableFuture<?> run(CachedOutput output) {
         final Object2ObjectOpenHashMap<ResourceLocation, LootTable> mappedLootTables = new Object2ObjectOpenHashMap<>();
         final Object2ObjectOpenHashMap<RandomSupport.Seed128bit, ResourceLocation> hashedLootTableLocs = new Object2ObjectOpenHashMap<>();
+        final ObjectOpenHashSet<ResourceLocation> trackedTables = new ObjectOpenHashSet<>();
         final ObjectOpenHashSet<ResourceLocation> requiredTables = new ObjectOpenHashSet<>();
 
         ValidationContext lootMiscValidationCtx = new ValidationContext(LootContextParamSets.ALL_PARAMS, new LootDataResolver() {
@@ -65,48 +68,10 @@ public class StandardLootProvider extends LootTableProvider implements ModDataPr
             }
         });
 
-        populateLootTables(output, mappedLootTables, requiredTables, lootMiscValidationCtx);
+        populateLootTables(mappedLootTables, trackedTables, requiredTables, lootMiscValidationCtx);
 
-    /*    this.subProviders.stream()
-                .filter(curSubProviderEntry -> curSubProviderEntry.provider().get() instanceof ModLootTableSubProvider)
-                .forEach((curSubProviderEntry) -> {
-                    ModLootTableSubProvider modLootTableSubProvider = (ModLootTableSubProvider) curSubProviderEntry.provider().get();
-
-                    NexusConstants.LOGGER.debug("Generating loot tables for sub-provider: {}", modLootTableSubProvider.getName());
-
-                    curSubProviderEntry.provider().get().generate((curLootTableLoc, curLootTableBuilder) -> {
-                        ResourceLocation mappedHashedLootTable = hashedLootTableLocs.put(RandomSequence.seedForKey(curLootTableLoc), curLootTableLoc);
-
-                        if (mappedHashedLootTable != null) Util.logAndPauseIfInIde("Loot table random sequence seed collision on " + mappedHashedLootTable + " and " + curLootTableLoc);
-
-                        LootTable curBuiltLootTable = curLootTableBuilder
-                                .setRandomSequence(curLootTableLoc)
-                                .setParamSet(curSubProviderEntry.paramSet())
-                                .build();
-
-                        Consumer<Object2ObjectOpenHashMap<ResourceLocation, LootTable>> tableMapper = (mappedTables) -> mappedTables.put(curLootTableLoc, curBuiltLootTable);
-
-                        if (mappedLootTables.get(curLootTableLoc) != null) {
-                            DuplicateDataPolicy chosenDupeStrat = dupeStrat == null ? modLootTableSubProvider.getDuplicateDataPolicy() : dupeStrat;
-
-                            switch (chosenDupeStrat) {
-                                case CRASH -> throw new IllegalStateException(String.format("Duplicate loot table %s from mod of ID %s, specified DuplicateDataPolicy is CRASH.", curLootTableLoc, modLootTableSubProvider.getModId()));
-                                case EXCLUDE_WARN -> NexusConstants.LOGGER.warn("Duplicate loot table {} from mod of ID {}, specified DuplicateDataPolicy is EXCLUDE_WARN. Skipping...", curLootTableLoc, modLootTableSubProvider.getModId());
-                                case EXCLUDE_SILENT -> {}
-                                case OVERRIDE_WARN -> {
-                                    NexusConstants.LOGGER.warn("Overriding duplicate loot table {} (mod of ID {}) with new data.", curLootTableLoc, modLootTableSubProvider.getModId());
-                                    tableMapper.accept(mappedLootTables);
-                                }
-                                case OVERRIDE_SILENT -> tableMapper.accept(mappedLootTables);
-                            }
-                        } else tableMapper.accept(mappedLootTables);
-
-                        if (validateAllEntries() || modLootTableSubProvider.validateAllEntries()) requiredTables.add(curLootTableLoc);
-                    });
-                }); ***/
-
-        for (ResourceLocation curLootTableLoc : Sets.difference(requiredTables, mappedLootTables.keySet())) { // This should literally never be reached (as in run (duh)), but in case it somehow is, we can still handle it
-            lootMiscValidationCtx.reportProblem(String.format("Missing loot table: %s (required by mod of ID: %s)", curLootTableLoc, modId));
+        for (ResourceLocation curLootTableLoc : requiredTables) {
+            lootMiscValidationCtx.reportProblem(String.format("Missing loot table: %s (required by mod of ID: %s), either because validateAllEntries is set to true for this provider or the object itself requires validation through DataGenBasedPropertyWrapper#getProviderTypeRequisites().", curLootTableLoc, modId));
         }
 
         mappedLootTables.forEach((mappedLootTableLoc, mappedLootTable) -> mappedLootTable.validate(lootMiscValidationCtx.setParams(mappedLootTable.getParamSet()).enterElement("{" + mappedLootTableLoc + "}", new LootDataId<>(LootDataType.TABLE, mappedLootTableLoc))));
@@ -114,7 +79,7 @@ public class StandardLootProvider extends LootTableProvider implements ModDataPr
         Multimap<String, String> lootTableValidationProblems = lootMiscValidationCtx.getProblems();
 
         if (!lootTableValidationProblems.isEmpty()) {
-            lootTableValidationProblems.forEach((problematicLootTable, validationProblem) -> LootTableProvider.LOGGER.warn("Found validation problem in {}: {}", problematicLootTable, validationProblem));
+            lootTableValidationProblems.forEach((problematicLootTable, validationProblem) -> LootTableProvider.LOGGER.warn("Found validation problem: {}", validationProblem));
             throw new IllegalStateException("Failed to validate loot tables, see logs");
         } else {
             return CompletableFuture.allOf(mappedLootTables.entrySet().stream().map((lootEntry) -> {
@@ -127,7 +92,7 @@ public class StandardLootProvider extends LootTableProvider implements ModDataPr
         }
     }
 
-    protected <T> void populateLootTables(CachedOutput targetOutput, Map<ResourceLocation, LootTable> mappedLootTables, Set<ResourceLocation> requiredLootTables, ValidationContext lootMiscValidationCtx) {
+    protected <T> void populateLootTables(Map<ResourceLocation, LootTable> mappedLootTables, Set<ResourceLocation> trackedTables, Set<ResourceLocation> requiredLootTables, ValidationContext lootMiscValidationCtx) {
         this.mappedLootPWs.stream()
                 .map(curPW -> (LootBasedPropertyWrapper<T, ?, ?>) curPW)
                 .forEach(curPW -> {
@@ -135,13 +100,34 @@ public class StandardLootProvider extends LootTableProvider implements ModDataPr
                     T parentObj = parentObjSup.get();
                     String objectDescId = curPW.getObjectDescriptionId();
                     String objectClassName = parentObj.getClass().getSimpleName();
+                    ResourceLocation finalizedLootTableLoc = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentObj)
+                            .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for object of type %s: %s", objectClassName, objectDescId)))
+                            .withPrefix(curPW.getLootTableDir());
 
-                    handeDuplicateLootTables(null, requiredLootTables, objectClassName, objectDescId);
+                    curPW.getLootTableBuilder().ifPresentOrElse(lootTableBuilder -> {
+                        Runnable lootTableMapper = () -> mappedLootTables.put(finalizedLootTableLoc, lootTableBuilder.apply(parentObjSup).build());
+
+                        handeDuplicateLootTables(finalizedLootTableLoc, trackedTables, objectClassName, objectDescId, lootTableMapper);
+                    }, () -> {
+                        // Nullity validation is handled later appropriately in this specific provider's case
+                        if (validateAllEntries() || curPW.getProviderTypeRequisites().getOrDefault(getProviderType(), false)) requiredLootTables.add(finalizedLootTableLoc);
+                    });
                 });
     }
 
-    protected void handeDuplicateLootTables(ResourceLocation targetLootTable, Set<ResourceLocation> requiredLootTables, String objectClassName, String objectName) {
-
+    protected void handeDuplicateLootTables(ResourceLocation targetLootTable, Set<ResourceLocation> trackedTables, String objectClassName, String objectName, Runnable lootTableMapper) {
+        if (!trackedTables.add(targetLootTable)) {
+            switch (getDuplicateDataPolicy()) {
+                case CRASH -> throw new IllegalStateException(String.format("Attempted to generate duplicate loot table %s for %s '%s' (from mod of ID %s), specified DuplicateDataPolicy is CRASH.", targetLootTable, objectClassName, objectName, getModId()));
+                case EXCLUDE_WARN -> NexusConstants.LOGGER.warn("Attempted to generate duplicate loot table {} for {} '{}' (from mod of ID {}), specified DuplicateDataPolicy is EXCLUDE_WARN. Skipping...", targetLootTable, objectClassName, objectName, getModId());
+                case EXCLUDE_SILENT -> {}
+                case OVERRIDE_WARN -> {
+                    NexusConstants.LOGGER.warn("Overriding duplicate loot table {} for {} '{}' (from mod of ID {}), specified DuplicateDataPolicy is OVERRIDE_WARN.", targetLootTable, objectClassName, objectName, getModId());
+                    lootTableMapper.run();
+                }
+                case OVERRIDE_SILENT -> lootTableMapper.run();
+            }
+        } else lootTableMapper.run();
     }
 
     @Override

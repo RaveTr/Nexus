@@ -1,1 +1,4 @@
-// 1.20.1	2025-09-20T18:17:21.889455	nexus/Loot Tables [nexus]
+// 1.20.1	2025-09-20T21:18:57.920988	nexus/Loot Tables [nexus]
+0f12718e9c4079cfa95b3f1739e4a43af2b83d76 data/nexus/loot_tables/blocks/test_block.json
+f14f826b48edb073ed661428f6990a0c3b36a986 data/nexus/loot_tables/blocks/test_block_3.json
+3a123e737e83b2f7ebd0ceccb41efad81007d93e data/nexus/loot_tables/blocks/test_able_block.json
