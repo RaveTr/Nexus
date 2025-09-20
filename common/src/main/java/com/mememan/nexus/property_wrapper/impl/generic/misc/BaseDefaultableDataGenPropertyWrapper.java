@@ -1,7 +1,7 @@
 package com.mememan.nexus.property_wrapper.impl.generic.misc;
 
-import com.mememan.nexus.property_wrapper.base.generic.misc.DefaultableDataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
+import com.mememan.nexus.property_wrapper.base.generic.misc.DefaultableDataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.impl.generic.BaseDataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.impl.specialised.language.SpecializedLanguagePropertyWrapper;
 import com.mememan.nexus.property_wrapper.impl.specialised.loot.SpecializedLootPropertyWrapper;

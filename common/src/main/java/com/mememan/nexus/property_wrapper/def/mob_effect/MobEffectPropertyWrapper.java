@@ -1,9 +1,6 @@
 package com.mememan.nexus.property_wrapper.def.mob_effect;
 
-import com.mememan.nexus.property_wrapper.base.generic.misc.DefaultableBareDataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.impl.generic.misc.BaseDefaultableBareDataGenPropertyWrapper;
-import com.mememan.nexus.property_wrapper.impl.specialised.language.SpecializedLanguagePropertyWrapper;
-import com.mememan.nexus.property_wrapper.impl.specialised.tag.SpecializedTagPropertyWrapper;
 import net.minecraft.world.effect.MobEffect;
 import org.jetbrains.annotations.NotNull;
 
