@@ -12,11 +12,13 @@ import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.specialised.loot.LootBasedPropertyWrapper;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import net.minecraft.Util;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.RandomSequence;
 import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.storage.loot.*;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
@@ -68,7 +70,7 @@ public class StandardLootProvider extends LootTableProvider implements ModDataPr
             }
         });
 
-        populateLootTables(mappedLootTables, trackedTables, requiredTables, lootMiscValidationCtx);
+        populateLootTables(mappedLootTables, trackedTables, requiredTables, hashedLootTableLocs);
 
         for (ResourceLocation curLootTableLoc : requiredTables) {
             lootMiscValidationCtx.reportProblem(String.format("Missing loot table: %s (required by mod of ID: %s), either because validateAllEntries is set to true for this provider or the object itself requires validation through DataGenBasedPropertyWrapper#getProviderTypeRequisites().", curLootTableLoc, modId));
@@ -92,7 +94,7 @@ public class StandardLootProvider extends LootTableProvider implements ModDataPr
         }
     }
 
-    protected <T> void populateLootTables(Map<ResourceLocation, LootTable> mappedLootTables, Set<ResourceLocation> trackedTables, Set<ResourceLocation> requiredLootTables, ValidationContext lootMiscValidationCtx) {
+    protected <T> void populateLootTables(Map<ResourceLocation, LootTable> mappedLootTables, Set<ResourceLocation> trackedTables, Set<ResourceLocation> requiredLootTables, Map<RandomSupport.Seed128bit, ResourceLocation> hashedLootTableLocs) {
         this.mappedLootPWs.stream()
                 .map(curPW -> (LootBasedPropertyWrapper<T, ?, ?>) curPW)
                 .forEach(curPW -> {
@@ -105,7 +107,13 @@ public class StandardLootProvider extends LootTableProvider implements ModDataPr
                             .withPrefix(curPW.getLootTableDir());
 
                     curPW.getLootTableBuilder().ifPresentOrElse(lootTableBuilder -> {
-                        Runnable lootTableMapper = () -> mappedLootTables.put(finalizedLootTableLoc, lootTableBuilder.apply(parentObjSup).build());
+                        Runnable lootTableMapper = () -> {
+                            ResourceLocation hashedLootTableLoc = hashedLootTableLocs.put(RandomSequence.seedForKey(finalizedLootTableLoc), finalizedLootTableLoc);
+
+                            if (hashedLootTableLoc != null) Util.logAndPauseIfInIde("Loot table random sequence seed collision on " + hashedLootTableLoc + " and " + finalizedLootTableLoc);
+
+                            mappedLootTables.put(finalizedLootTableLoc, lootTableBuilder.apply(parentObjSup).build());
+                        };
 
                         handeDuplicateLootTables(finalizedLootTableLoc, trackedTables, objectClassName, objectDescId, lootTableMapper);
                     }, () -> {
