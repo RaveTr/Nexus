@@ -1,5 +1,8 @@
 package com.mememan.nexus.util;
 
+import com.ibm.icu.text.PluralRules;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.List;
 import java.util.Locale;
 
@@ -113,5 +116,18 @@ public final class StringUtil {
         }
 
         return localizedInput;
+    }
+
+    /**
+     * Simple grammatical method for pluralizing English word inputs based on a primitive set of rules.
+     *
+     * @param word The input to pluralize.
+     *
+     * @return The pluralized form of the input {@code word}.
+     */
+    public static String pluralize(String word) {
+        if (word.endsWith("y") && !word.endsWith("ay") && !word.endsWith("ey") && !word.endsWith("iy") && !word.endsWith("oy") && !word.endsWith("uy")) return word.substring(0, word.length() - 1) + "ies";
+        else if (word.endsWith("s") || word.endsWith("x") || word.endsWith("z") || word.endsWith("ch") || word.endsWith("sh")) return word + "es";
+        else return word + "s";
     }
 }

@@ -1,9 +1,16 @@
 package com.mememan.nexus.property_wrapper.base.specialised.loot;
 
+import com.ibm.icu.impl.PluralRulesLoader;
+import com.ibm.icu.text.PluralFormat;
+import com.ibm.icu.text.PluralRules;
+import com.mememan.nexus.datagen.standard.data_pack.StandardLootProvider;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
+import com.mememan.nexus.util.StringUtil;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.storage.loot.LootDataManager;
+import net.minecraft.world.level.storage.loot.LootDataResolver;
 import net.minecraft.world.level.storage.loot.LootTable;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,10 +36,19 @@ public interface LootBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SEL
      */
     Optional<Function<Supplier<T>, LootTable.Builder>> getLootTableBuilder();
 
+    /**
+     * Gets the location to check against for the parent object's loot table if it couldn't be resolved via
+     * the {@link LootDataResolver} in {@link StandardLootProvider}.
+     * <br></br>
+     * Works by attempting to pluralize the parent object's registry path, then using that as the loot table folder.
+     * If the parent object has no registry path, it defaults to the parent object's class name in lowercase.
+     *
+     * @return The parent object's loot table folder.
+     */
     @NotNull
     default String getLootTableDir() {
         return getObjectRegistryKey()
-                .map(regKey -> regKey.location().getPath().concat("/"))
+                .map(regKey -> StringUtil.pluralize(regKey.location().getPath()).concat("/"))
                 .orElse(getParentObject().get().getClass().getSimpleName().toLowerCase(Locale.ROOT).concat("/"));
     }
 }
