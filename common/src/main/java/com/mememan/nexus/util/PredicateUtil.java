@@ -1,8 +1,11 @@
 package com.mememan.nexus.util;
 
+import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
+import com.mememan.nexus.property_wrapper.base.specialised.vanilla.VanillaBasedPropertyWrapper;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -35,19 +38,12 @@ public final class PredicateUtil {
     public static boolean hasParentTab(ItemStack stackToTest, Supplier<CreativeModeTab> targetParentTab) { // Necessary workaround for preservation of order. Works since display items are apparently cached when tabs are opened the first time.
         AtomicBoolean foundMatch = new AtomicBoolean(false);
 
-    /*    ItemPropertyWrapper.getMappedIpws().forEach((itemSup, ipwEntry) -> {
-            if (foundMatch.get()) return; // Break
-
-            foundMatch.set(itemSup.get().getDescriptionId().equals(stackToTest.getItem().getDescriptionId()) && ipwEntry.getParentCreativeModeTabs().contains(targetParentTab));
-        });
-
-        if (!foundMatch.get()) { // Avoid unnecessary lookup computation if the specified stack has already been matched with the specified parent tab
-            BlockPropertyWrapper.getMappedBpws().forEach((blockSup, bpwEntry) -> {
-                if (foundMatch.get()) return; // Break
-
-                foundMatch.set(blockSup.get().asItem().getDescriptionId().equals(stackToTest.getItem().getDescriptionId()) && bpwEntry.getParentCreativeModeTabs().contains(targetParentTab));
-            });
-        } */
+        PropertyWrapper.PropertyWrappersContainer.getInferrableWrappersOfType(VanillaBasedPropertyWrapper.class)
+                .stream()
+                .map(curPW -> (VanillaBasedPropertyWrapper<?, ?, ?>) curPW)
+                .filter(curPW -> Objects.equals(stackToTest.getItem(), curPW.getParentObject().get().asItem()) && curPW.getParentCreativeModeTabs().stream().anyMatch(parentTab -> Objects.equals(parentTab, targetParentTab.get())))
+                .findFirst()
+                .ifPresent(curPW -> foundMatch.set(true));
 
         if (!foundMatch.get()) foundMatch.set(targetParentTab.get().getDisplayItems().contains(stackToTest));
 

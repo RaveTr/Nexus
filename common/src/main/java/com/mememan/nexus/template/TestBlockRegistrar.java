@@ -12,6 +12,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
@@ -39,6 +40,7 @@ public class TestBlockRegistrar {
             .asFuel(parentBlock -> 12000)
             .withBlockTilling(parentBlock -> Pair.of((ctx) -> true, (ctx) -> ctx.getLevel().setBlock(ctx.getClickedPos(), Blocks.FARMLAND.defaultBlockState(), Block.UPDATE_ALL)))
             .withParentTab(() -> CreativeModeTabs.allTabs().get(3))
+            .withTag(() -> BlockTags.MINEABLE_WITH_AXE)
             .buildAndGet();
 
     public static final Supplier<SlabBlock> BLAH_2 = new BlockPropertyWrapper<>(registerBlock(new ResourceLocation("nexus", "test_able_block"), () -> new SlabBlock(BlockBehaviour.Properties.of())), "nexus")
@@ -49,7 +51,7 @@ public class TestBlockRegistrar {
             .buildAndGet();
 
     public static final Supplier<Block> BLAH_3 = BlockPropertyWrapperTemplates.registerAndChain(NexusConstants.prefix("test_block_3"), () -> new Block(BlockBehaviour.Properties.of()), BlockPropertyWrapperTemplates.BASIC, BLOCKS)
-            .withTag(TestBlockTags.TEST::get)
+            .withTags(TestBlockTags.TEST::get, () -> BlockTags.MINEABLE_WITH_AXE)
             .withBlockFlattening(parentBlock -> BLAH.get().defaultBlockState())
             .asCompostable(parentBlock -> 45.0F)
             .asFuel(parentBlock -> 12000)

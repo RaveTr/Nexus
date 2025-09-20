@@ -1,7 +1,6 @@
 package com.mememan.nexus.datagen.standard.data_pack;
 
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.datagen.DuplicateDataPolicy;
 import com.mememan.nexus.datagen.NexusProviderTypes;
@@ -46,7 +45,7 @@ public class StandardLootProvider extends LootTableProvider implements ModDataPr
     protected final DuplicateDataPolicy dupeStrat;
     protected final List<LootBasedPropertyWrapper<?, ?, ?>> mappedLootPWs;
 
-    public StandardLootProvider(PackOutput targetOutput, String modId, boolean validateAllEntries, @Nullable DuplicateDataPolicy dupeStrat) {
+    public StandardLootProvider(PackOutput targetOutput, String modId, boolean validateAllEntries, DuplicateDataPolicy dupeStrat) {
         super(targetOutput, Set.of(), List.of());
 
         this.modId = modId;
@@ -111,6 +110,8 @@ public class StandardLootProvider extends LootTableProvider implements ModDataPr
                             ResourceLocation hashedLootTableLoc = hashedLootTableLocs.put(RandomSequence.seedForKey(finalizedLootTableLoc), finalizedLootTableLoc);
 
                             if (hashedLootTableLoc != null) Util.logAndPauseIfInIde("Loot table random sequence seed collision on " + hashedLootTableLoc + " and " + finalizedLootTableLoc);
+
+                            NexusConstants.LOGGER.debug("[{}] [Generating Loot Table]: {} (for {} '{}')", getModId(), finalizedLootTableLoc, objectClassName, objectDescId);
 
                             mappedLootTables.put(finalizedLootTableLoc, lootTableBuilder.apply(parentObjSup).build());
                         };
