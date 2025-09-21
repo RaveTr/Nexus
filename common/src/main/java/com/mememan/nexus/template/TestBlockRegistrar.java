@@ -50,7 +50,7 @@ public class TestBlockRegistrar {
             .withLocalization(v -> v.toUpperCase(Locale.ROOT))
             .buildAndGet();
 
-    public static final Supplier<Block> BLAH_3 = BlockPropertyWrapperTemplates.registerAndChain(NexusConstants.prefix("test_block_3"), () -> new Block(BlockBehaviour.Properties.of()), BlockPropertyWrapperTemplates.BASIC, BLOCKS)
+    public static final Supplier<Block> BLAH_3 = BlockPropertyWrapperTemplates.registerWithItemAndChain(NexusConstants.prefix("test_block_3"), () -> new Block(BlockBehaviour.Properties.of()), BlockPropertyWrapperTemplates.BASIC)
             .withTags(TestBlockTags.TEST::get, () -> BlockTags.MINEABLE_WITH_AXE)
             .withBlockFlattening(parentBlock -> BLAH.get().defaultBlockState())
             .asCompostable(parentBlock -> 45.0F)

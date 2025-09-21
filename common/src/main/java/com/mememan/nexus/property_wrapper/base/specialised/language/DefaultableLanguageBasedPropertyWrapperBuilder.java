@@ -15,6 +15,11 @@ import java.util.function.Function;
  */
 public interface DefaultableLanguageBasedPropertyWrapperBuilder<T, SELF extends LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW>, LBPW extends LanguageBasedPropertyWrapper<T, LBPW, SELF>> extends LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW> {
 
+    /**
+     * The specialized builder to which all builder methods should delegate.
+     *
+     * @return The specialized builder to which all builder methods should delegate. May be empty.
+     */
     Optional<SpecializedLanguagePropertyWrapperBuilder<T, SELF, LBPW>> getSpecializedLanguageBuilder();
 
     @Override

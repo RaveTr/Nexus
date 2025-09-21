@@ -8,6 +8,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.ItemLike;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -24,55 +25,79 @@ import java.util.function.Supplier;
 public interface VanillaBasedPropertyWrapperBuilder<IL extends ItemLike, SELF extends PropertyWrapperBuilder<IL, SELF, VBPW>, VBPW extends PropertyWrapper<IL, VBPW, SELF>> extends PropertyWrapperBuilder<IL, SELF, VBPW> {
 
     /**
+     * Defines a mapping {@link Function} that assigns a composting chance using the parent {@link ItemLike} as input.
      *
+     * @param compostMapper The compost chance mapping {@link Function}.
      *
-     * @param compostMapper
-     *
-     * @return
+     * @return {@link #self()} (builder method).
      */
     SELF asCompostable(Function<Supplier<IL>, Float> compostMapper);
 
     /**
+     * Defines a mapping {@link Function} that assigns a fuel value using the parent {@link ItemLike} as input, where
+     * the fuel value represents the burn time (in furnaces and the likes) of the parent {@link ItemLike} in ticks.
      *
+     * @param fuelTimeMapper The fuel time mapping {@link Function}. Represents burn time in ticks.
      *
-     * @param fuelTimeMapper
-     *
-     * @return
+     * @return {@link #self()} (builder method).
      */
     SELF asFuel(Function<Supplier<IL>, Integer> fuelTimeMapper);
 
     /**
+     * Defines a parent {@link CreativeModeTab} in which the parent {@link ItemLike} should show up.
      *
-     * @param parentTab
+     * @param parentTab The parent {@link CreativeModeTab}.
      *
-     * @return
+     * @return {@link #self()} (builder method).
+     *
+     * @see #withParentTabs(Collection)
+     * @see #withParentTabs(Supplier[])
+     * @see #setParentTabs(Collection)
      */
     SELF withParentTab(Supplier<CreativeModeTab> parentTab);
 
     /**
+     * Defines a {@link Collection} of {@linkplain CreativeModeTab CreativeModeTabs} the parent {@link ItemLike} should
+     * show up in.
      *
-     * @param parentTabs
+     * @param parentTabs The {@link Collection} of {@linkplain CreativeModeTab CreativeModeTabs} the parent {@link ItemLike}
+     *                   should show up in.
      *
-     * @return
+     * @return {@link #self()} (builder method).
+     *
+     * @see #withParentTab(Supplier)
+     * @see #withParentTabs(Supplier[])
+     * @see #setParentTabs(Collection)
      */
     SELF withParentTabs(Collection<Supplier<CreativeModeTab>> parentTabs);
 
     /**
+     * Overloaded variant of {@link #withParentTabs(Collection)} that allows for varargs to be passed in.
      *
-     * @param parentTabs
+     * @param parentTabs The {@linkplain CreativeModeTab CreativeModeTabs} the parent {@link ItemLike} should show up in.
      *
-     * @return
+     * @return {@link #withParentTabs(Collection)} (builder method).
+     *
+     * @see #withParentTab(Supplier)
+     * @see #setParentTabs(Collection)
+     * @see #setParentTabs(Collection)
      */
     default SELF withParentTabs(Supplier<CreativeModeTab>... parentTabs) {
         return withParentTabs(ObjectArrayList.of(parentTabs));
     }
 
     /**
+     * Sets the existing {@link List} of parent {@linkplain CreativeModeTab CreativeModeTabs} to the provided
+     * {@code parentTabs}.
      *
+     * @param parentTabs The {@link Collection} of {@linkplain CreativeModeTab CreativeModeTabs} to set the existing one
+     *                   to.
      *
-     * @param parentTabs
+     * @return {@link #self()} (builder method).
      *
-     * @return
+     * @see #withParentTab(Supplier)
+     * @see #withParentTabs(Collection)
+     * @see #withParentTabs(Supplier[])
      */
     SELF setParentTabs(Collection<Supplier<CreativeModeTab>> parentTabs);
 }

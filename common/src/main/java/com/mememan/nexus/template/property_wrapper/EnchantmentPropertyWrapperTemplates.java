@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 public final class EnchantmentPropertyWrapperTemplates {
 
     private EnchantmentPropertyWrapperTemplates() {
-        throw new UnsupportedOperationException("Attempted to construct instance of template utility class! (EnchantmentPropertyWrapperTemplates)");
+        throw new IllegalAccessError("Attempted to construct instance of template utility class! (EnchantmentPropertyWrapperTemplates)");
     }
 
     public static <E extends Enchantment> Supplier<E> registerEnchantment(ResourceLocation enchId, Supplier<E> enchSup, @Nullable Collection<Supplier<Enchantment>> enchSupCol) {

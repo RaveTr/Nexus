@@ -18,6 +18,11 @@ import java.util.function.Supplier;
  */
 public interface DefaultableVanillaBasedPropertyWrapper<IL extends ItemLike, SELF extends VanillaBasedPropertyWrapper<IL, SELF, BUILDER>, BUILDER extends VanillaBasedPropertyWrapperBuilder<IL, BUILDER, SELF>> extends VanillaBasedPropertyWrapper<IL, SELF, BUILDER> {
 
+    /**
+     * The specialized wrapper to which all getters should delegate.
+     *
+     * @return The specialized wrapper to which all getters should delegate. May be empty.
+     */
     Optional<SpecializedVanillaPropertyWrapper<IL, ?, ?>> getSpecializedVanillaWrapper();
 
     @Override

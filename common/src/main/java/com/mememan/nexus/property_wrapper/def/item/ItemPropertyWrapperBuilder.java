@@ -32,7 +32,7 @@ public class ItemPropertyWrapperBuilder<I extends Item> extends BaseDefaultableD
         DefaultableVanillaBasedPropertyWrapperBuilder.super.copyFrom(propertyWrapper);
         return super.copyFrom(propertyWrapper)
                 .withItemColor(propertyWrapper.getItemColorMapper().orElse(null))
-                .withItemModelPredicates(propertyWrapper.getItemModelPredicates());
+                .setItemModelPredicates(propertyWrapper.getItemModelPredicates());
     }
 
     public ItemPropertyWrapperBuilder<I> withItemColor(Function<Supplier<I>, WrappedItemColor> itemColorMappingFunc) {
@@ -41,18 +41,18 @@ public class ItemPropertyWrapperBuilder<I extends Item> extends BaseDefaultableD
     }
 
     public ItemPropertyWrapperBuilder<I> withItemModelPredicate(ResourceLocation predicateId, WrappedClampedItemPropertyFunction predicate) {
-        itemModelPredicates.put(predicateId, predicate);
+        this.itemModelPredicates.put(predicateId, predicate);
         return this;
     }
 
     public ItemPropertyWrapperBuilder<I> withItemModelPredicates(Map<ResourceLocation, WrappedClampedItemPropertyFunction> predicates) {
-        itemModelPredicates.putAll(predicates);
+        this.itemModelPredicates.putAll(predicates);
         return this;
     }
 
     public ItemPropertyWrapperBuilder<I> setItemModelPredicates(Map<ResourceLocation, WrappedClampedItemPropertyFunction> predicates) {
-        itemModelPredicates.clear();
-        itemModelPredicates.putAll(predicates);
+        this.itemModelPredicates.clear();
+        this.itemModelPredicates.putAll(predicates);
         return this;
     }
 

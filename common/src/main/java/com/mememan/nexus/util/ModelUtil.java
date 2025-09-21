@@ -67,6 +67,14 @@ public final class ModelUtil {
                         .with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(targetBlock.get()))));
     }
 
+    /**
+     * Shortcut method to allow for the definition of a single parent {@link ModelTemplate} without any additional
+     * parameters (textures, etc.).
+     *
+     * @param parentModelLoc The {@link ResourceLocation} pointing towards the parent model.
+     *
+     * @return A {@link ModelTemplate} with the specified parent model.
+     */
     public static ModelTemplate fromLocation(ResourceLocation parentModelLoc) {
         return new ModelTemplate(Optional.of(parentModelLoc), Optional.empty());
     }

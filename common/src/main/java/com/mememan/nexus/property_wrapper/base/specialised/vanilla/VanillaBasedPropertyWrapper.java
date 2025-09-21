@@ -6,6 +6,7 @@ import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.ItemLike;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -28,6 +29,8 @@ public interface VanillaBasedPropertyWrapper<IL extends ItemLike, SELF extends P
      * {@linkplain #getParentObject() ItemLike's} composting chance.
      *
      * @return The compost value mapping {@link Function}. May be empty.
+     *
+     * @see VanillaBasedPropertyWrapperBuilder#asCompostable(Function)
      */
     Optional<Function<Supplier<IL>, Float>> getCompostMapper();
 
@@ -36,6 +39,8 @@ public interface VanillaBasedPropertyWrapper<IL extends ItemLike, SELF extends P
      * {@linkplain #getParentObject() ItemLike's} burn time in ticks when used in a furnace or similar.
      *
      * @return The fuel value mapping {@link Function}. May be empty.
+     *
+     * @see VanillaBasedPropertyWrapperBuilder#asFuel(Function)
      */
     Optional<Function<Supplier<IL>, Integer>> getFuelMapper();
 
@@ -44,6 +49,8 @@ public interface VanillaBasedPropertyWrapper<IL extends ItemLike, SELF extends P
      *
      * @return The {@link List} of tabs the parent {@linkplain #getParentObject() ItemLike} should be listed/show up in.
      * May be empty.
+     *
+     * @see VanillaBasedPropertyWrapperBuilder#withParentTabs(Collection)
      */
     List<Supplier<CreativeModeTab>> getParentCreativeModeTabs();
 }

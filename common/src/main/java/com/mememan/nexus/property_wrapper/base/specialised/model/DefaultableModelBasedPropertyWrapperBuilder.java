@@ -14,6 +14,11 @@ import java.util.function.Supplier;
  */
 public interface DefaultableModelBasedPropertyWrapperBuilder<T, SELF extends ModelBasedPropertyWrapperBuilder<T, SELF, MBPW>, MBPW extends ModelBasedPropertyWrapper<T, MBPW, SELF>> extends ModelBasedPropertyWrapperBuilder<T, SELF, MBPW> {
 
+    /**
+     * The specialized builder to which all builder methods should delegate.
+     *
+     * @return The specialized builder to which all builder methods should delegate. May be empty.
+     */
     Optional<SpecializedModelPropertyWrapperBuilder<T, SELF, MBPW>> getSpecializedModelBuilder();
 
     @Override

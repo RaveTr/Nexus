@@ -16,6 +16,11 @@ import java.util.function.Supplier;
  */
 public interface DefaultableTagBasedPropertyWrapper<T, SELF extends TagBasedPropertyWrapper<T, SELF, BUILDER>, BUILDER extends TagBasedPropertyWrapperBuilder<T, BUILDER, SELF>> extends TagBasedPropertyWrapper<T, SELF, BUILDER> {
 
+    /**
+     * The specialized wrapper to which all getters should delegate.
+     *
+     * @return The specialized wrapper to which all getters should delegate. May be empty.
+     */
     Optional<SpecializedTagPropertyWrapper<T, ?, ?>> getSpecializedTagWrapper();
 
     @Override

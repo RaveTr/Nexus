@@ -17,6 +17,11 @@ import java.util.function.Supplier;
  */
 public interface DefaultableVanillaBasedPropertyWrapperBuilder<IL extends ItemLike, SELF extends VanillaBasedPropertyWrapperBuilder<IL, SELF, VBPW>, VBPW extends VanillaBasedPropertyWrapper<IL, VBPW, SELF>> extends VanillaBasedPropertyWrapperBuilder<IL, SELF, VBPW> {
 
+    /**
+     * The specialized builder to which all builder methods should delegate.
+     *
+     * @return The specialized builder to which all builder methods should delegate. May be empty.
+     */
     Optional<SpecializedVanillaPropertyWrapperBuilder<IL, SELF, VBPW>> getSpecializedVanillaBuilder();
 
     @Override

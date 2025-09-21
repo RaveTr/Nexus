@@ -16,6 +16,11 @@ import java.util.function.Supplier;
  */
 public interface DefaultableRecipeBasedPropertyWrapper<T, SELF extends RecipeBasedPropertyWrapper<T, SELF, BUILDER>, BUILDER extends RecipeBasedPropertyWrapperBuilder<T, BUILDER, SELF>> extends RecipeBasedPropertyWrapper<T, SELF, BUILDER> {
 
+    /**
+     * The specialized wrapper to which all getters should delegate.
+     *
+     * @return The specialized wrapper to which all getters should delegate. May be empty.
+     */
     Optional<SpecializedRecipePropertyWrapper<T, ?, ?>> getSpecializedRecipeWrapper();
 
     @Override

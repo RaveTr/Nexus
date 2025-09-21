@@ -7,6 +7,8 @@ import com.mememan.nexus.util.LootUtil;
 import com.mememan.nexus.util.ModelUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.jetbrains.annotations.Nullable;
@@ -30,9 +32,21 @@ public final class BlockPropertyWrapperTemplates {
             .build();
 
     private BlockPropertyWrapperTemplates() {
-        throw new UnsupportedOperationException("Attempted to construct instance of template utility class! (BlockPropertyWrapperTemplates)");
+        throw new IllegalAccessError("Attempted to construct instance of template utility class! (BlockPropertyWrapperTemplates)");
     }
 
+    /**
+     * Registers and returns the provided {@link Block}.
+     *
+     * @param blockId The target {@linkplain Block Block's} {@linkplain ResourceLocation registry ID}.
+     * @param blockSup The {@link Block} object to register.
+     * @param blockSupCol An optional {@link Collection} to track the registered {@link Block}. Primarily useful if you
+     *                    want a shorthand method of tracking your own registered blocks.
+     *
+     * @return The {@link Supplier} of the registered {@link Block}.
+     *
+     * @param <B> Any {@link Block} type.
+     */
     public static <B extends Block> Supplier<B> registerBlock(ResourceLocation blockId, Supplier<B> blockSup, @Nullable Collection<Supplier<Block>> blockSupCol) {
         Supplier<B> registeredBlock = NexusServices.REGISTRAR.registerObject(blockId, blockSup, BuiltInRegistries.BLOCK);
 
@@ -41,10 +55,37 @@ public final class BlockPropertyWrapperTemplates {
         return registeredBlock;
     }
 
+    /**
+     * Overloaded variant of {@link #registerBlock(ResourceLocation, Supplier, Collection)} that does not track the
+     * registered {@link Block} to any custom {@link Collection}.
+     *
+     * @param blockId The target {@linkplain Block Block's} {@linkplain ResourceLocation registry ID}.
+     * @param blockSup The {@link Block} object to register.
+     *
+     * @return The {@link Supplier} of the registered {@link Block}.
+     *
+     * @param <B> Any {@link Block} type.
+     */
     public static <B extends Block> Supplier<B> registerBlock(ResourceLocation blockId, Supplier<B> blockSup) {
         return registerBlock(blockId, blockSup, null);
     }
 
+    /**
+     * Registers and returns the provided {@link Block}, mapping it to a new {@link BlockPropertyWrapper} inheriting
+     * from the provided {@link BlockPropertyWrapper} template. Optionally tracks the registered {@link Block} to a
+     * custom {@link Collection}.
+     *
+     * @param blockId The target {@linkplain Block Block's} {@linkplain ResourceLocation registry ID}.
+     * @param blockSup The {@link Block} object to register.
+     * @param templateBPW The {@link BlockPropertyWrapper} template to inherit from.
+     * @param blockSupCol An optional {@link Collection} to track the registered {@link Block}. Primarily useful if you
+     *                    want a shorthand method of tracking your own registered blocks.
+     *
+     * @return The {@link Supplier} of the registered {@link Block}, mapped to its own {@link BlockPropertyWrapper}
+     * inheriting from the provided {@code templateBPW}.
+     *
+     * @param <B> Any {@link Block} type.
+     */
     public static <B extends Block> Supplier<B> registerBlockFromTemplate(ResourceLocation blockId, Supplier<B> blockSup, BlockPropertyWrapper<Block> templateBPW, @Nullable Collection<Supplier<Block>> blockSupCol) {
         Supplier<B> registeredBlock = registerBlock(blockId, blockSup, blockSupCol);
 
@@ -57,6 +98,22 @@ public final class BlockPropertyWrapperTemplates {
     public static <B extends Block> Supplier<B> registerBlockFromTemplate(ResourceLocation blockId, Supplier<B> blockSup, BlockPropertyWrapper<Block> templateBPW) {
         return registerBlockFromTemplate(blockId, blockSup, templateBPW, null);
     }
+
+    public static <B extends Block> Supplier<B> registerBlockWithItemFromTemplate(ResourceLocation blockId, Supplier<B> blockSup, BlockPropertyWrapper<Block> templateBPW, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> blockItemSupCol) {
+        Supplier<B> registeredBlock = registerBlockFromTemplate(blockId, blockSup, templateBPW, blockSupCol);
+
+        ItemPropertyWrapperTemplates.registerItem(blockId, () -> new BlockItem(registeredBlock.get(), new Item.Properties()), blockItemSupCol);
+
+        return new BlockPropertyWrapper<>(registeredBlock, blockId.getNamespace())
+                .builder()
+                .copyFromType(templateBPW)
+                .buildAndGet();
+    }
+
+    public static <B extends Block> Supplier<B> registerBlockWithItemFromTemplate(ResourceLocation blockId, Supplier<B> blockSup, BlockPropertyWrapper<Block> templateBPW) {
+        return registerBlockWithItemFromTemplate(blockId, blockSup, templateBPW, null, null);
+    }
+
     public static <B extends Block> BlockPropertyWrapperBuilder<B> registerAndChain(ResourceLocation blockId, Supplier<B> blockSup, BlockPropertyWrapper<Block> templateBPW, @Nullable Collection<Supplier<Block>> blockSupCol) {
         Supplier<B> registeredBlock = registerBlock(blockId, blockSup, blockSupCol);
 
@@ -67,6 +124,20 @@ public final class BlockPropertyWrapperTemplates {
 
     public static <B extends Block> BlockPropertyWrapperBuilder<B> registerAndChain(ResourceLocation blockId, Supplier<B> blockSup, BlockPropertyWrapper<Block> templateBPW) {
         return registerAndChain(blockId, blockSup, templateBPW, null);
+    }
+
+    public static <B extends Block> BlockPropertyWrapperBuilder<B> registerWithItemAndChain(ResourceLocation blockId, Supplier<B> blockSup, BlockPropertyWrapper<Block> templateBPW, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> blockItemSupCol) {
+        Supplier<B> registeredBlock = registerBlock(blockId, blockSup, blockSupCol);
+
+        ItemPropertyWrapperTemplates.registerItem(blockId, () -> new BlockItem(registeredBlock.get(), new Item.Properties()), blockItemSupCol);
+
+        return new BlockPropertyWrapper<>(registeredBlock, blockId.getNamespace())
+                .builder()
+                .copyFromType(templateBPW);
+    }
+
+    public static <B extends Block> BlockPropertyWrapperBuilder<B> registerWithItemAndChain(ResourceLocation blockId, Supplier<B> blockSup, BlockPropertyWrapper<Block> templateBPW) {
+        return registerWithItemAndChain(blockId, blockSup, templateBPW, null, null);
     }
 
     public static <B extends Block> Supplier<B> registerBasicBlock(ResourceLocation blockId, Supplier<B> blockSup, @Nullable Collection<Supplier<Block>> blockSupCol) {

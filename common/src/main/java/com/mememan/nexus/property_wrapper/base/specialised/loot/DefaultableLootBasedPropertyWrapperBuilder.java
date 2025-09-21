@@ -15,6 +15,11 @@ import java.util.function.Supplier;
  */
 public interface DefaultableLootBasedPropertyWrapperBuilder<T, SELF extends LootBasedPropertyWrapperBuilder<T, SELF, LBPW>, LBPW extends LootBasedPropertyWrapper<T, LBPW, SELF>> extends LootBasedPropertyWrapperBuilder<T, SELF, LBPW> {
 
+    /**
+     * The specialized builder to which all builder methods should delegate.
+     *
+     * @return The specialized builder to which all builder methods should delegate. May be empty.
+     */
     Optional<SpecializedLootPropertyWrapperBuilder<T, SELF, LBPW>> getSpecializedLootBuilder();
 
     @Override
