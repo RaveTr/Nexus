@@ -13,7 +13,6 @@ import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
 import com.mememan.nexus.util.JsonUtil;
 import com.mememan.nexus.util.ResourceLocationUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction;
 import net.minecraft.data.models.model.*;
 import net.minecraft.resources.ResourceLocation;
@@ -155,6 +154,17 @@ public interface ModelBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SE
          * @see TextureSlot
          */
         ModelDefinition withTextureMapping(TextureMapping texMapping);
+
+        /**
+         * Defines a render type to use for this model definition.
+         *
+         * @param renderType The {@link ResourceLocation} of the target {@link net.minecraft.client.renderer.RenderType}.
+         *
+         * @return {@code this} (builder method)
+         *
+         * @see #getRenderType()
+         */
+        ModelDefinition withRenderType(ResourceLocation renderType);
 
         /**
          * Defines the GUI lighting to use for this model definition.
@@ -311,7 +321,8 @@ public interface ModelBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SE
         Optional<String> getBackingDirectory();
 
         /**
-         * Gets the custom {@link RenderType} to be passed into this model's JSON for custom rendering masks.
+         * Gets the custom {@link net.minecraft.client.renderer.RenderType} to be passed into this model's JSON for
+         * custom rendering masks.
          * <br></br>
          * <b>List of built-in render types:</b>
          * <ul>
@@ -325,7 +336,7 @@ public interface ModelBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SE
          *
          * @return The custom render type location. May be empty.
          *
-         * @see RenderType
+         * @see net.minecraft.client.renderer.RenderType
          */
         Optional<ResourceLocation> getRenderType();
 

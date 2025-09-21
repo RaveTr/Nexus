@@ -26,7 +26,43 @@ public final class ModelUtil {
     }
 
     /**
-     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_ALL} template.
+     * Shortcut method to allow for the definition of a single parent {@link ModelTemplate} without any additional
+     * parameters (textures, etc.).
+     *
+     * @param parentModelLoc The {@link ResourceLocation} pointing towards the parent model.
+     *
+     * @return A {@link ModelTemplate} with the specified parent model.
+     */
+    public static ModelTemplate fromLocation(ResourceLocation parentModelLoc) {
+        return new ModelTemplate(Optional.of(parentModelLoc), Optional.empty());
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_ALL} template and prompty generates
+     * an {@link ItemModelDefinition} using the {@code ownerBlockSup} to grab the prompt model location.
+     * <p>
+     * <h3>Required Texture Slots</h3>
+     * <ul>
+     *  <li>{@link TextureSlot#ALL} -> {@code blockTexLoc}</li>
+     * </ul>
+     *
+     * @param ownerBlockSup The {@code Supplier<Block>} representing the owner {@link Block} to be used for
+     *                      automatic model location resolution.
+     * @param blockTexLoc The {@link ResourceLocation} pointing towards the block texture for the block model.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_ALL} template.
+     *
+     * @see #simpleBlock(Supplier)
+     */
+    public static <B extends Block> BlockModelDefinition cubeAll(Supplier<B> ownerBlockSup, ResourceLocation blockTexLoc) {
+        return new BlockModelDefinition(ModelTemplates.CUBE_ALL)
+                .withTextureMapping(TextureMapping.cube(RegistryUtil.pickBlockPrefix(blockTexLoc)))
+                .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(ownerBlockSup.get()))));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_ALL} template and prompty generates
+     * an {@link ItemModelDefinition} using the {@code ownerBlockSup} to grab the prompt model location.
      * <p>
      * <h3>Required Texture Slots</h3>
      * <ul>
@@ -41,9 +77,67 @@ public final class ModelUtil {
      * @see #simpleBlock(Supplier)
      */
     public static <B extends Block> BlockModelDefinition cubeAll(Supplier<B> ownerBlockSup) {
-        return new BlockModelDefinition(ModelTemplates.CUBE_ALL)
-                .withTextureMapping(TextureMapping.cube(RegistryUtil.pickBlockPrefix(RegistryUtil.getBlockTextureLocationOrDefault(ownerBlockSup))))
+        return cubeAll(ownerBlockSup, RegistryUtil.getBlockTextureLocationOrDefault(ownerBlockSup));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_BOTTOM_TOP} template.
+     * <p>
+     * <h3>Required Texture Slots</h3>
+     * <ul>
+     *  <li>{@link TextureSlot#SIDE} -> {@code sideTexture}</li>
+     *  <li>{@link TextureSlot#BOTTOM} -> {@code bottomTexture}</li>
+     *  <li>{@link TextureSlot#TOP} -> {@code topTexture}</li>
+     * </ul>
+     *
+     * @param ownerBlockSup The {@code Supplier<Block>} representing the owner {@link Block} to be used for
+     *                      automatic model location resolution.
+     * @param sideTexture The {@link ResourceLocation} representing the texture of the 4 horizontal faces of a standard
+     *                    cube block (N, S, E, W).
+     * @param bottomTexture The {@link ResourceLocation} representing the texture of the bottom vertical face of a
+     *                      standard cube block (D).
+     * @param topTexture The {@link ResourceLocation} representing the texture of the top vertical face of a standard
+     *                   cube block (U).
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_BOTTOM_TOP} template.
+     *
+     * @see #simpleBlock(Supplier)
+     * @see #cubeBottomTop(Supplier)
+     */
+    public static BlockModelDefinition cubeBottomTop(Supplier<Block> ownerBlockSup, ResourceLocation sideTexture, ResourceLocation bottomTexture, ResourceLocation topTexture) {
+        return new BlockModelDefinition(ModelTemplates.CUBE_BOTTOM_TOP)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.SIDE, RegistryUtil.pickBlockPrefix(sideTexture))
+                        .put(TextureSlot.BOTTOM, RegistryUtil.pickBlockPrefix(bottomTexture))
+                        .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topTexture)))
                 .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(ownerBlockSup.get()))));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_BOTTOM_TOP} template.
+     * <p>
+     * <h3>Required Texture Slots</h3>
+     * <ul>
+     *  <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.getBlockTextureLocationOrDefaultWithSuffix(ownerBlockSup, "_side")}</li>
+     *  <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getBlockTextureLocationOrDefaultWithSuffix(ownerBlockSup, "_bottom")}</li>
+     *  <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getBlockTextureLocationOrDefaultWithSuffix(ownerBlockSup, "_top")}</li>
+     * </ul>
+     *
+     * @param ownerBlockSup The {@code Supplier<Block>} representing the owner {@link Block} to be used for
+     *                      automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_BOTTOM_TOP} template.
+     *
+     * @see #simpleBlock(Supplier)
+     * @see #cubeBottomTop(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
+     */
+    public static BlockModelDefinition cubeBottomTop(Supplier<Block> ownerBlockSup) {
+        return cubeBottomTop(
+                ownerBlockSup,
+                RegistryUtil.getBlockTextureLocationOrDefaultWithSuffix(ownerBlockSup, "_side"),
+                RegistryUtil.getBlockTextureLocationOrDefaultWithSuffix(ownerBlockSup, "_bottom"),
+                RegistryUtil.getBlockTextureLocationOrDefaultWithSuffix(ownerBlockSup, "_top")
+        );
     }
 
     /**
@@ -65,17 +159,5 @@ public final class ModelUtil {
         return new BlockStateDefinition(targetBlock)
                 .withBlockStateSupplier(MultiVariantGenerator.multiVariant(targetBlock.get(), Variant.variant()
                         .with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(targetBlock.get()))));
-    }
-
-    /**
-     * Shortcut method to allow for the definition of a single parent {@link ModelTemplate} without any additional
-     * parameters (textures, etc.).
-     *
-     * @param parentModelLoc The {@link ResourceLocation} pointing towards the parent model.
-     *
-     * @return A {@link ModelTemplate} with the specified parent model.
-     */
-    public static ModelTemplate fromLocation(ResourceLocation parentModelLoc) {
-        return new ModelTemplate(Optional.of(parentModelLoc), Optional.empty());
     }
 }

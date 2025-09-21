@@ -55,6 +55,8 @@ public class TestBlockRegistrar {
             .withBlockFlattening(parentBlock -> BLAH.get().defaultBlockState())
             .asCompostable(parentBlock -> 45.0F)
             .asFuel(parentBlock -> 12000)
+            .withBlockTilling(parentBlock -> Pair.of((ctx) -> true, (ctx) -> ctx.getLevel().setBlock(ctx.getClickedPos(), Blocks.FARMLAND.defaultBlockState(), Block.UPDATE_ALL)))
+            .withParentTabs(() -> CreativeModeTabs.allTabs().get(3), () -> CreativeModeTabs.allTabs().get(2))
             .buildAndGet();
 
     private static <B extends Block> Supplier<B> registerBlock(ResourceLocation name, Supplier<B> block) {

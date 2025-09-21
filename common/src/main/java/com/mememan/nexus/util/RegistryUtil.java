@@ -34,14 +34,24 @@ public final class RegistryUtil {
         throw new IllegalAccessError("Attempted to construct instance of utility class! (RegistryUtil)");
     }
 
-    public static Optional<ResourceLocation> getTextureLocation(ResourceLocation objectRegistryId, @Nullable String rawObjectRegistryKey) {
-        return objectRegistryId == null ? Optional.empty() : CACHED_TEXTURE_LOOKUP.stream()
-                .filter(curLoc -> curLoc.getNamespace().equals(objectRegistryId.getNamespace()) && (rawObjectRegistryKey == null || curLoc.getPath().contains("/" + rawObjectRegistryKey + "/")) && curLoc.getPath().endsWith(objectRegistryId.getPath()))
+    public static Optional<ResourceLocation> getTextureLocation(ResourceLocation textureName, @Nullable String rawObjectRegistryKey) {
+        return textureName == null ? Optional.empty() : CACHED_TEXTURE_LOOKUP.stream()
+                .filter(curLoc -> curLoc.getNamespace().equals(textureName.getNamespace()) && (rawObjectRegistryKey == null || curLoc.getPath().contains("/" + rawObjectRegistryKey + "/")) && curLoc.getPath().endsWith(textureName.getPath()))
                 .findFirst();
     }
 
-    public static Optional<ResourceLocation> getTextureLocation(ResourceLocation objectRegistryId) {
-        return getTextureLocation(objectRegistryId, null);
+    public static Optional<ResourceLocation> getTextureLocation(ResourceLocation textureName) {
+        return getTextureLocation(textureName, null);
+    }
+
+    @NotNull
+    public static ResourceLocation getTextureLocationOrDefault(ResourceLocation textureName, @NotNull ResourceLocation defaultTextureLocation) {
+        return getTextureLocation(textureName, null).orElse(defaultTextureLocation);
+    }
+
+    @NotNull
+    public static ResourceLocation getTextureLocationOrDefault(ResourceLocation textureName) {
+        return getTextureLocationOrDefault(textureName, textureName);
     }
 
     public static <T> Optional<ResourceLocation> getTextureLocation(Supplier<T> targetObj) {
@@ -56,6 +66,16 @@ public final class RegistryUtil {
     @NotNull
     public static <B extends Block> ResourceLocation getBlockTextureLocationOrDefault(Supplier<B> targetBlock) {
         return getTextureLocationOrDefault(targetBlock, TextureMapping.getBlockTexture(targetBlock.get()));
+    }
+
+    @NotNull
+    public static <B extends Block> ResourceLocation getBlockTextureLocationOrDefaultWithPrefix(Supplier<B> targetBlock, String prefix) {
+        return getTextureLocationOrDefault(getBlockTextureLocationOrDefault(targetBlock).withPrefix(prefix), TextureMapping.getBlockTexture(targetBlock.get()));
+    }
+
+    @NotNull
+    public static <B extends Block> ResourceLocation getBlockTextureLocationOrDefaultWithSuffix(Supplier<B> targetBlock, String suffix) {
+        return getTextureLocationOrDefault(getBlockTextureLocationOrDefault(targetBlock).withSuffix(suffix), TextureMapping.getBlockTexture(targetBlock.get()));
     }
 
     /**

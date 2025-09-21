@@ -88,6 +88,12 @@ public class BaseModelDefinition<SELF extends BaseModelDefinition<SELF>> impleme
     }
 
     @Override
+    public ModelBasedPropertyWrapper.ModelDefinition withRenderType(ResourceLocation renderType) {
+        this.modelRenderType = renderType;
+        return self();
+    }
+
+    @Override
     public SELF withGuiLight(ModelGuiLight guiLight) {
         this.modelGuiLight = guiLight;
         return self();
