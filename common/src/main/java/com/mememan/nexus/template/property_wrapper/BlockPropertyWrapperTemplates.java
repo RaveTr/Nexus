@@ -7,6 +7,7 @@ import com.mememan.nexus.util.LootUtil;
 import com.mememan.nexus.util.ModelUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -29,6 +30,138 @@ public final class BlockPropertyWrapperTemplates {
             .withModelDefinition(ModelUtil::cubeAll)
             .withBlockStateDefinition(ModelUtil::simpleBlock)
             .withLootTable(LootUtil::dropSelf)
+            .build();
+
+    /**
+     * Basic BPW template for blocks that can be mined with a pickaxe. Inherits from {@link #BASIC}.
+     */
+    public static final BlockPropertyWrapper<Block> BASIC_PICKAXE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFromType(BASIC)
+            .withTag(() -> BlockTags.MINEABLE_WITH_PICKAXE)
+            .build();
+    /**
+     * Basic BPW template for blocks that can be mined with a stone pickaxe or better. Inherits from {@link #BASIC_PICKAXE}.
+     */
+    public static final BlockPropertyWrapper<Block> BASIC_PICKAXE_STONE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFromType(BASIC_PICKAXE)
+            .withTag(() -> BlockTags.NEEDS_STONE_TOOL)
+            .build();
+    /**
+     * Basic BPW template for blocks that can be mined with an iron pickaxe or better. Inherits from {@link #BASIC_PICKAXE}.
+     */
+    public static final BlockPropertyWrapper<Block> BASIC_PICKAXE_IRON = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFromType(BASIC_PICKAXE)
+            .withTag(() -> BlockTags.NEEDS_IRON_TOOL)
+            .build();
+    /**
+     * Basic BPW template for blocks that can be mined with a diamond pickaxe or better. Inherits from {@link #BASIC_PICKAXE}.
+     */
+    public static final BlockPropertyWrapper<Block> BASIC_PICKAXE_DIAMOND = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFromType(BASIC_PICKAXE)
+            .withTag(() -> BlockTags.NEEDS_DIAMOND_TOOL)
+            .build();
+
+    /**
+     * Basic BPW template for blocks that can be mined with an axe. Inherits from {@link #BASIC}.
+     */
+    public static final BlockPropertyWrapper<Block> BASIC_AXE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFromType(BASIC)
+            .withTag(() -> BlockTags.MINEABLE_WITH_AXE)
+            .build();
+    /**
+     * Basic BPW template for blocks that can be mined with a stone axe or better. Inherits from {@link #BASIC_AXE}.
+     */
+    public static final BlockPropertyWrapper<Block> BASIC_AXE_STONE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFromType(BASIC_AXE)
+            .withTag(() -> BlockTags.NEEDS_STONE_TOOL)
+            .build();
+    /**
+     * Basic BPW template for blocks that can be mined with an iron axe or better. Inherits from {@link #BASIC_AXE}.
+     */
+    public static final BlockPropertyWrapper<Block> BASIC_AXE_IRON = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFromType(BASIC_AXE)
+            .withTag(() -> BlockTags.NEEDS_IRON_TOOL)
+            .build();
+    /**
+     * Basic BPW template for blocks that can be mined with a diamond axe or better. Inherits from {@link #BASIC_AXE}.
+     */
+    public static final BlockPropertyWrapper<Block> BASIC_AXE_DIAMOND = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFromType(BASIC_AXE)
+            .withTag(() -> BlockTags.NEEDS_DIAMOND_TOOL)
+            .build();
+
+    /**
+     * Basic BPW template for blocks that can be mined with a hoe. Inherits from {@link #BASIC}.
+     */
+    public static final BlockPropertyWrapper<Block> BASIC_HOE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFromType(BASIC)
+            .withTag(() -> BlockTags.MINEABLE_WITH_HOE)
+            .build();
+    /**
+     * Basic BPW template for blocks that can be mined with a stone hoe or better. Inherits from {@link #BASIC_HOE}.
+     */
+    public static final BlockPropertyWrapper<Block> BASIC_HOE_STONE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFromType(BASIC_HOE)
+            .withTag(() -> BlockTags.NEEDS_STONE_TOOL)
+            .build();
+    /**
+     * Basic BPW template for blocks that can be mined with an iron hoe or better. Inherits from {@link #BASIC_HOE}.
+     */
+    public static final BlockPropertyWrapper<Block> BASIC_HOE_IRON = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFromType(BASIC_HOE)
+            .withTag(() -> BlockTags.NEEDS_IRON_TOOL)
+            .build();
+    /**
+     * Basic BPW template for blocks that can be mined with a diamond hoe or better. Inherits from {@link #BASIC_HOE}.
+     */
+    public static final BlockPropertyWrapper<Block> BASIC_HOE_DIAMOND = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFromType(BASIC_HOE)
+            .withTag(() -> BlockTags.NEEDS_DIAMOND_TOOL)
+            .build();
+
+    /**
+     * Basic BPW template for blocks that can be mined with a shovel. Inherits from {@link #BASIC}.
+     */
+    public static final BlockPropertyWrapper<Block> BASIC_SHOVEL = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFromType(BASIC)
+            .withTag(() -> BlockTags.MINEABLE_WITH_SHOVEL)
+            .build();
+    /**
+     * Basic BPW template for blocks that can be mined with a stone shovel or better. Inherits from {@link #BASIC_SHOVEL}.
+     */
+    public static final BlockPropertyWrapper<Block> BASIC_SHOVEL_STONE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFromType(BASIC_SHOVEL)
+            .withTag(() -> BlockTags.NEEDS_STONE_TOOL)
+            .build();
+    /**
+     * Basic BPW template for blocks that can be mined with an iron shovel or better. Inherits from {@link #BASIC_SHOVEL}.
+     */
+    public static final BlockPropertyWrapper<Block> BASIC_SHOVEL_IRON = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFromType(BASIC_SHOVEL)
+            .withTag(() -> BlockTags.NEEDS_IRON_TOOL)
+            .build();
+    /**
+     * Basic BPW template for blocks that can be mined with a diamond shovel or better. Inherits from {@link #BASIC_SHOVEL}.
+     */
+    public static final BlockPropertyWrapper<Block> BASIC_SHOVEL_DIAMOND = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFromType(BASIC_SHOVEL)
+            .withTag(() -> BlockTags.NEEDS_DIAMOND_TOOL)
             .build();
 
     private BlockPropertyWrapperTemplates() {

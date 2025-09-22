@@ -163,43 +163,43 @@ public class StandardLanguageProvider implements ModDataProvider {
         return locale;
     }
 
-    public void addBlock(Supplier<? extends Block> targetBlockSup, String localizedBlockName) {
+    protected void addBlock(Supplier<? extends Block> targetBlockSup, String localizedBlockName) {
         addBlock(targetBlockSup.get(), localizedBlockName);
     }
 
-    public void addBlock(Block targetBlock, String localizedBlockName) {
+    protected void addBlock(Block targetBlock, String localizedBlockName) {
         add(targetBlock.getDescriptionId(), localizedBlockName);
     }
 
-    public void addEnchantment(Supplier<? extends Enchantment> targetEnchantmentSup, String localizedEnchantmentName) {
+    protected void addEnchantment(Supplier<? extends Enchantment> targetEnchantmentSup, String localizedEnchantmentName) {
         addEnchantment(targetEnchantmentSup.get(), localizedEnchantmentName);
     }
 
-    public void addEnchantment(Enchantment targetEnchantment, String localizedEnchantmentName) {
+    protected void addEnchantment(Enchantment targetEnchantment, String localizedEnchantmentName) {
         add(targetEnchantment.getDescriptionId(), localizedEnchantmentName);
     }
 
-    public void addEntityType(Supplier<? extends EntityType<?>> targetEntityTypeSup, String localizedEntityTypeName) {
+    protected void addEntityType(Supplier<? extends EntityType<?>> targetEntityTypeSup, String localizedEntityTypeName) {
         addEntityType(targetEntityTypeSup.get(), localizedEntityTypeName);
     }
 
-    public void addEntityType(EntityType<?> targetEntityType, String localizedEntityTypeName) {
+    protected void addEntityType(EntityType<?> targetEntityType, String localizedEntityTypeName) {
         add(targetEntityType.getDescriptionId(), localizedEntityTypeName);
     }
 
-    public void addItem(Supplier<? extends Item> targetItemSup, String localizedItemName) {
+    protected void addItem(Supplier<? extends Item> targetItemSup, String localizedItemName) {
         addItem(targetItemSup.get(), localizedItemName);
     }
 
-    public void addItem(Item targetItem, String localizedItemName) {
+    protected void addItem(Item targetItem, String localizedItemName) {
         add(targetItem.getDescriptionId(), localizedItemName);
     }
 
-    public void addMobEffect(Supplier<? extends MobEffect> targetMobEffectSup, String localizedMobEffectName) {
+    protected void addMobEffect(Supplier<? extends MobEffect> targetMobEffectSup, String localizedMobEffectName) {
         addMobEffect(targetMobEffectSup.get(), localizedMobEffectName);
     }
 
-    public void addMobEffect(MobEffect targetMobEffect, String localizedMobEffectName) {
+    protected void addMobEffect(MobEffect targetMobEffect, String localizedMobEffectName) {
         add(targetMobEffect.getDescriptionId(), localizedMobEffectName);
     }
 
@@ -210,7 +210,7 @@ public class StandardLanguageProvider implements ModDataProvider {
      * @param unlocalizedKey The unlocalized key to add.
      * @param localizedValue The corresponding localized value to add.
      */
-    public void add(String unlocalizedKey, String localizedValue) {
+    protected void add(String unlocalizedKey, String localizedValue) {
         boolean isAlreadyMapped = localizationEntries.containsKey(unlocalizedKey);
 
         if (isAlreadyMapped) {

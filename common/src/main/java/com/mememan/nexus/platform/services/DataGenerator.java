@@ -24,8 +24,7 @@ import java.util.stream.Collectors;
  * Primarily designed to accept provider implementations regardless of whether they're loader-specific or
  * common implementations.
  * <br></br>
- * Main use case is to allow for mods to modify Nexus API's behaviour when auto-generating related data. Mods should
- * otherwise prefer writing/implementing their own data providers.
+ * Main use case is to allow for mods to modify Nexus API's behaviour when auto-generating related data.
  *
  * @see <a href="https://github.com/RaveTr/Nexus/wiki/Data-Generation">Nexus Wiki: Data Generation</a>
  */

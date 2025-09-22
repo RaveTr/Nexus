@@ -43,7 +43,7 @@ import java.util.function.Supplier;
  * <pre>
  *     {@code
  *          @RegistrarEntry // Optional, you can use bootstrap methods or some other way to statically initialize this class
- *          public class MyModDamageTypes {
+ *          public class MyModBlocks {
  *              private static final ObjectArrayList<Supplier<Block>> BLOCKS = new ObjectArrayList<>(); // Collection type can vary based on your use-case, but this is generally how you'd do it for a standard registry. This is totally optional
  *              private static final ObjectArrayList<Supplier<Item>> BLOCK_ITEMS = new ObjectArrayList<>(); // If your blocks are going to have their own items, you should also store those separately
  *

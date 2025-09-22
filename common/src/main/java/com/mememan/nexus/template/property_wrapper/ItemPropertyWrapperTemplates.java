@@ -2,6 +2,8 @@ package com.mememan.nexus.template.property_wrapper;
 
 import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.property_wrapper.def.item.ItemPropertyWrapper;
+import com.mememan.nexus.property_wrapper.def.item.ItemPropertyWrapperBuilder;
+import com.mememan.nexus.util.ModelUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -15,6 +17,13 @@ import java.util.function.Supplier;
  * shortcut utility methods for registration.
  */
 public final class ItemPropertyWrapperTemplates {
+    /**
+     * Basic IPW template for standard items. Generated (standard) item model.
+     */
+    public static final ItemPropertyWrapper<Item> BASIC_GENERATED = new ItemPropertyWrapper<>()
+            .builder()
+            .withModelDefinition(ModelUtil::basicGenerated)
+            .build();
 
     private ItemPropertyWrapperTemplates() {
         throw new IllegalAccessError("Attempted to construct instance of template utility class! (ItemPropertyWrapperTemplates)");
@@ -30,10 +39,10 @@ public final class ItemPropertyWrapperTemplates {
      *
      * @return The {@link Supplier} of the registered {@link Item}.
      *
-     * @param <B> Any {@link Item} type.
+     * @param <I> Any {@link Item} type.
      */
-    public static <B extends Item> Supplier<B> registerItem(ResourceLocation itemId, Supplier<B> itemSup, @Nullable Collection<Supplier<Item>> itemSupCol) {
-        Supplier<B> registeredItem = NexusServices.REGISTRAR.registerObject(itemId, itemSup, BuiltInRegistries.ITEM);
+    public static <I extends Item> Supplier<I> registerItem(ResourceLocation itemId, Supplier<I> itemSup, @Nullable Collection<Supplier<Item>> itemSupCol) {
+        Supplier<I> registeredItem = NexusServices.REGISTRAR.registerObject(itemId, itemSup, BuiltInRegistries.ITEM);
 
         if (itemSupCol != null) itemSupCol.add((Supplier<Item>) registeredItem);
 
@@ -49,9 +58,87 @@ public final class ItemPropertyWrapperTemplates {
      *
      * @return The {@link Supplier} of the registered {@link Item}.
      *
-     * @param <B> Any {@link Item} type.
+     * @param <I> Any {@link Item} type.
      */
-    public static <B extends Item> Supplier<B> registerItem(ResourceLocation itemId, Supplier<B> itemSup) {
+    public static <I extends Item> Supplier<I> registerItem(ResourceLocation itemId, Supplier<I> itemSup) {
         return registerItem(itemId, itemSup, null);
+    }
+
+    /**
+     * Registers and returns the provided {@link Item}, mapping it to a new {@link ItemPropertyWrapper} inheriting
+     * from the provided {@link ItemPropertyWrapper} template. Optionally tracks the registered {@link Item} to a
+     * custom {@link Collection}.
+     *
+     * @param itemId The target {@linkplain Item Item's} {@linkplain ResourceLocation registry ID}.
+     * @param itemSup The {@link Item} object to register.
+     * @param templateBPW The {@link ItemPropertyWrapper} template to inherit from.
+     * @param itemSupCol An optional {@link Collection} to track the registered {@link Item}. Primarily useful if you
+     *                    want a shorthand method of tracking your own registered items.
+     *
+     * @return The {@link Supplier} of the registered {@link Item}, mapped to its own {@link ItemPropertyWrapper}
+     * inheriting from the provided {@code templateBPW}.
+     *
+     * @param <I> Any {@link Item} type.
+     */
+    public static <I extends Item> Supplier<I> registerItemFromTemplate(ResourceLocation itemId, Supplier<I> itemSup, ItemPropertyWrapper<Item> templateBPW, @Nullable Collection<Supplier<Item>> itemSupCol) {
+        Supplier<I> registeredItem = registerItem(itemId, itemSup, itemSupCol);
+
+        return new ItemPropertyWrapper<>(registeredItem, itemId.getNamespace())
+                .builder()
+                .copyFromType(templateBPW)
+                .buildAndGet();
+    }
+
+    public static <I extends Item> Supplier<I> registerItemFromTemplate(ResourceLocation itemId, Supplier<I> itemSup, ItemPropertyWrapper<Item> templateBPW) {
+        return registerItemFromTemplate(itemId, itemSup, templateBPW, null);
+    }
+
+    public static <I extends Item> Supplier<I> registerItemWithItemFromTemplate(ResourceLocation itemId, Supplier<I> itemSup, ItemPropertyWrapper<Item> templateBPW, @Nullable Collection<Supplier<Item>> itemSupCol, @Nullable Collection<Supplier<Item>> itemItemSupCol) {
+        Supplier<I> registeredItem = registerItemFromTemplate(itemId, itemSup, templateBPW, itemSupCol);
+        
+        return new ItemPropertyWrapper<>(registeredItem, itemId.getNamespace())
+                .builder()
+                .copyFromType(templateBPW)
+                .buildAndGet();
+    }
+
+    public static <I extends Item> Supplier<I> registerItemWithItemFromTemplate(ResourceLocation itemId, Supplier<I> itemSup, ItemPropertyWrapper<Item> templateBPW) {
+        return registerItemWithItemFromTemplate(itemId, itemSup, templateBPW, null, null);
+    }
+
+    public static <I extends Item> ItemPropertyWrapperBuilder<I> registerAndChain(ResourceLocation itemId, Supplier<I> itemSup, ItemPropertyWrapper<Item> templateBPW, @Nullable Collection<Supplier<Item>> itemSupCol) {
+        Supplier<I> registeredItem = registerItem(itemId, itemSup, itemSupCol);
+
+        return new ItemPropertyWrapper<>(registeredItem, itemId.getNamespace())
+                .builder()
+                .copyFromType(templateBPW);
+    }
+
+    public static <I extends Item> ItemPropertyWrapperBuilder<I> registerAndChain(ResourceLocation itemId, Supplier<I> itemSup, ItemPropertyWrapper<Item> templateBPW) {
+        return registerAndChain(itemId, itemSup, templateBPW, null);
+    }
+
+    public static <I extends Item> ItemPropertyWrapperBuilder<I> registerWithItemAndChain(ResourceLocation itemId, Supplier<I> itemSup, ItemPropertyWrapper<Item> templateBPW, @Nullable Collection<Supplier<Item>> itemSupCol, @Nullable Collection<Supplier<Item>> itemItemSupCol) {
+        Supplier<I> registeredItem = registerItem(itemId, itemSup, itemSupCol);
+
+        return new ItemPropertyWrapper<>(registeredItem, itemId.getNamespace())
+                .builder()
+                .copyFromType(templateBPW);
+    }
+
+    public static <I extends Item> ItemPropertyWrapperBuilder<I> registerWithItemAndChain(ResourceLocation itemId, Supplier<I> itemSup, ItemPropertyWrapper<Item> templateBPW) {
+        return registerWithItemAndChain(itemId, itemSup, templateBPW, null, null);
+    }
+
+    public static <I extends Item> Supplier<I> registerBasicItem(ResourceLocation itemId, Supplier<I> itemSup, @Nullable Collection<Supplier<Item>> itemSupCol) {
+        return registerItemFromTemplate(itemId, itemSup, BASIC_GENERATED, itemSupCol);
+    }
+
+    public static <I extends Item> Supplier<I> registerBasicItem(ResourceLocation itemId, Supplier<I> itemSup) {
+        return registerBasicItem(itemId, itemSup, null);
+    }
+
+    public static Supplier<Item> registerBasicItem(ResourceLocation itemId) {
+        return registerBasicItem(itemId, () -> new Item(new Item.Properties()));
     }
 }

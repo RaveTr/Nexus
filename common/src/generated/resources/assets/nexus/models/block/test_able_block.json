@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "nexus:block/test_able_block"
+    "all": "minecraft:block/invalid"
   }
 }

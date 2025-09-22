@@ -10,7 +10,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:air"
+          "name": "nexus:test_block_3"
         }
       ],
       "rolls": 1.0

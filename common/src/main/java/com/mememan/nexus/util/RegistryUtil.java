@@ -4,9 +4,7 @@ import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.Util;
-import net.minecraft.data.models.model.TextureMapping;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -64,18 +62,18 @@ public final class RegistryUtil {
     }
 
     @NotNull
-    public static <B extends Block> ResourceLocation getBlockTextureLocationOrDefault(Supplier<B> targetBlock) {
-        return getTextureLocationOrDefault(targetBlock, TextureMapping.getBlockTexture(targetBlock.get()));
+    public static <T> ResourceLocation getTextureLocationOrDefault(Supplier<T> targetObj) {
+        return getTextureLocationOrDefault(targetObj, new ResourceLocation("invalid"));
     }
 
     @NotNull
-    public static <B extends Block> ResourceLocation getBlockTextureLocationOrDefaultWithPrefix(Supplier<B> targetBlock, String prefix) {
-        return getTextureLocationOrDefault(getBlockTextureLocationOrDefault(targetBlock).withPrefix(prefix), TextureMapping.getBlockTexture(targetBlock.get()));
+    public static <T> ResourceLocation getTextureLocationOrDefaultWithPrefix(Supplier<T> targetObj, String prefix) {
+        return getTextureLocationOrDefault(targetObj).withPrefix(prefix);
     }
 
     @NotNull
-    public static <B extends Block> ResourceLocation getBlockTextureLocationOrDefaultWithSuffix(Supplier<B> targetBlock, String suffix) {
-        return getTextureLocationOrDefault(getBlockTextureLocationOrDefault(targetBlock).withSuffix(suffix), TextureMapping.getBlockTexture(targetBlock.get()));
+    public static <T> ResourceLocation getTextureLocationOrDefaultWithSuffix(Supplier<T> targetObj, String suffix) {
+        return getTextureLocationOrDefault(targetObj).withSuffix(suffix);
     }
 
     /**

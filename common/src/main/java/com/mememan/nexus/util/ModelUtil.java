@@ -8,6 +8,7 @@ import net.minecraft.data.models.blockstates.Variant;
 import net.minecraft.data.models.blockstates.VariantProperties;
 import net.minecraft.data.models.model.*;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
 import java.util.Optional;
@@ -41,10 +42,10 @@ public final class ModelUtil {
      * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_ALL} template and prompty generates
      * an {@link ItemModelDefinition} using the {@code ownerBlockSup} to grab the prompt model location.
      * <p>
-     * <h3>Required Texture Slots</h3>
-     * <ul>
-     *  <li>{@link TextureSlot#ALL} -> {@code blockTexLoc}</li>
-     * </ul>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#ALL} -> {@code blockTexLoc}</li>
+     *     </ul>
      *
      * @param ownerBlockSup The {@code Supplier<Block>} representing the owner {@link Block} to be used for
      *                      automatic model location resolution.
@@ -64,10 +65,10 @@ public final class ModelUtil {
      * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_ALL} template and prompty generates
      * an {@link ItemModelDefinition} using the {@code ownerBlockSup} to grab the prompt model location.
      * <p>
-     * <h3>Required Texture Slots</h3>
-     * <ul>
-     *  <li>{@link TextureSlot#ALL} -> {@code RegistryUtil.getBlockTextureLocationOrDefault(ownerBlockSup)}</li>
-     * </ul>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#ALL} -> {@code RegistryUtil.getTextureLocationOrDefault(ownerBlockSup)}</li>
+     *     </ul>
      *
      * @param ownerBlockSup The {@code Supplier<Block>} representing the owner {@link Block} to be used for
      *                      automatic texture location resolution (as shown above).
@@ -77,18 +78,18 @@ public final class ModelUtil {
      * @see #simpleBlock(Supplier)
      */
     public static <B extends Block> BlockModelDefinition cubeAll(Supplier<B> ownerBlockSup) {
-        return cubeAll(ownerBlockSup, RegistryUtil.getBlockTextureLocationOrDefault(ownerBlockSup));
+        return cubeAll(ownerBlockSup, RegistryUtil.getTextureLocationOrDefault(ownerBlockSup));
     }
 
     /**
      * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_BOTTOM_TOP} template.
      * <p>
-     * <h3>Required Texture Slots</h3>
-     * <ul>
-     *  <li>{@link TextureSlot#SIDE} -> {@code sideTexture}</li>
-     *  <li>{@link TextureSlot#BOTTOM} -> {@code bottomTexture}</li>
-     *  <li>{@link TextureSlot#TOP} -> {@code topTexture}</li>
-     * </ul>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#SIDE} -> {@code sideTexture}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code bottomTexture}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code topTexture}</li>
+     *     </ul>
      *
      * @param ownerBlockSup The {@code Supplier<Block>} representing the owner {@link Block} to be used for
      *                      automatic model location resolution.
@@ -116,12 +117,12 @@ public final class ModelUtil {
     /**
      * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_BOTTOM_TOP} template.
      * <p>
-     * <h3>Required Texture Slots</h3>
-     * <ul>
-     *  <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.getBlockTextureLocationOrDefaultWithSuffix(ownerBlockSup, "_side")}</li>
-     *  <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getBlockTextureLocationOrDefaultWithSuffix(ownerBlockSup, "_bottom")}</li>
-     *  <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getBlockTextureLocationOrDefaultWithSuffix(ownerBlockSup, "_top")}</li>
-     * </ul>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.getTextureLocationOrDefault(ownerBlockSup, "_side")}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(ownerBlockSup, "_bottom")}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(ownerBlockSup, "_top")}</li>
+     *     </ul>
      *
      * @param ownerBlockSup The {@code Supplier<Block>} representing the owner {@link Block} to be used for
      *                      automatic model and texture location resolution.
@@ -134,9 +135,9 @@ public final class ModelUtil {
     public static BlockModelDefinition cubeBottomTop(Supplier<Block> ownerBlockSup) {
         return cubeBottomTop(
                 ownerBlockSup,
-                RegistryUtil.getBlockTextureLocationOrDefaultWithSuffix(ownerBlockSup, "_side"),
-                RegistryUtil.getBlockTextureLocationOrDefaultWithSuffix(ownerBlockSup, "_bottom"),
-                RegistryUtil.getBlockTextureLocationOrDefaultWithSuffix(ownerBlockSup, "_top")
+                RegistryUtil.getTextureLocationOrDefaultWithSuffix(ownerBlockSup, "_side"),
+                RegistryUtil.getTextureLocationOrDefaultWithSuffix(ownerBlockSup, "_bottom"),
+                RegistryUtil.getTextureLocationOrDefaultWithSuffix(ownerBlockSup, "_top")
         );
     }
 
@@ -144,10 +145,10 @@ public final class ModelUtil {
      * Creates a {@link BlockStateDefinition}, using {@link MultiVariantGenerator} with the {@link VariantProperties#MODEL}
      * property set to the supplied {@linkplain Block Block's} default model location.
      * <p>
-     * <h3>Variants</h3>
-     * <ul>
-     *  <li>{@link VariantProperties#MODEL} -> {@link ModelLocationUtils#getModelLocation(Block)}</li>
-     * </ul>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link VariantProperties#MODEL} -> {@link ModelLocationUtils#getModelLocation(Block)}</li>
+     *     </ul>
      *
      * @param targetBlock The {@linkplain Block Block} to use as the base for the {@link BlockStateDefinition}.
      *
@@ -159,5 +160,45 @@ public final class ModelUtil {
         return new BlockStateDefinition(targetBlock)
                 .withBlockStateSupplier(MultiVariantGenerator.multiVariant(targetBlock.get(), Variant.variant()
                         .with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(targetBlock.get()))));
+    }
+
+    /**
+     * Creates a {@link ItemModelDefinition} with the {@link ModelTemplates#FLAT_ITEM} template (for "generated" item
+     * models).
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code texLoc}</li>
+     *     </ul>
+     *
+     * @param texLoc The location to use for the {@code layer0} texture slot.
+     *
+     * @return A new {@link ItemModelDefinition} with the {@link ModelTemplates#FLAT_ITEM} template.
+     *
+     * @see #basicGenerated(Supplier)
+     */
+    public static ItemModelDefinition basicGenerated(ResourceLocation texLoc) {
+        return new ItemModelDefinition(ModelTemplates.FLAT_ITEM)
+                .withTextureMapping(TextureMapping.layer0(RegistryUtil.pickItemPrefix(texLoc)));
+    }
+
+    /**
+     * Overloaded variant of {@link #basicGenerated(ResourceLocation)}. Creates a {@link ItemModelDefinition} with the
+     * {@link ModelTemplates#FLAT_ITEM} template (for "generated" item models).
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.getTextureLocationOrDefault(targetItem)}</li>
+     *     </ul>
+     *
+     * @param targetItem The {@linkplain Item Item} to use as the base for the {@link ItemModelDefinition} {@code layer0}
+     *                   texture lookup.
+     *
+     * @return A new {@link ItemModelDefinition} with the {@link ModelTemplates#FLAT_ITEM} template.
+     *
+     * @see #basicGenerated(ResourceLocation)
+     */
+    public static ItemModelDefinition basicGenerated(Supplier<Item> targetItem) {
+        return basicGenerated(RegistryUtil.getTextureLocationOrDefault(targetItem));
     }
 }

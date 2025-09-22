@@ -1,7 +1,5 @@
 package com.mememan.nexus.mixins.item;
 
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mememan.nexus.internal.event.common.NexusForgeCommonMiscEvents;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.item.HoeItem;
@@ -10,7 +8,6 @@ import net.minecraft.world.level.block.Block;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -18,8 +15,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
- * Mixin {@code class} for properly applying custom hoe tilling behaviour set by BPWs, using MixinExtras to allow for
- * chaining in place of {@link Redirect} annotations via {@link ModifyExpressionValue} and {@link WrapOperation}.
+ * Mixin {@code class} for properly applying custom hoe tilling behaviour set by BPWs.
  *
  * @see NexusForgeCommonMiscEvents
  */

@@ -55,6 +55,15 @@ public class StandardLootProvider extends LootTableProvider implements ModDataPr
         this.mappedLootPWs = PropertyWrapper.PropertyWrappersContainer.getInferrableDataGennableWrappersOfType(LootBasedPropertyWrapper.class, modId);
     }
 
+    /**
+     * Entrypoint for validation, generation, and serialization of all different loot table types.
+     *
+     * @param output The {@link CachedOutput} instance to use for saving generated data to disk.
+     *
+     * @return A {@link CompletableFuture} that completes when all loot tables have been generated and serialized.
+     *
+     * @see #populateLootTables(Map, Set, Set, Map)
+     */
     @Override
     public @NotNull CompletableFuture<?> run(CachedOutput output) {
         final Object2ObjectOpenHashMap<ResourceLocation, LootTable> mappedLootTables = new Object2ObjectOpenHashMap<>();
@@ -93,8 +102,28 @@ public class StandardLootProvider extends LootTableProvider implements ModDataPr
         }
     }
 
+    /**
+     * Handles loot table generation by adding validated loot tables to {@code mappedLootTables}. Additionally, handles
+     * missing loot table entries appropriately.
+     *
+     * @param mappedLootTables The {@link Map} whose contents will ultimately be queried for the serialization and saving
+     *                         of loot tables to disk.
+     * @param trackedTables Misc. {@link Set} whose primary purpose is to keep track of already-generated loot tables
+     *                      in order to handle duplicates properly.
+     * @param requiredLootTables Used to track missing loot tables that are required. If any loot table locations are
+     *                           added to this {@link Set}, a problem will be reported and an {@link IllegalStateException}
+     *                           will be thrown accordingly (see {@link #run(CachedOutput)}).
+     * @param hashedLootTableLocs In-dev {@link Map} used to detect hash collisions of different loot table locations.
+     *                            This is more of a leftover mechanism from Vanilla's {@link LootTableProvider} and will
+     *                            likely be removed, only kept at the moment for testing purposes. Does not affect
+     *                            data generation.
+     *
+     * @param <T> Convenient generic parameter for each parent object in {@link #mappedLootPWs}.
+     *
+     * @see #handeDuplicateLootTables(ResourceLocation, Set, String, String, Runnable)
+     */
     protected <T> void populateLootTables(Map<ResourceLocation, LootTable> mappedLootTables, Set<ResourceLocation> trackedTables, Set<ResourceLocation> requiredLootTables, Map<RandomSupport.Seed128bit, ResourceLocation> hashedLootTableLocs) {
-        this.mappedLootPWs.stream()
+        mappedLootPWs.stream()
                 .map(curPW -> (LootBasedPropertyWrapper<T, ?, ?>) curPW)
                 .forEach(curPW -> {
                     Supplier<T> parentObjSup = curPW.getParentObject();
@@ -124,6 +153,19 @@ public class StandardLootProvider extends LootTableProvider implements ModDataPr
                 });
     }
 
+    /**
+     * Wraps loot table generation in duplicate handling logic based on {@link #dupeStrat}.
+     *
+     * @param targetLootTable The {@link ResourceLocation} of the loot table to validate.
+     * @param trackedTables Misc. {@link Set} whose primary purpose is to keep track of already-generated loot tables
+     *                      in order to handle duplicates properly.
+     * @param objectClassName The name of the corresponding parent object's {@code class}. Primarily used for logging.
+     * @param objectName The name of the corresponding parent object (typically the object's description ID). Primarily
+     *                   used for logging.
+     * @param lootTableMapper The {@link Runnable} to execute if the loot table is not a duplicate (or if it is a
+     *                        duplicate and {@link #dupeStrat} is either {@link DuplicateDataPolicy#OVERRIDE_WARN} or
+     *                        {@link DuplicateDataPolicy#OVERRIDE_SILENT}).
+     */
     protected void handeDuplicateLootTables(ResourceLocation targetLootTable, Set<ResourceLocation> trackedTables, String objectClassName, String objectName, Runnable lootTableMapper) {
         if (!trackedTables.add(targetLootTable)) {
             switch (getDuplicateDataPolicy()) {
