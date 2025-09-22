@@ -19,8 +19,8 @@ import java.util.function.Consumer;
  * It should be noted that loader-specific implementations of this {@code interface} cache all mod meta/data only once
  * during startup. Resource management and other later runtime-dependant tasks should therefore be handled elsewhere.
  *
- * @apiNote A {@link ModData} object may represent one mod instance, NOT to be confused with a whole JAR file. Each
- * instance holds its own unique metadata/file path data regardless of whether it's nested or not.
+ * @apiNote A {@link ModData} object may represent one mod instance in its own JAR file. If a mod happens to be nested,
+ * only the contents and metadata of its JAR file are cached. The parent JAR remains separate as its own mod.
  */
 public interface ModData {
 

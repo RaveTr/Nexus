@@ -255,7 +255,7 @@ public final class LootUtil {
      *  <li><b>Rolls:</b> 1.0</li>
      *  <li><b>When:</b> {@link #HAS_SHEARS_OR_SILK_TOUCH}</li>
      *  <li><b>Drops:</b> {@code targetBlock}</li>
-     *  <li><b>Otherwise:</b> <ul>
+     *  <li><b>Otherwise: [Optional, based on presence of corresponding sapling]</b> <ul>
      *      <li><b>When:</b> {@link BonusLevelTableCondition#bonusLevelFlatChance(Enchantment, float...)} (Passes in
      *      {@link Enchantments#BLOCK_FORTUNE} and {@link #NORMAL_LEAVES_SAPLING_CHANCES} respectively)</li></li>
      *      <li><b>When:</b> {@link ExplosionCondition#survivesExplosion()}</li></li>

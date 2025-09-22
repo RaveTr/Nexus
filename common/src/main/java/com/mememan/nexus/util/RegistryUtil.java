@@ -44,7 +44,7 @@ public final class RegistryUtil {
 
     @NotNull
     public static ResourceLocation getTextureLocationOrDefault(ResourceLocation textureName, @NotNull ResourceLocation defaultTextureLocation) {
-        return getTextureLocation(textureName, null).orElse(defaultTextureLocation);
+        return getTextureLocation(textureName).orElse(defaultTextureLocation);
     }
 
     @NotNull
