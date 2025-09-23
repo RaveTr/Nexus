@@ -28,7 +28,7 @@ public final class BlockPropertyWrapperTemplates {
     public static final BlockPropertyWrapper<Block> BASIC = new BlockPropertyWrapper<>()
             .builder()
             .withModelDefinition(ModelUtil::cubeAll)
-            .withBlockStateDefinition(ModelUtil::simpleBlock)
+            .withBlockStateDefinition(ModelUtil::simpleBlockState)
             .withLootTable(LootUtil::dropSelf)
             .build();
 

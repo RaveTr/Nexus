@@ -3,13 +3,18 @@ package com.mememan.nexus.util;
 import com.mememan.nexus.client.block.BlockStateDefinition;
 import com.mememan.nexus.client.model.block.BlockModelDefinition;
 import com.mememan.nexus.client.model.item.ItemModelDefinition;
+import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import net.minecraft.data.models.blockstates.MultiVariantGenerator;
+import net.minecraft.data.models.blockstates.PropertyDispatch;
 import net.minecraft.data.models.blockstates.Variant;
 import net.minecraft.data.models.blockstates.VariantProperties;
 import net.minecraft.data.models.model.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.SlabType;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -53,9 +58,9 @@ public final class ModelUtil {
      *
      * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_ALL} template.
      *
-     * @see #simpleBlock(Supplier)
+     * @see #simpleBlockState(Supplier)
      */
-    public static <B extends Block> BlockModelDefinition cubeAll(Supplier<B> ownerBlockSup, ResourceLocation blockTexLoc) {
+    public static BlockModelDefinition cubeAll(Supplier<Block> ownerBlockSup, ResourceLocation blockTexLoc) {
         return new BlockModelDefinition(ModelTemplates.CUBE_ALL)
                 .withTextureMapping(TextureMapping.cube(RegistryUtil.pickBlockPrefix(blockTexLoc)))
                 .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(ownerBlockSup.get()))));
@@ -75,9 +80,9 @@ public final class ModelUtil {
      *
      * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_ALL} template.
      *
-     * @see #simpleBlock(Supplier)
+     * @see #simpleBlockState(Supplier)
      */
-    public static <B extends Block> BlockModelDefinition cubeAll(Supplier<B> ownerBlockSup) {
+    public static BlockModelDefinition cubeAll(Supplier<Block> ownerBlockSup) {
         return cubeAll(ownerBlockSup, RegistryUtil.getTextureLocationOrDefault(ownerBlockSup));
     }
 
@@ -102,7 +107,7 @@ public final class ModelUtil {
      *
      * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_BOTTOM_TOP} template.
      *
-     * @see #simpleBlock(Supplier)
+     * @see #simpleBlockState(Supplier)
      * @see #cubeBottomTop(Supplier)
      */
     public static BlockModelDefinition cubeBottomTop(Supplier<Block> ownerBlockSup, ResourceLocation sideTexture, ResourceLocation bottomTexture, ResourceLocation topTexture) {
@@ -129,7 +134,7 @@ public final class ModelUtil {
      *
      * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_BOTTOM_TOP} template.
      *
-     * @see #simpleBlock(Supplier)
+     * @see #simpleBlockState(Supplier)
      * @see #cubeBottomTop(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
      */
     public static BlockModelDefinition cubeBottomTop(Supplier<Block> ownerBlockSup) {
@@ -156,11 +161,288 @@ public final class ModelUtil {
      *
      * @see #cubeAll(Supplier)
      */
-    public static BlockStateDefinition simpleBlock(Supplier<Block> targetBlock) {
+    public static BlockStateDefinition simpleBlockState(Supplier<Block> targetBlock) {
         return new BlockStateDefinition(targetBlock)
                 .withBlockStateSupplier(MultiVariantGenerator.multiVariant(targetBlock.get(), Variant.variant()
                         .with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(targetBlock.get()))));
     }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#SLAB_BOTTOM} template.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code bottomTexture}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code topTexture}</li>
+     *         <li>{@link TextureSlot#SIDE} -> {@code sideTexture}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the owner {@link Block} to be used for
+     *                    automatic model location resolution.
+     * @param bottomTexture The {@link ResourceLocation} representing the texture of the bottom face of the slab.
+     * @param topTexture The {@link ResourceLocation} representing the texture of the top face of the slab.
+     * @param sideTexture The {@link ResourceLocation} representing the texture of the side faces of the slab.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#SLAB_BOTTOM} template.
+     *
+     * @see #slabTop(Supplier)
+     * @see #slab(Supplier)
+     */
+    public static BlockModelDefinition slabBottom(Supplier<Block> targetBlock, ResourceLocation bottomTexture, ResourceLocation topTexture, ResourceLocation sideTexture) {
+        return new BlockModelDefinition(ModelTemplates.SLAB_BOTTOM)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.BOTTOM, RegistryUtil.pickBlockPrefix(bottomTexture))
+                        .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topTexture))
+                        .put(TextureSlot.SIDE, RegistryUtil.pickBlockPrefix(sideTexture)))
+                .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get()))));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#SLAB_BOTTOM} template.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_bottom")}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_top")}</li>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the owner {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#SLAB_BOTTOM} template.
+     *
+     * @see #slabBottom(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
+     * @see #slabTop(Supplier)
+     * @see #slab(Supplier)
+     */
+    public static BlockModelDefinition slabBottom(Supplier<Block> targetBlock) {
+        return slabBottom(targetBlock, RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_bottom"), RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_top"), RegistryUtil.getTextureLocationOrDefault(targetBlock));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#SLAB_TOP} template.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code bottomTexture}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code topTexture}</li>
+     *         <li>{@link TextureSlot#SIDE} -> {@code sideTexture}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the owner {@link Block} to be used for
+     *                    automatic model location resolution.
+     * @param bottomTexture The {@link ResourceLocation} representing the texture of the bottom face of the slab.
+     * @param topTexture The {@link ResourceLocation} representing the texture of the top face of the slab.
+     * @param sideTexture The {@link ResourceLocation} representing the texture of the side faces of the slab.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#SLAB_TOP} template.
+     *
+     * @see #slabBottom(Supplier)
+     * @see #slab(Supplier)
+     */
+    public static BlockModelDefinition slabTop(Supplier<Block> targetBlock, ResourceLocation bottomTexture, ResourceLocation topTexture, ResourceLocation sideTexture) {
+        return new BlockModelDefinition(ModelTemplates.SLAB_TOP)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.BOTTOM, RegistryUtil.pickBlockPrefix(bottomTexture))
+                        .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topTexture))
+                        .put(TextureSlot.SIDE, RegistryUtil.pickBlockPrefix(sideTexture)))
+                .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get()))));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#SLAB_TOP} template.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_bottom")}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_top")}</li>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the owner {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#SLAB_TOP} template.
+     *
+     * @see #slabTop(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
+     * @see #slabBottom(Supplier)
+     * @see #slab(Supplier)
+     */
+    public static BlockModelDefinition slabTop(Supplier<Block> targetBlock) {
+        return slabTop(targetBlock, RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_bottom"), RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_top"), RegistryUtil.getTextureLocationOrDefault(targetBlock));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with both {@link ModelTemplates#SLAB_BOTTOM} and {@link ModelTemplates#SLAB_TOP} templates.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code bottomTexture}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code topTexture}</li>
+     *         <li>{@link TextureSlot#SIDE} -> {@code sideTexture}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the owner {@link Block} to be used for
+     *                    automatic model location resolution.
+     * @param bottomTexture The {@link ResourceLocation} representing the texture of the bottom face of the slab.
+     * @param topTexture The {@link ResourceLocation} representing the texture of the top face of the slab.
+     * @param sideTexture The {@link ResourceLocation} representing the texture of the side faces of the slab.
+     *
+     * @return A {@link BlockModelDefinition} with both {@link ModelTemplates#SLAB_BOTTOM} and {@link ModelTemplates#SLAB_TOP} templates.
+     *
+     * @see #slabBottom(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
+     * @see #slabTop(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
+     * @see #slab(Supplier)
+     */
+    public static BlockModelDefinition slab(Supplier<Block> targetBlock, ResourceLocation bottomTexture, ResourceLocation topTexture, ResourceLocation sideTexture) {
+        return slabBottom(targetBlock, bottomTexture, topTexture, sideTexture)
+                .withOrdinalModelDefinition(slabTop(targetBlock, bottomTexture, topTexture, sideTexture));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with both {@link ModelTemplates#SLAB_BOTTOM} and {@link ModelTemplates#SLAB_TOP} templates.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_bottom")}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_top")}</li>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the owner {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with both {@link ModelTemplates#SLAB_BOTTOM} and {@link ModelTemplates#SLAB_TOP} templates.
+     *
+     * @see #slab(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
+     * @see #slabBottom(Supplier)
+     * @see #slabTop(Supplier)
+     */
+    public static BlockModelDefinition slab(Supplier<Block> targetBlock) {
+        return slab(targetBlock, RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_bottom"), RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_top"), RegistryUtil.getTextureLocationOrDefault(targetBlock));
+    }
+
+    /**
+     * Creates a {@link BlockStateDefinition} for a slab block using {@link MultiVariantGenerator} with different models
+     * for each {@link SlabType}.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link SlabType#BOTTOM} -> {@code bottomModel}</li>
+     *         <li>{@link SlabType#TOP} -> {@code topModel}</li>
+     *         <li>{@link SlabType#DOUBLE} -> {@code doubleSlabModel}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the slab {@link Block} to create the blockstate for.
+     * @param bottomModel The {@link ResourceLocation} of the model to use for the bottom slab variant.
+     * @param topModel The {@link ResourceLocation} of the model to use for the top slab variant.
+     * @param doubleSlabModel The {@link ResourceLocation} of the model to use for the double slab variant.
+     *
+     * @return A {@link BlockStateDefinition} with slab-specific variants.
+     *
+     * @see #slabBlockState(Supplier, ResourceLocation)
+     * @see #slabBlockState(Supplier)
+     * @see #woodenSlabBlockState(Supplier)
+     */
+    public static BlockStateDefinition slabBlockState(Supplier<Block> targetBlock, ResourceLocation bottomModel, ResourceLocation topModel, ResourceLocation doubleSlabModel) {
+        return new BlockStateDefinition(targetBlock)
+                .withBlockStateSupplier(MultiVariantGenerator.multiVariant(targetBlock.get())
+                        .with(PropertyDispatch.property(BlockStateProperties.SLAB_TYPE)
+                                .select(SlabType.BOTTOM, Variant.variant()
+                                        .with(VariantProperties.MODEL, bottomModel))
+                                .select(SlabType.TOP, Variant.variant()
+                                        .with(VariantProperties.MODEL, topModel))
+                                .select(SlabType.DOUBLE, Variant.variant()
+                                        .with(VariantProperties.MODEL, doubleSlabModel))));
+    }
+
+    /**
+     * Overloaded variant of {@link #slabBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)}.
+     * Creates a {@link BlockStateDefinition} for a slab block using {@link MultiVariantGenerator} with different models
+     * for each {@link SlabType}.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link SlabType#BOTTOM} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get())}</li>
+     *         <li>{@link SlabType#TOP} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_top")}</li>
+     *         <li>{@link SlabType#DOUBLE} -> {@code doubleBlockModel}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the slab {@link Block} to create the blockstate for.
+     * @param doubleBlockModel The {@link ResourceLocation} of the model to use for the double slab variant.
+     *
+     * @return A {@link BlockStateDefinition} with slab-specific variants.
+     *
+     * @see #slabBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
+     * @see #slabBlockState(Supplier)
+     * @see #woodenSlabBlockState(Supplier)
+     */
+    public static BlockStateDefinition slabBlockState(Supplier<Block> targetBlock, ResourceLocation doubleBlockModel) {
+        return slabBlockState(targetBlock, ModelLocationUtils.getModelLocation(targetBlock.get()), ModelLocationUtils.getModelLocation(targetBlock.get(), "_top"), doubleBlockModel);
+    }
+
+    /**
+     * Overloaded variant of {@link #slabBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)}.
+     * Creates a {@link BlockStateDefinition} for a slab block using {@link MultiVariantGenerator} with different models
+     * for each {@link SlabType}. Automatically determines the double slab model based on the slab's registry ID.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link SlabType#BOTTOM} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get())}</li>
+     *         <li>{@link SlabType#TOP} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_top")}</li>
+     *         <li>{@link SlabType#DOUBLE} -> {@code chosenDoubleBlockModelPath} (derived from slab registry ID)</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the slab {@link Block} to create the blockstate for.
+     *
+     * @return A {@link BlockStateDefinition} with slab-specific variants.
+     *
+     * @see #slabBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
+     * @see #slabBlockState(Supplier, ResourceLocation)
+     * @see #woodenSlabBlockState(Supplier)
+     */
+    public static BlockStateDefinition slabBlockState(Supplier<Block> targetBlock) {
+        ResourceLocation baseSlabId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock)
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        String baseSlabPath = baseSlabId.getPath();
+        String targetDoubleBlockModelPath = StringUtils.substringBefore(ModelLocationUtils.getModelLocation(targetBlock.get()).getPath(), "_slab");
+        String chosenDoubleBlockModelPath = baseSlabPath.contains("_brick_")
+                ? targetDoubleBlockModelPath.concat("_bricks")
+                : targetDoubleBlockModelPath.concat("_block");
+
+        return slabBlockState(targetBlock, baseSlabId.withPath(chosenDoubleBlockModelPath));
+    }
+
+    /**
+     * Overloaded variant of {@link #slabBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)}.
+     * Creates a {@link BlockStateDefinition} for a wooden slab block using {@link MultiVariantGenerator} with different models
+     * for each {@link SlabType}. Automatically determines the double slab model to use the "_planks" variant.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link SlabType#BOTTOM} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get())}</li>
+     *         <li>{@link SlabType#TOP} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_top")}</li>
+     *         <li>{@link SlabType#DOUBLE} -> {@code targetDoubleBlockModelPath + "_planks"} (derived from slab registry ID)</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the wooden slab {@link Block} to create the blockstate for.
+     *
+     * @return A {@link BlockStateDefinition} with slab-specific variants using the "_planks" double slab model.
+     *
+     * @see #slabBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
+     * @see #slabBlockState(Supplier, ResourceLocation)
+     * @see #slabBlockState(Supplier)
+     */
+    public static BlockStateDefinition woodenSlabBlockState(Supplier<Block> targetBlock) {
+        ResourceLocation baseSlabId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock)
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        String targetDoubleBlockModelPath = StringUtils.substringBefore(ModelLocationUtils.getModelLocation(targetBlock.get()).getPath(), "_slab").concat("_planks");
+
+        return slabBlockState(targetBlock, baseSlabId.withPath(targetDoubleBlockModelPath));
+    }
+
+
 
     /**
      * Creates a {@link ItemModelDefinition} with the {@link ModelTemplates#FLAT_ITEM} template (for "generated" item

@@ -97,8 +97,8 @@ public final class ItemPropertyWrapperTemplates {
     }
 
     /**
-     * Overloaded variant of {@link #registerItemFromTemplate(ResourceLocation, Supplier, ItemPropertyWrapper, Collection)} that does not track the
-     * registered {@link Item} to any custom {@link Collection}.
+     * Overloaded variant of {@link #registerItemFromTemplate(ResourceLocation, Supplier, ItemPropertyWrapper, Collection)}
+     * that does not track the registered {@link Item} to any custom {@link Collection}.
      *
      * @param itemId The target {@linkplain Item Item's} {@linkplain ResourceLocation registry ID}.
      * @param itemSup The {@link Item} object to register.
@@ -138,8 +138,8 @@ public final class ItemPropertyWrapperTemplates {
     }
 
     /**
-     * Overloaded variant of {@link #registerAndChain(ResourceLocation, Supplier, ItemPropertyWrapper, Collection)} that does not track the
-     * registered {@link Item} to any custom {@link Collection}.
+     * Overloaded variant of {@link #registerAndChain(ResourceLocation, Supplier, ItemPropertyWrapper, Collection)} that
+     * does not track the registered {@link Item} to any custom {@link Collection}.
      *
      * @param itemId The target {@linkplain Item Item's} {@linkplain ResourceLocation registry ID}.
      * @param itemSup The {@link Item} object to register.
@@ -222,8 +222,8 @@ public final class ItemPropertyWrapperTemplates {
     }
 
     /**
-     * Overloaded variant of {@link #registerBasicHandheldItem(ResourceLocation, Supplier, Collection)} that does not track the
-     * registered {@link Item} to any custom {@link Collection}.
+     * Overloaded variant of {@link #registerBasicHandheldItem(ResourceLocation, Supplier, Collection)} that does not
+     * track the registered {@link Item} to any custom {@link Collection}.
      *
      * @param itemId The target {@linkplain Item Item's} {@linkplain ResourceLocation registry ID}.
      * @param itemSup The {@link Item} object to register.
