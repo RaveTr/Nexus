@@ -11,7 +11,7 @@ import java.util.Map;
 
 /**
  * Base implementation of {@link DataGenPropertyWrapperBuilder}. Extends from {@link BasePropertyWrapperBuilder} for
- * default behavior.
+ * default behavior. Includes datagen-oriented builder methods.
  *
  * @see BaseDataGenPropertyWrapper
  */

@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 
 /**
  * Base implementation of {@link DataGenPropertyWrapper}, extending from {@link BasePropertyWrapper} for default behavior.
+ * Includes datagen-oriented methods.
  *
  * @see BaseDataGenPropertyWrapperBuilder
  */

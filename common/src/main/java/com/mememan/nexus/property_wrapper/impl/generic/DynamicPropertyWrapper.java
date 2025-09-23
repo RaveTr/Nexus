@@ -16,7 +16,11 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
+ * Dynamic extension of {@link BaseDataGenPropertyWrapper} that wraps the parent object type in a {@link ResourceKey}.
+ * Primarily intended for dynamic objects, such as damage types. Implements composite specialized wrappers for language
+ * and tag support.
  *
+ * @see DynamicPropertyWrapperBuilder
  */
 public class DynamicPropertyWrapper<T, SELF extends DynamicPropertyWrapper<T, SELF, BUILDER>, BUILDER extends DynamicPropertyWrapperBuilder<T, BUILDER, SELF>> extends BaseDataGenPropertyWrapper<ResourceKey<T>, SELF, BUILDER> implements DefaultableLanguageBasedPropertyWrapper<ResourceKey<T>, SELF, BUILDER>, DefaultableTagBasedPropertyWrapper<ResourceKey<T>, SELF, BUILDER> {
     protected final SpecializedLanguagePropertyWrapper<ResourceKey<T>, ?, ?> compositeLanguageWrapper;

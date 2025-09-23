@@ -1,6 +1,7 @@
 package com.mememan.nexus.property_wrapper.impl.generic;
 
 import com.mememan.nexus.property_wrapper.base.specialised.language.DefaultableLanguageBasedPropertyWrapperBuilder;
+import com.mememan.nexus.property_wrapper.base.specialised.language.LanguageBasedPropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.specialised.tag.DefaultableTagBasedPropertyWrapperBuilder;
 import com.mememan.nexus.property_wrapper.impl.specialised.language.SpecializedLanguagePropertyWrapper;
 import com.mememan.nexus.property_wrapper.impl.specialised.language.SpecializedLanguagePropertyWrapperBuilder;
@@ -14,6 +15,22 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+/**
+ * Dynamic extension of {@link BaseDataGenPropertyWrapperBuilder} that wraps the parent object type in a {@link ResourceKey}.
+ * Primarily intended for dynamic objects, such as damage types. Implements composite specialized wrapper builders for
+ * language and tag support.
+ *
+ * @apiNote {@link LanguageBasedPropertyWrapper#bypassesDefaultTranslation()} is enabled by default for this builder,
+ * since the majority of dynamic objects are not directly localized. This can be disabled/adjusted if needed via
+ * {@link #bypassDefaultTranslation(boolean)}.
+ *
+ * @implNote {@link #withTag(Supplier)} and its overloads/variants are deprecated for this builder in favour of
+ * {@link #withAdditionalTag(Supplier)} and its overloads/variants. You may view their javadocs here for details on
+ * why that is.
+ *
+ * @see DynamicPropertyWrapper
+ * @see #withTag(Supplier)
+ */
 public class DynamicPropertyWrapperBuilder<T, SELF extends DynamicPropertyWrapperBuilder<T, SELF, DPW>, DPW extends DynamicPropertyWrapper<T, DPW, SELF>> extends BaseDataGenPropertyWrapperBuilder<ResourceKey<T>, SELF, DPW> implements DefaultableLanguageBasedPropertyWrapperBuilder<ResourceKey<T>, SELF, DPW>, DefaultableTagBasedPropertyWrapperBuilder<ResourceKey<T>, SELF, DPW> {
     protected final SpecializedLanguagePropertyWrapperBuilder<ResourceKey<T>, SELF, DPW> compositeLanguageBuilder;
     protected final SpecializedTagPropertyWrapperBuilder<ResourceKey<T>, SELF, DPW> compositeTagBuilder;

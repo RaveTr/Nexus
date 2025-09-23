@@ -32,12 +32,35 @@ public final class RegistryUtil {
         throw new IllegalAccessError("Attempted to construct instance of utility class! (RegistryUtil)");
     }
 
+    /**
+     * Attempts to retrieve the {@link ResourceLocation} of the texture with the given {@code textureName} from
+     * {@link #CACHED_TEXTURE_LOOKUP}.
+     *
+     * @param textureName The texture's {@link ResourceLocation}. Matched through namespace, where the path must only
+     *                    be the name of the texture file to look for (excluding the file extension).
+     * @param rawObjectRegistryKey An optional intermediary {@link String} to match for a specific registry directory
+     *                             for the target asset. Essentially boils down to an extra check for the presence of
+     *                             a path component.
+     *
+     * @return An {@link Optional} containing the {@link ResourceLocation} of the texture with the given
+     * {@code textureName} and {@code rawObjectRegistryKey} (if any). May be empty.
+     */
     public static Optional<ResourceLocation> getTextureLocation(ResourceLocation textureName, @Nullable String rawObjectRegistryKey) {
         return textureName == null ? Optional.empty() : CACHED_TEXTURE_LOOKUP.stream()
                 .filter(curLoc -> curLoc.getNamespace().equals(textureName.getNamespace()) && (rawObjectRegistryKey == null || curLoc.getPath().contains("/" + rawObjectRegistryKey + "/")) && curLoc.getPath().endsWith(textureName.getPath()))
                 .findFirst();
     }
 
+    /**
+     * Overloaded variant of {@link #getTextureLocation(ResourceLocation, String)}. Attempts to find a texture file
+     * matching the given {@code textureName} without any intermediary path components.
+     *
+     * @param textureName The texture's {@link ResourceLocation}. Matched through namespace, where the path must only
+     *                    be the name of the texture file to look for (excluding the file extension).
+     *
+     * @return An {@link Optional} containing the {@link ResourceLocation} of the texture with the given
+     * {@code textureName}. May be empty.
+     */
     public static Optional<ResourceLocation> getTextureLocation(ResourceLocation textureName) {
         return getTextureLocation(textureName, null);
     }

@@ -93,19 +93,6 @@ public final class ItemPropertyWrapperTemplates {
         return registerItemFromTemplate(itemId, itemSup, templateBPW, null);
     }
 
-    public static <I extends Item> Supplier<I> registerItemWithItemFromTemplate(ResourceLocation itemId, Supplier<I> itemSup, ItemPropertyWrapper<Item> templateBPW, @Nullable Collection<Supplier<Item>> itemSupCol, @Nullable Collection<Supplier<Item>> itemItemSupCol) {
-        Supplier<I> registeredItem = registerItemFromTemplate(itemId, itemSup, templateBPW, itemSupCol);
-        
-        return new ItemPropertyWrapper<>(registeredItem, itemId.getNamespace())
-                .builder()
-                .copyFromType(templateBPW)
-                .buildAndGet();
-    }
-
-    public static <I extends Item> Supplier<I> registerItemWithItemFromTemplate(ResourceLocation itemId, Supplier<I> itemSup, ItemPropertyWrapper<Item> templateBPW) {
-        return registerItemWithItemFromTemplate(itemId, itemSup, templateBPW, null, null);
-    }
-
     public static <I extends Item> ItemPropertyWrapperBuilder<I> registerAndChain(ResourceLocation itemId, Supplier<I> itemSup, ItemPropertyWrapper<Item> templateBPW, @Nullable Collection<Supplier<Item>> itemSupCol) {
         Supplier<I> registeredItem = registerItem(itemId, itemSup, itemSupCol);
 
@@ -116,18 +103,6 @@ public final class ItemPropertyWrapperTemplates {
 
     public static <I extends Item> ItemPropertyWrapperBuilder<I> registerAndChain(ResourceLocation itemId, Supplier<I> itemSup, ItemPropertyWrapper<Item> templateBPW) {
         return registerAndChain(itemId, itemSup, templateBPW, null);
-    }
-
-    public static <I extends Item> ItemPropertyWrapperBuilder<I> registerWithItemAndChain(ResourceLocation itemId, Supplier<I> itemSup, ItemPropertyWrapper<Item> templateBPW, @Nullable Collection<Supplier<Item>> itemSupCol, @Nullable Collection<Supplier<Item>> itemItemSupCol) {
-        Supplier<I> registeredItem = registerItem(itemId, itemSup, itemSupCol);
-
-        return new ItemPropertyWrapper<>(registeredItem, itemId.getNamespace())
-                .builder()
-                .copyFromType(templateBPW);
-    }
-
-    public static <I extends Item> ItemPropertyWrapperBuilder<I> registerWithItemAndChain(ResourceLocation itemId, Supplier<I> itemSup, ItemPropertyWrapper<Item> templateBPW) {
-        return registerWithItemAndChain(itemId, itemSup, templateBPW, null, null);
     }
 
     public static <I extends Item> Supplier<I> registerBasicItem(ResourceLocation itemId, Supplier<I> itemSup, @Nullable Collection<Supplier<Item>> itemSupCol) {
