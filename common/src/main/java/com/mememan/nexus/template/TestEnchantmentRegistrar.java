@@ -13,5 +13,5 @@ import java.util.function.Supplier;
 public class TestEnchantmentRegistrar {
     private static final ObjectArrayList<Supplier<Enchantment>> ENCHANTMENTS = new ObjectArrayList<>();
 
-    public static final Supplier<DamageEnchantment> TEST_ENCHANTMENT = EnchantmentPropertyWrapperTemplates.registerBasicEnchantment(NexusConstants.prefix("test_enchantment"), () -> new DamageEnchantment(Enchantment.Rarity.VERY_RARE, 0), ENCHANTMENTS);
+    public static final Supplier<DamageEnchantment> TEST_ENCHANTMENT = EnchantmentPropertyWrapperTemplates.registerEnchantment(NexusConstants.prefix("test_enchantment"), () -> new DamageEnchantment(Enchantment.Rarity.VERY_RARE, 0), ENCHANTMENTS);
 }

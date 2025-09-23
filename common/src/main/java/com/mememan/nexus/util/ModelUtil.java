@@ -201,4 +201,44 @@ public final class ModelUtil {
     public static ItemModelDefinition basicGenerated(Supplier<Item> targetItem) {
         return basicGenerated(RegistryUtil.getTextureLocationOrDefault(targetItem));
     }
+
+    /**
+     * Creates a {@link ItemModelDefinition} with the {@link ModelTemplates#FLAT_HANDHELD_ITEM} template (for "handheld"
+     * item models).
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code texLoc}</li>
+     *     </ul>
+     *
+     * @param texLoc The location to use for the {@code layer0} texture slot.
+     *
+     * @return A new {@link ItemModelDefinition} with the {@link ModelTemplates#FLAT_HANDHELD_ITEM} template.
+     *
+     * @see #basicHandheld(Supplier)
+     */
+    public static ItemModelDefinition basicHandheld(ResourceLocation texLoc) {
+        return new ItemModelDefinition(ModelTemplates.FLAT_HANDHELD_ITEM)
+                .withTextureMapping(TextureMapping.layer0(RegistryUtil.pickItemPrefix(texLoc)));
+    }
+
+    /**
+     * Overloaded variant of {@link #basicHandheld(ResourceLocation)}. Creates a {@link ItemModelDefinition} with the
+     * {@link ModelTemplates#FLAT_HANDHELD_ITEM} template (for "handheld" item models).
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.getTextureLocationOrDefault(targetItem)}</li>
+     *     </ul>
+     *
+     * @param targetItem The {@linkplain Item Item} to use as the base for the {@link ItemModelDefinition} {@code layer0}
+     *                   texture lookup.
+     *
+     * @return A new {@link ItemModelDefinition} with the {@link ModelTemplates#FLAT_HANDHELD_ITEM} template.
+     *
+     * @see #basicGenerated(ResourceLocation)
+     */
+    public static ItemModelDefinition basicHandheld(Supplier<Item> targetItem) {
+        return basicHandheld(RegistryUtil.getTextureLocationOrDefault(targetItem));
+    }
 }

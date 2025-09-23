@@ -34,7 +34,12 @@ public abstract class HoeItemMixin {
         if (tillingBehaviourFunc != null) {
             it.unimi.dsi.fastutil.Pair<Predicate<UseOnContext>, Consumer<UseOnContext>> tillingBehaviourPair = tillingBehaviourFunc.apply(() -> targetBlock);
 
-            return tillingBehaviourPair != null && tillingBehaviourPair.left() != null && tillingBehaviourPair.right() != null ? Pair.of(tillingBehaviourPair.left(), tillingBehaviourPair.right()) : originalPair;
+            if (tillingBehaviourPair != null) {
+                Predicate<UseOnContext> ctxTillingPredicate = tillingBehaviourPair.left();
+                Consumer<UseOnContext> ctxTillingAction = tillingBehaviourPair.right();
+
+                return ctxTillingPredicate != null && ctxTillingAction != null ? Pair.of(ctxTillingPredicate, ctxTillingAction) : originalPair;
+            }
         }
 
         return originalPair;

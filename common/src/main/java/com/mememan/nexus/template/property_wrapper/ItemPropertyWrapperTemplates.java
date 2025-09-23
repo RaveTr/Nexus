@@ -24,6 +24,13 @@ public final class ItemPropertyWrapperTemplates {
             .builder()
             .withModelDefinition(ModelUtil::basicGenerated)
             .build();
+    /**
+     * Basic IPW template for standard items. Handheld (standard) item model.
+     */
+    public static final ItemPropertyWrapper<Item> BASIC_HANDHELD = new ItemPropertyWrapper<>()
+            .builder()
+            .withModelDefinition(ModelUtil::basicHandheld)
+            .build();
 
     private ItemPropertyWrapperTemplates() {
         throw new IllegalAccessError("Attempted to construct instance of template utility class! (ItemPropertyWrapperTemplates)");
@@ -73,7 +80,7 @@ public final class ItemPropertyWrapperTemplates {
      * @param itemSup The {@link Item} object to register.
      * @param templateBPW The {@link ItemPropertyWrapper} template to inherit from.
      * @param itemSupCol An optional {@link Collection} to track the registered {@link Item}. Primarily useful if you
-     *                    want a shorthand method of tracking your own registered items.
+     *                   want a shorthand method of tracking your own registered items.
      *
      * @return The {@link Supplier} of the registered {@link Item}, mapped to its own {@link ItemPropertyWrapper}
      * inheriting from the provided {@code templateBPW}.
@@ -89,10 +96,39 @@ public final class ItemPropertyWrapperTemplates {
                 .buildAndGet();
     }
 
+    /**
+     * Overloaded variant of {@link #registerItemFromTemplate(ResourceLocation, Supplier, ItemPropertyWrapper, Collection)} that does not track the
+     * registered {@link Item} to any custom {@link Collection}.
+     *
+     * @param itemId The target {@linkplain Item Item's} {@linkplain ResourceLocation registry ID}.
+     * @param itemSup The {@link Item} object to register.
+     * @param templateBPW The {@link ItemPropertyWrapper} template to inherit from.
+     *
+     * @return The {@link Supplier} of the registered {@link Item}, mapped to its own {@link ItemPropertyWrapper}
+     * inheriting from the provided {@code templateBPW}.
+     *
+     * @param <I> Any {@link Item} type.
+     */
     public static <I extends Item> Supplier<I> registerItemFromTemplate(ResourceLocation itemId, Supplier<I> itemSup, ItemPropertyWrapper<Item> templateBPW) {
         return registerItemFromTemplate(itemId, itemSup, templateBPW, null);
     }
 
+    /**
+     * Registers the provided {@link Item} and returns its {@link ItemPropertyWrapperBuilder} inheriting from the
+     * provided {@link ItemPropertyWrapper} template. Optionally tracks the registered {@link Item} to a custom
+     * {@link Collection}.
+     *
+     * @param itemId The target {@linkplain Item Item's} {@linkplain ResourceLocation registry ID}.
+     * @param itemSup The {@link Item} object to register.
+     * @param templateBPW The {@link ItemPropertyWrapper} template to inherit from.
+     * @param itemSupCol An optional {@link Collection} to track the registered {@link Item}. Primarily useful if you
+     *                   want a shorthand method of tracking your own registered items.
+     *
+     * @return The {@link ItemPropertyWrapperBuilder} of the registered {@link Item}, inheriting from the provided
+     * {@code templateBPW}.
+     *
+     * @param <I> Any {@link Item} type.
+     */
     public static <I extends Item> ItemPropertyWrapperBuilder<I> registerAndChain(ResourceLocation itemId, Supplier<I> itemSup, ItemPropertyWrapper<Item> templateBPW, @Nullable Collection<Supplier<Item>> itemSupCol) {
         Supplier<I> registeredItem = registerItem(itemId, itemSup, itemSupCol);
 
@@ -101,18 +137,67 @@ public final class ItemPropertyWrapperTemplates {
                 .copyFromType(templateBPW);
     }
 
+    /**
+     * Overloaded variant of {@link #registerAndChain(ResourceLocation, Supplier, ItemPropertyWrapper, Collection)} that does not track the
+     * registered {@link Item} to any custom {@link Collection}.
+     *
+     * @param itemId The target {@linkplain Item Item's} {@linkplain ResourceLocation registry ID}.
+     * @param itemSup The {@link Item} object to register.
+     * @param templateBPW The {@link ItemPropertyWrapper} template to inherit from.
+     *
+     * @return The {@link ItemPropertyWrapperBuilder} of the registered {@link Item}, inheriting from the provided
+     * {@code templateBPW}.
+     *
+     * @param <I> Any {@link Item} type.
+     */
     public static <I extends Item> ItemPropertyWrapperBuilder<I> registerAndChain(ResourceLocation itemId, Supplier<I> itemSup, ItemPropertyWrapper<Item> templateBPW) {
         return registerAndChain(itemId, itemSup, templateBPW, null);
     }
 
+    /**
+     * Registers and returns the provided {@link Item}, mapped to a new {@link ItemPropertyWrapper} inheriting
+     * from the {@link #BASIC_GENERATED} template. Optionally tracks the registered {@link Item} to a custom
+     * {@link Collection}.
+     *
+     * @param itemId The target {@linkplain Item Item's} {@linkplain ResourceLocation registry ID}.
+     * @param itemSup The {@link Item} object to register.
+     * @param itemSupCol An optional {@link Collection} to track the registered {@link Item}. Primarily useful if you
+     *                   want a shorthand method of tracking your own registered items.
+     *
+     * @return The {@link Supplier} of the registered {@link Item}, mapped to its own {@link ItemPropertyWrapper}
+     * inheriting from the {@code BASIC_GENERATED} template.
+     *
+     * @param <I> Any {@link Item} type.
+     */
     public static <I extends Item> Supplier<I> registerBasicItem(ResourceLocation itemId, Supplier<I> itemSup, @Nullable Collection<Supplier<Item>> itemSupCol) {
         return registerItemFromTemplate(itemId, itemSup, BASIC_GENERATED, itemSupCol);
     }
 
+    /**
+     * Overloaded variant of {@link #registerBasicItem(ResourceLocation, Supplier, Collection)} that does not track the
+     * registered {@link Item} to any custom {@link Collection}.
+     *
+     * @param itemId The target {@linkplain Item Item's} {@linkplain ResourceLocation registry ID}.
+     * @param itemSup The {@link Item} object to register.
+     *
+     * @return The {@link Supplier} of the registered {@link Item}, mapped to its own {@link ItemPropertyWrapper}
+     * inheriting from the {@code BASIC_GENERATED} template.
+     *
+     * @param <I> Any {@link Item} type.
+     */
     public static <I extends Item> Supplier<I> registerBasicItem(ResourceLocation itemId, Supplier<I> itemSup) {
         return registerBasicItem(itemId, itemSup, null);
     }
 
+    /**
+     * Registers a new basic {@link Item} with default properties and returns it, mapped to a new
+     * {@link ItemPropertyWrapper} inheriting from the {@link #BASIC_GENERATED} template.
+     *
+     * @param itemId The target {@linkplain Item Item's} {@linkplain ResourceLocation registry ID}.
+     *
+     * @return The {@link Supplier} of the registered {@link Item}, mapped to its own {@link ItemPropertyWrapper}
+     * inheriting from the {@code BASIC_GENERATED} template.
+     */
     public static Supplier<Item> registerBasicItem(ResourceLocation itemId) {
         return registerBasicItem(itemId, () -> new Item(new Item.Properties()));
     }
