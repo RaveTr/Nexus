@@ -25,6 +25,8 @@ public class EntityTypePropertyWrapperBuilder<E extends Entity> extends BaseDefa
         return super.copyFrom(propertyWrapper);
     }
 
+
+
     @Override
     public Optional<SpecializedLootPropertyWrapperBuilder<EntityType<E>, EntityTypePropertyWrapperBuilder<E>, EntityTypePropertyWrapper<E>>> getSpecializedLootBuilder() {
         return Optional.of(compositeLootBuilder);

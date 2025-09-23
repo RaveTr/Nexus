@@ -201,4 +201,52 @@ public final class ItemPropertyWrapperTemplates {
     public static Supplier<Item> registerBasicItem(ResourceLocation itemId) {
         return registerBasicItem(itemId, () -> new Item(new Item.Properties()));
     }
+
+    /**
+     * Registers and returns the provided {@link Item}, mapped to a new {@link ItemPropertyWrapper} inheriting
+     * from the {@link #BASIC_HANDHELD} template. Optionally tracks the registered {@link Item} to a custom
+     * {@link Collection}.
+     *
+     * @param itemId The target {@linkplain Item Item's} {@linkplain ResourceLocation registry ID}.
+     * @param itemSup The {@link Item} object to register.
+     * @param itemSupCol An optional {@link Collection} to track the registered {@link Item}. Primarily useful if you
+     *                   want a shorthand method of tracking your own registered items.
+     *
+     * @return The {@link Supplier} of the registered {@link Item}, mapped to its own {@link ItemPropertyWrapper}
+     * inheriting from the {@code BASIC_HANDHELD} template.
+     *
+     * @param <I> Any {@link Item} type.
+     */
+    public static <I extends Item> Supplier<I> registerBasicHandheldItem(ResourceLocation itemId, Supplier<I> itemSup, @Nullable Collection<Supplier<Item>> itemSupCol) {
+        return registerItemFromTemplate(itemId, itemSup, BASIC_HANDHELD, itemSupCol);
+    }
+
+    /**
+     * Overloaded variant of {@link #registerBasicHandheldItem(ResourceLocation, Supplier, Collection)} that does not track the
+     * registered {@link Item} to any custom {@link Collection}.
+     *
+     * @param itemId The target {@linkplain Item Item's} {@linkplain ResourceLocation registry ID}.
+     * @param itemSup The {@link Item} object to register.
+     *
+     * @return The {@link Supplier} of the registered {@link Item}, mapped to its own {@link ItemPropertyWrapper}
+     * inheriting from the {@code BASIC_HANDHELD} template.
+     *
+     * @param <I> Any {@link Item} type.
+     */
+    public static <I extends Item> Supplier<I> registerBasicHandheldItem(ResourceLocation itemId, Supplier<I> itemSup) {
+        return registerBasicHandheldItem(itemId, itemSup, null);
+    }
+
+    /**
+     * Registers a new basic {@link Item} with default properties and returns it, mapped to a new
+     * {@link ItemPropertyWrapper} inheriting from the {@link #BASIC_HANDHELD} template.
+     *
+     * @param itemId The target {@linkplain Item Item's} {@linkplain ResourceLocation registry ID}.
+     *
+     * @return The {@link Supplier} of the registered {@link Item}, mapped to its own {@link ItemPropertyWrapper}
+     * inheriting from the {@code BASIC_HANDHELD} template.
+     */
+    public static Supplier<Item> registerBasicHandheldItem(ResourceLocation itemId) {
+        return registerBasicHandheldItem(itemId, () -> new Item(new Item.Properties()));
+    }
 }

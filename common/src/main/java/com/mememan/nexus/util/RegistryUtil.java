@@ -4,11 +4,16 @@ import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.Util;
+import net.minecraft.core.DefaultedRegistry;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -147,5 +152,86 @@ public final class RegistryUtil {
      */
     public static ResourceLocation pickItemPrefix(ResourceLocation baseItemLoc) {
         return pickPrefix(baseItemLoc, "item/");
+    }
+
+    public static Function<ResourceLocation, ResourceLocation> pickPrefix(String prefix) {
+        return baseLoc -> baseLoc.getPath().startsWith(prefix) ? baseLoc : baseLoc.withPrefix(prefix);
+    }
+
+    public static Function<ResourceLocation, ResourceLocation> pickSuffix(String suffix) {
+        return baseLoc -> baseLoc.getPath().endsWith(suffix) ? baseLoc : baseLoc.withSuffix(suffix);
+    }
+
+    public static Function<ResourceLocation, ResourceLocation> pickPrefixAndSuffix(String prefix, String suffix) {
+        return baseLoc -> baseLoc.getPath().startsWith(prefix) && baseLoc.getPath().endsWith(suffix) ? baseLoc : baseLoc.withPrefix(prefix).withSuffix(suffix);
+    }
+
+    public static Function<ResourceLocation, ResourceLocation> replacePrefix(String replacedPrefix) {
+        return baseLoc -> {
+            String baseLocPath = baseLoc.getPath();
+
+            return baseLocPath.startsWith(replacedPrefix) || !baseLocPath.contains("_")
+                    ? baseLoc
+                    : baseLoc.withPath(baseLocPath.replace(StringUtils.substringBefore(baseLocPath, baseLoc.getPath().indexOf('_')), replacedPrefix));
+        };
+    }
+
+    public static Function<ResourceLocation, ResourceLocation> replaceSuffix(String replacedSuffix) {
+        return baseLoc -> {
+            String baseLocPath = baseLoc.getPath();
+
+            return baseLocPath.endsWith(replacedSuffix) || !baseLocPath.contains("_")
+                    ? baseLoc
+                    : baseLoc.withPath(baseLocPath.replace(StringUtils.substringAfter(baseLocPath, baseLoc.getPath().lastIndexOf('_')), replacedSuffix));
+        };
+    }
+
+    public static <T> Optional<Supplier<T>> getSuppliedObjectFrom(Supplier<T> baseObjSup, Function<ResourceLocation, ResourceLocation> targetObjIdMapper, boolean throwIfMissing) {
+        T baseObj = baseObjSup.get();
+        String targetObjClassName = baseObj.getClass().getSimpleName();
+        Registry<T> baseObjRegistry = DataGenPropertyWrapper.RegistryLookupContainer.getRegistryForObject(baseObj)
+                .orElseThrow(() -> new IllegalArgumentException(String.format("Attempted to find registry for unregistered or unmapped object of type %s: %s", targetObjClassName, baseObj)));
+        ResourceLocation baseObjLoc = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(baseObj)
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for object of type %s: %s", targetObjClassName, baseObj)));
+        ResourceLocation targetObjLoc = targetObjIdMapper.apply(baseObjLoc);
+        Supplier<T> targetObj = () -> baseObjRegistry instanceof DefaultedRegistry<?> defReg && Objects.equals(defReg.get(targetObjLoc), defReg.get(defReg.getDefaultKey()))
+                ? null
+                : baseObjRegistry.get(targetObjLoc);
+
+        if (throwIfMissing && targetObj.get() == null) throw new IllegalArgumentException(String.format("Attempted to compute invalid object '%s' from %s '%s'", targetObjLoc, targetObjClassName, baseObjLoc));
+
+        return Optional.of(targetObj);
+    }
+
+    public static <T> Optional<T> getObjectFrom(Supplier<T> baseObjSup, Function<ResourceLocation, ResourceLocation> targetObjIdMapper, boolean throwIfMissing) {
+        return getSuppliedObjectFrom(baseObjSup, targetObjIdMapper, throwIfMissing).map(Supplier::get);
+    }
+
+    public static <T> Optional<T> getObjectFrom(T baseObj, Function<ResourceLocation, ResourceLocation> targetObjIdMapper, boolean throwIfMissing) {
+        return getObjectFrom(() -> baseObj, targetObjIdMapper, throwIfMissing);
+    }
+
+    public static <T> Optional<Supplier<T>> getSuppliedObjectFrom(Supplier<T> baseObjSup, Function<ResourceLocation, ResourceLocation> targetObjIdMapper) {
+        return getSuppliedObjectFrom(baseObjSup, targetObjIdMapper, false);
+    }
+
+    public static <T> Optional<T> getObjectFrom(Supplier<T> baseObjSup, Function<ResourceLocation, ResourceLocation> targetObjIdMapper) {
+        return getObjectFrom(baseObjSup, targetObjIdMapper, false);
+    }
+
+    public static <T> Optional<T> getObjectFrom(T baseObj, Function<ResourceLocation, ResourceLocation> targetObjIdMapper) {
+        return getObjectFrom(baseObj, targetObjIdMapper, false);
+    }
+
+    public static <T> Supplier<T> getSuppliedObjectFromOrThrow(Supplier<T> baseObjSup, Function<ResourceLocation, ResourceLocation> targetObjIdMapper) {
+        return getSuppliedObjectFrom(baseObjSup, targetObjIdMapper, true).get();
+    }
+
+    public static <T> T getObjectFromOrThrow(Supplier<T> baseObjSup, Function<ResourceLocation, ResourceLocation> targetObjIdMapper) {
+        return getObjectFrom(baseObjSup, targetObjIdMapper, true).get();
+    }
+
+    public static <T> T getObjectFromOrThrow(T baseObj, Function<ResourceLocation, ResourceLocation> targetObjIdMapper) {
+        return getObjectFrom(baseObj, targetObjIdMapper, true).get();
     }
 }
