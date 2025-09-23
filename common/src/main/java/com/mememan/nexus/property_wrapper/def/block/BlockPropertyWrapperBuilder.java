@@ -53,8 +53,8 @@ public class BlockPropertyWrapperBuilder<B extends Block> extends BaseDefaultabl
     /**
      * Defines the {@link BlockStateDefinition} to be used for the parent {@link Block} in datagen.
      *
-     * @param bsdMappingFunc The {@link BlockStateDefinition} mapping function used to build this BlockPropertyWrapperBuilder's
-     *                       parent block's blockstate in datagen, with the parent block as the input.
+     * @param bsdMappingFunc The {@link BlockStateDefinition} mapping function used to build the parent block's
+     *                       blockstate in datagen, with the parent block as the input. May be {@code null}.
      *
      * @return {@link #self()} (builder method).
      */
@@ -63,16 +63,46 @@ public class BlockPropertyWrapperBuilder<B extends Block> extends BaseDefaultabl
         return self();
     }
 
+    /**
+     * Defines a {@link Function} that outputs a {@link WrappedBlockColor} to be assigned to the parent {@link Block}
+     * at startup on the client. Useful for cases where blocks should have a custom color overlay applied to them, such
+     * as grass blocks.
+     *
+     * @param blockColorMappingFunc The mapping function used to output the parent block's {@link WrappedBlockColor},
+     *                              with the parent block as the input. May be {@code null}.
+     *
+     * @return {@link #self()} (builder method).
+     */
     public BlockPropertyWrapperBuilder<B> withBlockColor(Function<Supplier<B>, WrappedBlockColor> blockColorMappingFunc) {
         this.blockColorMappingFunc = Optional.ofNullable(blockColorMappingFunc);
         return self();
     }
 
+    /**
+     * Defines a {@link Function} that outputs a {@link IntIntMutablePair} representing the flammability properties
+     * of the parent {@link Block}, where the left {@code int} is the encouragement (i.e. ignition chance) and the right
+     * {@code int} is the spread (i.e. burn chance).
+     *
+     * @param flammabilityMappingFunc The mapping function used to output the property {@link IntIntMutablePair} for the
+     *                                parent block, with the parent block as the input. May be {@code null}.
+     *
+     * @return {@link #self()} (builder method).
+     */
     public BlockPropertyWrapperBuilder<B> withFlammability(Function<Supplier<B>, IntIntMutablePair> flammabilityMappingFunc) {
         this.flammabilityMappingFunc = Optional.ofNullable(flammabilityMappingFunc);
         return self();
     }
 
+    /**
+     * Defines a {@link Function} that outputs a {@link BlockState} representing the stripped state of the parent, which
+     * occurs when the parent block is right-clicked with an axe.
+     *
+     * @param blockStrippingMappingFunc The mapping function used to output the resultant {@link BlockState} for the
+     *                                  parent block when right-clicked with an axe, with the parent block as the input.
+     *                                  May be {@code null}.
+     *
+     * @return {@link #self()} (builder method).
+     */
     public BlockPropertyWrapperBuilder<B> withBlockStripping(Function<Supplier<B>, BlockState> blockStrippingMappingFunc) {
         this.blockStrippingMappingFunc = Optional.ofNullable(blockStrippingMappingFunc);
         return self();

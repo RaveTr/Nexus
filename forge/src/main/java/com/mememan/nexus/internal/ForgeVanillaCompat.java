@@ -41,7 +41,7 @@ public final class ForgeVanillaCompat {
                     IL parentItemLike = parentItemLikeSup.get();
 
                     curPW.getCompostMapper()
-                            .filter(compostMapper -> !parentItemLike.asItem().getDefaultInstance().isEmpty())
+                            .filter(compostMapper -> compostMapper.apply(parentItemLikeSup) != null && !parentItemLike.asItem().getDefaultInstance().isEmpty())
                             .ifPresent(compostMapper -> ComposterBlock.COMPOSTABLES.put(parentItemLike.asItem(), Math.abs(compostMapper.apply(parentItemLikeSup))));
 
                     if (curPW instanceof BlockPropertyWrapper<?> curBPW) registerBlockVanillaIntegration(curBPW);
@@ -79,9 +79,21 @@ public final class ForgeVanillaCompat {
         targetBPW.getFlammabilityMapper().ifPresent(flammabilityMapper -> {
             IntIntMutablePair flammabilityProperties = flammabilityMapper.apply(parentBlockSup);
 
-            ((FireBlock) Blocks.FIRE).setFlammable(parentBlock, Math.abs(flammabilityProperties.leftInt()), Math.abs(flammabilityProperties.rightInt()));
+            if (flammabilityProperties != null) {
+                ((FireBlock) Blocks.FIRE).setFlammable(parentBlock, Math.abs(flammabilityProperties.leftInt()), Math.abs(flammabilityProperties.rightInt()));
+            }
         });
-        targetBPW.getBlockOxidizationMapper().ifPresent(oxidizationMapper -> WeatheringCopper.NEXT_BY_BLOCK.get().put(parentBlock, oxidizationMapper.apply(parentBlockSup).get()));
-        targetBPW.getBlockWaxingMapper().ifPresent(waxingMapper -> HoneycombItem.WAXABLES.get().put(parentBlock, waxingMapper.apply(parentBlockSup).get()));
+        targetBPW.getBlockOxidizationMapper().ifPresent(oxidizationMapper -> {
+            Supplier<Block> oxidizedParentBlockSup = oxidizationMapper.apply(parentBlockSup);
+            Block oxidizedParentBlock = oxidizedParentBlockSup == null ? null : oxidizedParentBlockSup.get();
+
+            if (oxidizedParentBlock != null) WeatheringCopper.NEXT_BY_BLOCK.get().put(parentBlock, oxidizedParentBlock);
+        });
+        targetBPW.getBlockWaxingMapper().ifPresent(waxingMapper -> {
+            Supplier<Block> waxedParentBlockSup = waxingMapper.apply(parentBlockSup);
+            Block waxedParentBlock = waxedParentBlockSup == null ? null : waxedParentBlockSup.get();
+
+            if (waxedParentBlock != null) HoneycombItem.WAXABLES.get().put(parentBlock, waxedParentBlock);
+        });
     }
 }

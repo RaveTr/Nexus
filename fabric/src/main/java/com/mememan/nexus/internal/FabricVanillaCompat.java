@@ -18,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,8 +49,12 @@ public final class FabricVanillaCompat {
                     Supplier<IL> parentItemLikeSup = curPW.getParentObject();
                     IL parentItemLike = parentItemLikeSup.get();
 
-                    curPW.getCompostMapper().ifPresent(compostMapper -> CompostingChanceRegistry.INSTANCE.add(parentItemLike, Math.abs(compostMapper.apply(parentItemLikeSup))));
-                    curPW.getFuelMapper().ifPresent(fuelMapper -> FuelRegistry.INSTANCE.add(parentItemLike, Math.abs(fuelMapper.apply(parentItemLikeSup))));
+                    curPW.getCompostMapper()
+                            .filter(compostMapper -> compostMapper.apply(parentItemLikeSup) != null && !parentItemLike.asItem().getDefaultInstance().isEmpty())
+                            .ifPresent(compostMapper -> CompostingChanceRegistry.INSTANCE.add(parentItemLike, Math.abs(compostMapper.apply(parentItemLikeSup))));
+                    curPW.getFuelMapper()
+                            .filter(fuelMapper -> fuelMapper.apply(parentItemLikeSup) != null && !parentItemLike.asItem().getDefaultInstance().isEmpty())
+                            .ifPresent(fuelMapper -> FuelRegistry.INSTANCE.add(parentItemLike, Math.abs(fuelMapper.apply(parentItemLikeSup))));
 
                     List<Supplier<CreativeModeTab>> parentTabs = curPW.getParentCreativeModeTabs();
 
@@ -107,16 +112,43 @@ public final class FabricVanillaCompat {
         targetBPW.getFlammabilityMapper().ifPresent(flammabilityMapper -> {
             IntIntMutablePair flammabilityProperties = flammabilityMapper.apply(parentBlockSup);
 
-            FlammableBlockRegistry.getDefaultInstance().add(parentBlock, Math.abs(flammabilityProperties.leftInt()), Math.abs(flammabilityProperties.rightInt()));
+            if (flammabilityProperties != null) {
+                FlammableBlockRegistry.getDefaultInstance().add(parentBlock, Math.abs(flammabilityProperties.leftInt()), Math.abs(flammabilityProperties.rightInt()));
+            }
         });
-        targetBPW.getBlockStrippingMapper().ifPresent(strippedBlockMapper -> StrippableBlockRegistry.register(parentBlock, strippedBlockMapper.apply(parentBlockSup).getBlock()));
+        targetBPW.getBlockStrippingMapper().ifPresent(strippedBlockMapper -> {
+            BlockState strippedParentState = strippedBlockMapper.apply(parentBlockSup);
+
+            if (strippedParentState != null) StrippableBlockRegistry.register(parentBlock, strippedParentState.getBlock());
+        });
         targetBPW.getBlockTillingMapper().ifPresent(tillingMapper -> {
             Pair<Predicate<UseOnContext>, Consumer<UseOnContext>> mappedTillingBehaviourPair = tillingMapper.apply(parentBlockSup);
 
-            TillableBlockRegistry.register(parentBlock, mappedTillingBehaviourPair.left(), mappedTillingBehaviourPair.right());
+            if (mappedTillingBehaviourPair != null) {
+                Predicate<UseOnContext> ctxTillingPredicate = mappedTillingBehaviourPair.left();
+                Consumer<UseOnContext> ctxTillingAction = mappedTillingBehaviourPair.right();
+
+                if (ctxTillingPredicate != null && ctxTillingAction != null) {
+                    TillableBlockRegistry.register(parentBlock, ctxTillingPredicate, ctxTillingAction);
+                }
+            }
         });
-        targetBPW.getBlockFlatteningMapper().ifPresent(flatteningMapper -> FlattenableBlockRegistry.register(parentBlock, flatteningMapper.apply(parentBlockSup)));
-        targetBPW.getBlockOxidizationMapper().ifPresent(oxidizationMapper -> OxidizableBlocksRegistry.registerOxidizableBlockPair(parentBlock, oxidizationMapper.apply(parentBlockSup).get()));
-        targetBPW.getBlockWaxingMapper().ifPresent(waxingMapper -> OxidizableBlocksRegistry.registerWaxableBlockPair(parentBlock, waxingMapper.apply(parentBlockSup).get()));
+        targetBPW.getBlockFlatteningMapper().ifPresent(flatteningMapper -> {
+            BlockState flattenedState = flatteningMapper.apply(parentBlockSup);
+
+            if (flattenedState != null) FlattenableBlockRegistry.register(parentBlock, flattenedState);
+        });
+        targetBPW.getBlockOxidizationMapper().ifPresent(oxidizationMapper -> {
+            Supplier<Block> oxidizedParentBlockSup = oxidizationMapper.apply(parentBlockSup);
+            Block oxidizedParentBlock = oxidizedParentBlockSup == null ? null : oxidizedParentBlockSup.get();
+
+            if (oxidizedParentBlock != null) OxidizableBlocksRegistry.registerOxidizableBlockPair(parentBlock, oxidizedParentBlock);
+        });
+        targetBPW.getBlockWaxingMapper().ifPresent(waxingMapper -> {
+            Supplier<Block> waxedParentBlockSup = waxingMapper.apply(parentBlockSup);
+            Block waxedParentBlock = waxedParentBlockSup == null ? null : waxedParentBlockSup.get();
+
+            if (waxedParentBlock != null) OxidizableBlocksRegistry.registerWaxableBlockPair(parentBlock, waxedParentBlock);
+        });
     }
 }

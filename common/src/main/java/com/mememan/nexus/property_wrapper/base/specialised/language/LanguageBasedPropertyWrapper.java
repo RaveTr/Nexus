@@ -16,7 +16,7 @@ import java.util.function.Function;
 
 /**
  * Extension of {@link DataGenPropertyWrapper} with methods tailored towards localization for both description IDs and
- * misc translation keys (e.g. tooltips).
+ * misc. translation keys (e.g. tooltips).
  * <br></br>
  * This PW extension goes hand-in-hand with {@link LanguageBasedPropertyWrapperBuilder}.
  *

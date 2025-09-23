@@ -13,7 +13,7 @@ import java.util.function.Function;
 
 /**
  * Extension of {@link DataGenPropertyWrapperBuilder} with builder methods tailored towards localization for both
- * description IDs and misc translation keys (e.g. tooltips).
+ * description IDs and misc. translation keys (e.g. tooltips).
  * <br></br>
  * This PWB extension goes hand-in-hand with {@link LanguageBasedPropertyWrapper}.
  *
