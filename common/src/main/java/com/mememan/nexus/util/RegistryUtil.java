@@ -70,35 +70,129 @@ public final class RegistryUtil {
         return getTextureLocation(textureName, null);
     }
 
+    /**
+     * Overloaded variant of {@link #getTextureLocation(ResourceLocation, String)}. Attempts to retrieve the
+     * {@link ResourceLocation} of the texture with the given {@code textureName} from {@link #CACHED_TEXTURE_LOOKUP},
+     * returning the provided {@code defaultTextureLocation} if no matching texture is found.
+     *
+     * @param textureName The texture's {@link ResourceLocation}. Matched through namespace, where the path must only
+     *                    be the name of the texture file to look for (excluding the file extension).
+     * @param defaultTextureLocation The default {@link ResourceLocation} to return if no matching texture is found.
+     *
+     * @return The {@link ResourceLocation} of the texture with the given {@code textureName}, or the provided
+     * {@code defaultTextureLocation} if no match is found.
+     *
+     * @see #getTextureLocation(ResourceLocation)
+     */
     @NotNull
     public static ResourceLocation getTextureLocationOrDefault(ResourceLocation textureName, @NotNull ResourceLocation defaultTextureLocation) {
         return getTextureLocation(textureName).orElse(defaultTextureLocation);
     }
 
+    /**
+     * Overloaded variant of {@link #getTextureLocationOrDefault(ResourceLocation, ResourceLocation)}. Attempts to
+     * retrieve the {@link ResourceLocation} of the texture with the given {@code textureName} from
+     * {@link #CACHED_TEXTURE_LOOKUP}, returning the {@code textureName} itself if no matching texture is found.
+     *
+     * @param textureName The texture's {@link ResourceLocation}. Matched through namespace, where the path must only
+     *                    be the name of the texture file to look for (excluding the file extension).
+     *
+     * @return The {@link ResourceLocation} of the texture with the given {@code textureName}, or the
+     * {@code textureName} itself if no match is found.
+     *
+     * @see #getTextureLocationOrDefault(ResourceLocation, ResourceLocation)
+     */
     @NotNull
     public static ResourceLocation getTextureLocationOrDefault(ResourceLocation textureName) {
         return getTextureLocationOrDefault(textureName, textureName);
     }
 
+    /**
+     * Overloaded variant of {@link #getTextureLocation(ResourceLocation)}. Attempts to retrieve the
+     * {@link ResourceLocation} of the texture for the given {@code targetObj} from {@link #CACHED_TEXTURE_LOOKUP}.
+     *
+     * @param targetObj The {@link Supplier} of the target object to find the texture for.
+     * @param <T> The type of the target object.
+     *
+     * @return An {@link Optional} containing the {@link ResourceLocation} of the texture for the given
+     * {@code targetObj}. May be empty.
+     *
+     * @see #getTextureLocation(ResourceLocation)
+     */
     public static <T> Optional<ResourceLocation> getTextureLocation(Supplier<T> targetObj) {
         return getTextureLocation(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetObj.get()).orElse(null));
     }
 
+    /**
+     * Overloaded variant of {@link #getTextureLocation(Supplier)}. Attempts to retrieve the
+     * {@link ResourceLocation} of the texture for the given {@code targetObj} from {@link #CACHED_TEXTURE_LOOKUP},
+     * returning the provided {@code defaultTextureLocation} if no matching texture is found.
+     *
+     * @param targetObj The {@link Supplier} of the target object to find the texture for.
+     * @param defaultTextureLocation The default {@link ResourceLocation} to return if no matching texture is found.
+     * @param <T> The type of the target object.
+     *
+     * @return The {@link ResourceLocation} of the texture for the given {@code targetObj}, or the provided
+     * {@code defaultTextureLocation} if no match is found.
+     *
+     * @see #getTextureLocation(Supplier)
+     */
     @NotNull
     public static <T> ResourceLocation getTextureLocationOrDefault(Supplier<T> targetObj, @NotNull ResourceLocation defaultTextureLocation) {
         return getTextureLocation(targetObj).orElse(defaultTextureLocation);
     }
 
+    /**
+     * Overloaded variant of {@link #getTextureLocationOrDefault(Supplier, ResourceLocation)}. Attempts to retrieve the
+     * {@link ResourceLocation} of the texture for the given {@code targetObj} from {@link #CACHED_TEXTURE_LOOKUP},
+     * returning a default {@link ResourceLocation} with the namespace "invalid" if no matching texture is found.
+     *
+     * @param targetObj The {@link Supplier} of the target object to find the texture for.
+     * @param <T> The type of the target object.
+     *
+     * @return The {@link ResourceLocation} of the texture for the given {@code targetObj}, or a default
+     * {@link ResourceLocation} with the namespace "invalid" if no match is found.
+     *
+     * @see #getTextureLocationOrDefault(Supplier, ResourceLocation)
+     */
     @NotNull
     public static <T> ResourceLocation getTextureLocationOrDefault(Supplier<T> targetObj) {
         return getTextureLocationOrDefault(targetObj, new ResourceLocation("invalid"));
     }
 
+    /**
+     * Overloaded variant of {@link #getTextureLocationOrDefault(Supplier)}. Attempts to retrieve the
+     * {@link ResourceLocation} of the texture for the given {@code targetObj} from {@link #CACHED_TEXTURE_LOOKUP}
+     * and prepends the provided {@code prefix} to the resulting path.
+     *
+     * @param targetObj The {@link Supplier} of the target object to find the texture for.
+     * @param prefix The prefix to prepend to the texture path.
+     * @param <T> The type of the target object.
+     *
+     * @return The {@link ResourceLocation} of the texture for the given {@code targetObj} with the provided
+     * {@code prefix} prepended to its path.
+     *
+     * @see #getTextureLocationOrDefault(Supplier)
+     */
     @NotNull
     public static <T> ResourceLocation getTextureLocationOrDefaultWithPrefix(Supplier<T> targetObj, String prefix) {
         return getTextureLocationOrDefault(targetObj).withPrefix(prefix);
     }
 
+    /**
+     * Overloaded variant of {@link #getTextureLocationOrDefault(Supplier)}. Attempts to retrieve the
+     * {@link ResourceLocation} of the texture for the given {@code targetObj} from {@link #CACHED_TEXTURE_LOOKUP}
+     * and appends the provided {@code suffix} to the resulting path.
+     *
+     * @param targetObj The {@link Supplier} of the target object to find the texture for.
+     * @param suffix The suffix to append to the texture path.
+     * @param <T> The type of the target object.
+     *
+     * @return The {@link ResourceLocation} of the texture for the given {@code targetObj} with the provided
+     * {@code suffix} appended to its path.
+     *
+     * @see #getTextureLocationOrDefault(Supplier)
+     */
     @NotNull
     public static <T> ResourceLocation getTextureLocationOrDefaultWithSuffix(Supplier<T> targetObj, String suffix) {
         return getTextureLocationOrDefault(targetObj).withSuffix(suffix);
@@ -154,18 +248,54 @@ public final class RegistryUtil {
         return pickPrefix(baseItemLoc, "item/");
     }
 
+    /**
+     * Returns a {@link Function} that modifies a {@link ResourceLocation} by prepending the provided {@code prefix}
+     * to its path if it isn't already prefixed with said prefix.
+     *
+     * @param prefix The path prefix to search for/prepend.
+     *
+     * @return A {@link Function} that prepends the provided {@code prefix} to a {@link ResourceLocation}'s path.
+     *
+     * @see #pickPrefix(ResourceLocation, String)
+     */
     public static Function<ResourceLocation, ResourceLocation> pickPrefix(String prefix) {
         return baseLoc -> baseLoc.getPath().startsWith(prefix) ? baseLoc : baseLoc.withPrefix(prefix);
     }
 
+    /**
+     * Returns a {@link Function} that modifies a {@link ResourceLocation} by appending the provided {@code suffix}
+     * to its path if it isn't already suffixed with said suffix.
+     *
+     * @param suffix The path suffix to search for/append.
+     *
+     * @return A {@link Function} that appends the provided {@code suffix} to a {@link ResourceLocation}'s path.
+     */
     public static Function<ResourceLocation, ResourceLocation> pickSuffix(String suffix) {
         return baseLoc -> baseLoc.getPath().endsWith(suffix) ? baseLoc : baseLoc.withSuffix(suffix);
     }
 
+    /**
+     * Returns a {@link Function} that modifies a {@link ResourceLocation} by prepending the provided {@code prefix}
+     * and appending the provided {@code suffix} to its path if they aren't already present.
+     *
+     * @param prefix The path prefix to search for/prepend.
+     * @param suffix The path suffix to search for/append.
+     *
+     * @return A {@link Function} that prepends the provided {@code prefix} and appends the provided {@code suffix}
+     * to a {@link ResourceLocation}'s path.
+     */
     public static Function<ResourceLocation, ResourceLocation> pickPrefixAndSuffix(String prefix, String suffix) {
         return baseLoc -> baseLoc.getPath().startsWith(prefix) && baseLoc.getPath().endsWith(suffix) ? baseLoc : baseLoc.withPrefix(prefix).withSuffix(suffix);
     }
 
+    /**
+     * Returns a {@link Function} that replaces the prefix of a {@link ResourceLocation}'s path with the provided
+     * {@code replacedPrefix} if the path contains an underscore and doesn't already start with the prefix.
+     *
+     * @param replacedPrefix The prefix to replace the existing prefix with.
+     *
+     * @return A {@link Function} that replaces the prefix of a {@link ResourceLocation}'s path.
+     */
     public static Function<ResourceLocation, ResourceLocation> replacePrefix(String replacedPrefix) {
         return baseLoc -> {
             String baseLocPath = baseLoc.getPath();
@@ -176,16 +306,40 @@ public final class RegistryUtil {
         };
     }
 
+    /**
+     * Returns a {@link Function} that replaces the suffix of a {@link ResourceLocation}'s path with the provided
+     * {@code replacedSuffix} if the path contains an underscore and doesn't already end with the suffix.
+     *
+     * @param replacedSuffix The suffix to replace the existing suffix with.
+     *
+     * @return A {@link Function} that replaces the suffix of a {@link ResourceLocation}'s path.
+     */
     public static Function<ResourceLocation, ResourceLocation> replaceSuffix(String replacedSuffix) {
         return baseLoc -> {
             String baseLocPath = baseLoc.getPath();
 
             return baseLocPath.endsWith(replacedSuffix) || !baseLocPath.contains("_")
                     ? baseLoc
-                    : baseLoc.withPath(baseLocPath.replace(StringUtils.substringAfter(baseLocPath, baseLoc.getPath().lastIndexOf('_')), replacedSuffix));
+                    : baseLoc.withPath(baseLocPath.replace(baseLocPath.substring(baseLoc.getPath().lastIndexOf('_') + 1), replacedSuffix));
         };
     }
 
+    /**
+     * Attempts to retrieve a {@link Supplier} for an object from the registry using the provided base object and
+     * mapping function. Optionally throws an exception if the target object is not found.
+     *
+     * @param baseObjSup The {@link Supplier} of the base object to map from.
+     * @param targetObjIdMapper The {@link Function} to map the base object's registry ID to the target object's registry ID.
+     * @param throwIfMissing Whether to throw an exception if the target object is not found.
+     * @param <T> The type of the objects.
+     *
+     * @return An {@link Optional} containing a {@link Supplier} for the target object, or empty if not found and
+     * {@code throwIfMissing} is false.
+     *
+     * @throws IllegalArgumentException If {@code throwIfMissing} is true and the target object is not found.
+     *
+     * @see #getObjectFrom(Supplier, Function, boolean)
+     */
     public static <T> Optional<Supplier<T>> getSuppliedObjectFrom(Supplier<T> baseObjSup, Function<ResourceLocation, ResourceLocation> targetObjIdMapper, boolean throwIfMissing) {
         T baseObj = baseObjSup.get();
         String targetObjClassName = baseObj.getClass().getSimpleName();
@@ -203,34 +357,150 @@ public final class RegistryUtil {
         return Optional.of(targetObj);
     }
 
+    /**
+     * Overloaded variant of {@link #getSuppliedObjectFrom(Supplier, Function, boolean)}. Attempts to retrieve an object
+     * from the registry using the provided base object and mapping function. Optionally throws an exception if the target
+     * object is not found.
+     *
+     * @param baseObjSup The {@link Supplier} of the base object to map from.
+     * @param targetObjIdMapper The {@link Function} to map the base object's registry ID to the target object's registry ID.
+     * @param throwIfMissing Whether to throw an exception if the target object is not found.
+     * @param <T> The type of the objects.
+     *
+     * @return An {@link Optional} containing the target object, or empty if not found and {@code throwIfMissing} is false.
+     *
+     * @throws IllegalArgumentException If {@code throwIfMissing} is true and the target object is not found.
+     *
+     * @see #getSuppliedObjectFrom(Supplier, Function, boolean)
+     */
     public static <T> Optional<T> getObjectFrom(Supplier<T> baseObjSup, Function<ResourceLocation, ResourceLocation> targetObjIdMapper, boolean throwIfMissing) {
         return getSuppliedObjectFrom(baseObjSup, targetObjIdMapper, throwIfMissing).map(Supplier::get);
     }
 
+    /**
+     * Overloaded variant of {@link #getObjectFrom(Supplier, Function, boolean)}. Attempts to retrieve an object from
+     * the registry using the provided base object and mapping function. Optionally throws an exception if the target
+     * object is not found.
+     *
+     * @param baseObj The base object to map from.
+     * @param targetObjIdMapper The {@link Function} to map the base object's registry ID to the target object's registry ID.
+     * @param throwIfMissing Whether to throw an exception if the target object is not found.
+     * @param <T> The type of the objects.
+     *
+     * @return An {@link Optional} containing the target object, or empty if not found and {@code throwIfMissing} is false.
+     *
+     * @throws IllegalArgumentException If {@code throwIfMissing} is true and the target object is not found.
+     *
+     * @see #getObjectFrom(Supplier, Function, boolean)
+     */
     public static <T> Optional<T> getObjectFrom(T baseObj, Function<ResourceLocation, ResourceLocation> targetObjIdMapper, boolean throwIfMissing) {
         return getObjectFrom(() -> baseObj, targetObjIdMapper, throwIfMissing);
     }
 
+    /**
+     * Overloaded variant of {@link #getSuppliedObjectFrom(Supplier, Function, boolean)}. Attempts to retrieve a
+     * {@link Supplier} for an object from the registry using the provided base object and mapping function.
+     * Never throws an exception if the target object is not found.
+     *
+     * @param baseObjSup The {@link Supplier} of the base object to map from.
+     * @param targetObjIdMapper The {@link Function} to map the base object's registry ID to the target object's registry ID.
+     * @param <T> The type of the objects.
+     *
+     * @return An {@link Optional} containing a {@link Supplier} for the target object, or empty if not found.
+     *
+     * @see #getSuppliedObjectFrom(Supplier, Function, boolean)
+     */
     public static <T> Optional<Supplier<T>> getSuppliedObjectFrom(Supplier<T> baseObjSup, Function<ResourceLocation, ResourceLocation> targetObjIdMapper) {
         return getSuppliedObjectFrom(baseObjSup, targetObjIdMapper, false);
     }
 
+    /**
+     * Overloaded variant of {@link #getObjectFrom(Supplier, Function, boolean)}. Attempts to retrieve an object from
+     * the registry using the provided base object and mapping function. Never throws an exception if the target
+     * object is not found.
+     *
+     * @param baseObjSup The {@link Supplier} of the base object to map from.
+     * @param targetObjIdMapper The {@link Function} to map the base object's registry ID to the target object's registry ID.
+     * @param <T> The type of the objects.
+     *
+     * @return An {@link Optional} containing the target object, or empty if not found.
+     *
+     * @see #getObjectFrom(Supplier, Function, boolean)
+     */
     public static <T> Optional<T> getObjectFrom(Supplier<T> baseObjSup, Function<ResourceLocation, ResourceLocation> targetObjIdMapper) {
         return getObjectFrom(baseObjSup, targetObjIdMapper, false);
     }
 
+    /**
+     * Overloaded variant of {@link #getObjectFrom(Supplier, Function, boolean)}. Attempts to retrieve an object from
+     * the registry using the provided base object and mapping function. Never throws an exception if the target
+     * object is not found.
+     *
+     * @param baseObj The base object to map from.
+     * @param targetObjIdMapper The {@link Function} to map the base object's registry ID to the target object's registry ID.
+     * @param <T> The type of the objects.
+     *
+     * @return An {@link Optional} containing the target object, or empty if not found.
+     *
+     * @see #getObjectFrom(Supplier, Function, boolean)
+     */
     public static <T> Optional<T> getObjectFrom(T baseObj, Function<ResourceLocation, ResourceLocation> targetObjIdMapper) {
         return getObjectFrom(baseObj, targetObjIdMapper, false);
     }
 
+    /**
+     * Overloaded variant of {@link #getSuppliedObjectFrom(Supplier, Function, boolean)}. Attempts to retrieve a
+     * {@link Supplier} for an object from the registry using the provided base object and mapping function.
+     * Always throws an exception if the target object is not found.
+     *
+     * @param baseObjSup The {@link Supplier} of the base object to map from.
+     * @param targetObjIdMapper The {@link Function} to map the base object's registry ID to the target object's registry ID.
+     * @param <T> The type of the objects.
+     *
+     * @return A {@link Supplier} for the target object.
+     *
+     * @throws IllegalArgumentException If the target object is not found.
+     *
+     * @see #getSuppliedObjectFrom(Supplier, Function, boolean)
+     */
     public static <T> Supplier<T> getSuppliedObjectFromOrThrow(Supplier<T> baseObjSup, Function<ResourceLocation, ResourceLocation> targetObjIdMapper) {
         return getSuppliedObjectFrom(baseObjSup, targetObjIdMapper, true).get();
     }
 
+    /**
+     * Overloaded variant of {@link #getObjectFrom(Supplier, Function, boolean)}. Attempts to retrieve an object from
+     * the registry using the provided base object and mapping function. Always throws an exception if the target
+     * object is not found.
+     *
+     * @param baseObjSup The {@link Supplier} of the base object to map from.
+     * @param targetObjIdMapper The {@link Function} to map the base object's registry ID to the target object's registry ID.
+     * @param <T> The type of the objects.
+     *
+     * @return The target object.
+     *
+     * @throws IllegalArgumentException If the target object is not found.
+     *
+     * @see #getObjectFrom(Supplier, Function, boolean)
+     */
     public static <T> T getObjectFromOrThrow(Supplier<T> baseObjSup, Function<ResourceLocation, ResourceLocation> targetObjIdMapper) {
         return getObjectFrom(baseObjSup, targetObjIdMapper, true).get();
     }
 
+    /**
+     * Overloaded variant of {@link #getObjectFrom(Supplier, Function, boolean)}. Attempts to retrieve an object from
+     * the registry using the provided base object and mapping function. Always throws an exception if the target
+     * object is not found.
+     *
+     * @param baseObj The base object to map from.
+     * @param targetObjIdMapper The {@link Function} to map the base object's registry ID to the target object's registry ID.
+     * @param <T> The type of the objects.
+     *
+     * @return The target object.
+     *
+     * @throws IllegalArgumentException If the target object is not found.
+     *
+     * @see #getObjectFrom(Supplier, Function, boolean)
+     */
     public static <T> T getObjectFromOrThrow(T baseObj, Function<ResourceLocation, ResourceLocation> targetObjIdMapper) {
         return getObjectFrom(baseObj, targetObjIdMapper, true).get();
     }

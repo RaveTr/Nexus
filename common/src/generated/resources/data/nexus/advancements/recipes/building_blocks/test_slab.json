@@ -1,12 +1,12 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_acacia_boat": {
+    "has_test_block": {
       "conditions": {
         "items": [
           {
             "items": [
-              "minecraft:acacia_boat"
+              "nexus:test_block"
             ]
           }
         ]
@@ -15,20 +15,20 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "nexus:test_block"
+        "recipe": "nexus:test_slab"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
   },
   "requirements": [
     [
-      "has_acacia_boat",
+      "has_test_block",
       "has_the_recipe"
     ]
   ],
   "rewards": {
     "recipes": [
-      "nexus:test_block"
+      "nexus:test_slab"
     ]
   },
   "sends_telemetry_event": false

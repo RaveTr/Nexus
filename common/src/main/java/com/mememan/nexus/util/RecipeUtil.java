@@ -16,6 +16,8 @@ import java.util.function.Supplier;
 /**
  * Utility {@code class} containing helpful recipe shortcut/delegator helper methods, as well as some re-used constants
  * related to recipes in general.
+ * <br></br>
+ * Conventionally, recipe utility methods generate recipes from provided parent objects, not the other way around.
  */
 public final class RecipeUtil {
 
@@ -28,12 +30,15 @@ public final class RecipeUtil {
             IL parentItemLike = parentItemLikeSup.get();
             ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
                     .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
-            ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, resultantSlabMapper.apply(parentItemLike), 6)
-                    .define('P', parentItemLike)
-                    .pattern("PPP")
-                    .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
-                    .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            if (resultantItemLike != null) {
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, resultantItemLike, 6)
+                        .define('P', parentItemLike)
+                        .pattern("PPP")
+                        .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
+                        .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            }
         };
     }
 
@@ -45,18 +50,29 @@ public final class RecipeUtil {
         return slabRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("slab"));
     }
 
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazySlabRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return slabRecipeFrom(finishedRecipe, parentItemLike -> RegistryUtil.getObjectFrom(parentItemLike, RegistryUtil.replaceSuffix("slab")).get(), recipeIdMapper);
+    }
+
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazySlabRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return lazySlabRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("slab"));
+    }
+
     public static <IL extends ItemLike> Consumer<Supplier<IL>> woodenSlabRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
             ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
                     .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
-            ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, resultantSlabMapper.apply(parentItemLike), 6)
-                    .define('P', parentItemLike)
-                    .pattern("PPP")
-                    .group("wooden_slab")
-                    .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
-                    .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            if (resultantItemLike != null) {
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, resultantItemLike, 6)
+                        .define('P', parentItemLike)
+                        .pattern("PPP")
+                        .group("wooden_slab")
+                        .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
+                        .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            }
         };
     }
 
@@ -68,11 +84,20 @@ public final class RecipeUtil {
         return woodenSlabRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("slab"));
     }
 
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazyWoodenSlabRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return woodenSlabRecipeFrom(finishedRecipe, parentItemLike -> RegistryUtil.getObjectFrom(parentItemLike, RegistryUtil.replaceSuffix("slab")).get(), recipeIdMapper);
+    }
+
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazyWoodenSlabRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return lazyWoodenSlabRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("slab"));
+    }
+
     public static <IL extends ItemLike> Consumer<Supplier<IL>> stairsRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
             ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
                     .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+
 
             ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, resultantSlabMapper.apply(parentItemLike), 4)
                     .define('P', parentItemLike)
@@ -122,13 +147,16 @@ public final class RecipeUtil {
             IL parentItemLike = parentItemLikeSup.get();
             ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
                     .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
-            ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, resultantSlabMapper.apply(parentItemLike), 6)
-                    .define('P', parentItemLike)
-                    .pattern("PPP")
-                    .pattern("PPP")
-                    .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
-                    .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            if (resultantItemLike != null) {
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, resultantItemLike, 6)
+                        .define('P', parentItemLike)
+                        .pattern("PPP")
+                        .pattern("PPP")
+                        .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
+                        .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            }
         };
     }
 
@@ -140,16 +168,27 @@ public final class RecipeUtil {
         return wallRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("wall"));
     }
 
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazyWallRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return wallRecipeFrom(finishedRecipe, parentItemLike -> RegistryUtil.getObjectFrom(parentItemLike, RegistryUtil.replaceSuffix("wall")).get(), recipeIdMapper);
+    }
+
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazyWallRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return lazyWallRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("wall"));
+    }
+
     public static <IL extends ItemLike> Consumer<Supplier<IL>> buttonRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
             ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
                     .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
-            ShapelessRecipeBuilder.shapeless(RecipeCategory.REDSTONE, resultantSlabMapper.apply(parentItemLike))
-                    .requires(parentItemLike)
-                    .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
-                    .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            if (resultantItemLike != null) {
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.REDSTONE, resultantItemLike)
+                        .requires(parentItemLike)
+                        .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
+                        .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            }
         };
     }
 
@@ -161,17 +200,28 @@ public final class RecipeUtil {
         return buttonRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("button"));
     }
 
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazyButtonRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return buttonRecipeFrom(finishedRecipe, parentItemLike -> RegistryUtil.getObjectFrom(parentItemLike, RegistryUtil.replaceSuffix("button")).get(), recipeIdMapper);
+    }
+
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazyButtonRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return lazyButtonRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("button"));
+    }
+
     public static <IL extends ItemLike> Consumer<Supplier<IL>> woodenButtonRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
             ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
                     .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
-            ShapelessRecipeBuilder.shapeless(RecipeCategory.REDSTONE, resultantSlabMapper.apply(parentItemLike))
-                    .requires(parentItemLike)
-                    .group("wooden_button")
-                    .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
-                    .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            if (resultantItemLike != null) {
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.REDSTONE, resultantItemLike)
+                        .requires(parentItemLike)
+                        .group("wooden_button")
+                        .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
+                        .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            }
         };
     }
 
@@ -183,17 +233,28 @@ public final class RecipeUtil {
         return woodenButtonRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("button"));
     }
 
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazyWoodenButtonRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return woodenButtonRecipeFrom(finishedRecipe, parentItemLike -> RegistryUtil.getObjectFrom(parentItemLike, RegistryUtil.replaceSuffix("button")).get(), recipeIdMapper);
+    }
+
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazyWoodenButtonRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return lazyWoodenButtonRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("button"));
+    }
+
     public static <IL extends ItemLike> Consumer<Supplier<IL>> pressurePlateRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
             ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
                     .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
-            ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, resultantSlabMapper.apply(parentItemLike))
-                    .define('P', parentItemLike)
-                    .pattern("PP")
-                    .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
-                    .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            if (resultantItemLike != null) {
+                ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, resultantItemLike)
+                        .define('P', parentItemLike)
+                        .pattern("PP")
+                        .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
+                        .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            }
         };
     }
 
@@ -205,18 +266,29 @@ public final class RecipeUtil {
         return pressurePlateRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("pressure_plate"));
     }
 
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazyPressurePlateRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return pressurePlateRecipeFrom(finishedRecipe, parentItemLike -> RegistryUtil.getObjectFrom(parentItemLike, RegistryUtil.replaceSuffix("pressure_plate")).get(), recipeIdMapper);
+    }
+
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazyPressurePlateRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return lazyPressurePlateRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("pressure_plate"));
+    }
+
     public static <IL extends ItemLike> Consumer<Supplier<IL>> woodenPressurePlateRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
             ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
                     .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
-            ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, resultantSlabMapper.apply(parentItemLike))
-                    .define('P', parentItemLike)
-                    .pattern("PP")
-                    .group("wooden_pressure_plate")
-                    .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
-                    .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            if (resultantItemLike != null) {
+                ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, resultantItemLike)
+                        .define('P', parentItemLike)
+                        .pattern("PP")
+                        .group("wooden_pressure_plate")
+                        .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
+                        .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            }
         };
     }
 
@@ -228,20 +300,31 @@ public final class RecipeUtil {
         return woodenPressurePlateRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("pressure_plate"));
     }
 
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazyWoodenPressurePlateRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return woodenPressurePlateRecipeFrom(finishedRecipe, parentItemLike -> RegistryUtil.getObjectFrom(parentItemLike, RegistryUtil.replaceSuffix("pressure_plate")).get(), recipeIdMapper);
+    }
+
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazyWoodenPressurePlateRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return lazyWoodenPressurePlateRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("pressure_plate"));
+    }
+
     public static <IL extends ItemLike> Consumer<Supplier<IL>> woodenFenceRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
             ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
                     .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
-            ShapedRecipeBuilder.shaped(RecipeCategory.MISC, resultantSlabMapper.apply(parentItemLike), 3)
-                    .define('P', parentItemLike)
-                    .define('S', Items.STICK)
-                    .pattern("PSP")
-                    .pattern("PSP")
-                    .group("wooden_fence")
-                    .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
-                    .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            if (resultantItemLike != null) {
+                ShapedRecipeBuilder.shaped(RecipeCategory.MISC, resultantItemLike, 3)
+                        .define('P', parentItemLike)
+                        .define('S', Items.STICK)
+                        .pattern("PSP")
+                        .pattern("PSP")
+                        .group("wooden_fence")
+                        .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
+                        .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            }
         };
     }
 
@@ -253,20 +336,31 @@ public final class RecipeUtil {
         return woodenFenceRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("fence"));
     }
 
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazyWoodenFenceRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return woodenFenceRecipeFrom(finishedRecipe, parentItemLike -> RegistryUtil.getObjectFrom(parentItemLike, RegistryUtil.replaceSuffix("fence")).get(), recipeIdMapper);
+    }
+
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazyWoodenFenceRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return lazyWoodenFenceRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("fence"));
+    }
+
     public static <IL extends ItemLike> Consumer<Supplier<IL>> woodenFenceGateRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
             ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
                     .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
-            ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, resultantSlabMapper.apply(parentItemLike))
-                    .define('P', parentItemLike)
-                    .define('S', Items.STICK)
-                    .pattern("SPS")
-                    .pattern("SPS")
-                    .group("wooden_fence_gate")
-                    .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
-                    .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            if (resultantItemLike != null) {
+                ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, resultantItemLike)
+                        .define('P', parentItemLike)
+                        .define('S', Items.STICK)
+                        .pattern("SPS")
+                        .pattern("SPS")
+                        .group("wooden_fence_gate")
+                        .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
+                        .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            }
         };
     }
 
@@ -278,19 +372,30 @@ public final class RecipeUtil {
         return woodenFenceGateRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("fence_gate"));
     }
 
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazyWoodenFenceGateRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return woodenFenceGateRecipeFrom(finishedRecipe, parentItemLike -> RegistryUtil.getObjectFrom(parentItemLike, RegistryUtil.replaceSuffix("fence_gate")).get(), recipeIdMapper);
+    }
+
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazyWoodenFenceGateRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return lazyWoodenFenceGateRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("fence_gate"));
+    }
+
     public static <IL extends ItemLike> Consumer<Supplier<IL>> doorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
             ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
                     .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
-            ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, resultantSlabMapper.apply(parentItemLike))
-                    .define('P', parentItemLike)
-                    .pattern("PP")
-                    .pattern("PP")
-                    .pattern("PP")
-                    .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
-                    .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            if (resultantItemLike != null) {
+                ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, resultantItemLike)
+                        .define('P', parentItemLike)
+                        .pattern("PP")
+                        .pattern("PP")
+                        .pattern("PP")
+                        .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
+                        .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            }
         };
     }
 
@@ -302,20 +407,31 @@ public final class RecipeUtil {
         return doorRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("door"));
     }
 
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazyDoorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return doorRecipeFrom(finishedRecipe, parentItemLike -> RegistryUtil.getObjectFrom(parentItemLike, RegistryUtil.replaceSuffix("door")).get(), recipeIdMapper);
+    }
+
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazyDoorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return lazyDoorRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("door"));
+    }
+
     public static <IL extends ItemLike> Consumer<Supplier<IL>> woodenDoorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
             ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
                     .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
-            ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, resultantSlabMapper.apply(parentItemLike), 3)
-                    .define('P', parentItemLike)
-                    .pattern("PP")
-                    .pattern("PP")
-                    .pattern("PP")
-                    .group("wooden_door")
-                    .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
-                    .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            if (resultantItemLike != null) {
+                ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, resultantItemLike, 3)
+                        .define('P', parentItemLike)
+                        .pattern("PP")
+                        .pattern("PP")
+                        .pattern("PP")
+                        .group("wooden_door")
+                        .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
+                        .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            }
         };
     }
 
@@ -327,18 +443,29 @@ public final class RecipeUtil {
         return woodenDoorRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("door"));
     }
 
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazyWoodenDoorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return woodenDoorRecipeFrom(finishedRecipe, parentItemLike -> RegistryUtil.getObjectFrom(parentItemLike, RegistryUtil.replaceSuffix("door")).get(), recipeIdMapper);
+    }
+
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazyWoodenDoorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return lazyWoodenDoorRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("door"));
+    }
+
     public static <IL extends ItemLike> Consumer<Supplier<IL>> trapDoorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
             ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
                     .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
-            ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, resultantSlabMapper.apply(parentItemLike))
-                    .define('P', parentItemLike)
-                    .pattern("PP")
-                    .pattern("PP")
-                    .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
-                    .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            if (resultantItemLike != null) {
+                ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, resultantItemLike)
+                        .define('P', parentItemLike)
+                        .pattern("PP")
+                        .pattern("PP")
+                        .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
+                        .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            }
         };
     }
 
@@ -350,19 +477,30 @@ public final class RecipeUtil {
         return trapDoorRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("trapdoor"));
     }
 
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazyTrapDoorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return trapDoorRecipeFrom(finishedRecipe, parentItemLike -> RegistryUtil.getObjectFrom(parentItemLike, RegistryUtil.replaceSuffix("trapdoor")).get(), recipeIdMapper);
+    }
+
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazyTrapDoorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return lazyTrapDoorRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("trapdoor"));
+    }
+
     public static <IL extends ItemLike> Consumer<Supplier<IL>> woodenTrapDoorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
             ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
                     .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
-            ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, resultantSlabMapper.apply(parentItemLike), 2)
-                    .define('P', parentItemLike)
-                    .pattern("PP")
-                    .pattern("PP")
-                    .group("wooden_trapdoor")
-                    .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
-                    .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            if (resultantItemLike != null) {
+                ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, resultantItemLike, 2)
+                        .define('P', parentItemLike)
+                        .pattern("PP")
+                        .pattern("PP")
+                        .group("wooden_trapdoor")
+                        .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
+                        .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            }
         };
     }
 
@@ -372,5 +510,13 @@ public final class RecipeUtil {
 
     public static <IL extends ItemLike> Consumer<Supplier<IL>> woodenTrapDoorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
         return woodenTrapDoorRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("trapdoor"));
+    }
+
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazyWoodenTrapDoorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return woodenTrapDoorRecipeFrom(finishedRecipe, parentItemLike -> RegistryUtil.getObjectFrom(parentItemLike, RegistryUtil.replaceSuffix("trapdoor")).get(), recipeIdMapper);
+    }
+
+    public static <IL extends ItemLike> Consumer<Supplier<IL>> lazyWoodenTrapDoorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return lazyWoodenTrapDoorRecipeFrom(finishedRecipe, RegistryUtil.replaceSuffix("trapdoor"));
     }
 }

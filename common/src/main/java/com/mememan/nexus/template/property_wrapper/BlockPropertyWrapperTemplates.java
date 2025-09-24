@@ -182,9 +182,26 @@ public final class BlockPropertyWrapperTemplates {
             .withLootTable(LootUtil::dropSlab)
             .build();
     /**
-     * BPW template for wooden slabs. Inherits from {@link #BASIC_AXE}. Wooden slab loot table, wooden slab blockstate,
-     * wooden slab model. Blockstate and model assume the existence of an equivalent block with the suffix {@code "_planks"}.
-     * Additionally, tags the parent block with {@link BlockTags#WOODEN_SLABS}.
+     * BPW template for stairs. Inherits from {@link #BASIC_PICKAXE}. Stairs model, stairs blockstate.
+     * Blockstate and model assume the existence of an equivalent block with the suffix {@code "_block"} (or {@code "_bricks"}
+     * if the parent block name contains {@code "_brick_"}, e.g. {@code "example_brick_stairs"}). Additionally, tags the
+     * parent block with {@link BlockTags#STAIRS}.
+     *
+     * @see ModelUtil#stairs(Supplier)
+     * @see ModelUtil#stairsBlockState(Supplier)
+     */
+    public static final BlockPropertyWrapper<Block> STAIRS = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_PICKAXE)
+            .withTag(() -> BlockTags.STAIRS)
+            .withModelDefinition(ModelUtil::stairs)
+            .withBlockStateDefinition(ModelUtil::stairsBlockState)
+            .build();
+
+    /**
+     * BPW template for wooden slabs. Inherits from {@link #BASIC_AXE}. Wooden slab model, wooden slab blockstate,
+     * slab loot table. Blockstate and model assume the existence of an equivalent block with the suffix
+     * {@code "_planks"}. Additionally, tags the parent block with {@link BlockTags#WOODEN_SLABS}.
      *
      * @see ModelUtil#woodenSlab(Supplier)
      * @see ModelUtil#woodenSlabBlockState(Supplier)
@@ -197,8 +214,21 @@ public final class BlockPropertyWrapperTemplates {
             .withBlockStateDefinition(ModelUtil::woodenSlabBlockState)
             .withLootTable(LootUtil::dropSlab)
             .build();
-
-
+    /**
+     * BPW template for wooden stairs. Inherits from {@link #BASIC_AXE}. Wooden stairs model, stairs blockstate.
+     * Blockstate and model assume the existence of an equivalent block with the suffix {@code "_planks"}. Additionally,
+     * tags the parent block with {@link BlockTags#WOODEN_STAIRS}.
+     *
+     * @see ModelUtil#woodenStairs(Supplier)
+     * @see ModelUtil#stairsBlockState(Supplier)
+     */
+    public static final BlockPropertyWrapper<Block> WOODEN_STAIRS = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_AXE)
+            .withTag(() -> BlockTags.WOODEN_STAIRS)
+            .withModelDefinition(ModelUtil::woodenStairs)
+            .withBlockStateDefinition(ModelUtil::stairsBlockState)
+            .build();
 
     private BlockPropertyWrapperTemplates() {
         throw new IllegalAccessError("Attempted to construct instance of template utility class! (BlockPropertyWrapperTemplates)");

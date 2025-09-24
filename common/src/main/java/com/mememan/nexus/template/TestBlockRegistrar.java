@@ -5,21 +5,19 @@ import com.mememan.nexus.asm.annotations.RegistrarEntry;
 import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapper;
 import com.mememan.nexus.template.property_wrapper.BlockPropertyWrapperTemplates;
+import com.mememan.nexus.util.RecipeUtil;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.recipes.RecipeCategory;
-import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
 import java.util.Locale;
@@ -32,10 +30,7 @@ public class TestBlockRegistrar {
     public static final Supplier<Block> BLAH = new BlockPropertyWrapper<>(registerBlock(new ResourceLocation("nexus", "test_block"), () -> new Block(BlockBehaviour.Properties.of())), "nexus")
             .builder()
             .copyFromType(BlockPropertyWrapperTemplates.BASIC)
-            .withRecipe(r -> result -> ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, result.get())
-                    .requires(Items.ACACIA_BOAT)
-                    .unlockedBy("has_" + BuiltInRegistries.ITEM.getKey(Items.ACACIA_BOAT).getPath(), InventoryChangeTrigger.TriggerInstance.hasItems(Items.ACACIA_BOAT))
-                    .save(r, new ResourceLocation("nexus", result.get().getDescriptionId().substring(result.get().getDescriptionId().lastIndexOf(".") + 1))))
+            .withRecipe(RecipeUtil::slabRecipeFrom)
             .asCompostable(parentBlock -> 45.0F)
             .asFuel(parentBlock -> 12000)
             .withBlockTilling(parentBlock -> Pair.of((ctx) -> true, (ctx) -> ctx.getLevel().setBlock(ctx.getClickedPos(), Blocks.FARMLAND.defaultBlockState(), Block.UPDATE_ALL)))
@@ -44,6 +39,7 @@ public class TestBlockRegistrar {
             .buildAndGet();
 
     public static final Supplier<SlabBlock> BLAH_SLAB = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(NexusConstants.prefix("test_slab"), () -> new SlabBlock(BlockBehaviour.Properties.of()), BlockPropertyWrapperTemplates.SLAB);
+    public static final Supplier<Block> BLAH_STAIRS = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(NexusConstants.prefix("test_block_stairs"), () -> new StairBlock(BLAH.get().defaultBlockState(), BlockBehaviour.Properties.copy(BLAH.get())), BlockPropertyWrapperTemplates.STAIRS);
 
     public static final Supplier<SlabBlock> BLAH_2 = new BlockPropertyWrapper<>(registerBlock(new ResourceLocation("nexus", "test_able_block"), () -> new SlabBlock(BlockBehaviour.Properties.of())), "nexus")
             .builder()

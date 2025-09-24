@@ -1,7 +1,8 @@
-// 1.20.1	2025-09-24T11:19:29.1364687	nexus/Tags [nexus]
+// 1.20.1	2025-09-24T14:48:56.8811359	nexus/Tags [nexus]
 5505ce3bb8e3f7e7fa6b730f461bdf2e6ae17213 data\minecraft\tags\blocks\mineable\axe.json
-b97a4c65d45167554d1691dd9fff5dba458d7343 data\minecraft\tags\blocks\mineable\pickaxe.json
+f5bd08197a3e010e93d8dabed6e7752cd26bbfac data\minecraft\tags\blocks\mineable\pickaxe.json
 86e3d34c8c4cb323b2aef689e446e78675c912d2 data\minecraft\tags\damage_type\bypasses_armor.json
 b97a4c65d45167554d1691dd9fff5dba458d7343 data\minecraft\tags\blocks\slabs.json
 5b65003587c7544d6dcb53a752c561d9e6773239 data\nexus\tags\blocks\test\sometagtest.json
+c0e9cbc4c86745d437148b91e6e5663eeaa8d427 data\minecraft\tags\blocks\stairs.json
 4814a5f98fbc4dd9a029b050d7e5635d110daaab data\minecraft\tags\damage_type\always_most_significant_fall.json

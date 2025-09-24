@@ -1,4 +1,5 @@
-// 1.20.1	2025-09-24T11:19:29.1395434	nexus/BlockStates [nexus]
+// 1.20.1	2025-09-24T14:48:56.8842615	nexus/BlockStates [nexus]
 e95cde701ce70f0613676689d328f88f0cf6122a assets\nexus\blockstates\test_block.json
-df96a8d209761f90e402805e5120cc26d11008e9 assets\nexus\blockstates\test_slab.json
 0530fb9a7274363b77d8ff101812ee0526513574 assets\nexus\blockstates\test_block_3.json
+df96a8d209761f90e402805e5120cc26d11008e9 assets\nexus\blockstates\test_slab.json
+884a00e6d4d3852c3f825ca981e09a6d766f3e9a assets\nexus\blockstates\test_block_stairs.json

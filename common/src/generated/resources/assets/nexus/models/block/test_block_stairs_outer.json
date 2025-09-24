@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "bottom": "nexus:block/zamn/test_block",
+    "side": "nexus:block/zamn/test_block",
+    "top": "nexus:block/zamn/test_block"
+  }
+}

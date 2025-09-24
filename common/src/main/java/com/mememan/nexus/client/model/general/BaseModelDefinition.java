@@ -70,6 +70,11 @@ public class BaseModelDefinition<SELF extends BaseModelDefinition<SELF>> impleme
     }
 
     @Override
+    public SELF withOrdinalModelDefinitions(ModelBasedPropertyWrapper.ModelDefinition... modelDefinition) { // Overridden for convenience when chaining (avoid annoying compile-time errors)
+        return withOrdinalModelDefinitions(ObjectArrayList.of(modelDefinition));
+    }
+
+    @Override
     public SELF withCustomName(String customName) {
         this.modelCustomName = customName;
         return self();
