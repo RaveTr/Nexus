@@ -10,6 +10,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CarpetBlock;
+import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.LeavesBlock;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -523,6 +524,29 @@ public final class RegistryUtil {
         return getObjectFrom(baseObj, targetObjIdMapper, true).get();
     }
 
+    /**
+     * Calculates standard flammability values for wooden blocks following the flammability property patterns used in
+     * Minecraft's {@link net.minecraft.world.level.block.FireBlock}. Returns an {@link IntIntMutablePair} where the first
+     * value represents the encouragement value (how easily fire spreads from this block) and the second value represents
+     * the flammability value (how easily this block catches fire).
+     * <p>
+     *     <h3>Flammability Patterns</h3>
+     *     <ul>
+     *         <li>Leaf blocks (description ID ending with {@code "_leaves"} or {@link LeavesBlock} instances):
+     *         (30, 60) - High flammability</li>
+     *         <li>Carpet blocks (description ID ending with {@code "_carpet"} or {@link CarpetBlock} instances):
+     *         (60, 20) - Medium flammability</li>
+     *         <li>All other (presumably wooden) blocks: (5, 20) - Low flammability</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@link Supplier} of the target {@link Block} to calculate flammability values for.
+     *
+     * @return An {@link IntIntMutablePair} containing the encouragement value (first) and flammability value (second).
+     *
+     * @see FireBlock
+     * @see LeavesBlock
+     * @see CarpetBlock
+     */
     public static IntIntMutablePair standardWoodFlammability(Supplier<Block> targetBlock) {
         Block targetBlockObj = targetBlock.get();
 
@@ -533,6 +557,21 @@ public final class RegistryUtil {
                 : IntIntMutablePair.of(5, 20);
     }
 
+    /**
+     * Overloaded variant of {@link #pickBlockId(Supplier)}. Modifies the registry path of the target block using the
+     * provided path mapping function. This method allows for custom transformation of block registry paths based on
+     * specific naming conventions or requirements.
+     *
+     * @param targetBlock The {@link Supplier} of the target {@link Block} to modify the registry path for.
+     * @param pathIdMapper The {@link Function} to apply to the block's registry path for transformation.
+     *
+     * @return A new {@link ResourceLocation} with the modified registry path.
+     *
+     * @throws IllegalArgumentException If no registry entry is present for the target block.
+     *
+     * @see #pickBlockId(Supplier)
+     * @see #pickWoodenBlockId(Supplier)
+     */
     public static ResourceLocation pickBlockId(Supplier<Block> targetBlock, Function<String, String> pathIdMapper) {
         ResourceLocation baseBlockId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
                 .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
@@ -542,6 +581,26 @@ public final class RegistryUtil {
         return baseBlockId.withPath(chosenBlockId);
     }
 
+    /**
+     * Modifies the registry path of the target block to create a block variant by ensuring the path contains
+     * {@code "_block"} or {@code "_bricks"}. This method is specifically designed for creating block variants from base block names.
+     * <p>
+     *     <h3>Block ID Mapping</h3>
+     *     <ul>
+     *         <li>If the base path contains {@code "_brick_"}: Replaces with {@code "_bricks"}</li>
+     *         <li>If the base path ends with {@code "_block"}: Returns the path unchanged</li>
+     *         <li>Otherwise: Appends {@code "_block"} to the base path (everything before the last underscore)</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@link Supplier} of the target {@link Block} to create a block variant ID for.
+     *
+     * @return A new {@link ResourceLocation} with the modified registry path containing {@code "_block"} or {@code "_bricks"}.
+     *
+     * @throws IllegalArgumentException If no registry entry is present for the target block.
+     *
+     * @see #pickBlockId(Supplier, Function)
+     * @see #pickWoodenBlockId(Supplier)
+     */
     public static ResourceLocation pickBlockId(Supplier<Block> targetBlock) {
         return pickBlockId(targetBlock, baseBlockPath -> {
             String targetBlockId = baseBlockPath.substring(0, baseBlockPath.lastIndexOf("_"));
@@ -554,7 +613,26 @@ public final class RegistryUtil {
         });
     }
 
-    public static ResourceLocation pickWoodBlockId(Supplier<Block> targetBlock) {
+    /**
+     * Modifies the registry path of the target block to create a wooden variant by ensuring the path contains
+     * {@code "_planks"}. This method is specifically designed for creating wooden block variants from base block names.
+     * <p>
+     *     <h3>Wooden Block ID Mapping</h3>
+     *     <ul>
+     *         <li>If the base path contains {@code "_plank_"} or ends with {@code "_planks"}: Returns the path unchanged</li>
+     *         <li>Otherwise: Appends {@code "_planks"} to the base path (everything before the last underscore)</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@link Supplier} of the target {@link Block} to create a wooden variant ID for.
+     *
+     * @return A new {@link ResourceLocation} with the modified registry path containing {@code "_planks"}.
+     *
+     * @throws IllegalArgumentException If no registry entry is present for the target block.
+     *
+     * @see #pickBlockId(Supplier)
+     * @see #pickBlockId(Supplier, Function)
+     */
+    public static ResourceLocation pickWoodenBlockId(Supplier<Block> targetBlock) {
         return pickBlockId(targetBlock, baseBlockPath -> {
             String targetBlockId = baseBlockPath.substring(0, baseBlockPath.lastIndexOf("_"));
 
@@ -564,11 +642,37 @@ public final class RegistryUtil {
         });
     }
 
+    /**
+     * Retrieves the texture location for the target block using standard block ID transformation. This method first
+     * attempts to find a texture matching the block's registry ID, then falls back to using the transformed block ID
+     * if no direct texture match is found.
+     *
+     * @param targetBlock The {@link Supplier} of the target {@link Block} to find the texture location for.
+     *
+     * @return The {@link ResourceLocation} of the texture for the target block.
+     *
+     * @see #getTextureLocationOrDefault(Supplier)
+     * @see #pickBlockId(Supplier)
+     * @see #pickWoodenBlockTexture(Supplier)
+     */
     public static ResourceLocation pickBlockTexture(Supplier<Block> targetBlock) {
         return RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(pickBlockId(targetBlock)));
     }
 
-    public static ResourceLocation pickWoodBlockTexture(Supplier<Block> targetBlock) {
-        return RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(pickWoodBlockId(targetBlock)));
+    /**
+     * Retrieves the texture location for the target block using wooden block ID transformation. This method first
+     * attempts to find a texture matching the block's registry ID, then falls back to using the transformed wooden
+     * block ID if no direct texture match is found. Specifically designed for wooden block variants.
+     *
+     * @param targetBlock The {@link Supplier} of the target {@link Block} to find the wooden texture location for.
+     *
+     * @return The {@link ResourceLocation} of the texture for the target wooden block.
+     *
+     * @see #getTextureLocationOrDefault(Supplier)
+     * @see #pickWoodenBlockId(Supplier)
+     * @see #pickBlockTexture(Supplier)
+     */
+    public static ResourceLocation pickWoodenBlockTexture(Supplier<Block> targetBlock) {
+        return RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(pickWoodenBlockId(targetBlock)));
     }
 }

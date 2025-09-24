@@ -7,6 +7,7 @@ import com.mememan.nexus.util.LootUtil;
 import com.mememan.nexus.util.ModelUtil;
 import com.mememan.nexus.util.RegistryUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.models.blockstates.MultiVariantGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.BlockItem;
@@ -199,6 +200,38 @@ public final class BlockPropertyWrapperTemplates {
             .withBlockStateDefinition(ModelUtil::stairsBlockState)
             .build();
     /**
+     * BPW template for buttons. Inherits from {@link #BASIC}. Button model, button blockstate.
+     * Blockstate uses {@link MultiVariantGenerator} with different models for each combination of power state,
+     * attach face, and facing direction. Blockstate and model assume the existence of an equivalent block with the
+     * suffix {@code "_block"} (or {@code "_bricks"} if the parent block name contains {@code "_brick_"}, e.g.
+     * {@code "example_brick_button"}) Additionally, tags the parent block with {@link BlockTags#BUTTONS}.
+     *
+     * @see ModelUtil#button(Supplier)
+     * @see ModelUtil#buttonBlockState(Supplier)
+     */
+    public static final BlockPropertyWrapper<Block> BUTTON = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_PICKAXE)
+            .withTag(() -> BlockTags.BUTTONS)
+            .withModelDefinition(ModelUtil::button)
+            .withBlockStateDefinition(ModelUtil::buttonBlockState)
+            .build();
+    /**
+     * BPW template for pressure plates. Inherits from {@link #BASIC_PICKAXE}. Pressure plate model, pressure plate blockstate.
+     * Blockstate uses {@link MultiVariantGenerator} with different models for each power state (pressed/unpressed).
+     * Additionally, tags the parent block with {@link BlockTags#PRESSURE_PLATES}.
+     *
+     * @see ModelUtil#pressurePlate(Supplier)
+     * @see ModelUtil#pressurePlateBlockState(Supplier)
+     */
+    public static final BlockPropertyWrapper<Block> PRESSURE_PLATE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_PICKAXE)
+            .withTag(() -> BlockTags.PRESSURE_PLATES)
+            .withModelDefinition(ModelUtil::pressurePlate)
+            .withBlockStateDefinition(ModelUtil::pressurePlateBlockState)
+            .build();
+    /**
      * BPW template for walls. Inherits from {@link #BASIC_PICKAXE}. Wall model, wall blockstate.
      * Blockstate and model assume the existence of an equivalent block with the suffix {@code "_block"} (or {@code "_bricks"}
      * if the parent block name contains {@code "_brick_"}, e.g. {@code "example_brick_wall"}). Additionally, tags the
@@ -222,6 +255,7 @@ public final class BlockPropertyWrapperTemplates {
      *
      * @see ModelUtil#woodenSlab(Supplier)
      * @see ModelUtil#woodenSlabBlockState(Supplier)
+     * @see LootUtil#dropSlab(Supplier)
      */
     public static final BlockPropertyWrapper<Block> WOODEN_SLAB = new BlockPropertyWrapper<>()
             .builder()
@@ -247,6 +281,38 @@ public final class BlockPropertyWrapperTemplates {
             .withModelDefinition(ModelUtil::woodenStairs)
             .withBlockStateDefinition(ModelUtil::stairsBlockState)
             .withFlammability(RegistryUtil::standardWoodFlammability)
+            .build();
+    /**
+     * BPW template for wooden buttons. Inherits from {@link #BASIC}. Wooden button model, button blockstate.
+     * Blockstate uses {@link MultiVariantGenerator} with different models for each combination of power state,
+     * attach face, and facing direction. Blockstate and model assume the existence of an equivalent block with the
+     * suffix {@code "_planks"} Additionally, tags the parent block with {@link BlockTags#WOODEN_BUTTONS}.
+     *
+     * @see ModelUtil#woodenButton(Supplier)
+     * @see ModelUtil#buttonBlockState(Supplier)
+     */
+    public static final BlockPropertyWrapper<Block> WOODEN_BUTTON = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_AXE)
+            .withTag(() -> BlockTags.WOODEN_BUTTONS)
+            .withModelDefinition(ModelUtil::woodenButton)
+            .withBlockStateDefinition(ModelUtil::buttonBlockState)
+            .build();
+    /**
+     * BPW template for wooden pressure plates. Inherits from {@link #BASIC_AXE}. Wooden pressure plate model, pressure plate blockstate.
+     * Blockstate uses {@link MultiVariantGenerator} with different models for each power state (pressed/unpressed).
+     * Blockstate and model assume the existence of an equivalent block with the suffix {@code "_planks"}. Additionally,
+     * tags the parent block with {@link BlockTags#WOODEN_PRESSURE_PLATES}.
+     *
+     * @see ModelUtil#woodenPressurePlate(Supplier)
+     * @see ModelUtil#pressurePlateBlockState(Supplier)
+     */
+    public static final BlockPropertyWrapper<Block> WOODEN_PRESSURE_PLATE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_AXE)
+            .withTag(() -> BlockTags.WOODEN_PRESSURE_PLATES)
+            .withModelDefinition(ModelUtil::woodenPressurePlate)
+            .withBlockStateDefinition(ModelUtil::pressurePlateBlockState)
             .build();
 
     private BlockPropertyWrapperTemplates() {

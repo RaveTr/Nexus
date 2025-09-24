@@ -348,7 +348,7 @@ public final class ModelUtil {
      * @see #woodenSlabBlockState(Supplier)
      */
     public static BlockModelDefinition woodenSlab(Supplier<Block> targetBlock) {
-        ResourceLocation defaultedTexLoc = RegistryUtil.pickWoodBlockTexture(targetBlock);
+        ResourceLocation defaultedTexLoc = RegistryUtil.pickWoodenBlockTexture(targetBlock);
 
         return slab(targetBlock, defaultedTexLoc, defaultedTexLoc, defaultedTexLoc);
     }
@@ -457,7 +457,7 @@ public final class ModelUtil {
      * @see #slabBlockState(Supplier)
      */
     public static BlockStateDefinition woodenSlabBlockState(Supplier<Block> targetBlock) {
-        return slabBlockState(targetBlock, RegistryUtil.pickWoodBlockId(targetBlock));
+        return slabBlockState(targetBlock, RegistryUtil.pickWoodenBlockId(targetBlock));
     }
 
     /**
@@ -700,7 +700,7 @@ public final class ModelUtil {
      * @see #stairs(Supplier)
      */
     public static BlockModelDefinition woodenStairs(Supplier<Block> targetBlock) {
-        ResourceLocation defaultedTexLoc = RegistryUtil.pickWoodBlockTexture(targetBlock);
+        ResourceLocation defaultedTexLoc = RegistryUtil.pickWoodenBlockTexture(targetBlock);
 
         return stairs(targetBlock, defaultedTexLoc, defaultedTexLoc, defaultedTexLoc);
     }
@@ -1212,6 +1212,474 @@ public final class ModelUtil {
      */
     public static BlockStateDefinition wallBlockState(Supplier<Block> targetBlock) {
         return wallBlockState(targetBlock, ModelLocationUtils.getModelLocation(targetBlock.get(), "_post"), ModelLocationUtils.getModelLocation(targetBlock.get(), "_side"), ModelLocationUtils.getModelLocation(targetBlock.get(), "_side_tall"));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#BUTTON} template for button blocks.
+     * This model is specifically designed for the default button component.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockPrefix(buttonTexture)}</li>
+     *     </ul>
+     *
+     * @param buttonTexture The {@link ResourceLocation} representing the texture of the button.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#BUTTON} template.
+     *
+     * @see #buttonInventory(Supplier, ResourceLocation)
+     * @see #buttonPressed(Supplier, ResourceLocation)
+     * @see #button(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition buttonDefault(ResourceLocation buttonTexture) {
+        return new BlockModelDefinition(ModelTemplates.BUTTON)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.TEXTURE, RegistryUtil.pickBlockPrefix(buttonTexture)));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#BUTTON_INVENTORY} template for button blocks.
+     * This model is specifically designed for the inventory representation of button blocks and promptly generates
+     * a corresponding item model.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockPrefix(buttonTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the button {@link Block} to be used for
+     *                    automatic model location resolution and custom naming.
+     * @param buttonTexture The {@link ResourceLocation} representing the texture of the button.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#BUTTON_INVENTORY} template.
+     *
+     * @see #buttonDefault(ResourceLocation)
+     * @see #buttonPressed(Supplier, ResourceLocation)
+     * @see #button(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition buttonInventory(Supplier<Block> targetBlock, ResourceLocation buttonTexture) {
+        ResourceLocation baseButtonId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return new BlockModelDefinition(ModelTemplates.BUTTON_INVENTORY)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.TEXTURE, RegistryUtil.pickBlockPrefix(buttonTexture)))
+                .withCustomName(baseButtonId.getPath().concat("_inventory"))
+                .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get(), "_inventory"))));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#BUTTON_PRESSED} template for button blocks.
+     * This model is specifically designed for the pressed state of button blocks.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockPrefix(buttonTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the button {@link Block} to be used for
+     *                    automatic model location resolution and custom naming.
+     * @param buttonTexture The {@link ResourceLocation} representing the texture of the button.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#BUTTON_PRESSED} template.
+     *
+     * @see #buttonDefault(ResourceLocation)
+     * @see #buttonInventory(Supplier, ResourceLocation)
+     * @see #button(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition buttonPressed(Supplier<Block> targetBlock, ResourceLocation buttonTexture) {
+        ResourceLocation baseButtonId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return new BlockModelDefinition(ModelTemplates.BUTTON_PRESSED)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.TEXTURE, RegistryUtil.pickBlockPrefix(buttonTexture)))
+                .withCustomName(baseButtonId.getPath().concat("_pressed"));
+    }
+
+    /**
+     * Creates a comprehensive {@link BlockModelDefinition} with all three button variants (default, inventory, pressed)
+     * using the {@link ModelTemplates#BUTTON}, {@link ModelTemplates#BUTTON_INVENTORY}, and {@link ModelTemplates#BUTTON_PRESSED}
+     * templates. The inventory variant includes a corresponding item model.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code buttonTexture}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the button {@link Block} to be used for
+     *                    automatic model location resolution and custom naming.
+     * @param buttonTexture The {@link ResourceLocation} representing the texture of the button.
+     *
+     * @return A {@link BlockModelDefinition} with all button variants.
+     *
+     * @see #buttonDefault(ResourceLocation)
+     * @see #buttonInventory(Supplier, ResourceLocation)
+     * @see #buttonPressed(Supplier, ResourceLocation)
+     * @see #button(Supplier)
+     * @see #woodenButton(Supplier)
+     */
+    public static BlockModelDefinition button(Supplier<Block> targetBlock, ResourceLocation buttonTexture) {
+        return buttonDefault(buttonTexture)
+                .withOrdinalModelDefinitions(buttonInventory(targetBlock, buttonTexture), buttonPressed(targetBlock, buttonTexture));
+    }
+
+    /**
+     * Overloaded variant of {@link #button(Supplier, ResourceLocation)}. Creates a comprehensive {@link BlockModelDefinition}
+     * with all three button variants using automatic texture resolution. Automatically determines the button texture based
+     * on the button's registry ID.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the button {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with all button variants using automatic texture resolution.
+     *
+     * @see #buttonDefault(ResourceLocation)
+     * @see #buttonInventory(Supplier, ResourceLocation)
+     * @see #buttonPressed(Supplier, ResourceLocation)
+     * @see #button(Supplier, ResourceLocation)
+     * @see #woodenButton(Supplier)
+     */
+    public static BlockModelDefinition button(Supplier<Block> targetBlock) {
+        return button(targetBlock, RegistryUtil.pickBlockTexture(targetBlock));
+    }
+
+    /**
+     * Creates a comprehensive {@link BlockModelDefinition} with all three button variants specifically designed for
+     * wooden buttons. Uses the {@link ModelTemplates#BUTTON}, {@link ModelTemplates#BUTTON_INVENTORY}, and
+     * {@link ModelTemplates#BUTTON_PRESSED} templates with the "_planks" texture variant. Automatically determines
+     * the button texture to use the corresponding "_planks" variant from the button's registry ID.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickWoodBlockTexture(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the wooden button {@link Block} to be used for
+     *                    texture lookup and model creation.
+     *
+     * @return A new {@link BlockModelDefinition} with all wooden button variants.
+     *
+     * @see #buttonDefault(ResourceLocation)
+     * @see #buttonInventory(Supplier, ResourceLocation)
+     * @see #buttonPressed(Supplier, ResourceLocation)
+     * @see #button(Supplier, ResourceLocation)
+     * @see #button(Supplier)
+     */
+    public static BlockModelDefinition woodenButton(Supplier<Block> targetBlock) {
+        return button(targetBlock, RegistryUtil.pickWoodenBlockTexture(targetBlock));
+    }
+
+    /**
+     * Creates a {@link BlockStateDefinition} for button blocks using {@link MultiVariantGenerator} with different models
+     * for each combination of power state, attach face, and facing direction. This method handles the complex variant system
+     * used by Minecraft buttons to show pressed/unpressed states and proper orientations based on placement.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link BlockStateProperties#POWERED} = false -> {@code RegistryUtil.pickBlockPrefix(buttonModel)}</li>
+     *         <li>{@link BlockStateProperties#POWERED} = true -> {@code RegistryUtil.pickBlockPrefix(buttonPressedModel)}</li>
+     *         <li>{@link AttachFace#FLOOR} + {@link Direction#EAST} -> 90° Y rotation</li>
+     *         <li>{@link AttachFace#FLOOR} + {@link Direction#WEST} -> 270° Y rotation</li>
+     *         <li>{@link AttachFace#FLOOR} + {@link Direction#SOUTH} -> 180° Y rotation</li>
+     *         <li>{@link AttachFace#FLOOR} + {@link Direction#NORTH} -> no rotation</li>
+     *         <li>{@link AttachFace#WALL} + {@link Direction#EAST} -> 90° Y + 90° X rotation + UV lock</li>
+     *         <li>{@link AttachFace#WALL} + {@link Direction#WEST} -> 270° Y + 90° X rotation + UV lock</li>
+     *         <li>{@link AttachFace#WALL} + {@link Direction#SOUTH} -> 180° Y + 90° X rotation + UV lock</li>
+     *         <li>{@link AttachFace#WALL} + {@link Direction#NORTH} -> 90° X rotation + UV lock</li>
+     *         <li>{@link AttachFace#CEILING} + {@link Direction#EAST} -> 270° Y + 180° X rotation</li>
+     *         <li>{@link AttachFace#CEILING} + {@link Direction#WEST} -> 90° Y + 180° X rotation</li>
+     *         <li>{@link AttachFace#CEILING} + {@link Direction#SOUTH} -> 180° X rotation</li>
+     *         <li>{@link AttachFace#CEILING} + {@link Direction#NORTH} -> 180° Y + 180° X rotation</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the button {@link Block} to create the blockstate for.
+     * @param buttonModel The {@link ResourceLocation} of the model to use for the unpressed button state.
+     * @param buttonPressedModel The {@link ResourceLocation} of the model to use for the pressed button state.
+     *
+     * @return A {@link BlockStateDefinition} with comprehensive button blockstate variants.
+     *
+     * @see #buttonBlockState(Supplier)
+     * @see #buttonDefault(ResourceLocation)
+     * @see #buttonInventory(Supplier, ResourceLocation)
+     * @see #buttonPressed(Supplier, ResourceLocation)
+     * @see #button(Supplier, ResourceLocation)
+     */
+    public static BlockStateDefinition buttonBlockState(Supplier<Block> targetBlock, ResourceLocation buttonModel, ResourceLocation buttonPressedModel) {
+        return new BlockStateDefinition(targetBlock)
+                .withBlockStateSupplier(MultiVariantGenerator.multiVariant(targetBlock.get())
+                        .with(PropertyDispatch
+                                .property(BlockStateProperties.POWERED)
+                                .select(false, Variant.variant()
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(buttonModel)))
+                                .select(true, Variant.variant()
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(buttonPressedModel))))
+                        .with(PropertyDispatch
+                                .properties(BlockStateProperties.ATTACH_FACE, BlockStateProperties.HORIZONTAL_FACING)
+                                .select(AttachFace.FLOOR, Direction.EAST, Variant.variant()
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
+                                .select(AttachFace.FLOOR, Direction.WEST, Variant.variant()
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270))
+                                .select(AttachFace.FLOOR, Direction.SOUTH, Variant.variant()
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180))
+                                .select(AttachFace.FLOOR, Direction.NORTH, Variant.variant())
+                                .select(AttachFace.WALL, Direction.EAST, Variant.variant()
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
+                                        .with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
+                                        .with(VariantProperties.UV_LOCK, true))
+                                .select(AttachFace.WALL, Direction.WEST, Variant.variant()
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)
+                                        .with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
+                                        .with(VariantProperties.UV_LOCK, true))
+                                .select(AttachFace.WALL, Direction.SOUTH, Variant.variant()
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180)
+                                        .with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
+                                        .with(VariantProperties.UV_LOCK, true))
+                                .select(AttachFace.WALL, Direction.NORTH, Variant.variant()
+                                        .with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
+                                        .with(VariantProperties.UV_LOCK, true))
+                                .select(AttachFace.CEILING, Direction.EAST, Variant.variant()
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)
+                                        .with(VariantProperties.X_ROT, VariantProperties.Rotation.R180))
+                                .select(AttachFace.CEILING, Direction.WEST, Variant.variant()
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
+                                        .with(VariantProperties.X_ROT, VariantProperties.Rotation.R180))
+                                .select(AttachFace.CEILING, Direction.SOUTH, Variant.variant()
+                                        .with(VariantProperties.X_ROT, VariantProperties.Rotation.R180))
+                                .select(AttachFace.CEILING, Direction.NORTH, Variant.variant()
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180)
+                                        .with(VariantProperties.X_ROT, VariantProperties.Rotation.R180))));
+    }
+
+    /**
+     * Overloaded variant of {@link #buttonBlockState(Supplier, ResourceLocation, ResourceLocation)}.
+     * Creates a {@link BlockStateDefinition} for button blocks using {@link MultiVariantGenerator} with different models
+     * for each combination of power state, attach face, and facing direction. Automatically determines model locations
+     * using standard naming convention (base model and "_pressed" suffix).
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link BlockStateProperties#POWERED} = false -> {@code ModelLocationUtils.getModelLocation(targetBlock.get())}</li>
+     *         <li>{@link BlockStateProperties#POWERED} = true -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_pressed")}</li>
+     *         <li>{@link AttachFace#FLOOR} + {@link Direction#EAST} -> 90° Y rotation</li>
+     *         <li>{@link AttachFace#FLOOR} + {@link Direction#WEST} -> 270° Y rotation</li>
+     *         <li>{@link AttachFace#FLOOR} + {@link Direction#SOUTH} -> 180° Y rotation</li>
+     *         <li>{@link AttachFace#FLOOR} + {@link Direction#NORTH} -> no rotation</li>
+     *         <li>{@link AttachFace#WALL} + {@link Direction#EAST} -> 90° Y + 90° X rotation + UV lock</li>
+     *         <li>{@link AttachFace#WALL} + {@link Direction#WEST} -> 270° Y + 90° X rotation + UV lock</li>
+     *         <li>{@link AttachFace#WALL} + {@link Direction#SOUTH} -> 180° Y + 90° X rotation + UV lock</li>
+     *         <li>{@link AttachFace#WALL} + {@link Direction#NORTH} -> 90° X rotation + UV lock</li>
+     *         <li>{@link AttachFace#CEILING} + {@link Direction#EAST} -> 270° Y + 180° X rotation</li>
+     *         <li>{@link AttachFace#CEILING} + {@link Direction#WEST} -> 90° Y + 180° X rotation</li>
+     *         <li>{@link AttachFace#CEILING} + {@link Direction#SOUTH} -> 180° X rotation</li>
+     *         <li>{@link AttachFace#CEILING} + {@link Direction#NORTH} -> 180° Y + 180° X rotation</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the button {@link Block} to create the blockstate for.
+     *
+     * @return A {@link BlockStateDefinition} with comprehensive button blockstate variants using automatic model resolution.
+     *
+     * @see #buttonBlockState(Supplier, ResourceLocation, ResourceLocation)
+     * @see #buttonDefault(ResourceLocation)
+     * @see #buttonInventory(Supplier, ResourceLocation)
+     * @see #buttonPressed(Supplier, ResourceLocation)
+     * @see #button(Supplier, ResourceLocation)
+     */
+    public static BlockStateDefinition buttonBlockState(Supplier<Block> targetBlock) {
+        return buttonBlockState(targetBlock, ModelLocationUtils.getModelLocation(targetBlock.get()), ModelLocationUtils.getModelLocation(targetBlock.get(), "_pressed"));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#PRESSURE_PLATE_UP} template for pressure plate blocks.
+     * This model is specifically designed for the unpressed (up) state of pressure plate blocks and promptly generates
+     * a corresponding item model.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockPrefix(pressurePlateTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the pressure plate {@link Block} to be used for
+     *                    automatic model location resolution and custom naming.
+     * @param pressurePlateTexture The {@link ResourceLocation} representing the texture of the pressure plate.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#PRESSURE_PLATE_UP} template.
+     *
+     * @see #pressurePlateDown(Supplier, ResourceLocation)
+     * @see #pressurePlate(Supplier, ResourceLocation)
+     * @see #pressurePlate(Supplier)
+     * @see #woodenPressurePlate(Supplier)
+     */
+    public static BlockModelDefinition pressurePlateUp(Supplier<Block> targetBlock, ResourceLocation pressurePlateTexture) {
+        return new BlockModelDefinition(ModelTemplates.PRESSURE_PLATE_UP)
+                .withTextureMapping(TextureMapping.defaultTexture(RegistryUtil.pickBlockPrefix(pressurePlateTexture)))
+                .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get()))));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#PRESSURE_PLATE_DOWN} template for pressure plate blocks.
+     * This model is specifically designed for the pressed (down) state of pressure plate blocks.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockPrefix(pressurePlateTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the pressure plate {@link Block} to be used for
+     *                    automatic model location resolution and custom naming.
+     * @param pressurePlateTexture The {@link ResourceLocation} representing the texture of the pressure plate.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#PRESSURE_PLATE_DOWN} template.
+     *
+     * @see #pressurePlateUp(Supplier, ResourceLocation)
+     * @see #pressurePlate(Supplier, ResourceLocation)
+     * @see #pressurePlate(Supplier)
+     * @see #woodenPressurePlate(Supplier)
+     */
+    public static BlockModelDefinition pressurePlateDown(Supplier<Block> targetBlock, ResourceLocation pressurePlateTexture) {
+        ResourceLocation basePressurePlateId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return new BlockModelDefinition(ModelTemplates.PRESSURE_PLATE_DOWN)
+                .withTextureMapping(TextureMapping.defaultTexture(RegistryUtil.pickBlockPrefix(pressurePlateTexture)))
+                .withCustomName(basePressurePlateId.getPath().concat("_down"));
+    }
+
+    /**
+     * Creates a comprehensive {@link BlockModelDefinition} with both pressure plate variants (up and down)
+     * using the {@link ModelTemplates#PRESSURE_PLATE_UP} and {@link ModelTemplates#PRESSURE_PLATE_DOWN} templates.
+     * The up variant includes a corresponding item model.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockPrefix(pressurePlateTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the pressure plate {@link Block} to be used for
+     *                    automatic model location resolution and custom naming.
+     * @param pressurePlateTexture The {@link ResourceLocation} representing the texture of the pressure plate.
+     *
+     * @return A {@link BlockModelDefinition} with both pressure plate variants.
+     *
+     * @see #pressurePlateUp(Supplier, ResourceLocation)
+     * @see #pressurePlateDown(Supplier, ResourceLocation)
+     * @see #pressurePlate(Supplier)
+     * @see #woodenPressurePlate(Supplier)
+     */
+    public static BlockModelDefinition pressurePlate(Supplier<Block> targetBlock, ResourceLocation pressurePlateTexture) {
+        return pressurePlateUp(targetBlock, pressurePlateTexture)
+                .withOrdinalModelDefinition(pressurePlateDown(targetBlock, pressurePlateTexture));
+    }
+
+    /**
+     * Overloaded variant of {@link #pressurePlate(Supplier, ResourceLocation)}. Creates a comprehensive {@link BlockModelDefinition}
+     * with both pressure plate variants using automatic texture resolution. Automatically determines the pressure plate texture based
+     * on the pressure plate's registry ID.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the pressure plate {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with both pressure plate variants using automatic texture resolution.
+     *
+     * @see #pressurePlateUp(Supplier, ResourceLocation)
+     * @see #pressurePlateDown(Supplier, ResourceLocation)
+     * @see #pressurePlate(Supplier, ResourceLocation)
+     * @see #woodenPressurePlate(Supplier)
+     */
+    public static BlockModelDefinition pressurePlate(Supplier<Block> targetBlock) {
+        return pressurePlate(targetBlock, RegistryUtil.pickBlockTexture(targetBlock));
+    }
+
+    /**
+     * Creates a comprehensive {@link BlockModelDefinition} with both pressure plate variants specifically designed for
+     * wooden pressure plates. Uses the {@link ModelTemplates#PRESSURE_PLATE_UP} and {@link ModelTemplates#PRESSURE_PLATE_DOWN}
+     * templates with the "_planks" texture variant. Automatically determines the pressure plate texture to use the
+     * corresponding "_planks" variant from the pressure plate's registry ID.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickWoodenBlockTexture(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the wooden pressure plate {@link Block} to be used for
+     *                    texture lookup and model creation.
+     *
+     * @return A new {@link BlockModelDefinition} with both wooden pressure plate variants.
+     *
+     * @see #pressurePlateUp(Supplier, ResourceLocation)
+     * @see #pressurePlateDown(Supplier, ResourceLocation)
+     * @see #pressurePlate(Supplier, ResourceLocation)
+     * @see #pressurePlate(Supplier)
+     */
+    public static BlockModelDefinition woodenPressurePlate(Supplier<Block> targetBlock) {
+        return pressurePlate(targetBlock, RegistryUtil.pickWoodenBlockTexture(targetBlock));
+    }
+
+    /**
+     * Creates a {@link BlockStateDefinition} for pressure plate blocks using {@link MultiVariantGenerator} with different models
+     * for each power state. This method handles the simple binary system used by Minecraft pressure plates to show
+     * pressed/unpressed states based on whether entities are standing on them.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link BlockStateProperties#POWERED} = {@code false} -> {@code RegistryUtil.pickBlockPrefix(pressurePlateUpModel)}</li>
+     *         <li>{@link BlockStateProperties#POWERED} = {@code true} -> {@code RegistryUtil.pickBlockPrefix(pressurePlateDownModel)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the pressure plate {@link Block} to create the blockstate for.
+     * @param pressurePlateDownModel The {@link ResourceLocation} of the model to use for the pressed (down) pressure plate state.
+     * @param pressurePlateUpModel The {@link ResourceLocation} of the model to use for the unpressed (up) pressure plate state.
+     *
+     * @return A {@link BlockStateDefinition} with pressure plate blockstate variants using binary power states.
+     *
+     * @see #pressurePlateBlockState(Supplier)
+     * @see #pressurePlateUp(Supplier, ResourceLocation)
+     * @see #pressurePlateDown(Supplier, ResourceLocation)
+     * @see #pressurePlate(Supplier, ResourceLocation)
+     */
+    public static BlockStateDefinition pressurePlateBlockState(Supplier<Block> targetBlock, ResourceLocation pressurePlateDownModel, ResourceLocation pressurePlateUpModel) {
+        return new BlockStateDefinition(targetBlock)
+                .withBlockStateSupplier(MultiVariantGenerator.multiVariant(targetBlock.get())
+                        .with(PropertyDispatch
+                                .property(BlockStateProperties.POWERED)
+                                .select(true, Variant.variant()
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(pressurePlateDownModel)))
+                                .select(false, Variant.variant()
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(pressurePlateUpModel)))));
+    }
+
+    /**
+     * Overloaded variant of {@link #pressurePlateBlockState(Supplier, ResourceLocation, ResourceLocation)}.
+     * Creates a {@link BlockStateDefinition} for pressure plate blocks using {@link MultiVariantGenerator} with different models
+     * for each power state. Automatically determines model locations using standard naming convention (base model and "_down" suffix).
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link BlockStateProperties#POWERED} = {@code false} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get())}</li>
+     *         <li>{@link BlockStateProperties#POWERED} = {@code true} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_down")}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the pressure plate {@link Block} to create the blockstate for.
+     *
+     * @return A {@link BlockStateDefinition} with pressure plate blockstate variants using automatic model resolution.
+     *
+     * @see #pressurePlateBlockState(Supplier, ResourceLocation, ResourceLocation)
+     * @see #pressurePlateUp(Supplier, ResourceLocation)
+     * @see #pressurePlateDown(Supplier, ResourceLocation)
+     * @see #pressurePlate(Supplier, ResourceLocation)
+     */
+    public static BlockStateDefinition pressurePlateBlockState(Supplier<Block> targetBlock) {
+        return pressurePlateBlockState(targetBlock, ModelLocationUtils.getModelLocation(targetBlock.get(), "_down"), ModelLocationUtils.getModelLocation(targetBlock.get()));
     }
 
     /**
