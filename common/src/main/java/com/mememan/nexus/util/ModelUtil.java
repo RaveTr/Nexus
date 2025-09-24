@@ -5,19 +5,12 @@ import com.mememan.nexus.client.model.block.BlockModelDefinition;
 import com.mememan.nexus.client.model.item.ItemModelDefinition;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import net.minecraft.core.Direction;
-import net.minecraft.data.models.blockstates.MultiVariantGenerator;
-import net.minecraft.data.models.blockstates.PropertyDispatch;
-import net.minecraft.data.models.blockstates.Variant;
-import net.minecraft.data.models.blockstates.VariantProperties;
+import net.minecraft.data.models.blockstates.*;
 import net.minecraft.data.models.model.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.Half;
-import net.minecraft.world.level.block.state.properties.SlabType;
-import net.minecraft.world.level.block.state.properties.StairsShape;
-import org.apache.commons.lang3.StringUtils;
+import net.minecraft.world.level.block.state.properties.*;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -52,7 +45,7 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#ALL} -> {@code blockTexLoc}</li>
+     *         <li>{@link TextureSlot#ALL} -> {@code RegistryUtil.pickBlockPrefix(blockTexLoc)}</li>
      *     </ul>
      *
      * @param ownerBlockSup The {@code Supplier<Block>} representing the owner {@link Block} to be used for
@@ -94,9 +87,9 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#SIDE} -> {@code sideTexture}</li>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code bottomTexture}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code topTexture}</li>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.pickBlockPrefix(sideTexture)}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickBlockPrefix(bottomTexture)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(topTexture)}</li>
      *     </ul>
      *
      * @param ownerBlockSup The {@code Supplier<Block>} representing the owner {@link Block} to be used for
@@ -176,9 +169,9 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code bottomTexture}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code topTexture}</li>
-     *         <li>{@link TextureSlot#SIDE} -> {@code sideTexture}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickBlockPrefix(bottomTexture)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(topTexture)}</li>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.pickBlockPrefix(sideTexture)}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the owner {@link Block} to be used for
@@ -229,9 +222,9 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code bottomTexture}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code topTexture}</li>
-     *         <li>{@link TextureSlot#SIDE} -> {@code sideTexture}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickBlockPrefix(bottomTexture)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(topTexture)}</li>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.pickBlockPrefix(sideTexture)}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the owner {@link Block} to be used for
@@ -286,9 +279,9 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code bottomTexture}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code topTexture}</li>
-     *         <li>{@link TextureSlot#SIDE} -> {@code sideTexture}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickBlockPrefix(bottomTexture)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(topTexture)}</li>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.pickBlockPrefix(sideTexture)}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the owner {@link Block} to be used for
@@ -314,9 +307,9 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(chosenDoubleBlockId)))}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(chosenDoubleBlockId)))}</li>
-     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(chosenDoubleBlockId)))}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the owner {@link Block} to be used for
@@ -329,16 +322,7 @@ public final class ModelUtil {
      * @see #slabTop(Supplier)
      */
     public static BlockModelDefinition slab(Supplier<Block> targetBlock) {
-        ResourceLocation baseSlabId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
-        String baseSlabPath = baseSlabId.getPath();
-        String targetDoubleBlockId = StringUtils.substringBefore(baseSlabId.getPath(), "_slab");
-        String chosenDoubleBlockId = baseSlabPath.contains("_brick_")
-                ? targetDoubleBlockId.concat("_bricks")
-                : baseSlabPath.endsWith("_block")
-                ? targetDoubleBlockId
-                : targetDoubleBlockId.concat("_block");
-        ResourceLocation defaultedTexLoc = RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(chosenDoubleBlockId)));
+        ResourceLocation defaultedTexLoc = RegistryUtil.pickBlockTexture(targetBlock);
 
         return slab(targetBlock, defaultedTexLoc, defaultedTexLoc, defaultedTexLoc);
     }
@@ -350,9 +334,9 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(targetDoubleBlockId)))}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(targetDoubleBlockId)))}</li>
-     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(targetDoubleBlockId)))}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickWoodBlockTexture(targetBlock)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickWoodBlockTexture(targetBlock)}</li>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.pickWoodBlockTexture(targetBlock)}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the wooden slab {@link Block} to be used for
@@ -364,10 +348,7 @@ public final class ModelUtil {
      * @see #woodenSlabBlockState(Supplier)
      */
     public static BlockModelDefinition woodenSlab(Supplier<Block> targetBlock) {
-        ResourceLocation baseSlabId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
-        String targetDoubleBlockId = StringUtils.substringBefore(baseSlabId.getPath(), "_slab").concat("_planks");
-        ResourceLocation defaultedTexLoc = RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(targetDoubleBlockId)));
+        ResourceLocation defaultedTexLoc = RegistryUtil.pickWoodBlockTexture(targetBlock);
 
         return slab(targetBlock, defaultedTexLoc, defaultedTexLoc, defaultedTexLoc);
     }
@@ -378,9 +359,9 @@ public final class ModelUtil {
      * <p>
      *     <h3>Variants</h3>
      *     <ul>
-     *         <li>{@link SlabType#BOTTOM} -> {@code bottomModel}</li>
-     *         <li>{@link SlabType#TOP} -> {@code topModel}</li>
-     *         <li>{@link SlabType#DOUBLE} -> {@code doubleSlabModel}</li>
+     *         <li>{@link SlabType#BOTTOM} -> {@code RegistryUtil.pickBlockPrefix(bottomModel)}</li>
+     *         <li>{@link SlabType#TOP} -> {@code RegistryUtil.pickBlockPrefix(topModel)}</li>
+     *         <li>{@link SlabType#DOUBLE} -> {@code RegistryUtil.pickBlockPrefix(doubleSlabModel)}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the slab {@link Block} to create the blockstate for.
@@ -399,11 +380,11 @@ public final class ModelUtil {
                 .withBlockStateSupplier(MultiVariantGenerator.multiVariant(targetBlock.get())
                         .with(PropertyDispatch.property(BlockStateProperties.SLAB_TYPE)
                                 .select(SlabType.BOTTOM, Variant.variant()
-                                        .with(VariantProperties.MODEL, bottomModel))
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(bottomModel)))
                                 .select(SlabType.TOP, Variant.variant()
-                                        .with(VariantProperties.MODEL, topModel))
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(topModel)))
                                 .select(SlabType.DOUBLE, Variant.variant()
-                                        .with(VariantProperties.MODEL, doubleSlabModel))));
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(doubleSlabModel)))));
     }
 
     /**
@@ -440,7 +421,7 @@ public final class ModelUtil {
      *     <ul>
      *         <li>{@link SlabType#BOTTOM} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get())}</li>
      *         <li>{@link SlabType#TOP} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_top")}</li>
-     *         <li>{@link SlabType#DOUBLE} -> {@code chosenDoubleBlockModelPath} (derived from slab registry ID)</li>
+     *         <li>{@link SlabType#DOUBLE} -> {@code RegistryUtil.pickBlockId(targetBlock)}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the slab {@link Block} to create the blockstate for.
@@ -452,17 +433,7 @@ public final class ModelUtil {
      * @see #woodenSlabBlockState(Supplier)
      */
     public static BlockStateDefinition slabBlockState(Supplier<Block> targetBlock) {
-        ResourceLocation baseSlabId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
-        String baseSlabPath = baseSlabId.getPath();
-        String targetDoubleBlockModelPath = StringUtils.substringBefore(ModelLocationUtils.getModelLocation(targetBlock.get()).getPath(), "_slab");
-        String chosenDoubleBlockModelPath = baseSlabPath.contains("_brick_")
-                ? targetDoubleBlockModelPath.concat("_bricks")
-                : baseSlabPath.endsWith("_block")
-                ? targetDoubleBlockModelPath
-                : targetDoubleBlockModelPath.concat("_block");
-
-        return slabBlockState(targetBlock, baseSlabId.withPath(chosenDoubleBlockModelPath));
+        return slabBlockState(targetBlock, RegistryUtil.pickBlockId(targetBlock));
     }
 
     /**
@@ -474,7 +445,7 @@ public final class ModelUtil {
      *     <ul>
      *         <li>{@link SlabType#BOTTOM} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get())}</li>
      *         <li>{@link SlabType#TOP} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_top")}</li>
-     *         <li>{@link SlabType#DOUBLE} -> {@code targetDoubleBlockModelPath + "_planks"} (derived from slab registry ID)</li>
+     *         <li>{@link SlabType#DOUBLE} -> {@code RegistryUtil.pickWoodBlockId(targetBlock)}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the wooden slab {@link Block} to create the blockstate for.
@@ -486,11 +457,7 @@ public final class ModelUtil {
      * @see #slabBlockState(Supplier)
      */
     public static BlockStateDefinition woodenSlabBlockState(Supplier<Block> targetBlock) {
-        ResourceLocation baseSlabId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
-        String targetDoubleBlockModelPath = StringUtils.substringBefore(ModelLocationUtils.getModelLocation(targetBlock.get()).getPath(), "_slab").concat(baseSlabId.getPath().contains("_plank_") ? "s" : "_planks");
-
-        return slabBlockState(targetBlock, baseSlabId.withPath(targetDoubleBlockModelPath));
+        return slabBlockState(targetBlock, RegistryUtil.pickWoodBlockId(targetBlock));
     }
 
     /**
@@ -530,9 +497,9 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, baseStairsId.withPath(chosenBlockId))}</li>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, baseStairsId.withPath(chosenBlockId))}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, baseStairsId.withPath(chosenBlockId))}</li>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the stairs {@link Block} to be used for
@@ -543,16 +510,7 @@ public final class ModelUtil {
      * @see #stairsStraight(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
      */
     public static BlockModelDefinition stairsStraight(Supplier<Block> targetBlock) {
-        ResourceLocation baseStairsId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
-        String baseStairsPath = baseStairsId.getPath();
-        String targetBlockId = StringUtils.substringBefore(baseStairsId.getPath(), "_stairs");
-        String chosenBlockId = baseStairsPath.contains("_brick_")
-                ? targetBlockId.concat("_bricks")
-                : targetBlockId.endsWith("_block")
-                ? targetBlockId
-                : targetBlockId.concat("_block");
-        ResourceLocation defaultedTexLoc = RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseStairsId.withPath(chosenBlockId)));
+        ResourceLocation defaultedTexLoc = RegistryUtil.pickBlockTexture(targetBlock);
 
         return stairsStraight(targetBlock, defaultedTexLoc, defaultedTexLoc, defaultedTexLoc);
     }
@@ -563,9 +521,9 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, baseStairsId.withPath(chosenBlockId))}</li>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, baseStairsId.withPath(chosenBlockId))}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, baseStairsId.withPath(chosenBlockId))}</li>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.pickBlockPrefix(sideTexture)}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickBlockPrefix(bottomTexture)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(topTexture)}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the stairs {@link Block} to be used for
@@ -596,9 +554,9 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, baseStairsId.withPath(chosenBlockId))}</li>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, baseStairsId.withPath(chosenBlockId))}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, baseStairsId.withPath(chosenBlockId))}</li>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the stairs {@link Block} to be used for
@@ -609,16 +567,7 @@ public final class ModelUtil {
      * @see #stairsInner(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
      */
     public static BlockModelDefinition stairsInner(Supplier<Block> targetBlock) {
-        ResourceLocation baseStairsId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
-        String baseStairsPath = baseStairsId.getPath();
-        String targetBlockId = StringUtils.substringBefore(baseStairsId.getPath(), "_stairs");
-        String chosenBlockId = baseStairsPath.contains("_brick_")
-                ? targetBlockId.concat("_bricks")
-                : targetBlockId.endsWith("_block")
-                ? targetBlockId
-                : targetBlockId.concat("_block");
-        ResourceLocation defaultedTexLoc = RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseStairsId.withPath(chosenBlockId)));
+        ResourceLocation defaultedTexLoc = RegistryUtil.pickBlockTexture(targetBlock);
 
         return stairsInner(targetBlock, defaultedTexLoc, defaultedTexLoc, defaultedTexLoc);
     }
@@ -629,9 +578,9 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, baseStairsId.withPath(chosenBlockId))}</li>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, baseStairsId.withPath(chosenBlockId))}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, baseStairsId.withPath(chosenBlockId))}</li>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.pickBlockPrefix(sideTexture)}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickBlockPrefix(bottomTexture)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(topTexture)}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the stairs {@link Block} to be used for
@@ -662,9 +611,9 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, baseStairsId.withPath(chosenBlockId))}</li>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, baseStairsId.withPath(chosenBlockId))}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, baseStairsId.withPath(chosenBlockId))}</li>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the stairs {@link Block} to be used for
@@ -675,16 +624,7 @@ public final class ModelUtil {
      * @see #stairsOuter(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
      */
     public static BlockModelDefinition stairsOuter(Supplier<Block> targetBlock) {
-        ResourceLocation baseStairsId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
-        String baseStairsPath = baseStairsId.getPath();
-        String targetBlockId = StringUtils.substringBefore(baseStairsId.getPath(), "_stairs");
-        String chosenBlockId = baseStairsPath.contains("_brick_")
-                ? targetBlockId.concat("_bricks")
-                : targetBlockId.endsWith("_block")
-                ? targetBlockId
-                : targetBlockId.concat("_block");
-        ResourceLocation defaultedTexLoc = RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseStairsId.withPath(chosenBlockId)));
+        ResourceLocation defaultedTexLoc = RegistryUtil.pickBlockTexture(targetBlock);
 
         return stairsOuter(targetBlock, defaultedTexLoc, defaultedTexLoc, defaultedTexLoc);
     }
@@ -722,9 +662,9 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, baseStairsId.withPath(chosenBlockId))}</li>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, baseStairsId.withPath(chosenBlockId))}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, baseStairsId.withPath(chosenBlockId))}</li>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the stairs {@link Block} to be used for
@@ -735,16 +675,7 @@ public final class ModelUtil {
      * @see #stairs(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
      */
     public static BlockModelDefinition stairs(Supplier<Block> targetBlock) {
-        ResourceLocation baseStairsId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
-        String baseStairsPath = baseStairsId.getPath();
-        String targetBlockId = StringUtils.substringBefore(baseStairsId.getPath(), "_stairs");
-        String chosenBlockId = baseStairsPath.contains("_brick_")
-                ? targetBlockId.concat("_bricks")
-                : targetBlockId.endsWith("_block")
-                ? targetBlockId
-                : targetBlockId.concat("_block");
-        ResourceLocation defaultedTexLoc = RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseStairsId.withPath(chosenBlockId)));
+        ResourceLocation defaultedTexLoc = RegistryUtil.pickBlockTexture(targetBlock);
 
         return stairs(targetBlock, defaultedTexLoc, defaultedTexLoc, defaultedTexLoc);
     }
@@ -756,9 +687,9 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, baseStairsId.withPath(targetBlockId))}</li>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, baseStairsId.withPath(targetBlockId))}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, baseStairsId.withPath(targetBlockId))}</li>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.pickWoodBlockTexture(targetBlock)}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickWoodBlockTexture(targetBlock)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickWoodBlockTexture(targetBlock)}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the wooden stairs {@link Block} to be used for
@@ -769,10 +700,7 @@ public final class ModelUtil {
      * @see #stairs(Supplier)
      */
     public static BlockModelDefinition woodenStairs(Supplier<Block> targetBlock) {
-        ResourceLocation baseStairsId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
-        String targetBlockId = StringUtils.substringBefore(baseStairsId.getPath(), "_stairs").concat(baseStairsId.getPath().contains("_plank_") ? "s" : "_planks");
-        ResourceLocation defaultedTexLoc = RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseStairsId.withPath(targetBlockId)));
+        ResourceLocation defaultedTexLoc = RegistryUtil.pickWoodBlockTexture(targetBlock);
 
         return stairs(targetBlock, defaultedTexLoc, defaultedTexLoc, defaultedTexLoc);
     }
@@ -784,11 +712,11 @@ public final class ModelUtil {
      *     <h3>Variants</h3>
      *     <ul>
      *         <li>{@link BlockStateProperties#HORIZONTAL_FACING} + {@link BlockStateProperties#HALF}
-     *         + {@link StairsShape#STRAIGHT} -> {@code straightStairsModel}</li>
+     *         + {@link StairsShape#STRAIGHT} -> {@code RegistryUtil.pickBlockPrefix(straightStairsModel)}</li>
      *         <li>{@link BlockStateProperties#HORIZONTAL_FACING} + {@link BlockStateProperties#HALF}
-     *         + {@link StairsShape#INNER_LEFT} or {@link StairsShape#INNER_RIGHT} -> {@code innerStairsModel}</li>
+     *         + {@link StairsShape#INNER_LEFT} or {@link StairsShape#INNER_RIGHT} -> {@code RegistryUtil.pickBlockPrefix(innerStairsModel)}</li>
      *         <li>{@link BlockStateProperties#HORIZONTAL_FACING} + {@link BlockStateProperties#HALF}
-     *         + {@link StairsShape#OUTER_LEFT} or {@link StairsShape#OUTER_RIGHT} -> {@code outerStairsModel}</li>
+     *         + {@link StairsShape#OUTER_LEFT} or {@link StairsShape#OUTER_RIGHT} -> {@code RegistryUtil.pickBlockPrefix(outerStairsModel)}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the stairs {@link Block} to create the blockstate for.
@@ -806,167 +734,167 @@ public final class ModelUtil {
                         .with(PropertyDispatch
                                 .properties(BlockStateProperties.HORIZONTAL_FACING, BlockStateProperties.HALF, BlockStateProperties.STAIRS_SHAPE)
                                 .select(Direction.EAST, Half.BOTTOM, StairsShape.STRAIGHT, Variant.variant()
-                                        .with(VariantProperties.MODEL, straightStairsModel))
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(straightStairsModel)))
                                 .select(Direction.WEST, Half.BOTTOM, StairsShape.STRAIGHT, Variant.variant()
-                                        .with(VariantProperties.MODEL, straightStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(straightStairsModel))
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.SOUTH, Half.BOTTOM, StairsShape.STRAIGHT, Variant.variant()
-                                        .with(VariantProperties.MODEL, straightStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(straightStairsModel))
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.NORTH, Half.BOTTOM, StairsShape.STRAIGHT, Variant.variant()
-                                        .with(VariantProperties.MODEL, straightStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(straightStairsModel))
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.EAST, Half.BOTTOM, StairsShape.OUTER_RIGHT, Variant.variant()
-                                        .with(VariantProperties.MODEL, outerStairsModel))
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(outerStairsModel)))
                                 .select(Direction.WEST, Half.BOTTOM, StairsShape.OUTER_RIGHT, Variant.variant()
-                                        .with(VariantProperties.MODEL, outerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(outerStairsModel))
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.SOUTH, Half.BOTTOM, StairsShape.OUTER_RIGHT, Variant.variant()
-                                        .with(VariantProperties.MODEL, outerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(outerStairsModel))
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.NORTH, Half.BOTTOM, StairsShape.OUTER_RIGHT, Variant.variant()
-                                        .with(VariantProperties.MODEL, outerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(outerStairsModel))
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.EAST, Half.BOTTOM, StairsShape.OUTER_LEFT, Variant.variant()
-                                        .with(VariantProperties.MODEL, outerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(outerStairsModel))
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.WEST, Half.BOTTOM, StairsShape.OUTER_LEFT, Variant.variant()
-                                        .with(VariantProperties.MODEL, outerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(outerStairsModel))
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.SOUTH, Half.BOTTOM, StairsShape.OUTER_LEFT, Variant.variant()
-                                        .with(VariantProperties.MODEL, outerStairsModel))
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(outerStairsModel)))
                                 .select(Direction.NORTH, Half.BOTTOM, StairsShape.OUTER_LEFT, Variant.variant()
-                                        .with(VariantProperties.MODEL, outerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(outerStairsModel))
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.EAST, Half.BOTTOM, StairsShape.INNER_RIGHT, Variant.variant()
-                                        .with(VariantProperties.MODEL, innerStairsModel))
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(innerStairsModel)))
                                 .select(Direction.WEST, Half.BOTTOM, StairsShape.INNER_RIGHT, Variant.variant()
-                                        .with(VariantProperties.MODEL, innerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(innerStairsModel))
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.SOUTH, Half.BOTTOM, StairsShape.INNER_RIGHT, Variant.variant()
-                                        .with(VariantProperties.MODEL, innerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(innerStairsModel))
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.NORTH, Half.BOTTOM, StairsShape.INNER_RIGHT, Variant.variant()
-                                        .with(VariantProperties.MODEL, innerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(innerStairsModel))
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.EAST, Half.BOTTOM, StairsShape.INNER_LEFT, Variant.variant()
-                                        .with(VariantProperties.MODEL, innerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(innerStairsModel))
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.WEST, Half.BOTTOM, StairsShape.INNER_LEFT, Variant.variant()
-                                        .with(VariantProperties.MODEL, innerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(innerStairsModel))
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.SOUTH, Half.BOTTOM, StairsShape.INNER_LEFT, Variant.variant()
-                                        .with(VariantProperties.MODEL, innerStairsModel))
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(innerStairsModel)))
                                 .select(Direction.NORTH, Half.BOTTOM, StairsShape.INNER_LEFT, Variant.variant()
-                                        .with(VariantProperties.MODEL, innerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(innerStairsModel))
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.EAST, Half.TOP, StairsShape.STRAIGHT, Variant.variant()
-                                        .with(VariantProperties.MODEL, straightStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(straightStairsModel))
                                         .with(VariantProperties.X_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.WEST, Half.TOP, StairsShape.STRAIGHT, Variant.variant()
-                                        .with(VariantProperties.MODEL, straightStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(straightStairsModel))
                                         .with(VariantProperties.X_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.SOUTH, Half.TOP, StairsShape.STRAIGHT, Variant.variant()
-                                        .with(VariantProperties.MODEL, straightStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(straightStairsModel))
                                         .with(VariantProperties.X_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.NORTH, Half.TOP, StairsShape.STRAIGHT, Variant.variant()
-                                        .with(VariantProperties.MODEL, straightStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(straightStairsModel))
                                         .with(VariantProperties.X_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.EAST, Half.TOP, StairsShape.OUTER_RIGHT, Variant.variant()
-                                        .with(VariantProperties.MODEL, outerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(outerStairsModel))
                                         .with(VariantProperties.X_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.WEST, Half.TOP, StairsShape.OUTER_RIGHT, Variant.variant()
-                                        .with(VariantProperties.MODEL, outerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(outerStairsModel))
                                         .with(VariantProperties.X_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.SOUTH, Half.TOP, StairsShape.OUTER_RIGHT, Variant.variant()
-                                        .with(VariantProperties.MODEL, outerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(outerStairsModel))
                                         .with(VariantProperties.X_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.NORTH, Half.TOP, StairsShape.OUTER_RIGHT, Variant.variant()
-                                        .with(VariantProperties.MODEL, outerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(outerStairsModel))
                                         .with(VariantProperties.X_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.EAST, Half.TOP, StairsShape.OUTER_LEFT, Variant.variant()
-                                        .with(VariantProperties.MODEL, outerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(outerStairsModel))
                                         .with(VariantProperties.X_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.WEST, Half.TOP, StairsShape.OUTER_LEFT, Variant.variant()
-                                        .with(VariantProperties.MODEL, outerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(outerStairsModel))
                                         .with(VariantProperties.X_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.SOUTH, Half.TOP, StairsShape.OUTER_LEFT, Variant.variant()
-                                        .with(VariantProperties.MODEL, outerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(outerStairsModel))
                                         .with(VariantProperties.X_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.NORTH, Half.TOP, StairsShape.OUTER_LEFT, Variant.variant()
-                                        .with(VariantProperties.MODEL, outerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(outerStairsModel))
                                         .with(VariantProperties.X_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.EAST, Half.TOP, StairsShape.INNER_RIGHT, Variant.variant()
-                                        .with(VariantProperties.MODEL, innerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(innerStairsModel))
                                         .with(VariantProperties.X_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.WEST, Half.TOP, StairsShape.INNER_RIGHT, Variant.variant()
-                                        .with(VariantProperties.MODEL, innerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(innerStairsModel))
                                         .with(VariantProperties.X_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.SOUTH, Half.TOP, StairsShape.INNER_RIGHT, Variant.variant()
-                                        .with(VariantProperties.MODEL, innerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(innerStairsModel))
                                         .with(VariantProperties.X_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.NORTH, Half.TOP, StairsShape.INNER_RIGHT, Variant.variant()
-                                        .with(VariantProperties.MODEL, innerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(innerStairsModel))
                                         .with(VariantProperties.X_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.EAST, Half.TOP, StairsShape.INNER_LEFT, Variant.variant()
-                                        .with(VariantProperties.MODEL, innerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(innerStairsModel))
                                         .with(VariantProperties.X_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.WEST, Half.TOP, StairsShape.INNER_LEFT, Variant.variant()
-                                        .with(VariantProperties.MODEL, innerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(innerStairsModel))
                                         .with(VariantProperties.X_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.SOUTH, Half.TOP, StairsShape.INNER_LEFT, Variant.variant()
-                                        .with(VariantProperties.MODEL, innerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(innerStairsModel))
                                         .with(VariantProperties.X_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
                                         .with(VariantProperties.UV_LOCK, true))
                                 .select(Direction.NORTH, Half.TOP, StairsShape.INNER_LEFT, Variant.variant()
-                                        .with(VariantProperties.MODEL, innerStairsModel)
+                                        .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(innerStairsModel))
                                         .with(VariantProperties.X_ROT, VariantProperties.Rotation.R180)
                                         .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)
                                         .with(VariantProperties.UV_LOCK, true))));
@@ -998,6 +926,292 @@ public final class ModelUtil {
      */
     public static BlockStateDefinition stairsBlockState(Supplier<Block> targetBlock) {
         return stairsBlockState(targetBlock, ModelLocationUtils.getModelLocation(targetBlock.get()), ModelLocationUtils.getModelLocation(targetBlock.get(), "_inner"), ModelLocationUtils.getModelLocation(targetBlock.get(), "_outer"));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#WALL_INVENTORY} template for wall blocks.
+     * This model is specifically designed for the inventory representation of wall blocks and promptly generates
+     * a corresponding item model.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#WALL} -> {@code RegistryUtil.pickBlockPrefix(wallTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the wall {@link Block} to be used for
+     *                    automatic model location resolution and custom naming.
+     * @param wallTexture The {@link ResourceLocation} representing the texture of the wall block.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#WALL_INVENTORY} template.
+     *
+     * @see #wallPost(Supplier, ResourceLocation)
+     * @see #wallSide(Supplier, ResourceLocation)
+     * @see #wallSideTall(Supplier, ResourceLocation)
+     * @see #wall(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition wallInventory(Supplier<Block> targetBlock, ResourceLocation wallTexture) {
+        ResourceLocation baseWallId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return new BlockModelDefinition(ModelTemplates.WALL_INVENTORY)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.WALL, RegistryUtil.pickBlockPrefix(wallTexture)))
+                .withCustomName(baseWallId.getPath().concat("_inventory"))
+                .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get(), "_inventory"))));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#WALL_POST} template for wall blocks.
+     * This model is specifically designed for the center post/pillar component of wall blocks.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#WALL} -> {@code RegistryUtil.pickBlockPrefix(wallTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the wall {@link Block} to be used for
+     *                    automatic model location resolution and custom naming.
+     * @param wallTexture The {@link ResourceLocation} representing the texture of the wall block.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#WALL_POST} template.
+     *
+     * @see #wallInventory(Supplier, ResourceLocation)
+     * @see #wallSide(Supplier, ResourceLocation)
+     * @see #wallSideTall(Supplier, ResourceLocation)
+     * @see #wall(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition wallPost(Supplier<Block> targetBlock, ResourceLocation wallTexture) {
+        ResourceLocation baseWallId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return new BlockModelDefinition(ModelTemplates.WALL_POST)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.WALL, RegistryUtil.pickBlockPrefix(wallTexture)))
+                .withCustomName(baseWallId.getPath().concat("_post"));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#WALL_LOW_SIDE} template for wall blocks.
+     * This model is specifically designed for the low side components of wall blocks that connect to adjacent blocks
+     * at the standard wall height.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#WALL} -> {@code RegistryUtil.pickBlockPrefix(wallTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the wall {@link Block} to be used for
+     *                    automatic model location resolution and custom naming.
+     * @param wallTexture The {@link ResourceLocation} representing the texture of the wall block.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#WALL_LOW_SIDE} template.
+     *
+     * @see #wallInventory(Supplier, ResourceLocation)
+     * @see #wallPost(Supplier, ResourceLocation)
+     * @see #wallSideTall(Supplier, ResourceLocation)
+     * @see #wall(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition wallSide(Supplier<Block> targetBlock, ResourceLocation wallTexture) {
+        ResourceLocation baseWallId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return new BlockModelDefinition(ModelTemplates.WALL_LOW_SIDE)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.WALL, RegistryUtil.pickBlockPrefix(wallTexture)))
+                .withCustomName(baseWallId.getPath().concat("_side"));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#WALL_TALL_SIDE} template for wall blocks.
+     * This model is specifically designed for the tall side components of wall blocks that connect to adjacent blocks
+     * at an elevated wall height, typically used when walls connect to taller blocks.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#WALL} -> {@code RegistryUtil.pickBlockPrefix(wallTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the wall {@link Block} to be used for
+     *                    automatic model location resolution and custom naming.
+     * @param wallTexture The {@link ResourceLocation} representing the texture of the wall block.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#WALL_TALL_SIDE} template.
+     *
+     * @see #wallInventory(Supplier, ResourceLocation)
+     * @see #wallPost(Supplier, ResourceLocation)
+     * @see #wallSide(Supplier, ResourceLocation)
+     * @see #wall(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition wallSideTall(Supplier<Block> targetBlock, ResourceLocation wallTexture) {
+        ResourceLocation baseWallId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return new BlockModelDefinition(ModelTemplates.WALL_TALL_SIDE)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.WALL, RegistryUtil.pickBlockPrefix(wallTexture)))
+                .withCustomName(baseWallId.getPath().concat("_side_tall"));
+    }
+
+    /**
+     * Creates a comprehensive {@link BlockModelDefinition} with all three wall variants (inventory, post, side, side_tall)
+     * using the {@link ModelTemplates#WALL_INVENTORY}, {@link ModelTemplates#WALL_POST}, {@link ModelTemplates#WALL_LOW_SIDE},
+     * and {@link ModelTemplates#WALL_TALL_SIDE} templates. The inventory variant includes a corresponding item model.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#WALL} -> {@code RegistryUtil.pickBlockPrefix(wallTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the wall {@link Block} to be used for
+     *                    automatic model location resolution and custom naming.
+     * @param wallTexture The {@link ResourceLocation} representing the texture of the wall block.
+     *
+     * @return A {@link BlockModelDefinition} with all wall variants.
+     *
+     * @see #wallInventory(Supplier, ResourceLocation)
+     * @see #wallPost(Supplier, ResourceLocation)
+     * @see #wallSide(Supplier, ResourceLocation)
+     * @see #wallSideTall(Supplier, ResourceLocation)
+     * @see #wall(Supplier)
+     */
+    public static BlockModelDefinition wall(Supplier<Block> targetBlock, ResourceLocation wallTexture) {
+        return wallInventory(targetBlock, wallTexture)
+                .withOrdinalModelDefinitions(wallPost(targetBlock, wallTexture), wallSide(targetBlock, wallTexture), wallSideTall(targetBlock, wallTexture));
+    }
+
+    /**
+     * Overloaded variant of {@link #wall(Supplier, ResourceLocation)}. Creates a comprehensive {@link BlockModelDefinition}
+     * with all three wall variants using automatic texture resolution. Automatically determines the wall texture based
+     * on the wall's registry ID.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#WALL} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the wall {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with all wall variants using automatic texture resolution.
+     *
+     * @see #wallInventory(Supplier, ResourceLocation)
+     * @see #wallPost(Supplier, ResourceLocation)
+     * @see #wallSide(Supplier, ResourceLocation)
+     * @see #wallSideTall(Supplier, ResourceLocation)
+     * @see #wall(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition wall(Supplier<Block> targetBlock) {
+        return wall(targetBlock, RegistryUtil.pickBlockTexture(targetBlock));
+    }
+
+    /**
+     * Creates a {@link BlockStateDefinition} for wall blocks using {@link MultiPartGenerator} with different models
+     * for each combination of wall connections and heights. This method handles the complex multipart system used
+     * by Minecraft walls to connect properly with adjacent blocks.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link BlockStateProperties#UP} -> {@code wallPostModel} (when wall has a post)</li>
+     *         <li>{@link BlockStateProperties#NORTH_WALL} + {@link WallSide#LOW} -> {@code wallSideModel}</li>
+     *         <li>{@link BlockStateProperties#EAST_WALL} + {@link WallSide#LOW} -> {@code wallSideModel} (90° rotation)</li>
+     *         <li>{@link BlockStateProperties#SOUTH_WALL} + {@link WallSide#LOW} -> {@code wallSideModel} (180° rotation)</li>
+     *         <li>{@link BlockStateProperties#WEST_WALL} + {@link WallSide#LOW} -> {@code wallSideModel} (270° rotation)</li>
+     *         <li>{@link BlockStateProperties#NORTH_WALL} + {@link WallSide#TALL} -> {@code wallSideTallModel}</li>
+     *         <li>{@link BlockStateProperties#EAST_WALL} + {@link WallSide#TALL} -> {@code wallSideTallModel} (90° rotation)</li>
+     *         <li>{@link BlockStateProperties#SOUTH_WALL} + {@link WallSide#TALL} -> {@code wallSideTallModel} (180° rotation)</li>
+     *         <li>{@link BlockStateProperties#WEST_WALL} + {@link WallSide#TALL} -> {@code wallSideTallModel} (270° rotation)</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the wall {@link Block} to create the blockstate for.
+     * @param wallPostModel The {@link ResourceLocation} of the model to use for the wall post (center pillar).
+     * @param wallSideModel The {@link ResourceLocation} of the model to use for low wall sides.
+     * @param wallSideTallModel The {@link ResourceLocation} of the model to use for tall wall sides.
+     *
+     * @return A {@link BlockStateDefinition} with comprehensive wall blockstate variants using multipart system.
+     *
+     * @see #wallBlockState(Supplier)
+     * @see #wallInventory(Supplier, ResourceLocation)
+     * @see #wallPost(Supplier, ResourceLocation)
+     * @see #wallSide(Supplier, ResourceLocation)
+     * @see #wallSideTall(Supplier, ResourceLocation)
+     */
+    public static BlockStateDefinition wallBlockState(Supplier<Block> targetBlock, ResourceLocation wallPostModel, ResourceLocation wallSideModel, ResourceLocation wallSideTallModel) {
+        return new BlockStateDefinition(targetBlock)
+                .withBlockStateSupplier(MultiPartGenerator.multiPart(targetBlock.get())
+                        .with(Condition.condition()
+                                .term(BlockStateProperties.UP, true), Variant.variant()
+                                .with(VariantProperties.MODEL, wallPostModel))
+                        .with(Condition.condition()
+                                .term(BlockStateProperties.NORTH_WALL, WallSide.LOW), Variant.variant()
+                                .with(VariantProperties.MODEL, wallSideModel)
+                                .with(VariantProperties.UV_LOCK, true))
+                        .with(Condition.condition()
+                                .term(BlockStateProperties.EAST_WALL, WallSide.LOW), Variant.variant()
+                                .with(VariantProperties.MODEL, wallSideModel)
+                                .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
+                                .with(VariantProperties.UV_LOCK, true))
+                        .with(Condition.condition()
+                                .term(BlockStateProperties.SOUTH_WALL, WallSide.LOW), Variant.variant()
+                                .with(VariantProperties.MODEL, wallSideModel)
+                                .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180)
+                                .with(VariantProperties.UV_LOCK, true))
+                        .with(Condition.condition()
+                                .term(BlockStateProperties.WEST_WALL, WallSide.LOW), Variant.variant()
+                                .with(VariantProperties.MODEL, wallSideModel)
+                                .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)
+                                .with(VariantProperties.UV_LOCK, true))
+                        .with(Condition.condition()
+                                .term(BlockStateProperties.NORTH_WALL, WallSide.TALL), Variant.variant()
+                                .with(VariantProperties.MODEL, wallSideTallModel)
+                                .with(VariantProperties.UV_LOCK, true))
+                        .with(Condition.condition()
+                                .term(BlockStateProperties.EAST_WALL, WallSide.TALL), Variant.variant()
+                                .with(VariantProperties.MODEL, wallSideTallModel)
+                                .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
+                                .with(VariantProperties.UV_LOCK, true))
+                        .with(Condition.condition()
+                                .term(BlockStateProperties.SOUTH_WALL, WallSide.TALL), Variant.variant()
+                                .with(VariantProperties.MODEL, wallSideTallModel)
+                                .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180)
+                                .with(VariantProperties.UV_LOCK, true))
+                        .with(Condition.condition()
+                                .term(BlockStateProperties.WEST_WALL, WallSide.TALL), Variant.variant()
+                                .with(VariantProperties.MODEL, wallSideTallModel)
+                                .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)
+                                .with(VariantProperties.UV_LOCK, true)));
+    }
+
+    /**
+     * Overloaded variant of {@link #wallBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)}.
+     * Creates a {@link BlockStateDefinition} for wall blocks using {@link MultiPartGenerator} with different models
+     * for each combination of wall connections and heights. Automatically determines model locations using standard
+     * naming convention (base model with "_post", "_side", "_side_tall" suffixes).
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link BlockStateProperties#UP} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_post")}</li>
+     *         <li>{@link BlockStateProperties#NORTH_WALL} + {@link WallSide#LOW} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_side")}</li>
+     *         <li>{@link BlockStateProperties#EAST_WALL} + {@link WallSide#LOW} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_side")} (90° rotation)</li>
+     *         <li>{@link BlockStateProperties#SOUTH_WALL} + {@link WallSide#LOW} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_side")} (180° rotation)</li>
+     *         <li>{@link BlockStateProperties#WEST_WALL} + {@link WallSide#LOW} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_side")} (270° rotation)</li>
+     *         <li>{@link BlockStateProperties#NORTH_WALL} + {@link WallSide#TALL} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_side_tall")}</li>
+     *         <li>{@link BlockStateProperties#EAST_WALL} + {@link WallSide#TALL} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_side_tall")} (90° rotation)</li>
+     *         <li>{@link BlockStateProperties#SOUTH_WALL} + {@link WallSide#TALL} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_side_tall")} (180° rotation)</li>
+     *         <li>{@link BlockStateProperties#WEST_WALL} + {@link WallSide#TALL} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_side_tall")} (270° rotation)</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the wall {@link Block} to create the blockstate for.
+     *
+     * @return A {@link BlockStateDefinition} with comprehensive wall blockstate variants using automatic model resolution.
+     *
+     * @see #wallBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
+     * @see #wallInventory(Supplier, ResourceLocation)
+     * @see #wallPost(Supplier, ResourceLocation)
+     * @see #wallSide(Supplier, ResourceLocation)
+     * @see #wallSideTall(Supplier, ResourceLocation)
+     */
+    public static BlockStateDefinition wallBlockState(Supplier<Block> targetBlock) {
+        return wallBlockState(targetBlock, ModelLocationUtils.getModelLocation(targetBlock.get(), "_post"), ModelLocationUtils.getModelLocation(targetBlock.get(), "_side"), ModelLocationUtils.getModelLocation(targetBlock.get(), "_side_tall"));
     }
 
     /**

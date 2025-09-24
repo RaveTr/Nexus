@@ -1,6 +1,7 @@
 {
   "values": [
     "nexus:test_slab",
-    "nexus:test_block_stairs"
+    "nexus:test_block_stairs",
+    "nexus:test_block_wall"
   ]
 }

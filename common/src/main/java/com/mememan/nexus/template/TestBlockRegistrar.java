@@ -14,10 +14,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.SlabBlock;
-import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
 import java.util.Locale;
@@ -40,6 +37,7 @@ public class TestBlockRegistrar {
 
     public static final Supplier<SlabBlock> BLAH_SLAB = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(NexusConstants.prefix("test_slab"), () -> new SlabBlock(BlockBehaviour.Properties.of()), BlockPropertyWrapperTemplates.SLAB);
     public static final Supplier<Block> BLAH_STAIRS = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(NexusConstants.prefix("test_block_stairs"), () -> new StairBlock(BLAH.get().defaultBlockState(), BlockBehaviour.Properties.copy(BLAH.get())), BlockPropertyWrapperTemplates.STAIRS);
+    public static final Supplier<Block> BLAH_WALL = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(NexusConstants.prefix("test_block_wall"), () -> new WallBlock(BlockBehaviour.Properties.copy(BLAH.get())), BlockPropertyWrapperTemplates.WALL);
 
     public static final Supplier<SlabBlock> BLAH_2 = new BlockPropertyWrapper<>(registerBlock(new ResourceLocation("nexus", "test_able_block"), () -> new SlabBlock(BlockBehaviour.Properties.of())), "nexus")
             .builder()

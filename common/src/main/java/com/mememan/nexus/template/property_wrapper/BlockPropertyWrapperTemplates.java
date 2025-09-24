@@ -5,6 +5,7 @@ import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapperBuilder;
 import com.mememan.nexus.util.LootUtil;
 import com.mememan.nexus.util.ModelUtil;
+import com.mememan.nexus.util.RegistryUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
@@ -197,6 +198,22 @@ public final class BlockPropertyWrapperTemplates {
             .withModelDefinition(ModelUtil::stairs)
             .withBlockStateDefinition(ModelUtil::stairsBlockState)
             .build();
+    /**
+     * BPW template for walls. Inherits from {@link #BASIC_PICKAXE}. Wall model, wall blockstate.
+     * Blockstate and model assume the existence of an equivalent block with the suffix {@code "_block"} (or {@code "_bricks"}
+     * if the parent block name contains {@code "_brick_"}, e.g. {@code "example_brick_wall"}). Additionally, tags the
+     * parent block with {@link BlockTags#WALLS}.
+     *
+     * @see ModelUtil#wall(Supplier)
+     * @see ModelUtil#wallBlockState(Supplier)
+     */
+    public static final BlockPropertyWrapper<Block> WALL = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_PICKAXE)
+            .withTag(() -> BlockTags.WALLS)
+            .withModelDefinition(ModelUtil::wall)
+            .withBlockStateDefinition(ModelUtil::wallBlockState)
+            .build();
 
     /**
      * BPW template for wooden slabs. Inherits from {@link #BASIC_AXE}. Wooden slab model, wooden slab blockstate,
@@ -213,6 +230,7 @@ public final class BlockPropertyWrapperTemplates {
             .withModelDefinition(ModelUtil::woodenSlab)
             .withBlockStateDefinition(ModelUtil::woodenSlabBlockState)
             .withLootTable(LootUtil::dropSlab)
+            .withFlammability(RegistryUtil::standardWoodFlammability)
             .build();
     /**
      * BPW template for wooden stairs. Inherits from {@link #BASIC_AXE}. Wooden stairs model, stairs blockstate.
@@ -228,6 +246,7 @@ public final class BlockPropertyWrapperTemplates {
             .withTag(() -> BlockTags.WOODEN_STAIRS)
             .withModelDefinition(ModelUtil::woodenStairs)
             .withBlockStateDefinition(ModelUtil::stairsBlockState)
+            .withFlammability(RegistryUtil::standardWoodFlammability)
             .build();
 
     private BlockPropertyWrapperTemplates() {

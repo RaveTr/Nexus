@@ -2,11 +2,15 @@ package com.mememan.nexus.util;
 
 import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
+import it.unimi.dsi.fastutil.ints.IntIntMutablePair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.Util;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.CarpetBlock;
+import net.minecraft.world.level.block.LeavesBlock;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -517,5 +521,54 @@ public final class RegistryUtil {
      */
     public static <T> T getObjectFromOrThrow(T baseObj, Function<ResourceLocation, ResourceLocation> targetObjIdMapper) {
         return getObjectFrom(baseObj, targetObjIdMapper, true).get();
+    }
+
+    public static IntIntMutablePair standardWoodFlammability(Supplier<Block> targetBlock) {
+        Block targetBlockObj = targetBlock.get();
+
+        return targetBlockObj.getDescriptionId().endsWith("_leaves") || targetBlockObj instanceof LeavesBlock
+                ? IntIntMutablePair.of(30, 60)
+                : targetBlockObj.getDescriptionId().endsWith("_carpet") || targetBlockObj instanceof CarpetBlock
+                ? IntIntMutablePair.of(60, 20)
+                : IntIntMutablePair.of(5, 20);
+    }
+
+    public static ResourceLocation pickBlockId(Supplier<Block> targetBlock, Function<String, String> pathIdMapper) {
+        ResourceLocation baseBlockId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        String baseBlockPath = baseBlockId.getPath();
+        String chosenBlockId = pathIdMapper.apply(baseBlockPath);
+
+        return baseBlockId.withPath(chosenBlockId);
+    }
+
+    public static ResourceLocation pickBlockId(Supplier<Block> targetBlock) {
+        return pickBlockId(targetBlock, baseBlockPath -> {
+            String targetBlockId = baseBlockPath.substring(0, baseBlockPath.lastIndexOf("_"));
+
+            return baseBlockPath.contains("_brick_")
+                    ? targetBlockId.concat("_bricks")
+                    : targetBlockId.endsWith("_block")
+                    ? targetBlockId
+                    : targetBlockId.concat("_block");
+        });
+    }
+
+    public static ResourceLocation pickWoodBlockId(Supplier<Block> targetBlock) {
+        return pickBlockId(targetBlock, baseBlockPath -> {
+            String targetBlockId = baseBlockPath.substring(0, baseBlockPath.lastIndexOf("_"));
+
+            return targetBlockId.contains("_plank_") || targetBlockId.endsWith("_planks")
+                    ? targetBlockId
+                    : targetBlockId.concat("_planks");
+        });
+    }
+
+    public static ResourceLocation pickBlockTexture(Supplier<Block> targetBlock) {
+        return RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(pickBlockId(targetBlock)));
+    }
+
+    public static ResourceLocation pickWoodBlockTexture(Supplier<Block> targetBlock) {
+        return RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(pickWoodBlockId(targetBlock)));
     }
 }
