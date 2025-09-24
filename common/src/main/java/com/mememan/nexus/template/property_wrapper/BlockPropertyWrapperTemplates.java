@@ -37,7 +37,7 @@ public final class BlockPropertyWrapperTemplates {
      */
     public static final BlockPropertyWrapper<Block> BASIC_PICKAXE = new BlockPropertyWrapper<>()
             .builder()
-            .copyFromType(BASIC)
+            .copyFrom(BASIC)
             .withTag(() -> BlockTags.MINEABLE_WITH_PICKAXE)
             .build();
     /**
@@ -45,7 +45,7 @@ public final class BlockPropertyWrapperTemplates {
      */
     public static final BlockPropertyWrapper<Block> BASIC_PICKAXE_STONE = new BlockPropertyWrapper<>()
             .builder()
-            .copyFromType(BASIC_PICKAXE)
+            .copyFrom(BASIC_PICKAXE)
             .withTag(() -> BlockTags.NEEDS_STONE_TOOL)
             .build();
     /**
@@ -53,7 +53,7 @@ public final class BlockPropertyWrapperTemplates {
      */
     public static final BlockPropertyWrapper<Block> BASIC_PICKAXE_IRON = new BlockPropertyWrapper<>()
             .builder()
-            .copyFromType(BASIC_PICKAXE)
+            .copyFrom(BASIC_PICKAXE)
             .withTag(() -> BlockTags.NEEDS_IRON_TOOL)
             .build();
     /**
@@ -61,7 +61,7 @@ public final class BlockPropertyWrapperTemplates {
      */
     public static final BlockPropertyWrapper<Block> BASIC_PICKAXE_DIAMOND = new BlockPropertyWrapper<>()
             .builder()
-            .copyFromType(BASIC_PICKAXE)
+            .copyFrom(BASIC_PICKAXE)
             .withTag(() -> BlockTags.NEEDS_DIAMOND_TOOL)
             .build();
 
@@ -70,7 +70,7 @@ public final class BlockPropertyWrapperTemplates {
      */
     public static final BlockPropertyWrapper<Block> BASIC_AXE = new BlockPropertyWrapper<>()
             .builder()
-            .copyFromType(BASIC)
+            .copyFrom(BASIC)
             .withTag(() -> BlockTags.MINEABLE_WITH_AXE)
             .build();
     /**
@@ -78,7 +78,7 @@ public final class BlockPropertyWrapperTemplates {
      */
     public static final BlockPropertyWrapper<Block> BASIC_AXE_STONE = new BlockPropertyWrapper<>()
             .builder()
-            .copyFromType(BASIC_AXE)
+            .copyFrom(BASIC_AXE)
             .withTag(() -> BlockTags.NEEDS_STONE_TOOL)
             .build();
     /**
@@ -86,7 +86,7 @@ public final class BlockPropertyWrapperTemplates {
      */
     public static final BlockPropertyWrapper<Block> BASIC_AXE_IRON = new BlockPropertyWrapper<>()
             .builder()
-            .copyFromType(BASIC_AXE)
+            .copyFrom(BASIC_AXE)
             .withTag(() -> BlockTags.NEEDS_IRON_TOOL)
             .build();
     /**
@@ -94,7 +94,7 @@ public final class BlockPropertyWrapperTemplates {
      */
     public static final BlockPropertyWrapper<Block> BASIC_AXE_DIAMOND = new BlockPropertyWrapper<>()
             .builder()
-            .copyFromType(BASIC_AXE)
+            .copyFrom(BASIC_AXE)
             .withTag(() -> BlockTags.NEEDS_DIAMOND_TOOL)
             .build();
 
@@ -103,7 +103,7 @@ public final class BlockPropertyWrapperTemplates {
      */
     public static final BlockPropertyWrapper<Block> BASIC_HOE = new BlockPropertyWrapper<>()
             .builder()
-            .copyFromType(BASIC)
+            .copyFrom(BASIC)
             .withTag(() -> BlockTags.MINEABLE_WITH_HOE)
             .build();
     /**
@@ -111,7 +111,7 @@ public final class BlockPropertyWrapperTemplates {
      */
     public static final BlockPropertyWrapper<Block> BASIC_HOE_STONE = new BlockPropertyWrapper<>()
             .builder()
-            .copyFromType(BASIC_HOE)
+            .copyFrom(BASIC_HOE)
             .withTag(() -> BlockTags.NEEDS_STONE_TOOL)
             .build();
     /**
@@ -119,7 +119,7 @@ public final class BlockPropertyWrapperTemplates {
      */
     public static final BlockPropertyWrapper<Block> BASIC_HOE_IRON = new BlockPropertyWrapper<>()
             .builder()
-            .copyFromType(BASIC_HOE)
+            .copyFrom(BASIC_HOE)
             .withTag(() -> BlockTags.NEEDS_IRON_TOOL)
             .build();
     /**
@@ -127,7 +127,7 @@ public final class BlockPropertyWrapperTemplates {
      */
     public static final BlockPropertyWrapper<Block> BASIC_HOE_DIAMOND = new BlockPropertyWrapper<>()
             .builder()
-            .copyFromType(BASIC_HOE)
+            .copyFrom(BASIC_HOE)
             .withTag(() -> BlockTags.NEEDS_DIAMOND_TOOL)
             .build();
 
@@ -136,7 +136,7 @@ public final class BlockPropertyWrapperTemplates {
      */
     public static final BlockPropertyWrapper<Block> BASIC_SHOVEL = new BlockPropertyWrapper<>()
             .builder()
-            .copyFromType(BASIC)
+            .copyFrom(BASIC)
             .withTag(() -> BlockTags.MINEABLE_WITH_SHOVEL)
             .build();
     /**
@@ -144,7 +144,7 @@ public final class BlockPropertyWrapperTemplates {
      */
     public static final BlockPropertyWrapper<Block> BASIC_SHOVEL_STONE = new BlockPropertyWrapper<>()
             .builder()
-            .copyFromType(BASIC_SHOVEL)
+            .copyFrom(BASIC_SHOVEL)
             .withTag(() -> BlockTags.NEEDS_STONE_TOOL)
             .build();
     /**
@@ -152,7 +152,7 @@ public final class BlockPropertyWrapperTemplates {
      */
     public static final BlockPropertyWrapper<Block> BASIC_SHOVEL_IRON = new BlockPropertyWrapper<>()
             .builder()
-            .copyFromType(BASIC_SHOVEL)
+            .copyFrom(BASIC_SHOVEL)
             .withTag(() -> BlockTags.NEEDS_IRON_TOOL)
             .build();
     /**
@@ -160,9 +160,45 @@ public final class BlockPropertyWrapperTemplates {
      */
     public static final BlockPropertyWrapper<Block> BASIC_SHOVEL_DIAMOND = new BlockPropertyWrapper<>()
             .builder()
-            .copyFromType(BASIC_SHOVEL)
+            .copyFrom(BASIC_SHOVEL)
             .withTag(() -> BlockTags.NEEDS_DIAMOND_TOOL)
             .build();
+
+    /**
+     * BPW template for slabs. Inherits from {@link #BASIC_PICKAXE}. Slab loot table, slab blockstate, slab model.
+     * Blockstate and model assume the existence of an equivalent block with the suffix {@code "_block"} (or {@code "_bricks"}
+     * if the parent block name contains {@code "_brick_"}, e.g. {@code "example_brick_slab"}). Additionally, tags the
+     * parent block with {@link BlockTags#SLABS}.
+     *
+     * @see ModelUtil#slab(Supplier)
+     * @see ModelUtil#slabBlockState(Supplier)
+     */
+    public static final BlockPropertyWrapper<Block> SLAB = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_PICKAXE)
+            .withTag(() -> BlockTags.SLABS)
+            .withModelDefinition(ModelUtil::slab)
+            .withBlockStateDefinition(ModelUtil::slabBlockState)
+            .withLootTable(LootUtil::dropSlab)
+            .build();
+    /**
+     * BPW template for wooden slabs. Inherits from {@link #BASIC_AXE}. Wooden slab loot table, wooden slab blockstate,
+     * wooden slab model. Blockstate and model assume the existence of an equivalent block with the suffix {@code "_planks"}.
+     * Additionally, tags the parent block with {@link BlockTags#WOODEN_SLABS}.
+     *
+     * @see ModelUtil#woodenSlab(Supplier)
+     * @see ModelUtil#woodenSlabBlockState(Supplier)
+     */
+    public static final BlockPropertyWrapper<Block> WOODEN_SLAB = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_AXE)
+            .withTag(() -> BlockTags.WOODEN_SLABS)
+            .withModelDefinition(ModelUtil::woodenSlab)
+            .withBlockStateDefinition(ModelUtil::woodenSlabBlockState)
+            .withLootTable(LootUtil::dropSlab)
+            .build();
+
+
 
     private BlockPropertyWrapperTemplates() {
         throw new IllegalAccessError("Attempted to construct instance of template utility class! (BlockPropertyWrapperTemplates)");

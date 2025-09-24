@@ -108,21 +108,62 @@ public class BlockPropertyWrapperBuilder<B extends Block> extends BaseDefaultabl
         return self();
     }
 
+    /**
+     * Defines a {@link Function} that outputs a {@link Pair} containing a {@link Predicate} and {@link Consumer}
+     * representing the tilling behavior of the parent {@link Block}, which occurs when the parent block is right-clicked
+     * with a hoe. The {@link Predicate} determines if tilling can occur, while the {@link Consumer} handles the
+     * tilling action.
+     *
+     * @param blockTillingMappingFunc The mapping function used to output the tilling behavior {@link Pair} for the
+     *                                parent block, with the parent block as the input. May be {@code null}.
+     *
+     * @return {@link #self()} (builder method).
+     */
     public BlockPropertyWrapperBuilder<B> withBlockTilling(Function<Supplier<B>, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>>> blockTillingMappingFunc) {
         this.blockTillingMappingFunc = Optional.ofNullable(blockTillingMappingFunc);
         return self();
     }
 
+    /**
+     * Defines a {@link Function} that outputs a {@link BlockState} representing the flattened state of the parent
+     * {@link Block}, which occurs when the parent block is right-clicked with a shovel.
+     *
+     * @param blockFlatteningMappingFunc The mapping function used to output the resultant {@link BlockState} for the
+     *                                   parent block when right-clicked with a shovel, with the parent block as the input.
+     *                                   May be {@code null}.
+     *
+     * @return {@link #self()} (builder method).
+     */
     public BlockPropertyWrapperBuilder<B> withBlockFlattening(Function<Supplier<B>, BlockState> blockFlatteningMappingFunc) {
         this.blockFlatteningMappingFunc = Optional.ofNullable(blockFlatteningMappingFunc);
         return self();
     }
 
+    /**
+     * Defines a {@link Function} that outputs a {@link Supplier} of a {@link Block} representing the oxidized state
+     * of the parent {@link Block}. This is typically used for blocks that can weather or oxidize over time, such as
+     * copper blocks.
+     *
+     * @param blockOxidizationMappingFunc The mapping function used to output the oxidized block {@link Supplier} for the
+     *                                    parent block, with the parent block as the input. May be {@code null}.
+     *
+     * @return {@link #self()} (builder method).
+     */
     public BlockPropertyWrapperBuilder<B> withBlockOxidization(Function<Supplier<B>, Supplier<Block>> blockOxidizationMappingFunc) {
         this.blockOxidizationMappingFunc = Optional.ofNullable(blockOxidizationMappingFunc);
         return self();
     }
 
+    /**
+     * Defines a {@link Function} that outputs a {@link Supplier} of a {@link Block} representing the waxed state
+     * of the parent {@link Block}. This is typically used for blocks that can be waxed to prevent oxidation, such as
+     * copper blocks.
+     *
+     * @param blockWaxingMappingFunc The mapping function used to output the waxed block {@link Supplier} for the
+     *                               parent block, with the parent block as the input. May be {@code null}.
+     *
+     * @return {@link #self()} (builder method).
+     */
     public BlockPropertyWrapperBuilder<B> withBlockWaxing(Function<Supplier<B>, Supplier<Block>> blockWaxingMappingFunc) {
         this.blockWaxingMappingFunc = Optional.ofNullable(blockWaxingMappingFunc);
         return self();

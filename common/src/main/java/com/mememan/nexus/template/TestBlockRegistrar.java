@@ -29,7 +29,7 @@ import java.util.function.Supplier;
 public class TestBlockRegistrar {
     private static final ObjectArrayList<Supplier<Block>> BLOCKS = new ObjectArrayList<>();
 
-    public static final Supplier<SlabBlock> BLAH = new BlockPropertyWrapper<>(registerBlock(new ResourceLocation("nexus", "test_block"), () -> new SlabBlock(BlockBehaviour.Properties.of())), "nexus")
+    public static final Supplier<Block> BLAH = new BlockPropertyWrapper<>(registerBlock(new ResourceLocation("nexus", "test_block"), () -> new Block(BlockBehaviour.Properties.of())), "nexus")
             .builder()
             .copyFromType(BlockPropertyWrapperTemplates.BASIC)
             .withRecipe(r -> result -> ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, result.get())
@@ -43,9 +43,10 @@ public class TestBlockRegistrar {
             .withTag(() -> BlockTags.MINEABLE_WITH_AXE)
             .buildAndGet();
 
+    public static final Supplier<SlabBlock> BLAH_SLAB = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(NexusConstants.prefix("test_slab"), () -> new SlabBlock(BlockBehaviour.Properties.of()), BlockPropertyWrapperTemplates.SLAB);
+
     public static final Supplier<SlabBlock> BLAH_2 = new BlockPropertyWrapper<>(registerBlock(new ResourceLocation("nexus", "test_able_block"), () -> new SlabBlock(BlockBehaviour.Properties.of())), "nexus")
             .builder()
-            .copyFrom(BLAH)
             .literalTranslation()
             .withLocalization(v -> v.toUpperCase(Locale.ROOT))
             .buildAndGet();

@@ -51,30 +51,91 @@ public class BlockPropertyWrapper<B extends Block> extends BaseDefaultableDataGe
         return rawBuilder().flatMap(builder -> builder.blockStateDefMapperFunc);
     }
 
+    /**
+     * Gets the {@link WrappedBlockColor} mapping function used to assign a custom color overlay to this
+     * BlockPropertyWrapper's parent block at startup on the client. This is useful for cases where blocks should
+     * have a custom color applied to them, such as grass blocks.
+     *
+     * @return The {@link WrappedBlockColor} mapping function. May be empty.
+     *
+     * @see BlockPropertyWrapperBuilder#withBlockColor(Function)
+     */
     public Optional<Function<Supplier<B>, WrappedBlockColor>> getBlockColorMapper() {
         return rawBuilder().flatMap(builder -> builder.blockColorMappingFunc);
     }
 
+    /**
+     * Gets the flammability mapping function used to define the fire-related properties of this BlockPropertyWrapper's
+     * parent block, where the left {@code int} represents the encouragement (ignition chance) and the right {@code int}
+     * represents the spread (burn chance).
+     *
+     * @return The flammability mapping function. May be empty.
+     *
+     * @see BlockPropertyWrapperBuilder#withFlammability(Function)
+     */
     public Optional<Function<Supplier<B>, IntIntMutablePair>> getFlammabilityMapper() {
         return rawBuilder().flatMap(builder -> builder.flammabilityMappingFunc);
     }
 
+    /**
+     * Gets the block stripping mapping function used to define the behavior when this BlockPropertyWrapper's parent
+     * block is right-clicked with an axe, returning the resultant {@link BlockState}.
+     *
+     * @return The block stripping mapping function. May be empty.
+     *
+     * @see BlockPropertyWrapperBuilder#withBlockStripping(Function)
+     */
     public Optional<Function<Supplier<B>, BlockState>> getBlockStrippingMapper() {
         return rawBuilder().flatMap(builder -> builder.blockStrippingMappingFunc);
     }
 
+    /**
+     * Gets the block tilling mapping function used to define the behavior when this BlockPropertyWrapper's parent
+     * block is right-clicked with a hoe. Returns a {@link Pair} containing a {@link Predicate} that determines if
+     * tilling can occur and a {@link Consumer} that handles the tilling action.
+     *
+     * @return The block tilling mapping function. May be empty.
+     *
+     * @see BlockPropertyWrapperBuilder#withBlockTilling(Function)
+     */
     public Optional<Function<Supplier<B>, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>>>> getBlockTillingMapper() {
         return rawBuilder().flatMap(builder -> builder.blockTillingMappingFunc);
     }
 
+    /**
+     * Gets the block flattening mapping function used to define the behavior when this BlockPropertyWrapper's parent
+     * block is right-clicked with a shovel, returning the resultant {@link BlockState}.
+     *
+     * @return The block flattening mapping function. May be empty.
+     *
+     * @see BlockPropertyWrapperBuilder#withBlockFlattening(Function)
+     */
     public Optional<Function<Supplier<B>, BlockState>> getBlockFlatteningMapper() {
         return rawBuilder().flatMap(builder -> builder.blockFlatteningMappingFunc);
     }
 
+    /**
+     * Gets the block oxidization mapping function used to define the oxidized state of this BlockPropertyWrapper's
+     * parent block. This is typically used for blocks that can weather or oxidize over time, such as copper blocks.
+     * Returns a {@link Supplier} of the oxidized block.
+     *
+     * @return The block oxidization mapping function. May be empty.
+     *
+     * @see BlockPropertyWrapperBuilder#withBlockOxidization(Function)
+     */
     public Optional<Function<Supplier<B>, Supplier<Block>>> getBlockOxidizationMapper() {
         return rawBuilder().flatMap(builder -> builder.blockOxidizationMappingFunc);
     }
 
+    /**
+     * Gets the block waxing mapping function used to define the waxed state of this BlockPropertyWrapper's parent
+     * block. This is typically used for blocks that can be waxed to prevent oxidation, such as copper blocks.
+     * Returns a {@link Supplier} of the waxed block.
+     *
+     * @return The block waxing mapping function. May be empty.
+     *
+     * @see BlockPropertyWrapperBuilder#withBlockWaxing(Function)
+     */
     public Optional<Function<Supplier<B>, Supplier<Block>>> getBlockWaxingMapper() {
         return rawBuilder().flatMap(builder -> builder.blockWaxingMappingFunc);
     }

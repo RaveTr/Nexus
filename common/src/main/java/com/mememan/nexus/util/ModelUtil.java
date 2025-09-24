@@ -242,12 +242,15 @@ public final class ModelUtil {
      * @see #slab(Supplier)
      */
     public static BlockModelDefinition slabTop(Supplier<Block> targetBlock, ResourceLocation bottomTexture, ResourceLocation topTexture, ResourceLocation sideTexture) {
+        ResourceLocation baseSlabId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
         return new BlockModelDefinition(ModelTemplates.SLAB_TOP)
                 .withTextureMapping(new TextureMapping()
                         .put(TextureSlot.BOTTOM, RegistryUtil.pickBlockPrefix(bottomTexture))
                         .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topTexture))
                         .put(TextureSlot.SIDE, RegistryUtil.pickBlockPrefix(sideTexture)))
-                .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get()))));
+                .withCustomName(baseSlabId.getPath().concat("_top"));
     }
 
     /**
@@ -274,7 +277,8 @@ public final class ModelUtil {
     }
 
     /**
-     * Creates a {@link BlockModelDefinition} with both {@link ModelTemplates#SLAB_BOTTOM} and {@link ModelTemplates#SLAB_TOP} templates.
+     * Creates a {@link BlockModelDefinition} with both {@link ModelTemplates#SLAB_BOTTOM} and {@link ModelTemplates#SLAB_TOP}
+     * templates.
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
@@ -301,13 +305,14 @@ public final class ModelUtil {
     }
 
     /**
-     * Creates a {@link BlockModelDefinition} with both {@link ModelTemplates#SLAB_BOTTOM} and {@link ModelTemplates#SLAB_TOP} templates.
+     * Creates a {@link BlockModelDefinition} with both {@link ModelTemplates#SLAB_BOTTOM} and {@link ModelTemplates#SLAB_TOP}
+     * templates. Automatically determines the slab textures based on the slab's registry ID ({@code chosenDoubleBlockId}).
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_bottom")}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_top")}</li>
-     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(chosenDoubleBlockId)))}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(chosenDoubleBlockId)))}</li>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(chosenDoubleBlockId)))}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the owner {@link Block} to be used for
@@ -320,7 +325,43 @@ public final class ModelUtil {
      * @see #slabTop(Supplier)
      */
     public static BlockModelDefinition slab(Supplier<Block> targetBlock) {
-        return slab(targetBlock, RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_bottom"), RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_top"), RegistryUtil.getTextureLocationOrDefault(targetBlock));
+        ResourceLocation baseSlabId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        String baseSlabPath = baseSlabId.getPath();
+        String targetDoubleBlockId = StringUtils.substringBefore(baseSlabId.getPath(), "_slab");
+        String chosenDoubleBlockId = baseSlabPath.contains("_brick_")
+                ? targetDoubleBlockId.concat("_bricks")
+                : targetDoubleBlockId.concat("_block");
+
+        return slab(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(chosenDoubleBlockId))), RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(chosenDoubleBlockId))), RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(chosenDoubleBlockId))));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with both {@link ModelTemplates#SLAB_BOTTOM} and {@link ModelTemplates#SLAB_TOP}
+     * templates, specifically designed for wooden slabs. Automatically determines the slab textures to use the
+     * corresponding "_planks" variant from the slab's registry ID.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(targetDoubleBlockId)))}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(targetDoubleBlockId)))}</li>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(targetDoubleBlockId)))}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the wooden slab {@link Block} to be used for
+     *                    texture lookup and model creation.
+     *
+     * @return A new {@link BlockModelDefinition} with slab templates using the "_planks" texture variant.
+     *
+     * @see #slab(Supplier)
+     * @see #woodenSlabBlockState(Supplier)
+     */
+    public static BlockModelDefinition woodenSlab(Supplier<Block> targetBlock) {
+        ResourceLocation baseSlabId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        String targetDoubleBlockId = StringUtils.substringBefore(baseSlabId.getPath(), "_slab").concat("_planks");
+
+        return slab(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(targetDoubleBlockId))), RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(targetDoubleBlockId))), RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(targetDoubleBlockId))));
     }
 
     /**
@@ -403,7 +444,7 @@ public final class ModelUtil {
      * @see #woodenSlabBlockState(Supplier)
      */
     public static BlockStateDefinition slabBlockState(Supplier<Block> targetBlock) {
-        ResourceLocation baseSlabId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock)
+        ResourceLocation baseSlabId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
                 .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
         String baseSlabPath = baseSlabId.getPath();
         String targetDoubleBlockModelPath = StringUtils.substringBefore(ModelLocationUtils.getModelLocation(targetBlock.get()).getPath(), "_slab");
@@ -435,14 +476,12 @@ public final class ModelUtil {
      * @see #slabBlockState(Supplier)
      */
     public static BlockStateDefinition woodenSlabBlockState(Supplier<Block> targetBlock) {
-        ResourceLocation baseSlabId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock)
+        ResourceLocation baseSlabId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
                 .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
         String targetDoubleBlockModelPath = StringUtils.substringBefore(ModelLocationUtils.getModelLocation(targetBlock.get()).getPath(), "_slab").concat("_planks");
 
         return slabBlockState(targetBlock, baseSlabId.withPath(targetDoubleBlockModelPath));
     }
-
-
 
     /**
      * Creates a {@link ItemModelDefinition} with the {@link ModelTemplates#FLAT_ITEM} template (for "generated" item

@@ -13,6 +13,7 @@ import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
 import com.mememan.nexus.util.JsonUtil;
 import com.mememan.nexus.util.ResourceLocationUtil;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.core.Direction;
 import net.minecraft.data.models.model.*;
 import net.minecraft.resources.ResourceLocation;
@@ -384,7 +385,7 @@ public interface ModelBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SE
 
         /**
          * Gets a flattened view of all contained model definitions within this definition and their children, all the
-         * way down the logical hierarchy.
+         * way down the logical hierarchy. Prunes duplicates from the resultant {@link List}.
          *
          * @return A flattened list of all contained model definitions.
          *
@@ -395,9 +396,13 @@ public interface ModelBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SE
 
             List<ModelDefinition> flattenedDefinitions = new ObjectArrayList<>();
             Queue<ModelDefinition> toProcess = new LinkedList<>(getOrdinalModelDefinitions());
+            Set<ModelDefinition> processed = new ObjectOpenHashSet<>();
 
             while (!toProcess.isEmpty()) { // Recursively flatten definitions all the way down
                 ModelDefinition next = toProcess.poll();
+                
+                if (!processed.add(next)) continue;
+                
                 flattenedDefinitions.add(next);
 
                 if (!next.getOrdinalModelDefinitions().isEmpty()) {
