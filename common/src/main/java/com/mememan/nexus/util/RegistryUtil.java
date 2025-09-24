@@ -112,6 +112,7 @@ public final class RegistryUtil {
      * {@link ResourceLocation} of the texture for the given {@code targetObj} from {@link #CACHED_TEXTURE_LOOKUP}.
      *
      * @param targetObj The {@link Supplier} of the target object to find the texture for.
+     *
      * @param <T> The type of the target object.
      *
      * @return An {@link Optional} containing the {@link ResourceLocation} of the texture for the given
@@ -130,6 +131,7 @@ public final class RegistryUtil {
      *
      * @param targetObj The {@link Supplier} of the target object to find the texture for.
      * @param defaultTextureLocation The default {@link ResourceLocation} to return if no matching texture is found.
+     *
      * @param <T> The type of the target object.
      *
      * @return The {@link ResourceLocation} of the texture for the given {@code targetObj}, or the provided
@@ -148,6 +150,7 @@ public final class RegistryUtil {
      * returning a default {@link ResourceLocation} with the namespace "invalid" if no matching texture is found.
      *
      * @param targetObj The {@link Supplier} of the target object to find the texture for.
+     *
      * @param <T> The type of the target object.
      *
      * @return The {@link ResourceLocation} of the texture for the given {@code targetObj}, or a default
@@ -167,6 +170,7 @@ public final class RegistryUtil {
      *
      * @param targetObj The {@link Supplier} of the target object to find the texture for.
      * @param prefix The prefix to prepend to the texture path.
+     *
      * @param <T> The type of the target object.
      *
      * @return The {@link ResourceLocation} of the texture for the given {@code targetObj} with the provided
@@ -186,6 +190,7 @@ public final class RegistryUtil {
      *
      * @param targetObj The {@link Supplier} of the target object to find the texture for.
      * @param suffix The suffix to append to the texture path.
+     *
      * @param <T> The type of the target object.
      *
      * @return The {@link ResourceLocation} of the texture for the given {@code targetObj} with the provided
@@ -331,6 +336,7 @@ public final class RegistryUtil {
      * @param baseObjSup The {@link Supplier} of the base object to map from.
      * @param targetObjIdMapper The {@link Function} to map the base object's registry ID to the target object's registry ID.
      * @param throwIfMissing Whether to throw an exception if the target object is not found.
+     *
      * @param <T> The type of the objects.
      *
      * @return An {@link Optional} containing a {@link Supplier} for the target object, or empty if not found and
@@ -365,6 +371,7 @@ public final class RegistryUtil {
      * @param baseObjSup The {@link Supplier} of the base object to map from.
      * @param targetObjIdMapper The {@link Function} to map the base object's registry ID to the target object's registry ID.
      * @param throwIfMissing Whether to throw an exception if the target object is not found.
+     *
      * @param <T> The type of the objects.
      *
      * @return An {@link Optional} containing the target object, or empty if not found and {@code throwIfMissing} is false.
@@ -385,6 +392,7 @@ public final class RegistryUtil {
      * @param baseObj The base object to map from.
      * @param targetObjIdMapper The {@link Function} to map the base object's registry ID to the target object's registry ID.
      * @param throwIfMissing Whether to throw an exception if the target object is not found.
+     *
      * @param <T> The type of the objects.
      *
      * @return An {@link Optional} containing the target object, or empty if not found and {@code throwIfMissing} is false.
@@ -404,6 +412,7 @@ public final class RegistryUtil {
      *
      * @param baseObjSup The {@link Supplier} of the base object to map from.
      * @param targetObjIdMapper The {@link Function} to map the base object's registry ID to the target object's registry ID.
+     *
      * @param <T> The type of the objects.
      *
      * @return An {@link Optional} containing a {@link Supplier} for the target object, or empty if not found.
@@ -421,6 +430,7 @@ public final class RegistryUtil {
      *
      * @param baseObjSup The {@link Supplier} of the base object to map from.
      * @param targetObjIdMapper The {@link Function} to map the base object's registry ID to the target object's registry ID.
+     *
      * @param <T> The type of the objects.
      *
      * @return An {@link Optional} containing the target object, or empty if not found.
@@ -438,6 +448,7 @@ public final class RegistryUtil {
      *
      * @param baseObj The base object to map from.
      * @param targetObjIdMapper The {@link Function} to map the base object's registry ID to the target object's registry ID.
+     *
      * @param <T> The type of the objects.
      *
      * @return An {@link Optional} containing the target object, or empty if not found.
@@ -455,6 +466,7 @@ public final class RegistryUtil {
      *
      * @param baseObjSup The {@link Supplier} of the base object to map from.
      * @param targetObjIdMapper The {@link Function} to map the base object's registry ID to the target object's registry ID.
+     *
      * @param <T> The type of the objects.
      *
      * @return A {@link Supplier} for the target object.
@@ -474,6 +486,7 @@ public final class RegistryUtil {
      *
      * @param baseObjSup The {@link Supplier} of the base object to map from.
      * @param targetObjIdMapper The {@link Function} to map the base object's registry ID to the target object's registry ID.
+     *
      * @param <T> The type of the objects.
      *
      * @return The target object.
@@ -493,6 +506,7 @@ public final class RegistryUtil {
      *
      * @param baseObj The base object to map from.
      * @param targetObjIdMapper The {@link Function} to map the base object's registry ID to the target object's registry ID.
+     *
      * @param <T> The type of the objects.
      *
      * @return The target object.

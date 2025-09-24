@@ -338,8 +338,9 @@ public final class ModelUtil {
                 : baseSlabPath.endsWith("_block")
                 ? targetDoubleBlockId
                 : targetDoubleBlockId.concat("_block");
+        ResourceLocation defaultedTexLoc = RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(chosenDoubleBlockId)));
 
-        return slab(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(chosenDoubleBlockId))), RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(chosenDoubleBlockId))), RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(chosenDoubleBlockId))));
+        return slab(targetBlock, defaultedTexLoc, defaultedTexLoc, defaultedTexLoc);
     }
 
     /**
@@ -366,8 +367,9 @@ public final class ModelUtil {
         ResourceLocation baseSlabId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
                 .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
         String targetDoubleBlockId = StringUtils.substringBefore(baseSlabId.getPath(), "_slab").concat("_planks");
+        ResourceLocation defaultedTexLoc = RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(targetDoubleBlockId)));
 
-        return slab(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(targetDoubleBlockId))), RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(targetDoubleBlockId))), RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseSlabId.withPath(targetDoubleBlockId))));
+        return slab(targetBlock, defaultedTexLoc, defaultedTexLoc, defaultedTexLoc);
     }
 
     /**
@@ -550,8 +552,9 @@ public final class ModelUtil {
                 : targetBlockId.endsWith("_block")
                 ? targetBlockId
                 : targetBlockId.concat("_block");
+        ResourceLocation defaultedTexLoc = RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseStairsId.withPath(chosenBlockId)));
 
-        return stairsStraight(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseStairsId.withPath(chosenBlockId))), RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseStairsId.withPath(chosenBlockId))), RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseStairsId.withPath(chosenBlockId))));
+        return stairsStraight(targetBlock, defaultedTexLoc, defaultedTexLoc, defaultedTexLoc);
     }
 
     /**
@@ -615,8 +618,9 @@ public final class ModelUtil {
                 : targetBlockId.endsWith("_block")
                 ? targetBlockId
                 : targetBlockId.concat("_block");
+        ResourceLocation defaultedTexLoc = RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseStairsId.withPath(chosenBlockId)));
 
-        return stairsInner(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseStairsId.withPath(chosenBlockId))), RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseStairsId.withPath(chosenBlockId))), RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseStairsId.withPath(chosenBlockId))));
+        return stairsInner(targetBlock, defaultedTexLoc, defaultedTexLoc, defaultedTexLoc);
     }
 
     /**
@@ -680,8 +684,9 @@ public final class ModelUtil {
                 : targetBlockId.endsWith("_block")
                 ? targetBlockId
                 : targetBlockId.concat("_block");
+        ResourceLocation defaultedTexLoc = RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseStairsId.withPath(chosenBlockId)));
 
-        return stairsOuter(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseStairsId.withPath(chosenBlockId))), RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseStairsId.withPath(chosenBlockId))), RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseStairsId.withPath(chosenBlockId))));
+        return stairsOuter(targetBlock, defaultedTexLoc, defaultedTexLoc, defaultedTexLoc);
     }
 
     /**
@@ -739,8 +744,9 @@ public final class ModelUtil {
                 : targetBlockId.endsWith("_block")
                 ? targetBlockId
                 : targetBlockId.concat("_block");
+        ResourceLocation defaultedTexLoc = RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseStairsId.withPath(chosenBlockId)));
 
-        return stairs(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseStairsId.withPath(chosenBlockId))), RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseStairsId.withPath(chosenBlockId))), RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseStairsId.withPath(chosenBlockId))));
+        return stairs(targetBlock, defaultedTexLoc, defaultedTexLoc, defaultedTexLoc);
     }
 
     /**
@@ -766,8 +772,9 @@ public final class ModelUtil {
         ResourceLocation baseStairsId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
                 .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
         String targetBlockId = StringUtils.substringBefore(baseStairsId.getPath(), "_stairs").concat(baseStairsId.getPath().contains("_plank_") ? "s" : "_planks");
+        ResourceLocation defaultedTexLoc = RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseStairsId.withPath(targetBlockId)));
 
-        return stairs(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseStairsId.withPath(targetBlockId))), RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseStairsId.withPath(targetBlockId))), RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseStairsId.withPath(targetBlockId))));
+        return stairs(targetBlock, defaultedTexLoc, defaultedTexLoc, defaultedTexLoc);
     }
 
     /**

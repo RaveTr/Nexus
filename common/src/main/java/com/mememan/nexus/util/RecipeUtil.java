@@ -97,15 +97,17 @@ public final class RecipeUtil {
             IL parentItemLike = parentItemLikeSup.get();
             ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
                     .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
-
-            ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, resultantSlabMapper.apply(parentItemLike), 4)
-                    .define('P', parentItemLike)
-                    .pattern("P")
-                    .pattern("PP")
-                    .pattern("PPP")
-                    .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
-                    .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            if (resultantItemLike != null) {
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, resultantSlabMapper.apply(parentItemLike), 4)
+                        .define('P', parentItemLike)
+                        .pattern("P")
+                        .pattern("PP")
+                        .pattern("PPP")
+                        .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
+                        .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            }
         };
     }
 
@@ -122,15 +124,18 @@ public final class RecipeUtil {
             IL parentItemLike = parentItemLikeSup.get();
             ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
                     .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
-            ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, resultantSlabMapper.apply(parentItemLike), 4)
-                    .define('P', parentItemLike)
-                    .pattern("P")
-                    .pattern("PP")
-                    .pattern("PPP")
-                    .group("wooden_stairs")
-                    .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
-                    .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            if (resultantItemLike != null) {
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, resultantSlabMapper.apply(parentItemLike), 4)
+                        .define('P', parentItemLike)
+                        .pattern("P")
+                        .pattern("PP")
+                        .pattern("PPP")
+                        .group("wooden_stairs")
+                        .unlockedBy("has_" + parentItemLikeId.getPath(), PredicateUtil.has(parentItemLike))
+                        .save(finishedRecipe, recipeIdMapper.apply(parentItemLikeId));
+            }
         };
     }
 

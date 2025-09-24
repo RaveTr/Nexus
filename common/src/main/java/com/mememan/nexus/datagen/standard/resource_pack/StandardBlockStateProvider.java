@@ -66,7 +66,7 @@ public class StandardBlockStateProvider implements ModDataProvider {
 
         targetBPW.getBlockStateDefinition().ifPresentOrElse(bsdMappingFunc -> {
             BlockStateDefinition mappedBSD = bsdMappingFunc.apply(parentObjSup);
-            JsonElement generatedState = parseBlockStateJson(mappedBSD, blockClassName, blockName);
+            JsonElement generatedState = serializeBlockStateJson(mappedBSD, blockClassName, blockName);
             Runnable stateSaveTask = () -> {
                 NexusConstants.LOGGER.info("[{}] [Generating Block State for {}]: {}", getModId(), blockClassName, blockStateRL);
 
@@ -121,7 +121,7 @@ public class StandardBlockStateProvider implements ModDataProvider {
         return dupeStrat;
     }
 
-    protected static JsonElement parseBlockStateJson(BlockStateDefinition mappedBSD, String blockClassName, String blockName) {
+    protected static JsonElement serializeBlockStateJson(BlockStateDefinition mappedBSD, String blockClassName, String blockName) {
         BlockStateGenerator stateGen = Optional.ofNullable(mappedBSD.getBlockStateSupplier())
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Failed to retrieve block state generator for %s: %s (No generator present via %s#getBlockStateSupplier())", blockClassName, blockName, mappedBSD.getClass().getSimpleName())));
         return Optional.ofNullable(stateGen.get())
