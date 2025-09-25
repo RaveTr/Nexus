@@ -1,8 +1,5 @@
 package com.mememan.nexus.util;
 
-import com.ibm.icu.text.PluralRules;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.List;
 import java.util.Locale;
 
@@ -129,5 +126,36 @@ public final class StringUtil {
         if (word.endsWith("y") && !word.endsWith("ay") && !word.endsWith("ey") && !word.endsWith("iy") && !word.endsWith("oy") && !word.endsWith("uy")) return word.substring(0, word.length() - 1) + "ies";
         else if (word.endsWith("s") || word.endsWith("x") || word.endsWith("z") || word.endsWith("ch") || word.endsWith("sh")) return word + "es";
         else return word + "s";
+    }
+
+    /**
+     * Checks if the specified {@code suffix} is present in the given array of {@code suffixes}.
+     *
+     * @param suffixes The array of suffixes to search through.
+     * @param suffix The suffix to find within the array.
+     *
+     * @return {@code true} if the {@code suffix} is found in the {@code suffixes} array, otherwise {@code false}.
+     *         Returns {@code false} if either parameter is {@code null}.
+     */
+    public static boolean containsSuffix(String[] suffixes, String suffix) {
+        if (suffixes == null || suffix == null) return false;
+        for (String s : suffixes) if (s.equals(suffix)) return true;
+
+        return false;
+    }
+
+    /**
+     * Extracts the last token from a path-like string, where tokens are separated by underscores.
+     *
+     * @param path The input string to process, typically a registry path or similar identifier.
+     *
+     * @return The substring after the last underscore in {@code path}, or the entire string if no
+     *         underscore is present. Returns the input string if it is {@code null} or empty.
+     */
+    public static String lastToken(String path) {
+        if (path == null || path.isEmpty()) return path;
+        int targetIdx = path.lastIndexOf('_');
+
+        return targetIdx == -1 ? path : path.substring(targetIdx + 1);
     }
 }

@@ -1,6 +1,8 @@
-// 1.20.1	2025-09-24T21:41:05.680599	nexus/Loot Tables [nexus]
-9bfbefb2895049baa24f029b0a4086f3b7b12fa2 data\nexus\loot_tables\blocks\test_slab.json
+// 1.20.1	2025-09-25T19:19:05.4802796	nexus/Loot Tables [nexus]
 191708da416a1d7167eec75a12fc48b31716b58c data\nexus\loot_tables\blocks\test_block_3.json
-c57fc4254aa19fa8e4fc36c9e781baf632dae111 data\nexus\loot_tables\blocks\test_block_stairs.json
+1efd81967e4a82c48f90de53ddabd5e47cbcc8fa data\nexus\loot_tables\blocks\test_block_slab.json
 0f12718e9c4079cfa95b3f1739e4a43af2b83d76 data\nexus\loot_tables\blocks\test_block.json
+82c4a1bfeaec4b72e0de4cf43f24fe4150d1b5a8 data\nexus\loot_tables\blocks\test_stairs.json
 dd288e9a11e02b5790f843e0ea14715ed73fe32d data\nexus\loot_tables\blocks\test_block_wall.json
+a3bfae1253992c8bb2be3e132ee54e6758d2d7a2 data\nexus\loot_tables\blocks\test_button.json
+f0ea804ee9108dd9e6d8eccc152be2aea28f8f1e data\nexus\loot_tables\blocks\test_block_pressure_plate.json

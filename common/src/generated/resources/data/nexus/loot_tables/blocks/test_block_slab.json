@@ -10,7 +10,7 @@
               "add": false,
               "conditions": [
                 {
-                  "block": "nexus:test_slab",
+                  "block": "nexus:test_block_slab",
                   "condition": "minecraft:block_state_property",
                   "properties": {
                     "type": "double"
@@ -21,7 +21,7 @@
               "function": "minecraft:set_count"
             }
           ],
-          "name": "nexus:test_slab"
+          "name": "nexus:test_block_slab"
         }
       ],
       "functions": [

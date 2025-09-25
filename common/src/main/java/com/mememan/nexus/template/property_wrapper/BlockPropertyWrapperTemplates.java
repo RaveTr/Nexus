@@ -253,16 +253,16 @@ public final class BlockPropertyWrapperTemplates {
      * slab loot table. Blockstate and model assume the existence of an equivalent block with the suffix
      * {@code "_planks"}. Additionally, tags the parent block with {@link BlockTags#WOODEN_SLABS}.
      *
-     * @see ModelUtil#woodenSlab(Supplier)
-     * @see ModelUtil#woodenSlabBlockState(Supplier)
+     * @see ModelUtil#slab(Supplier)
+     * @see ModelUtil#slabBlockState(Supplier)
      * @see LootUtil#dropSlab(Supplier)
      */
     public static final BlockPropertyWrapper<Block> WOODEN_SLAB = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_AXE)
             .withTag(() -> BlockTags.WOODEN_SLABS)
-            .withModelDefinition(ModelUtil::woodenSlab)
-            .withBlockStateDefinition(ModelUtil::woodenSlabBlockState)
+            .withModelDefinition(ModelUtil::slab)
+            .withBlockStateDefinition(ModelUtil::slabBlockState)
             .withLootTable(LootUtil::dropSlab)
             .withFlammability(RegistryUtil::standardWoodFlammability)
             .build();
@@ -271,14 +271,14 @@ public final class BlockPropertyWrapperTemplates {
      * Blockstate and model assume the existence of an equivalent block with the suffix {@code "_planks"}. Additionally,
      * tags the parent block with {@link BlockTags#WOODEN_STAIRS}.
      *
-     * @see ModelUtil#woodenStairs(Supplier)
+     * @see ModelUtil#stairs(Supplier)
      * @see ModelUtil#stairsBlockState(Supplier)
      */
     public static final BlockPropertyWrapper<Block> WOODEN_STAIRS = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_AXE)
             .withTag(() -> BlockTags.WOODEN_STAIRS)
-            .withModelDefinition(ModelUtil::woodenStairs)
+            .withModelDefinition(ModelUtil::stairs)
             .withBlockStateDefinition(ModelUtil::stairsBlockState)
             .withFlammability(RegistryUtil::standardWoodFlammability)
             .build();
@@ -288,14 +288,14 @@ public final class BlockPropertyWrapperTemplates {
      * attach face, and facing direction. Blockstate and model assume the existence of an equivalent block with the
      * suffix {@code "_planks"} Additionally, tags the parent block with {@link BlockTags#WOODEN_BUTTONS}.
      *
-     * @see ModelUtil#woodenButton(Supplier)
+     * @see ModelUtil#button(Supplier)
      * @see ModelUtil#buttonBlockState(Supplier)
      */
     public static final BlockPropertyWrapper<Block> WOODEN_BUTTON = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_AXE)
             .withTag(() -> BlockTags.WOODEN_BUTTONS)
-            .withModelDefinition(ModelUtil::woodenButton)
+            .withModelDefinition(ModelUtil::button)
             .withBlockStateDefinition(ModelUtil::buttonBlockState)
             .build();
     /**
@@ -304,14 +304,14 @@ public final class BlockPropertyWrapperTemplates {
      * Blockstate and model assume the existence of an equivalent block with the suffix {@code "_planks"}. Additionally,
      * tags the parent block with {@link BlockTags#WOODEN_PRESSURE_PLATES}.
      *
-     * @see ModelUtil#woodenPressurePlate(Supplier)
+     * @see ModelUtil#pressurePlate(Supplier)
      * @see ModelUtil#pressurePlateBlockState(Supplier)
      */
     public static final BlockPropertyWrapper<Block> WOODEN_PRESSURE_PLATE = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_AXE)
             .withTag(() -> BlockTags.WOODEN_PRESSURE_PLATES)
-            .withModelDefinition(ModelUtil::woodenPressurePlate)
+            .withModelDefinition(ModelUtil::pressurePlate)
             .withBlockStateDefinition(ModelUtil::pressurePlateBlockState)
             .build();
 

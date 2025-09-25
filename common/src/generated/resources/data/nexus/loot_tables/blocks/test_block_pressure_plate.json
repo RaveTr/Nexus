@@ -10,7 +10,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "nexus:test_block_stairs"
+          "name": "nexus:test_block_pressure_plate"
         }
       ],
       "rolls": 1.0

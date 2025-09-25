@@ -1,6 +1,8 @@
-// 1.20.1	2025-09-24T21:41:05.6816011	nexus/BlockStates [nexus]
+// 1.20.1	2025-09-25T19:19:05.4812797	nexus/BlockStates [nexus]
+a8c5a2aa5cb3648aba6661086d4e67c33ac828b4 assets\nexus\blockstates\test_stairs.json
+a1375c8309b9ec28c51d377d9fe0d0e09edee73d assets\nexus\blockstates\test_block_slab.json
+71d82312b43cc65657bd8b94d34116d781acf86f assets\nexus\blockstates\test_block_pressure_plate.json
 e95cde701ce70f0613676689d328f88f0cf6122a assets\nexus\blockstates\test_block.json
 af49a2f11b578babf157b1fff6a14a03550e2a97 assets\nexus\blockstates\test_block_wall.json
+a852182233d086576bd315b17b4308b19effe924 assets\nexus\blockstates\test_button.json
 0530fb9a7274363b77d8ff101812ee0526513574 assets\nexus\blockstates\test_block_3.json
-df96a8d209761f90e402805e5120cc26d11008e9 assets\nexus\blockstates\test_slab.json
-884a00e6d4d3852c3f825ca981e09a6d766f3e9a assets\nexus\blockstates\test_block_stairs.json

@@ -328,32 +328,6 @@ public final class ModelUtil {
     }
 
     /**
-     * Creates a {@link BlockModelDefinition} with both {@link ModelTemplates#SLAB_BOTTOM} and {@link ModelTemplates#SLAB_TOP}
-     * templates, specifically designed for wooden slabs. Automatically determines the slab textures to use the
-     * corresponding "_planks" variant from the slab's registry ID.
-     * <p>
-     *     <h3>Required Texture Slots</h3>
-     *     <ul>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickWoodBlockTexture(targetBlock)}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickWoodBlockTexture(targetBlock)}</li>
-     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.pickWoodBlockTexture(targetBlock)}</li>
-     *     </ul>
-     *
-     * @param targetBlock The {@code Supplier<Block>} representing the wooden slab {@link Block} to be used for
-     *                    texture lookup and model creation.
-     *
-     * @return A new {@link BlockModelDefinition} with slab templates using the "_planks" texture variant.
-     *
-     * @see #slab(Supplier)
-     * @see #woodenSlabBlockState(Supplier)
-     */
-    public static BlockModelDefinition woodenSlab(Supplier<Block> targetBlock) {
-        ResourceLocation defaultedTexLoc = RegistryUtil.pickWoodenBlockTexture(targetBlock);
-
-        return slab(targetBlock, defaultedTexLoc, defaultedTexLoc, defaultedTexLoc);
-    }
-
-    /**
      * Creates a {@link BlockStateDefinition} for a slab block using {@link MultiVariantGenerator} with different models
      * for each {@link SlabType}.
      * <p>
@@ -373,7 +347,6 @@ public final class ModelUtil {
      *
      * @see #slabBlockState(Supplier, ResourceLocation)
      * @see #slabBlockState(Supplier)
-     * @see #woodenSlabBlockState(Supplier)
      */
     public static BlockStateDefinition slabBlockState(Supplier<Block> targetBlock, ResourceLocation bottomModel, ResourceLocation topModel, ResourceLocation doubleSlabModel) {
         return new BlockStateDefinition(targetBlock)
@@ -406,7 +379,6 @@ public final class ModelUtil {
      *
      * @see #slabBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
      * @see #slabBlockState(Supplier)
-     * @see #woodenSlabBlockState(Supplier)
      */
     public static BlockStateDefinition slabBlockState(Supplier<Block> targetBlock, ResourceLocation doubleBlockModel) {
         return slabBlockState(targetBlock, ModelLocationUtils.getModelLocation(targetBlock.get()), ModelLocationUtils.getModelLocation(targetBlock.get(), "_top"), doubleBlockModel);
@@ -430,34 +402,9 @@ public final class ModelUtil {
      *
      * @see #slabBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
      * @see #slabBlockState(Supplier, ResourceLocation)
-     * @see #woodenSlabBlockState(Supplier)
      */
     public static BlockStateDefinition slabBlockState(Supplier<Block> targetBlock) {
         return slabBlockState(targetBlock, RegistryUtil.pickBlockId(targetBlock));
-    }
-
-    /**
-     * Overloaded variant of {@link #slabBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)}.
-     * Creates a {@link BlockStateDefinition} for a wooden slab block using {@link MultiVariantGenerator} with different models
-     * for each {@link SlabType}. Automatically determines the double slab model to use the "_planks" variant.
-     * <p>
-     *     <h3>Variants</h3>
-     *     <ul>
-     *         <li>{@link SlabType#BOTTOM} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get())}</li>
-     *         <li>{@link SlabType#TOP} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_top")}</li>
-     *         <li>{@link SlabType#DOUBLE} -> {@code RegistryUtil.pickWoodBlockId(targetBlock)}</li>
-     *     </ul>
-     *
-     * @param targetBlock The {@code Supplier<Block>} representing the wooden slab {@link Block} to create the blockstate for.
-     *
-     * @return A {@link BlockStateDefinition} with slab-specific variants using the "_planks" double slab model.
-     *
-     * @see #slabBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
-     * @see #slabBlockState(Supplier, ResourceLocation)
-     * @see #slabBlockState(Supplier)
-     */
-    public static BlockStateDefinition woodenSlabBlockState(Supplier<Block> targetBlock) {
-        return slabBlockState(targetBlock, RegistryUtil.pickWoodenBlockId(targetBlock));
     }
 
     /**
@@ -676,31 +623,6 @@ public final class ModelUtil {
      */
     public static BlockModelDefinition stairs(Supplier<Block> targetBlock) {
         ResourceLocation defaultedTexLoc = RegistryUtil.pickBlockTexture(targetBlock);
-
-        return stairs(targetBlock, defaultedTexLoc, defaultedTexLoc, defaultedTexLoc);
-    }
-
-    /**
-     * Creates a {@link BlockModelDefinition} with all three stairs variants (straight, inner, outer) specifically
-     * designed for wooden stairs. Uses the {@link ModelTemplates#STAIRS_STRAIGHT} template with the "_planks"
-     * texture variant. The straight variant includes a corresponding item model.
-     * <p>
-     *     <h3>Required Texture Slots</h3>
-     *     <ul>
-     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.pickWoodBlockTexture(targetBlock)}</li>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickWoodBlockTexture(targetBlock)}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickWoodBlockTexture(targetBlock)}</li>
-     *     </ul>
-     *
-     * @param targetBlock The {@code Supplier<Block>} representing the wooden stairs {@link Block} to be used for
-     *                    texture lookup and model creation.
-     *
-     * @return A new {@link BlockModelDefinition} with all wooden stairs variants.
-     *
-     * @see #stairs(Supplier)
-     */
-    public static BlockModelDefinition woodenStairs(Supplier<Block> targetBlock) {
-        ResourceLocation defaultedTexLoc = RegistryUtil.pickWoodenBlockTexture(targetBlock);
 
         return stairs(targetBlock, defaultedTexLoc, defaultedTexLoc, defaultedTexLoc);
     }
@@ -1317,7 +1239,6 @@ public final class ModelUtil {
      * @see #buttonInventory(Supplier, ResourceLocation)
      * @see #buttonPressed(Supplier, ResourceLocation)
      * @see #button(Supplier)
-     * @see #woodenButton(Supplier)
      */
     public static BlockModelDefinition button(Supplier<Block> targetBlock, ResourceLocation buttonTexture) {
         return buttonDefault(buttonTexture)
@@ -1343,36 +1264,9 @@ public final class ModelUtil {
      * @see #buttonInventory(Supplier, ResourceLocation)
      * @see #buttonPressed(Supplier, ResourceLocation)
      * @see #button(Supplier, ResourceLocation)
-     * @see #woodenButton(Supplier)
      */
     public static BlockModelDefinition button(Supplier<Block> targetBlock) {
         return button(targetBlock, RegistryUtil.pickBlockTexture(targetBlock));
-    }
-
-    /**
-     * Creates a comprehensive {@link BlockModelDefinition} with all three button variants specifically designed for
-     * wooden buttons. Uses the {@link ModelTemplates#BUTTON}, {@link ModelTemplates#BUTTON_INVENTORY}, and
-     * {@link ModelTemplates#BUTTON_PRESSED} templates with the "_planks" texture variant. Automatically determines
-     * the button texture to use the corresponding "_planks" variant from the button's registry ID.
-     * <p>
-     *     <h3>Required Texture Slots</h3>
-     *     <ul>
-     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickWoodBlockTexture(targetBlock)}</li>
-     *     </ul>
-     *
-     * @param targetBlock The {@code Supplier<Block>} representing the wooden button {@link Block} to be used for
-     *                    texture lookup and model creation.
-     *
-     * @return A new {@link BlockModelDefinition} with all wooden button variants.
-     *
-     * @see #buttonDefault(ResourceLocation)
-     * @see #buttonInventory(Supplier, ResourceLocation)
-     * @see #buttonPressed(Supplier, ResourceLocation)
-     * @see #button(Supplier, ResourceLocation)
-     * @see #button(Supplier)
-     */
-    public static BlockModelDefinition woodenButton(Supplier<Block> targetBlock) {
-        return button(targetBlock, RegistryUtil.pickWoodenBlockTexture(targetBlock));
     }
 
     /**
@@ -1513,7 +1407,6 @@ public final class ModelUtil {
      * @see #pressurePlateDown(Supplier, ResourceLocation)
      * @see #pressurePlate(Supplier, ResourceLocation)
      * @see #pressurePlate(Supplier)
-     * @see #woodenPressurePlate(Supplier)
      */
     public static BlockModelDefinition pressurePlateUp(Supplier<Block> targetBlock, ResourceLocation pressurePlateTexture) {
         return new BlockModelDefinition(ModelTemplates.PRESSURE_PLATE_UP)
@@ -1539,7 +1432,6 @@ public final class ModelUtil {
      * @see #pressurePlateUp(Supplier, ResourceLocation)
      * @see #pressurePlate(Supplier, ResourceLocation)
      * @see #pressurePlate(Supplier)
-     * @see #woodenPressurePlate(Supplier)
      */
     public static BlockModelDefinition pressurePlateDown(Supplier<Block> targetBlock, ResourceLocation pressurePlateTexture) {
         ResourceLocation basePressurePlateId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
@@ -1569,7 +1461,6 @@ public final class ModelUtil {
      * @see #pressurePlateUp(Supplier, ResourceLocation)
      * @see #pressurePlateDown(Supplier, ResourceLocation)
      * @see #pressurePlate(Supplier)
-     * @see #woodenPressurePlate(Supplier)
      */
     public static BlockModelDefinition pressurePlate(Supplier<Block> targetBlock, ResourceLocation pressurePlateTexture) {
         return pressurePlateUp(targetBlock, pressurePlateTexture)
@@ -1594,35 +1485,9 @@ public final class ModelUtil {
      * @see #pressurePlateUp(Supplier, ResourceLocation)
      * @see #pressurePlateDown(Supplier, ResourceLocation)
      * @see #pressurePlate(Supplier, ResourceLocation)
-     * @see #woodenPressurePlate(Supplier)
      */
     public static BlockModelDefinition pressurePlate(Supplier<Block> targetBlock) {
         return pressurePlate(targetBlock, RegistryUtil.pickBlockTexture(targetBlock));
-    }
-
-    /**
-     * Creates a comprehensive {@link BlockModelDefinition} with both pressure plate variants specifically designed for
-     * wooden pressure plates. Uses the {@link ModelTemplates#PRESSURE_PLATE_UP} and {@link ModelTemplates#PRESSURE_PLATE_DOWN}
-     * templates with the "_planks" texture variant. Automatically determines the pressure plate texture to use the
-     * corresponding "_planks" variant from the pressure plate's registry ID.
-     * <p>
-     *     <h3>Required Texture Slots</h3>
-     *     <ul>
-     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickWoodenBlockTexture(targetBlock)}</li>
-     *     </ul>
-     *
-     * @param targetBlock The {@code Supplier<Block>} representing the wooden pressure plate {@link Block} to be used for
-     *                    texture lookup and model creation.
-     *
-     * @return A new {@link BlockModelDefinition} with both wooden pressure plate variants.
-     *
-     * @see #pressurePlateUp(Supplier, ResourceLocation)
-     * @see #pressurePlateDown(Supplier, ResourceLocation)
-     * @see #pressurePlate(Supplier, ResourceLocation)
-     * @see #pressurePlate(Supplier)
-     */
-    public static BlockModelDefinition woodenPressurePlate(Supplier<Block> targetBlock) {
-        return pressurePlate(targetBlock, RegistryUtil.pickWoodenBlockTexture(targetBlock));
     }
 
     /**

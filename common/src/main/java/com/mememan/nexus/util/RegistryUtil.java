@@ -37,6 +37,25 @@ public final class RegistryUtil {
                     texLookup.add(new ResourceLocation(assumedModId, formattedTexturePath));
                 }
             }));
+    private static final String[] DERIVED_BLOCK_SUFFIXES = new String[] { // Longest-first ordering to avoid partial matches (Stored in a raw array cuz no need for a whole list or map)
+            "_hanging_sign",
+            "_pressure_plate",
+            "_fence_gate",
+            "_trapdoor",
+            "_button",
+            "_stairs",
+            "_slab",
+            "_fence",
+            "_wall",
+            "_door",
+            "_sign"
+    };
+    private static final String[] WOOD_COMPONENT_SUFFIXES = new String[] { // Wood-only components; if we strip one of these and the base looks like a wood family name, append _planks.
+            "_door", "_trapdoor", "_button", "_pressure_plate", "_fence", "_fence_gate", "_sign", "_hanging_sign"
+    };
+    private static final String[] VANILLA_WOOD_MATERIALS = new String[] {
+            "oak", "spruce", "birch", "jungle", "acacia", "dark_oak", "mangrove", "cherry", "bamboo", "crimson", "warped"
+    };
 
     private RegistryUtil() {
         throw new IllegalAccessError("Attempted to construct instance of utility class! (RegistryUtil)");
@@ -570,7 +589,6 @@ public final class RegistryUtil {
      * @throws IllegalArgumentException If no registry entry is present for the target block.
      *
      * @see #pickBlockId(Supplier)
-     * @see #pickWoodenBlockId(Supplier)
      */
     public static ResourceLocation pickBlockId(Supplier<Block> targetBlock, Function<String, String> pathIdMapper) {
         ResourceLocation baseBlockId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
@@ -582,63 +600,79 @@ public final class RegistryUtil {
     }
 
     /**
-     * Modifies the registry path of the target block to create a block variant by ensuring the path contains
-     * {@code "_block"} or {@code "_bricks"}. This method is specifically designed for creating block variants from base block names.
+     * Derives a base block registry path from the given block's registry ID. This infers the "original" block name
+     * from common derived variants (e.g., slabs, stairs, walls, fences, buttons, pressure plates, doors, trapdoors,
+     * signs), applying standard normalization and family heuristics.
      * <p>
-     *     <h3>Block ID Mapping</h3>
+     *     <h3>Derivation Rules</h3>
      *     <ul>
-     *         <li>If the base path contains {@code "_brick_"}: Replaces with {@code "_bricks"}</li>
-     *         <li>If the base path ends with {@code "_block"}: Returns the path unchanged</li>
-     *         <li>Otherwise: Appends {@code "_block"} to the base path (everything before the last underscore)</li>
+     *         <li>Strips a known derived suffix (longest-first): {@code _hanging_sign}, {@code _pressure_plate},
+     *         {@code _fence_gate}, {@code _trapdoor}, {@code _button}, {@code _stairs}, {@code _slab},
+     *         {@code _fence}, {@code _wall}, {@code _door}, {@code _sign}.</li>
+     *         <li>Normalizes singular family terms to plurals: {@code _brick} → {@code _bricks},
+     *         {@code _plank} → {@code _planks} (applies to middle and trailing positions).</li>
+     *         <li>Wood-family heuristic: for wood-only components, if the base looks like a vanilla wood key
+     *         (e.g., {@code oak}, {@code spruce}, {@code bamboo}, {@code crimson}, {@code warped}), append
+     *         {@code _planks} unless already present.</li>
+     *         <li>Appends {@code _block} when appropriate: if the source contained {@code _block} anywhere, or a
+     *         derived suffix was stripped and the resulting base is not a plural family ({@code _bricks}/{@code _planks}).</li>
      *     </ul>
      *
-     * @param targetBlock The {@link Supplier} of the target {@link Block} to create a block variant ID for.
+     * @param targetBlock The {@link Supplier} of the target {@link Block} to derive a base block ID for.
      *
-     * @return A new {@link ResourceLocation} with the modified registry path containing {@code "_block"} or {@code "_bricks"}.
+     * @return A new {@link ResourceLocation} whose path is the inferred base block ID.
      *
      * @throws IllegalArgumentException If no registry entry is present for the target block.
      *
      * @see #pickBlockId(Supplier, Function)
-     * @see #pickWoodenBlockId(Supplier)
      */
     public static ResourceLocation pickBlockId(Supplier<Block> targetBlock) {
         return pickBlockId(targetBlock, baseBlockPath -> {
-            String targetBlockId = baseBlockPath.substring(0, baseBlockPath.lastIndexOf("_"));
+            String work = baseBlockPath;
+            String removedSuffix = null;
 
-            return baseBlockPath.contains("_brick_")
-                    ? targetBlockId.concat("_bricks")
-                    : targetBlockId.endsWith("_block")
-                    ? targetBlockId
-                    : targetBlockId.concat("_block");
-        });
-    }
+            final boolean sourceContainedBlockToken = baseBlockPath.contains("_block");
 
-    /**
-     * Modifies the registry path of the target block to create a wooden variant by ensuring the path contains
-     * {@code "_planks"}. This method is specifically designed for creating wooden block variants from base block names.
-     * <p>
-     *     <h3>Wooden Block ID Mapping</h3>
-     *     <ul>
-     *         <li>If the base path contains {@code "_plank_"} or ends with {@code "_planks"}: Returns the path unchanged</li>
-     *         <li>Otherwise: Appends {@code "_planks"} to the base path (everything before the last underscore)</li>
-     *     </ul>
-     *
-     * @param targetBlock The {@link Supplier} of the target {@link Block} to create a wooden variant ID for.
-     *
-     * @return A new {@link ResourceLocation} with the modified registry path containing {@code "_planks"}.
-     *
-     * @throws IllegalArgumentException If no registry entry is present for the target block.
-     *
-     * @see #pickBlockId(Supplier)
-     * @see #pickBlockId(Supplier, Function)
-     */
-    public static ResourceLocation pickWoodenBlockId(Supplier<Block> targetBlock) {
-        return pickBlockId(targetBlock, baseBlockPath -> {
-            String targetBlockId = baseBlockPath.substring(0, baseBlockPath.lastIndexOf("_"));
+            for (String suffix : DERIVED_BLOCK_SUFFIXES) { // Strip a known derived suffix if present (e.g., _slab, _stairs, _pressure_plate, ...)
+                if (work.endsWith(suffix)) {
+                    work = work.substring(0, work.length() - suffix.length());
+                    removedSuffix = suffix;
+                    break;
+                }
+            }
 
-            return targetBlockId.contains("_plank_") || targetBlockId.endsWith("_planks")
-                    ? targetBlockId
-                    : targetBlockId.concat("_planks");
+            // Normalize brick/plank singulars to plurals in both middle and trailing positions.
+            if (work.contains("_brick_")) work = work.replace("_brick_", "_bricks_");
+            if (work.endsWith("_brick")) work = work.substring(0, work.length() - 6).concat("_bricks");
+            if (work.contains("_plank_")) work = work.replace("_plank_", "_planks_");
+            if (work.endsWith("_plank")) work = work.substring(0, work.length() - 6).concat("_planks");
+
+            boolean woodFamilyBaseDetected = work.endsWith("_planks");
+
+            if (removedSuffix != null && StringUtil.containsSuffix(WOOD_COMPONENT_SUFFIXES, removedSuffix)) { // Wood-family heuristic: if we stripped a wood-only component and the base looks like a wood key, append _planks.
+                String lastToken = StringUtil.lastToken(work);
+
+                if (StringUtil.containsSuffix(VANILLA_WOOD_MATERIALS, work) || StringUtil.containsSuffix(VANILLA_WOOD_MATERIALS, lastToken)) {
+                    if (!work.endsWith("_planks") && !work.contains("plank")) work = work.concat("_planks");
+
+                    woodFamilyBaseDetected = true;
+                }
+            }
+
+            boolean endsWithFamilyBase = work.endsWith("_bricks") || work.endsWith("_planks"); // Prefer <base>_block unless it's plural or a wood family base (always keep "_block" if present)
+
+            if (!endsWithFamilyBase) {
+                /*
+                 * Append "_block" when either:
+                 * - Source name contains "_block" anywhere
+                 * - We stripped a derived suffix and the base is not a wood family (e.g. <wood>_planks)
+                 */
+                boolean expectBlockBase = sourceContainedBlockToken || (removedSuffix != null && !woodFamilyBaseDetected);
+
+                if (expectBlockBase && !work.endsWith("_block")) work = work.concat("_block");
+            }
+
+            return work;
         });
     }
 
@@ -653,26 +687,8 @@ public final class RegistryUtil {
      *
      * @see #getTextureLocationOrDefault(Supplier)
      * @see #pickBlockId(Supplier)
-     * @see #pickWoodenBlockTexture(Supplier)
      */
     public static ResourceLocation pickBlockTexture(Supplier<Block> targetBlock) {
         return RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(pickBlockId(targetBlock)));
-    }
-
-    /**
-     * Retrieves the texture location for the target block using wooden block ID transformation. This method first
-     * attempts to find a texture matching the block's registry ID, then falls back to using the transformed wooden
-     * block ID if no direct texture match is found. Specifically designed for wooden block variants.
-     *
-     * @param targetBlock The {@link Supplier} of the target {@link Block} to find the wooden texture location for.
-     *
-     * @return The {@link ResourceLocation} of the texture for the target wooden block.
-     *
-     * @see #getTextureLocationOrDefault(Supplier)
-     * @see #pickWoodenBlockId(Supplier)
-     * @see #pickBlockTexture(Supplier)
-     */
-    public static ResourceLocation pickWoodenBlockTexture(Supplier<Block> targetBlock) {
-        return RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(pickWoodenBlockId(targetBlock)));
     }
 }
