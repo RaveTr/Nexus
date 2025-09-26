@@ -1548,12 +1548,934 @@ public final class ModelUtil {
     }
 
     /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#DOOR_BOTTOM_LEFT} template for door blocks.
+     * This model represents the bottom-left portion of a closed door and is used for the lower half of doors
+     * positioned on the left side when viewed from the front. The model will be automatically named
+     * {@code baseDoorId.getPath() + "_bottom_left"}.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickBlockPrefix(bottomDoorTexture)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(topDoorTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
+     *                    automatic model naming.
+     * @param bottomDoorTexture The {@link ResourceLocation} representing the texture of the bottom portion of the door.
+     * @param topDoorTexture The {@link ResourceLocation} representing the texture of the top portion of the door.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#DOOR_BOTTOM_LEFT} template.
+     *
+     * @see #doorBottomLeft(Supplier)
+     * @see #doorBottomLeftOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBottomRight(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopLeft(Supplier, ResourceLocation, ResourceLocation)
+     * @see #door(Supplier)
+     */
+    public static BlockModelDefinition doorBottomLeft(Supplier<Block> targetBlock, ResourceLocation bottomDoorTexture, ResourceLocation topDoorTexture) {
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return new BlockModelDefinition(ModelTemplates.DOOR_BOTTOM_LEFT)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.BOTTOM, RegistryUtil.pickBlockPrefix(bottomDoorTexture))
+                        .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topDoorTexture)))
+                .withCustomName(baseDoorId.getPath().concat("_bottom_left"));
+    }
+
+    /**
+     * Overloaded variant of {@link #doorBottomLeft(Supplier, ResourceLocation, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#DOOR_BOTTOM_LEFT} template for door blocks using automatic texture resolution.
+     * Automatically determines the door textures based on the door's registry ID using "_bottom" and "_top" suffixes.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom"))}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top"))}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#DOOR_BOTTOM_LEFT} template.
+     *
+     * @see #doorBottomLeft(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBottomLeftOpen(Supplier)
+     * @see #doorBottomRight(Supplier)
+     * @see #doorTopLeft(Supplier)
+     * @see #door(Supplier)
+     */
+    public static BlockModelDefinition doorBottomLeft(Supplier<Block> targetBlock) {
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return doorBottomLeft(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#DOOR_BOTTOM_LEFT_OPEN} template for door blocks.
+     * This model represents the bottom-left portion of an open door and is used for the lower half of doors
+     * positioned on the left side when viewed from the front, rotated 90 degrees to show the open state.
+     * The model will be automatically named {@code baseDoorId.getPath() + "_bottom_left_open"}.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickBlockPrefix(bottomDoorTexture)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(topDoorTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
+     *                    automatic model naming.
+     * @param bottomDoorTexture The {@link ResourceLocation} representing the texture of the bottom portion of the door.
+     * @param topDoorTexture The {@link ResourceLocation} representing the texture of the top portion of the door.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#DOOR_BOTTOM_LEFT_OPEN} template.
+     *
+     * @see #doorBottomLeftOpen(Supplier)
+     * @see #doorBottomLeft(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBottomRightOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopLeftOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #door(Supplier)
+     */
+    public static BlockModelDefinition doorBottomLeftOpen(Supplier<Block> targetBlock, ResourceLocation bottomDoorTexture, ResourceLocation topDoorTexture) {
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return new BlockModelDefinition(ModelTemplates.DOOR_BOTTOM_LEFT_OPEN)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.BOTTOM, RegistryUtil.pickBlockPrefix(bottomDoorTexture))
+                        .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topDoorTexture)))
+                .withCustomName(baseDoorId.getPath().concat("_bottom_left_open"));
+    }
+
+    /**
+     * Overloaded variant of {@link #doorBottomLeftOpen(Supplier, ResourceLocation, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#DOOR_BOTTOM_LEFT_OPEN} template for door blocks using automatic texture resolution.
+     * Automatically determines the door textures based on the door's registry ID using "_bottom" and "_top" suffixes.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom"))}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top"))}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#DOOR_BOTTOM_LEFT_OPEN} template.
+     *
+     * @see #doorBottomLeftOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBottomLeft(Supplier)
+     * @see #doorBottomRightOpen(Supplier)
+     * @see #doorTopLeftOpen(Supplier)
+     * @see #door(Supplier)
+     */
+    public static BlockModelDefinition doorBottomLeftOpen(Supplier<Block> targetBlock) {
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return doorBottomLeftOpen(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#DOOR_BOTTOM_RIGHT} template for door blocks.
+     * This model represents the bottom-right portion of a closed door and is used for the lower half of doors
+     * positioned on the right side when viewed from the front (mirror of the left variant).
+     * The model will be automatically named {@code baseDoorId.getPath() + "_bottom_right"}.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickBlockPrefix(bottomDoorTexture)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(topDoorTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
+     *                    automatic model naming.
+     * @param bottomDoorTexture The {@link ResourceLocation} representing the texture of the bottom portion of the door.
+     * @param topDoorTexture The {@link ResourceLocation} representing the texture of the top portion of the door.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#DOOR_BOTTOM_RIGHT} template.
+     *
+     * @see #doorBottomRight(Supplier)
+     * @see #doorBottomLeft(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBottomRightOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopRight(Supplier, ResourceLocation, ResourceLocation)
+     * @see #door(Supplier)
+     */
+    public static BlockModelDefinition doorBottomRight(Supplier<Block> targetBlock, ResourceLocation bottomDoorTexture, ResourceLocation topDoorTexture) {
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return new BlockModelDefinition(ModelTemplates.DOOR_BOTTOM_RIGHT)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.BOTTOM, RegistryUtil.pickBlockPrefix(bottomDoorTexture))
+                        .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topDoorTexture)))
+                .withCustomName(baseDoorId.getPath().concat("_bottom_right"));
+    }
+
+    /**
+     * Overloaded variant of {@link #doorBottomRight(Supplier, ResourceLocation, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#DOOR_BOTTOM_RIGHT} template for door blocks using automatic texture resolution.
+     * Automatically determines the door textures based on the door's registry ID using "_bottom" and "_top" suffixes.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom"))}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top"))}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#DOOR_BOTTOM_RIGHT} template.
+     *
+     * @see #doorBottomRight(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBottomLeft(Supplier)
+     * @see #doorBottomRightOpen(Supplier)
+     * @see #doorTopRight(Supplier)
+     * @see #door(Supplier)
+     */
+    public static BlockModelDefinition doorBottomRight(Supplier<Block> targetBlock) {
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return doorBottomRight(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#DOOR_BOTTOM_RIGHT_OPEN} template for door blocks.
+     * This model represents the bottom-right portion of an open door and is used for the lower half of doors
+     * positioned on the right side when viewed from the front, rotated 270 degrees to show the open state.
+     * The model will be automatically named {@code baseDoorId.getPath() + "_bottom_right_open"}.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickBlockPrefix(bottomDoorTexture)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(topDoorTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
+     *                    automatic model naming.
+     * @param bottomDoorTexture The {@link ResourceLocation} representing the texture of the bottom portion of the door.
+     * @param topDoorTexture The {@link ResourceLocation} representing the texture of the top portion of the door.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#DOOR_BOTTOM_RIGHT_OPEN} template.
+     *
+     * @see #doorBottomRightOpen(Supplier)
+     * @see #doorBottomRight(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBottomLeftOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopRightOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #door(Supplier)
+     */
+    public static BlockModelDefinition doorBottomRightOpen(Supplier<Block> targetBlock, ResourceLocation bottomDoorTexture, ResourceLocation topDoorTexture) {
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return new BlockModelDefinition(ModelTemplates.DOOR_BOTTOM_RIGHT_OPEN)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.BOTTOM, RegistryUtil.pickBlockPrefix(bottomDoorTexture))
+                        .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topDoorTexture)))
+                .withCustomName(baseDoorId.getPath().concat("_bottom_right_open"));
+    }
+
+    /**
+     * Overloaded variant of {@link #doorBottomRightOpen(Supplier, ResourceLocation, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#DOOR_BOTTOM_RIGHT_OPEN} template for door blocks using automatic texture resolution.
+     * Automatically determines the door textures based on the door's registry ID using "_bottom" and "_top" suffixes.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom"))}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top"))}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#DOOR_BOTTOM_RIGHT_OPEN} template.
+     *
+     * @see #doorBottomRightOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBottomRight(Supplier)
+     * @see #doorBottomLeftOpen(Supplier)
+     * @see #doorTopRightOpen(Supplier)
+     * @see #door(Supplier)
+     */
+    public static BlockModelDefinition doorBottomRightOpen(Supplier<Block> targetBlock) {
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return doorBottomRightOpen(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#DOOR_TOP_LEFT} template for door blocks.
+     * This model represents the top-left portion of a closed door and is used for the upper half of doors
+     * positioned on the left side when viewed from the front.
+     * The model will be automatically named {@code baseDoorId.getPath() + "_top_left"}.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickBlockPrefix(bottomDoorTexture)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(topDoorTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
+     *                    automatic model naming.
+     * @param bottomDoorTexture The {@link ResourceLocation} representing the texture of the bottom portion of the door.
+     * @param topDoorTexture The {@link ResourceLocation} representing the texture of the top portion of the door.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#DOOR_TOP_LEFT} template.
+     *
+     * @see #doorTopLeft(Supplier)
+     * @see #doorBottomLeft(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopLeftOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopRight(Supplier, ResourceLocation, ResourceLocation)
+     * @see #door(Supplier)
+     */
+    public static BlockModelDefinition doorTopLeft(Supplier<Block> targetBlock, ResourceLocation bottomDoorTexture, ResourceLocation topDoorTexture) {
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return new BlockModelDefinition(ModelTemplates.DOOR_TOP_LEFT)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.BOTTOM, RegistryUtil.pickBlockPrefix(bottomDoorTexture))
+                        .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topDoorTexture)))
+                .withCustomName(baseDoorId.getPath().concat("_top_left"));
+    }
+
+    /**
+     * Overloaded variant of {@link #doorTopLeft(Supplier, ResourceLocation, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#DOOR_TOP_LEFT} template for door blocks using automatic texture resolution.
+     * Automatically determines the door textures based on the door's registry ID using "_bottom" and "_top" suffixes.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom"))}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top"))}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#DOOR_TOP_LEFT} template.
+     *
+     * @see #doorTopLeft(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBottomLeft(Supplier)
+     * @see #doorTopLeftOpen(Supplier)
+     * @see #doorTopRight(Supplier)
+     * @see #door(Supplier)
+     */
+    public static BlockModelDefinition doorTopLeft(Supplier<Block> targetBlock) {
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return doorTopLeft(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#DOOR_TOP_LEFT_OPEN} template for door blocks.
+     * This model represents the top-left portion of an open door and is used for the upper half of doors
+     * positioned on the left side when viewed from the front, rotated 90 degrees to show the open state.
+     * The model will be automatically named {@code baseDoorId.getPath() + "_top_left_open"}.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickBlockPrefix(bottomDoorTexture)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(topDoorTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
+     *                    automatic model naming.
+     * @param bottomDoorTexture The {@link ResourceLocation} representing the texture of the bottom portion of the door.
+     * @param topDoorTexture The {@link ResourceLocation} representing the texture of the top portion of the door.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#DOOR_TOP_LEFT_OPEN} template.
+     *
+     * @see #doorTopLeftOpen(Supplier)
+     * @see #doorTopLeft(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBottomLeftOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopRightOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #door(Supplier)
+     */
+    public static BlockModelDefinition doorTopLeftOpen(Supplier<Block> targetBlock, ResourceLocation bottomDoorTexture, ResourceLocation topDoorTexture) {
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return new BlockModelDefinition(ModelTemplates.DOOR_TOP_LEFT_OPEN)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.BOTTOM, RegistryUtil.pickBlockPrefix(bottomDoorTexture))
+                        .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topDoorTexture)))
+                .withCustomName(baseDoorId.getPath().concat("_top_left_open"));
+    }
+
+    /**
+     * Overloaded variant of {@link #doorTopLeftOpen(Supplier, ResourceLocation, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#DOOR_TOP_LEFT_OPEN} template for door blocks using automatic texture resolution.
+     * Automatically determines the door textures based on the door's registry ID using "_bottom" and "_top" suffixes.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom"))}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top"))}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#DOOR_TOP_LEFT_OPEN} template.
+     *
+     * @see #doorTopLeftOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopLeft(Supplier)
+     * @see #doorBottomLeftOpen(Supplier)
+     * @see #doorTopRightOpen(Supplier)
+     * @see #door(Supplier)
+     */
+    public static BlockModelDefinition doorTopLeftOpen(Supplier<Block> targetBlock) {
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return doorTopLeftOpen(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#DOOR_TOP_RIGHT} template for door blocks.
+     * This model represents the top-right portion of a closed door and is used for the upper half of doors
+     * positioned on the right side when viewed from the front (mirror of the left variant).
+     * The model will be automatically named {@code baseDoorId.getPath() + "_top_right"}.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickBlockPrefix(bottomDoorTexture)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(topDoorTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
+     *                    automatic model naming.
+     * @param bottomDoorTexture The {@link ResourceLocation} representing the texture of the bottom portion of the door.
+     * @param topDoorTexture The {@link ResourceLocation} representing the texture of the top portion of the door.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#DOOR_TOP_RIGHT} template.
+     *
+     * @see #doorTopRight(Supplier)
+     * @see #doorTopLeft(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBottomRight(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopRightOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #door(Supplier)
+     */
+    public static BlockModelDefinition doorTopRight(Supplier<Block> targetBlock, ResourceLocation bottomDoorTexture, ResourceLocation topDoorTexture) {
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return new BlockModelDefinition(ModelTemplates.DOOR_TOP_RIGHT)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.BOTTOM, RegistryUtil.pickBlockPrefix(bottomDoorTexture))
+                        .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topDoorTexture)))
+                .withCustomName(baseDoorId.getPath().concat("_top_right"));
+    }
+
+    /**
+     * Overloaded variant of {@link #doorTopRight(Supplier, ResourceLocation, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#DOOR_TOP_RIGHT} template for door blocks using automatic texture resolution.
+     * Automatically determines the door textures based on the door's registry ID using "_bottom" and "_top" suffixes.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom"))}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top"))}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#DOOR_TOP_RIGHT} template.
+     *
+     * @see #doorTopRight(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopLeft(Supplier)
+     * @see #doorBottomRight(Supplier)
+     * @see #doorTopRightOpen(Supplier)
+     * @see #door(Supplier)
+     */
+    public static BlockModelDefinition doorTopRight(Supplier<Block> targetBlock) {
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return doorTopRight(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#DOOR_TOP_RIGHT_OPEN} template for door blocks.
+     * This model represents the top-right portion of an open door and is used for the upper half of doors
+     * positioned on the right side when viewed from the front, rotated 270 degrees to show the open state.
+     * The model will be automatically named {@code baseDoorId.getPath() + "_top_right_open"}.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickBlockPrefix(bottomDoorTexture)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(topDoorTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
+     *                    automatic model naming.
+     * @param bottomDoorTexture The {@link ResourceLocation} representing the texture of the bottom portion of the door.
+     * @param topDoorTexture The {@link ResourceLocation} representing the texture of the top portion of the door.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#DOOR_TOP_RIGHT_OPEN} template.
+     *
+     * @see #doorTopRightOpen(Supplier)
+     * @see #doorTopRight(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBottomRightOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopLeftOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #door(Supplier)
+     */
+    public static BlockModelDefinition doorTopRightOpen(Supplier<Block> targetBlock, ResourceLocation bottomDoorTexture, ResourceLocation topDoorTexture) {
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return new BlockModelDefinition(ModelTemplates.DOOR_TOP_RIGHT_OPEN)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.BOTTOM, RegistryUtil.pickBlockPrefix(bottomDoorTexture))
+                        .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topDoorTexture)))
+                .withCustomName(baseDoorId.getPath().concat("_top_right_open"));
+    }
+
+    /**
+     * Overloaded variant of {@link #doorTopRightOpen(Supplier, ResourceLocation, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#DOOR_TOP_RIGHT_OPEN} template for door blocks using automatic texture resolution.
+     * Automatically determines the door textures based on the door's registry ID using "_bottom" and "_top" suffixes.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom"))}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top"))}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#DOOR_TOP_RIGHT_OPEN} template.
+     *
+     * @see #doorTopRightOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopRight(Supplier)
+     * @see #doorBottomRightOpen(Supplier)
+     * @see #doorTopLeftOpen(Supplier)
+     * @see #door(Supplier)
+     */
+    public static BlockModelDefinition doorTopRightOpen(Supplier<Block> targetBlock) {
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return doorTopRightOpen(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
+    }
+
+    /**
+     * Creates an {@link ItemModelDefinition} for door items using the {@link ModelTemplates#FLAT_ITEM} template.
+     * This method generates the item model for door blocks used in inventory and item rendering.
+     * Automatically determines the item texture based on the door's registry ID.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
+     *                    automatic item texture location resolution.
+     *
+     * @return An {@link ItemModelDefinition} with the {@link ModelTemplates#FLAT_ITEM} template for door items.
+     *
+     * @see #basicGenerated(ResourceLocation)
+     * @see #door(Supplier)
+     * @see #door(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
+     */
+    public static ItemModelDefinition doorItem(Supplier<Block> targetBlock) {
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return basicGenerated(RegistryUtil.getTextureLocationOrDefault(baseDoorId));
+    }
+
+    /**
+     * Creates a comprehensive {@link BlockModelDefinition} with all eight door variants (bottom-left, bottom-left-open,
+     * bottom-right, bottom-right-open, top-left, top-left-open, top-right, top-right-open) using the respective
+     * {@link ModelTemplates#DOOR_BOTTOM_LEFT}, {@link ModelTemplates#DOOR_BOTTOM_LEFT_OPEN}, {@link ModelTemplates#DOOR_BOTTOM_RIGHT},
+     * {@link ModelTemplates#DOOR_BOTTOM_RIGHT_OPEN}, {@link ModelTemplates#DOOR_TOP_LEFT}, {@link ModelTemplates#DOOR_TOP_LEFT_OPEN},
+     * {@link ModelTemplates#DOOR_TOP_RIGHT}, and {@link ModelTemplates#DOOR_TOP_RIGHT_OPEN} templates. Also includes
+     * a corresponding item model for inventory rendering.
+     * <p>
+     * <h3>Required Texture Slots</h3>
+     * <ul>
+     *     <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickBlockPrefix(bottomTexture)}</li>
+     *     <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(topTexture)}</li>
+     *     <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.pickItemPrefix(itemTexture)}</li>
+     * </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     * @param bottomTexture The {@link ResourceLocation} representing the texture of the bottom portion of the door.
+     * @param topTexture    The {@link ResourceLocation} representing the texture of the top portion of the door.
+     * @param itemTexture   The {@link ResourceLocation} representing the texture for the door item model.
+     *
+     * @return A {@link BlockModelDefinition} with all door variants and item model.
+     *
+     * @see #door(Supplier, ResourceLocation, ResourceLocation)
+     * @see #door(Supplier)
+     * @see #doorBottomLeft(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBottomLeftOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBottomRight(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBottomRightOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopLeft(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopLeftOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopRight(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopRightOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorItem(Supplier)
+     */
+    public static BlockModelDefinition door(Supplier<Block> targetBlock, ResourceLocation bottomTexture, ResourceLocation topTexture, ResourceLocation itemTexture) {
+        return doorBottomLeft(targetBlock, bottomTexture, topTexture)
+                .withOrdinalModelDefinitions(
+                        doorBottomLeftOpen(targetBlock, bottomTexture, topTexture),
+                        doorBottomRight(targetBlock, bottomTexture, topTexture),
+                        doorBottomRightOpen(targetBlock, bottomTexture, topTexture),
+                        doorTopLeft(targetBlock, bottomTexture, topTexture),
+                        doorTopLeftOpen(targetBlock, bottomTexture, topTexture),
+                        doorTopRight(targetBlock, bottomTexture, topTexture),
+                        doorTopRightOpen(targetBlock, bottomTexture, topTexture),
+                        basicGenerated(itemTexture)
+                );
+    }
+
+    /**
+     * Overloaded variant of {@link #door(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)}. Creates a comprehensive
+     * {@link BlockModelDefinition} with all eight door variants using automatic item texture resolution. Automatically
+     * determines the item texture via {@link RegistryUtil#getTextureLocation(ResourceLocation, String)} under the
+     * "item" directory.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickBlockPrefix(bottomTexture)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(topTexture)}</li>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.pickItemPrefix(derivedItemTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     * @param bottomTexture The {@link ResourceLocation} representing the texture of the bottom portion of the door.
+     * @param topTexture The {@link ResourceLocation} representing the texture of the top portion of the door.
+     *
+     * @return A {@link BlockModelDefinition} with all door variants using automatic item texture resolution.
+     *
+     * @see #door(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
+     * @see #door(Supplier)
+     * @see #doorBottomLeft(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBottomLeftOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBottomRight(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBottomRightOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopLeft(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopLeftOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopRight(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopRightOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorItem(Supplier)
+     */
+    public static BlockModelDefinition door(Supplier<Block> targetBlock, ResourceLocation bottomTexture, ResourceLocation topTexture) {
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return door(targetBlock, bottomTexture, topTexture, RegistryUtil.getTextureLocation(baseDoorId, "item").orElse(baseDoorId));
+    }
+
+    /**
+     * Overloaded variant of {@link #door(Supplier, ResourceLocation, ResourceLocation)}. Creates a comprehensive
+     * {@link BlockModelDefinition} with all eight door variants using automatic texture resolution. Automatically
+     * determines the door textures based on the door's registry ID using "_bottom" and "_top" suffixes, and
+     * derives the item texture automatically.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom"))}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top"))}</li>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.pickItemPrefix(derivedItemTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with all door variants using automatic texture resolution.
+     *
+     * @see #door(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
+     * @see #door(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBottomLeft(Supplier)
+     * @see #doorBottomLeftOpen(Supplier)
+     * @see #doorBottomRight(Supplier)
+     * @see #doorBottomRightOpen(Supplier)
+     * @see #doorTopLeft(Supplier)
+     * @see #doorTopLeftOpen(Supplier)
+     * @see #doorTopRight(Supplier)
+     * @see #doorTopRightOpen(Supplier)
+     * @see #doorItem(Supplier)
+     */
+    public static BlockModelDefinition door(Supplier<Block> targetBlock) {
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+
+        return door(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
+    }
+
+    /**
+     * Creates a {@link BlockStateDefinition} for door blocks using {@link MultiVariantGenerator} with models selected by
+     * {@link BlockStateProperties#HORIZONTAL_FACING}, {@link BlockStateProperties#DOUBLE_BLOCK_HALF},
+     * {@link BlockStateProperties#DOOR_HINGE}, and {@link BlockStateProperties#OPEN}.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link BlockStateProperties#HORIZONTAL_FACING} + {@link BlockStateProperties#DOUBLE_BLOCK_HALF}
+     *         + {@link BlockStateProperties#DOOR_HINGE} + {@link BlockStateProperties#OPEN} -> Various model combinations</li>
+     *         <li>{@link DoubleBlockHalf#LOWER} + {@link DoorHingeSide#LEFT} + {@code false} -> {@code bottomLeftDoorModel} with Y-rotations by facing:
+     *         {@link Direction#EAST}: 0°, {@link Direction#SOUTH}: 90°, {@link Direction#WEST}: 180°, {@link Direction#NORTH}: 270°</li>
+     *         <li>{@link DoubleBlockHalf#LOWER} + {@link DoorHingeSide#RIGHT} + {@code false} -> {@code bottomRightDoorModel} with Y-rotations by facing:
+     *         {@link Direction#EAST}: 0°, {@link Direction#SOUTH}: 90°, {@link Direction#WEST}: 180°, {@link Direction#NORTH}: 270°</li>
+     *         <li>{@link DoubleBlockHalf#LOWER} + {@link DoorHingeSide#LEFT} + {@code true} -> {@code bottomLeftDoorOpenModel} with Y-rotations by facing:
+     *         {@link Direction#EAST}: 90°, {@link Direction#SOUTH}: 180°, {@link Direction#WEST}: 270°, {@link Direction#NORTH}: 0°</li>
+     *         <li>{@link DoubleBlockHalf#LOWER} + {@link DoorHingeSide#RIGHT} + {@code true} -> {@code bottomRightDoorOpenModel} with Y-rotations by facing:
+     *         {@link Direction#EAST}: 270°, {@link Direction#SOUTH}: 0°, {@link Direction#WEST}: 90°, {@link Direction#NORTH}: 180°</li>
+     *         <li>{@link DoubleBlockHalf#UPPER} + {@link DoorHingeSide#LEFT} + {@code false} -> {@code topLeftDoorModel} with Y-rotations by facing:
+     *         {@link Direction#EAST}: 0°, {@link Direction#SOUTH}: 90°, {@link Direction#WEST}: 180°, {@link Direction#NORTH}: 270°</li>
+     *         <li>{@link DoubleBlockHalf#UPPER} + {@link DoorHingeSide#RIGHT} + {@code false} -> {@code topRightDoorModel} with Y-rotations by facing:
+     *         {@link Direction#EAST}: 0°, {@link Direction#SOUTH}: 90°, {@link Direction#WEST}: 180°, {@link Direction#NORTH}: 270°</li>
+     *         <li>{@link DoubleBlockHalf#UPPER} + {@link DoorHingeSide#LEFT} + {@code true} -> {@code topLeftDoorOpenModel} with Y-rotations by facing:
+     *         {@link Direction#EAST}: 90°, {@link Direction#SOUTH}: 180°, {@link Direction#WEST}: 270°, {@link Direction#NORTH}: 0°</li>
+     *         <li>{@link DoubleBlockHalf#UPPER} + {@link DoorHingeSide#RIGHT} + {@code true} -> {@code topRightDoorOpenModel} with Y-rotations by facing:
+     *         {@link Direction#EAST}: 270°, {@link Direction#SOUTH}: 0°, {@link Direction#WEST}: 90°, {@link Direction#NORTH}: 180°</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to create the blockstate for.
+     * @param topLeftDoorModel Model for the top-left closed door variant.
+     * @param topLeftDoorOpenModel Model for the top-left open door variant.
+     * @param bottomLeftDoorModel Model for the bottom-left closed door variant.
+     * @param bottomLeftDoorOpenModel Model for the bottom-left open door variant.
+     * @param topRightDoorModel Model for the top-right closed door variant.
+     * @param topRightDoorOpenModel Model for the top-right open door variant.
+     * @param bottomRightDoorModel Model for the bottom-right closed door variant.
+     * @param bottomRightDoorOpenModel Model for the bottom-right open door variant.
+     *
+     * @return A {@link BlockStateDefinition} with door variants mapped across facing, half, hinge, and open properties.
+     *
+     * @see #doorBlockState(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBlockState(Supplier)
+     * @see #door(Supplier)
+     * @see #doorBottomLeft(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBottomLeftOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBottomRight(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBottomRightOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopLeft(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopLeftOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopRight(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopRightOpen(Supplier, ResourceLocation, ResourceLocation)
+     */
+    public static BlockStateDefinition doorBlockState(Supplier<Block> targetBlock, ResourceLocation topLeftDoorModel, ResourceLocation topLeftDoorOpenModel, ResourceLocation bottomLeftDoorModel, ResourceLocation bottomLeftDoorOpenModel, ResourceLocation topRightDoorModel, ResourceLocation topRightDoorOpenModel, ResourceLocation bottomRightDoorModel, ResourceLocation bottomRightDoorOpenModel) {
+        return new BlockStateDefinition(targetBlock)
+                .withBlockStateSupplier(MultiVariantGenerator.multiVariant(targetBlock.get()).with(
+                        PropertyDispatch.properties(BlockStateProperties.HORIZONTAL_FACING, BlockStateProperties.DOUBLE_BLOCK_HALF, BlockStateProperties.DOOR_HINGE, BlockStateProperties.OPEN)
+                                .select(Direction.EAST, DoubleBlockHalf.LOWER, DoorHingeSide.LEFT, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, bottomLeftDoorModel))
+                                .select(Direction.SOUTH, DoubleBlockHalf.LOWER, DoorHingeSide.LEFT, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, bottomLeftDoorModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
+                                .select(Direction.WEST, DoubleBlockHalf.LOWER, DoorHingeSide.LEFT, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, bottomLeftDoorModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180))
+                                .select(Direction.NORTH, DoubleBlockHalf.LOWER, DoorHingeSide.LEFT, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, bottomLeftDoorModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270))
+                                .select(Direction.EAST, DoubleBlockHalf.LOWER, DoorHingeSide.RIGHT, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, bottomRightDoorModel))
+                                .select(Direction.SOUTH, DoubleBlockHalf.LOWER, DoorHingeSide.RIGHT, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, bottomRightDoorModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
+                                .select(Direction.WEST, DoubleBlockHalf.LOWER, DoorHingeSide.RIGHT, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, bottomRightDoorModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180))
+                                .select(Direction.NORTH, DoubleBlockHalf.LOWER, DoorHingeSide.RIGHT, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, bottomRightDoorModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270))
+                                .select(Direction.EAST, DoubleBlockHalf.LOWER, DoorHingeSide.LEFT, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, bottomLeftDoorOpenModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
+                                .select(Direction.SOUTH, DoubleBlockHalf.LOWER, DoorHingeSide.LEFT, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, bottomLeftDoorOpenModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180))
+                                .select(Direction.WEST, DoubleBlockHalf.LOWER, DoorHingeSide.LEFT, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, bottomLeftDoorOpenModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270))
+                                .select(Direction.NORTH, DoubleBlockHalf.LOWER, DoorHingeSide.LEFT, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, bottomLeftDoorOpenModel))
+                                .select(Direction.EAST, DoubleBlockHalf.LOWER, DoorHingeSide.RIGHT, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, bottomRightDoorOpenModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270))
+                                .select(Direction.SOUTH, DoubleBlockHalf.LOWER, DoorHingeSide.RIGHT, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, bottomRightDoorOpenModel))
+                                .select(Direction.WEST, DoubleBlockHalf.LOWER, DoorHingeSide.RIGHT, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, bottomRightDoorOpenModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
+                                .select(Direction.NORTH, DoubleBlockHalf.LOWER, DoorHingeSide.RIGHT, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, bottomRightDoorOpenModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180))
+                                .select(Direction.EAST, DoubleBlockHalf.UPPER, DoorHingeSide.LEFT, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, topLeftDoorModel))
+                                .select(Direction.SOUTH, DoubleBlockHalf.UPPER, DoorHingeSide.LEFT, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, topLeftDoorModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
+                                .select(Direction.WEST, DoubleBlockHalf.UPPER, DoorHingeSide.LEFT, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, topLeftDoorModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180))
+                                .select(Direction.NORTH, DoubleBlockHalf.UPPER, DoorHingeSide.LEFT, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, topLeftDoorModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270))
+                                .select(Direction.EAST, DoubleBlockHalf.UPPER, DoorHingeSide.RIGHT, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, topRightDoorModel))
+                                .select(Direction.SOUTH, DoubleBlockHalf.UPPER, DoorHingeSide.RIGHT, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, topRightDoorModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
+                                .select(Direction.WEST, DoubleBlockHalf.UPPER, DoorHingeSide.RIGHT, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, topRightDoorModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180))
+                                .select(Direction.NORTH, DoubleBlockHalf.UPPER, DoorHingeSide.RIGHT, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, topRightDoorModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270))
+                                .select(Direction.EAST, DoubleBlockHalf.UPPER, DoorHingeSide.LEFT, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, topLeftDoorOpenModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
+                                .select(Direction.SOUTH, DoubleBlockHalf.UPPER, DoorHingeSide.LEFT, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, topLeftDoorOpenModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180))
+                                .select(Direction.WEST, DoubleBlockHalf.UPPER, DoorHingeSide.LEFT, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, topLeftDoorOpenModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270))
+                                .select(Direction.NORTH, DoubleBlockHalf.UPPER, DoorHingeSide.LEFT, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, topLeftDoorOpenModel))
+                                .select(Direction.EAST, DoubleBlockHalf.UPPER, DoorHingeSide.RIGHT, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, topRightDoorOpenModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270))
+                                .select(Direction.SOUTH, DoubleBlockHalf.UPPER, DoorHingeSide.RIGHT, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, topRightDoorOpenModel))
+                                .select(Direction.WEST, DoubleBlockHalf.UPPER, DoorHingeSide.RIGHT, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, topRightDoorOpenModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
+                                .select(Direction.NORTH, DoubleBlockHalf.UPPER, DoorHingeSide.RIGHT, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, topRightDoorOpenModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180))
+                ));
+    }
+
+    /**
+     * Overload that derives the eight door-part models from two base models using the naming scheme
+     * {@code topDoorModel}_{left|left_open|right|right_open} and
+     * {@code bottomDoorModel}_{left|left_open|right|right_open}, then applies the same variant mapping as the
+     * full-parameter overload.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link BlockStateProperties#HORIZONTAL_FACING} + {@link BlockStateProperties#DOUBLE_BLOCK_HALF}
+     *         + {@link BlockStateProperties#DOOR_HINGE} + {@link BlockStateProperties#OPEN} -> Derived model combinations</li>
+     *         <li>{@link DoubleBlockHalf#LOWER} + {@link DoorHingeSide#LEFT} + {@code false} -> {@code topDoorModel + "_left"} with Y-rotations by facing:
+     *         {@link Direction#EAST}: 0°, {@link Direction#SOUTH}: 90°, {@link Direction#WEST}: 180°, {@link Direction#NORTH}: 270°</li>
+     *         <li>{@link DoubleBlockHalf#LOWER} + {@link DoorHingeSide#RIGHT} + {@code false} -> {@code bottomDoorModel + "_right"} with Y-rotations by facing:
+     *         {@link Direction#EAST}: 0°, {@link Direction#SOUTH}: 90°, {@link Direction#WEST}: 180°, {@link Direction#NORTH}: 270°</li>
+     *         <li>{@link DoubleBlockHalf#LOWER} + {@link DoorHingeSide#LEFT} + {@code true} -> {@code bottomDoorModel + "_left_open"} with Y-rotations by facing:
+     *         {@link Direction#EAST}: 90°, {@link Direction#SOUTH}: 180°, {@link Direction#WEST}: 270°, {@link Direction#NORTH}: 0°</li>
+     *         <li>{@link DoubleBlockHalf#LOWER} + {@link DoorHingeSide#RIGHT} + {@code true} -> {@code bottomDoorModel + "_right_open"} with Y-rotations by facing:
+     *         {@link Direction#EAST}: 270°, {@link Direction#SOUTH}: 0°, {@link Direction#WEST}: 90°, {@link Direction#NORTH}: 180°</li>
+     *         <li>{@link DoubleBlockHalf#UPPER} + {@link DoorHingeSide#LEFT} + {@code false} -> {@code topDoorModel + "_left"} with Y-rotations by facing:
+     *         {@link Direction#EAST}: 0°, {@link Direction#SOUTH}: 90°, {@link Direction#WEST}: 180°, {@link Direction#NORTH}: 270°</li>
+     *         <li>{@link DoubleBlockHalf#UPPER} + {@link DoorHingeSide#RIGHT} + {@code false} -> {@code topDoorModel + "_right"} with Y-rotations by facing:
+     *         {@link Direction#EAST}: 0°, {@link Direction#SOUTH}: 90°, {@link Direction#WEST}: 180°, {@link Direction#NORTH}: 270°</li>
+     *         <li>{@link DoubleBlockHalf#UPPER} + {@link DoorHingeSide#LEFT} + {@code true} -> {@code topDoorModel + "_left_open"} with Y-rotations by facing:
+     *         {@link Direction#EAST}: 90°, {@link Direction#SOUTH}: 180°, {@link Direction#WEST}: 270°, {@link Direction#NORTH}: 0°</li>
+     *         <li>{@link DoubleBlockHalf#UPPER} + {@link DoorHingeSide#RIGHT} + {@code true} -> {@code topDoorModel + "_right_open"} with Y-rotations by facing:
+     *         {@link Direction#EAST}: 270°, {@link Direction#SOUTH}: 0°, {@link Direction#WEST}: 90°, {@link Direction#NORTH}: 180°</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to create the blockstate for.
+     * @param topDoorModel Base model for top door halves; "_left", "_left_open", "_right", "_right_open" are appended.
+     * @param bottomDoorModel Base model for bottom door halves; "_left", "_left_open", "_right", "_right_open" are appended.
+     *
+     * @return A {@link BlockStateDefinition} with door variants using automatically derived models.
+     *
+     * @see #doorBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation)
+     * @see #doorBlockState(Supplier)
+     * @see #door(Supplier)
+     * @see #doorBottomLeft(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBottomLeftOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBottomRight(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorBottomRightOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopLeft(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopLeftOpen(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopRight(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doorTopRightOpen(Supplier, ResourceLocation, ResourceLocation)
+     */
+    public static BlockStateDefinition doorBlockState(Supplier<Block> targetBlock, ResourceLocation topDoorModel, ResourceLocation bottomDoorModel) {
+        return doorBlockState(targetBlock, topDoorModel.withSuffix("_left"), topDoorModel.withSuffix("_left_open"), bottomDoorModel.withSuffix("_left"), bottomDoorModel.withSuffix("_left_open"), topDoorModel.withSuffix("_right"), topDoorModel.withSuffix("_right_open"), bottomDoorModel.withSuffix("_right"), bottomDoorModel.withSuffix("_right_open"));
+    }
+
+    /**
+     * Overload that fully derives all door-part models from the block's registry-based model locations using the
+     * standard suffix scheme: top = "_top", bottom = "_bottom", then "_left", "_left_open", "_right",
+     * "_right_open". Applies the same variant mapping and rotations as the full-parameter overload.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link BlockStateProperties#HORIZONTAL_FACING} + {@link BlockStateProperties#DOUBLE_BLOCK_HALF}
+     *         + {@link BlockStateProperties#DOOR_HINGE} + {@link BlockStateProperties#OPEN} -> Registry-derived model combinations</li>
+     *         <li>{@link DoubleBlockHalf#LOWER} + {@link DoorHingeSide#LEFT} + {@code false} ->
+     *             {@link ModelLocationUtils}.getModelLocation({@code targetBlock.get()}, {@code "_bottom_left"}) with Y-rotations by facing:
+     *         {@link Direction#EAST}: 0°, {@link Direction#SOUTH}: 90°, {@link Direction#WEST}: 180°, {@link Direction#NORTH}: 270°</li>
+     *         <li>{@link DoubleBlockHalf#LOWER} + {@link DoorHingeSide#RIGHT} + {@code false} ->
+     *             {@link ModelLocationUtils}.getModelLocation({@code targetBlock.get()}, {@code "_bottom_right"}) with Y-rotations by facing:
+     *         {@link Direction#EAST}: 0°, {@link Direction#SOUTH}: 90°, {@link Direction#WEST}: 180°, {@link Direction#NORTH}: 270°</li>
+     *         <li>{@link DoubleBlockHalf#LOWER} + {@link DoorHingeSide#LEFT} + {@code true} ->
+     *             {@link ModelLocationUtils}.getModelLocation({@code targetBlock.get()}, {@code "_bottom_left_open"}) with Y-rotations by facing:
+     *         {@link Direction#EAST}: 90°, {@link Direction#SOUTH}: 180°, {@link Direction#WEST}: 270°, {@link Direction#NORTH}: 0°</li>
+     *         <li>{@link DoubleBlockHalf#LOWER} + {@link DoorHingeSide#RIGHT} + {@code true} ->
+     *             {@link ModelLocationUtils}.getModelLocation({@code targetBlock.get()}, {@code "_bottom_right_open"}) with Y-rotations by facing:
+     *         {@link Direction#EAST}: 270°, {@link Direction#SOUTH}: 0°, {@link Direction#WEST}: 90°, {@link Direction#NORTH}: 180°</li>
+     *         <li>{@link DoubleBlockHalf#UPPER} + {@link DoorHingeSide#LEFT} + {@code false} ->
+     *             {@link ModelLocationUtils}.getModelLocation({@code targetBlock.get()}, {@code "_top_left"}) with Y-rotations by facing:
+     *         {@link Direction#EAST}: 0°, {@link Direction#SOUTH}: 90°, {@link Direction#WEST}: 180°, {@link Direction#NORTH}: 270°</li>
+     *         <li>{@link DoubleBlockHalf#UPPER} + {@link DoorHingeSide#RIGHT} + {@code false} ->
+     *             {@link ModelLocationUtils}.getModelLocation({@code targetBlock.get()}, {@code "_top_right"}) with Y-rotations by facing:
+     *         {@link Direction#EAST}: 0°, {@link Direction#SOUTH}: 90°, {@link Direction#WEST}: 180°, {@link Direction#NORTH}: 270°</li>
+     *         <li>{@link DoubleBlockHalf#UPPER} + {@link DoorHingeSide#LEFT} + {@code true} ->
+     *             {@link ModelLocationUtils}.getModelLocation({@code targetBlock.get()}, {@code "_top_left_open"}) with Y-rotations by facing:
+     *         {@link Direction#EAST}: 90°, {@link Direction#SOUTH}: 180°, {@link Direction#WEST}: 270°, {@link Direction#NORTH}: 0°</li>
+     *         <li>{@link DoubleBlockHalf#UPPER} + {@link DoorHingeSide#RIGHT} + {@code true} ->
+     *             {@link ModelLocationUtils}.getModelLocation({@code targetBlock.get()}, {@code "_top_right_open"}) with Y-rotations by facing:
+     *         {@link Direction#EAST}: 270°, {@link Direction#SOUTH}: 0°, {@link Direction#WEST}: 90°, {@link Direction#NORTH}: 180°</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to create the blockstate for.
+     *
+     * @return A {@link BlockStateDefinition} with door variants using fully automatic model resolution.
+     *
+     * @see #doorBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation)
+     * @see #doorBlockState(Supplier, ResourceLocation, ResourceLocation)
+     * @see #door(Supplier)
+     * @see #doorBottomLeft(Supplier)
+     * @see #doorBottomLeftOpen(Supplier)
+     * @see #doorBottomRight(Supplier)
+     * @see #doorBottomRightOpen(Supplier)
+     * @see #doorTopLeft(Supplier)
+     * @see #doorTopLeftOpen(Supplier)
+     * @see #doorTopRight(Supplier)
+     * @see #doorTopRightOpen(Supplier)
+     */
+    public static BlockStateDefinition doorBlockState(Supplier<Block> targetBlock) {
+        return doorBlockState(targetBlock, ModelLocationUtils.getModelLocation(targetBlock.get(), "_top"), ModelLocationUtils.getModelLocation(targetBlock.get(), "_bottom"));
+    }
+
+    /**
      * Creates a {@link ItemModelDefinition} with the {@link ModelTemplates#FLAT_ITEM} template (for "generated" item
      * models).
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#LAYER0} -> {@code texLoc}</li>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.pickItemPrefix(texLoc)}</li>
      *     </ul>
      *
      * @param texLoc The location to use for the {@code layer0} texture slot.

@@ -232,6 +232,23 @@ public final class BlockPropertyWrapperTemplates {
             .withBlockStateDefinition(ModelUtil::pressurePlateBlockState)
             .build();
     /**
+     * BPW template for doors. Inherits from {@link #BASIC_PICKAXE}. Door model, door blockstate. Blockstate uses
+     * {@link MultiVariantGenerator} with different models for each combination of hinge side, half, and open state.
+     * Additionally, tags the parent block with {@link BlockTags#DOORS}.
+     *
+     * @see ModelUtil#door(Supplier)
+     * @see ModelUtil#doorBlockState(Supplier)
+     * @see LootUtil#dropDoor(Supplier)
+     */
+    public static final BlockPropertyWrapper<Block> DOOR = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_PICKAXE)
+            .withTag(() -> BlockTags.DOORS)
+            .withModelDefinition(ModelUtil::door)
+            .withBlockStateDefinition(ModelUtil::doorBlockState)
+            .withLootTable(LootUtil::dropDoor)
+            .build();
+    /**
      * BPW template for walls. Inherits from {@link #BASIC_PICKAXE}. Wall model, wall blockstate.
      * Blockstate and model assume the existence of an equivalent block with the suffix {@code "_block"} (or {@code "_bricks"}
      * if the parent block name contains {@code "_brick_"}, e.g. {@code "example_brick_wall"}). Additionally, tags the
@@ -249,7 +266,7 @@ public final class BlockPropertyWrapperTemplates {
             .build();
 
     /**
-     * BPW template for wooden slabs. Inherits from {@link #BASIC_AXE}. Wooden slab model, wooden slab blockstate,
+     * BPW template for wooden slabs. Inherits from {@link #BASIC_AXE}. Slab model, wooden slab blockstate,
      * slab loot table. Blockstate and model assume the existence of an equivalent block with the suffix
      * {@code "_planks"}. Additionally, tags the parent block with {@link BlockTags#WOODEN_SLABS}.
      *
@@ -267,7 +284,7 @@ public final class BlockPropertyWrapperTemplates {
             .withFlammability(RegistryUtil::standardWoodFlammability)
             .build();
     /**
-     * BPW template for wooden stairs. Inherits from {@link #BASIC_AXE}. Wooden stairs model, stairs blockstate.
+     * BPW template for wooden stairs. Inherits from {@link #BASIC_AXE}. Stairs model, stairs blockstate.
      * Blockstate and model assume the existence of an equivalent block with the suffix {@code "_planks"}. Additionally,
      * tags the parent block with {@link BlockTags#WOODEN_STAIRS}.
      *
@@ -283,7 +300,7 @@ public final class BlockPropertyWrapperTemplates {
             .withFlammability(RegistryUtil::standardWoodFlammability)
             .build();
     /**
-     * BPW template for wooden buttons. Inherits from {@link #BASIC}. Wooden button model, button blockstate.
+     * BPW template for wooden buttons. Inherits from {@link #BASIC}. Button model, button blockstate.
      * Blockstate uses {@link MultiVariantGenerator} with different models for each combination of power state,
      * attach face, and facing direction. Blockstate and model assume the existence of an equivalent block with the
      * suffix {@code "_planks"} Additionally, tags the parent block with {@link BlockTags#WOODEN_BUTTONS}.
@@ -299,7 +316,7 @@ public final class BlockPropertyWrapperTemplates {
             .withBlockStateDefinition(ModelUtil::buttonBlockState)
             .build();
     /**
-     * BPW template for wooden pressure plates. Inherits from {@link #BASIC_AXE}. Wooden pressure plate model, pressure plate blockstate.
+     * BPW template for wooden pressure plates. Inherits from {@link #BASIC_AXE}. Pressure plate model, pressure plate blockstate.
      * Blockstate uses {@link MultiVariantGenerator} with different models for each power state (pressed/unpressed).
      * Blockstate and model assume the existence of an equivalent block with the suffix {@code "_planks"}. Additionally,
      * tags the parent block with {@link BlockTags#WOODEN_PRESSURE_PLATES}.
@@ -313,6 +330,23 @@ public final class BlockPropertyWrapperTemplates {
             .withTag(() -> BlockTags.WOODEN_PRESSURE_PLATES)
             .withModelDefinition(ModelUtil::pressurePlate)
             .withBlockStateDefinition(ModelUtil::pressurePlateBlockState)
+            .build();
+    /**
+     * BPW template for wooden doors. Inherits from {@link #BASIC_AXE}. Door model, door blockstate. Blockstate
+     * and model assume the existence of an equivalent block with the suffix {@code "_planks"}. Additionally, tags the
+     * parent block with {@link BlockTags#WOODEN_DOORS}.
+     *
+     * @see ModelUtil#door(Supplier)
+     * @see ModelUtil#doorBlockState(Supplier)
+     * @see LootUtil#dropDoor(Supplier)
+     */
+    public static final BlockPropertyWrapper<Block> WOODEN_DOOR = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_AXE)
+            .withTag(() -> BlockTags.WOODEN_DOORS)
+            .withModelDefinition(ModelUtil::door)
+            .withBlockStateDefinition(ModelUtil::doorBlockState)
+            .withLootTable(LootUtil::dropDoor)
             .build();
 
     private BlockPropertyWrapperTemplates() {
