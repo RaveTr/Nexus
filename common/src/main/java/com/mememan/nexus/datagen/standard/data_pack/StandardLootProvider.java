@@ -130,8 +130,7 @@ public class StandardLootProvider extends LootTableProvider implements ModDataPr
                     T parentObj = parentObjSup.get();
                     String objectDescId = curPW.getObjectDescriptionId();
                     String objectClassName = parentObj.getClass().getSimpleName();
-                    ResourceLocation finalizedLootTableLoc = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentObj)
-                            .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for object of type %s: %s", objectClassName, objectDescId)))
+                    ResourceLocation finalizedLootTableLoc = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentObj)
                             .withPrefix(curPW.getLootTableDir());
 
                     curPW.getLootTableBuilder().ifPresentOrElse(lootTableBuilder -> {

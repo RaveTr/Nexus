@@ -8,6 +8,8 @@ import com.mememan.nexus.property_wrapper.impl.specialised.vanilla.SpecializedVa
 import com.mememan.nexus.property_wrapper.impl.specialised.vanilla.SpecializedVanillaPropertyWrapperBuilder;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.IntIntMutablePair;
+import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -29,6 +31,7 @@ public class BlockPropertyWrapperBuilder<B extends Block> extends BaseDefaultabl
     protected Optional<Function<Supplier<B>, BlockState>> blockFlatteningMappingFunc = Optional.empty();
     protected Optional<Function<Supplier<B>, Supplier<Block>>> blockOxidizationMappingFunc = Optional.empty();
     protected Optional<Function<Supplier<B>, Supplier<Block>>> blockWaxingMappingFunc = Optional.empty();
+    protected int minMiningLevel = 0;
 
     public BlockPropertyWrapperBuilder(@NotNull BlockPropertyWrapper<B> ownerWrapper) {
         super(ownerWrapper);
@@ -166,6 +169,19 @@ public class BlockPropertyWrapperBuilder<B extends Block> extends BaseDefaultabl
      */
     public BlockPropertyWrapperBuilder<B> withBlockWaxing(Function<Supplier<B>, Supplier<Block>> blockWaxingMappingFunc) {
         this.blockWaxingMappingFunc = Optional.ofNullable(blockWaxingMappingFunc);
+        return self();
+    }
+
+    /**
+     * Defines the minimum mining level required to mine the parent {@link Block}. This is compared against a
+     * {@linkplain TieredItem TieredItem's} {@linkplain TieredItem#getTier() tier} {@linkplain Tier#getLevel() level}.
+     *
+     * @param miningLevel The minimum mining level required to mine the parent {@link Block}.
+     *
+     * @return {@link #self()} (builder method).
+     */
+    public BlockPropertyWrapperBuilder<B> minimumMiningLevel(int miningLevel) {
+        this.minMiningLevel = Math.abs(miningLevel);
         return self();
     }
 

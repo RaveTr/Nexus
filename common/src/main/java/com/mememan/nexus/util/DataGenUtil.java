@@ -30,20 +30,22 @@ public final class DataGenUtil {
         JsonObject result = new JsonObject();
         JsonArray values = new JsonArray();
         Set<String> existingValues = new ObjectOpenHashSet<>(); // Keep track of added values to avoid dupes
-
-        if (existingObj.has("values")) {  // Add existing values (if any)
-            existingObj.getAsJsonArray("values").forEach(value -> {
-                String valueStr = value.toString();
-
-                if (existingValues.add(valueStr)) values.add(value);
-            });
-        }
+        Set<String> newValues = new ObjectOpenHashSet<>(); // Avoid keeping stale values
 
         if (newObj.has("values")) { // Add new values (if any)
             newObj.getAsJsonArray("values").forEach(value -> {
                 String valueStr = value.toString();
 
+                newValues.add(valueStr);
                 if (existingValues.add(valueStr)) values.add(value);
+            });
+        }
+
+        if (existingObj.has("values")) {  // Add existing values (if any)
+            existingObj.getAsJsonArray("values").forEach(value -> {
+                String valueStr = value.toString();
+
+                if (newValues.contains(valueStr) && existingValues.add(valueStr)) values.add(value);
             });
         }
 

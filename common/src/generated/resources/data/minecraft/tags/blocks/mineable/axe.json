@@ -1,6 +1,8 @@
 {
   "values": [
     "nexus:test_block",
-    "nexus:test_block_3"
+    "nexus:test_fence",
+    "nexus:test_block_3",
+    "nexus:test_fence_gate"
   ]
 }

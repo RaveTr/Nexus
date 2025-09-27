@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 
@@ -42,7 +43,10 @@ public class TestBlockRegistrar {
     public static final Supplier<Block> BLAH_WALL = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(NexusConstants.prefix("test_block_wall"), () -> new WallBlock(BlockBehaviour.Properties.copy(BLAH.get())), BlockPropertyWrapperTemplates.WALL);
     public static final Supplier<Block> BLAH_BUTTON = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(NexusConstants.prefix("test_button"), () -> new ButtonBlock(BlockBehaviour.Properties.copy(BLAH.get()).noCollission().strength(0.5F).pushReaction(PushReaction.DESTROY), BlockSetType.STONE, 20, false), BlockPropertyWrapperTemplates.BUTTON);
     public static final Supplier<Block> BLAH_PRESSURE_PLATE = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(NexusConstants.prefix("test_block_pressure_plate"), () -> new PressurePlateBlock(PressurePlateBlock.Sensitivity.MOBS, BlockBehaviour.Properties.copy(BLAH.get()).mapColor(MapColor.STONE).forceSolidOn().instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().noCollission().strength(0.5F).pushReaction(PushReaction.DESTROY), BlockSetType.STONE), BlockPropertyWrapperTemplates.PRESSURE_PLATE);
-    public static final Supplier<Block> BLAH_DOOR = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(NexusConstants.prefix("test_door"), () -> new DoorBlock(BlockBehaviour.Properties.of().mapColor(BLAH.get().defaultMapColor()).instrument(NoteBlockInstrument.BASS).strength(5.0F).noOcclusion().ignitedByLava().pushReaction(PushReaction.DESTROY), BlockSetType.STONE), BlockPropertyWrapperTemplates.DOOR);
+    public static final Supplier<Block> BLAH_DOOR = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(NexusConstants.prefix("test_door"), () -> new DoorBlock(BlockBehaviour.Properties.of().mapColor(BLAH.get().defaultMapColor()).instrument(NoteBlockInstrument.BASS).strength(5.0F).noOcclusion().ignitedByLava(), BlockSetType.STONE), BlockPropertyWrapperTemplates.DOOR);
+    public static final Supplier<Block> BLAH_TRAPDOOR = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(NexusConstants.prefix("test_trapdoor"), () -> new TrapDoorBlock(BlockBehaviour.Properties.copy(BLAH.get()).mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(0.5F), BlockSetType.STONE), BlockPropertyWrapperTemplates.TRAPDOOR);
+    public static final Supplier<Block> BLAH_FENCE = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(NexusConstants.prefix("test_fence"), () -> new FenceBlock(BlockBehaviour.Properties.copy(BLAH.get())), BlockPropertyWrapperTemplates.WOODEN_FENCE);
+    public static final Supplier<Block> BLAH_FENCE_GATE = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(NexusConstants.prefix("test_fence_gate"), () -> new FenceGateBlock(BlockBehaviour.Properties.copy(BLAH.get()), WoodType.ACACIA), BlockPropertyWrapperTemplates.WOODEN_FENCE_GATE);
 
     public static final Supplier<SlabBlock> BLAH_2 = new BlockPropertyWrapper<>(registerBlock(new ResourceLocation("nexus", "test_able_block"), () -> new SlabBlock(BlockBehaviour.Properties.of())), "nexus")
             .builder()

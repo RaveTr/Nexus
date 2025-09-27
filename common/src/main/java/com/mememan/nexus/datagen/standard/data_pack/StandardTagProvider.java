@@ -155,8 +155,7 @@ public class StandardTagProvider extends TagsProvider<Object> implements ModData
                                 taggedObjects.forEach(curTaggedObject -> {
                                     T taggedObject = curTaggedObject.get();
                                     String taggedObjClassName = taggedObject.getClass().getSimpleName();
-                                    ResourceLocation childObjLoc = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(taggedObject)
-                                            .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for object of type %s: %s", taggedObjClassName, taggedObject)));
+                                    ResourceLocation childObjLoc = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(taggedObject);
 
                                     if (validateDupeObjectTag(parentTagObj, taggedObjClassName, childObjLoc)) {
                                         NexusConstants.LOGGER.debug("[{}] [Tagging {}]: {} -> {}", getModId(), taggedObjClassName, childObjLoc, parentTagObj);
@@ -184,8 +183,7 @@ public class StandardTagProvider extends TagsProvider<Object> implements ModData
                             throw new NullPointerException(String.format("Missing tag entry for %s: %s, required by mod: %s, either because validateAllEntries is set to true for this provider or the object itself requires validation through DataGenBasedPropertyWrapper#getProviderTypeRequisites().", objectClassName, curPW.getObjectDescriptionId(), modId));
                         }
 
-                        ResourceLocation parentObjLoc = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentObject.get())
-                                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for object of type %s: %s", objectClassName, objectDescId)));
+                        ResourceLocation parentObjLoc = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentObject.get());
 
                         objectTags.forEach(tK -> {
                             TagKey<? super T> parentTagKey = tK.get();

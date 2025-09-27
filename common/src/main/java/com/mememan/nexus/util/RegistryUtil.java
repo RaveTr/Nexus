@@ -178,7 +178,7 @@ public final class RegistryUtil {
      * @param <T> The type of the target object.
      *
      * @return The {@link ResourceLocation} of the texture for the given {@code targetObj}, or a default
-     * {@link ResourceLocation} with the namespace "invalid" if no match is found.
+     * {@link ResourceLocation} with the path "invalid" if no match is found.
      *
      * @see #getTextureLocationOrDefault(Supplier, ResourceLocation)
      */
@@ -375,8 +375,7 @@ public final class RegistryUtil {
         String targetObjClassName = baseObj.getClass().getSimpleName();
         Registry<T> baseObjRegistry = DataGenPropertyWrapper.RegistryLookupContainer.getRegistryForObject(baseObj)
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Attempted to find registry for unregistered or unmapped object of type %s: %s", targetObjClassName, baseObj)));
-        ResourceLocation baseObjLoc = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(baseObj)
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for object of type %s: %s", targetObjClassName, baseObj)));
+        ResourceLocation baseObjLoc = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(baseObj);
         ResourceLocation targetObjLoc = targetObjIdMapper.apply(baseObjLoc);
         Supplier<T> targetObj = () -> baseObjRegistry instanceof DefaultedRegistry<?> defReg && Objects.equals(defReg.get(targetObjLoc), defReg.get(defReg.getDefaultKey()))
                 ? null
@@ -591,8 +590,7 @@ public final class RegistryUtil {
      * @see #pickBlockId(Supplier)
      */
     public static ResourceLocation pickBlockId(Supplier<Block> targetBlock, Function<String, String> pathIdMapper) {
-        ResourceLocation baseBlockId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseBlockId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
         String baseBlockPath = baseBlockId.getPath();
         String chosenBlockId = pathIdMapper.apply(baseBlockPath);
 

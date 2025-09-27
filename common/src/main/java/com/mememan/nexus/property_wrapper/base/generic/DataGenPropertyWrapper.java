@@ -175,7 +175,7 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
         return isTemplate()
                 ? "Template ".concat(getClass().getSimpleName())
                 : parentObjRegId
-                .map(regLoc -> Util.makeDescriptionId(getDescriptionIdPrefix().orElse(regLoc.getPath()), RegistryLookupContainer.getObjectRegistryId(getParentObject().get()).get()))
+                .map(regLoc -> Util.makeDescriptionId(getDescriptionIdPrefix().orElse(regLoc.getPath()), RegistryLookupContainer.getObjectRegistryIdOrThrow(getParentObject().get())))
                 .orElseGet(() -> getParentObject().get().toString());
     }
 
@@ -416,6 +416,30 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
                     : Optional.ofNullable(getRegistryForObject(targetObj)
                     .orElseThrow(() -> new IllegalArgumentException(String.format("Attempted to find registry for unregistered or unmapped object of type %s: %s", targetObj.getClass().getSimpleName(), targetObj)))
                     .getKey(targetObj));
+        }
+
+        /**
+         * Retrieves the {@link ResourceLocation} registry identifier of the provided {@code targetObj}, throwing an
+         * {@link IllegalArgumentException} if no registry entry is found.
+         * <br></br>
+         * This method is equivalent to calling {@link #getObjectRegistryId(Object)} and then calling
+         * {@link Optional#orElseThrow(java.util.function.Supplier)} on the result, but returns the {@link ResourceLocation}
+         * directly instead of an {@link Optional}.
+         *
+         * @param targetObj The parent object type whose registry identifier should be looked up.
+         *
+         * @return The {@link ResourceLocation} registry identifier of the provided {@code targetObj}.
+         *
+         * @throws IllegalArgumentException If no registry entry is present for the provided {@code targetObj}.
+         *
+         * @param <T> The parent object type.
+         *
+         * @see #getObjectRegistryId(Object)
+         * @see #getRegistryForObject(Object)
+         */
+        public static <T> ResourceLocation getObjectRegistryIdOrThrow(T targetObj) {
+            return getObjectRegistryId(targetObj)
+                    .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for object of type %s: %s", targetObj.getClass().getSimpleName(), targetObj)));
         }
 
         /**

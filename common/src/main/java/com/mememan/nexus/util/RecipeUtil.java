@@ -28,8 +28,8 @@ public final class RecipeUtil {
     public static <IL extends ItemLike> Consumer<Supplier<IL>> slabRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
-            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
-                    .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+                    
             IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
             if (resultantItemLike != null) {
@@ -61,8 +61,8 @@ public final class RecipeUtil {
     public static <IL extends ItemLike> Consumer<Supplier<IL>> woodenSlabRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
-            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
-                    .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+                    
             IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
             if (resultantItemLike != null) {
@@ -95,8 +95,8 @@ public final class RecipeUtil {
     public static <IL extends ItemLike> Consumer<Supplier<IL>> stairsRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
-            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
-                    .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+                    
             IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
             if (resultantItemLike != null) {
@@ -122,8 +122,8 @@ public final class RecipeUtil {
     public static <IL extends ItemLike> Consumer<Supplier<IL>> woodenStairsRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
-            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
-                    .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+                    
             IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
             if (resultantItemLike != null) {
@@ -150,8 +150,8 @@ public final class RecipeUtil {
     public static <IL extends ItemLike> Consumer<Supplier<IL>> wallRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
-            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
-                    .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+                    
             IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
             if (resultantItemLike != null) {
@@ -184,8 +184,8 @@ public final class RecipeUtil {
     public static <IL extends ItemLike> Consumer<Supplier<IL>> buttonRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
-            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
-                    .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+                    
             IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
             if (resultantItemLike != null) {
@@ -216,8 +216,8 @@ public final class RecipeUtil {
     public static <IL extends ItemLike> Consumer<Supplier<IL>> woodenButtonRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
-            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
-                    .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+                    
             IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
             if (resultantItemLike != null) {
@@ -249,8 +249,8 @@ public final class RecipeUtil {
     public static <IL extends ItemLike> Consumer<Supplier<IL>> pressurePlateRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
-            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
-                    .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+                    
             IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
             if (resultantItemLike != null) {
@@ -282,8 +282,8 @@ public final class RecipeUtil {
     public static <IL extends ItemLike> Consumer<Supplier<IL>> woodenPressurePlateRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
-            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
-                    .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+                    
             IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
             if (resultantItemLike != null) {
@@ -316,8 +316,8 @@ public final class RecipeUtil {
     public static <IL extends ItemLike> Consumer<Supplier<IL>> woodenFenceRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
-            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
-                    .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+                    
             IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
             if (resultantItemLike != null) {
@@ -352,8 +352,8 @@ public final class RecipeUtil {
     public static <IL extends ItemLike> Consumer<Supplier<IL>> woodenFenceGateRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
-            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
-                    .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+                    
             IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
             if (resultantItemLike != null) {
@@ -388,8 +388,8 @@ public final class RecipeUtil {
     public static <IL extends ItemLike> Consumer<Supplier<IL>> doorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
-            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
-                    .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+                    
             IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
             if (resultantItemLike != null) {
@@ -423,8 +423,8 @@ public final class RecipeUtil {
     public static <IL extends ItemLike> Consumer<Supplier<IL>> woodenDoorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
-            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
-                    .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+                    
             IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
             if (resultantItemLike != null) {
@@ -459,8 +459,8 @@ public final class RecipeUtil {
     public static <IL extends ItemLike> Consumer<Supplier<IL>> trapDoorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
-            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
-                    .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+                    
             IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
             if (resultantItemLike != null) {
@@ -493,8 +493,8 @@ public final class RecipeUtil {
     public static <IL extends ItemLike> Consumer<Supplier<IL>> woodenTrapDoorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<IL, IL> resultantSlabMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             IL parentItemLike = parentItemLikeSup.get();
-            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentItemLike)
-                    .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for ItemLike of type %s: %s", parentItemLike.getClass().getSimpleName(), parentItemLike)));
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+                    
             IL resultantItemLike = resultantSlabMapper.apply(parentItemLike);
 
             if (resultantItemLike != null) {

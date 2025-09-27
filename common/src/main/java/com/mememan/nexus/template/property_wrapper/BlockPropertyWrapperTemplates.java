@@ -7,6 +7,7 @@ import com.mememan.nexus.util.LootUtil;
 import com.mememan.nexus.util.ModelUtil;
 import com.mememan.nexus.util.RegistryUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.models.blockstates.MultiPartGenerator;
 import net.minecraft.data.models.blockstates.MultiVariantGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
@@ -168,9 +169,7 @@ public final class BlockPropertyWrapperTemplates {
 
     /**
      * BPW template for slabs. Inherits from {@link #BASIC_PICKAXE}. Slab loot table, slab blockstate, slab model.
-     * Blockstate and model assume the existence of an equivalent block with the suffix {@code "_block"} (or {@code "_bricks"}
-     * if the parent block name contains {@code "_brick_"}, e.g. {@code "example_brick_slab"}). Additionally, tags the
-     * parent block with {@link BlockTags#SLABS}.
+     * Additionally, tags the parent block with {@link BlockTags#SLABS}.
      *
      * @see ModelUtil#slab(Supplier)
      * @see ModelUtil#slabBlockState(Supplier)
@@ -185,9 +184,7 @@ public final class BlockPropertyWrapperTemplates {
             .build();
     /**
      * BPW template for stairs. Inherits from {@link #BASIC_PICKAXE}. Stairs model, stairs blockstate.
-     * Blockstate and model assume the existence of an equivalent block with the suffix {@code "_block"} (or {@code "_bricks"}
-     * if the parent block name contains {@code "_brick_"}, e.g. {@code "example_brick_stairs"}). Additionally, tags the
-     * parent block with {@link BlockTags#STAIRS}.
+     * Additionally, tags the parent block with {@link BlockTags#STAIRS}.
      *
      * @see ModelUtil#stairs(Supplier)
      * @see ModelUtil#stairsBlockState(Supplier)
@@ -202,9 +199,7 @@ public final class BlockPropertyWrapperTemplates {
     /**
      * BPW template for buttons. Inherits from {@link #BASIC}. Button model, button blockstate.
      * Blockstate uses {@link MultiVariantGenerator} with different models for each combination of power state,
-     * attach face, and facing direction. Blockstate and model assume the existence of an equivalent block with the
-     * suffix {@code "_block"} (or {@code "_bricks"} if the parent block name contains {@code "_brick_"}, e.g.
-     * {@code "example_brick_button"}) Additionally, tags the parent block with {@link BlockTags#BUTTONS}.
+     * attach face, and facing direction. Additionally, tags the parent block with {@link BlockTags#BUTTONS}.
      *
      * @see ModelUtil#button(Supplier)
      * @see ModelUtil#buttonBlockState(Supplier)
@@ -249,10 +244,23 @@ public final class BlockPropertyWrapperTemplates {
             .withLootTable(LootUtil::dropDoor)
             .build();
     /**
+     * BPW template for trapdoors. Inherits from {@link #BASIC_PICKAXE}. Trapdoor model, trapdoor blockstate.
+     * Blockstate uses {@link MultiVariantGenerator} with different models for each combination of facing, half,
+     * and open state. Additionally, tags the parent block with {@link BlockTags#TRAPDOORS}.
+     *
+     * @see ModelUtil#trapdoor(Supplier)
+     * @see ModelUtil#trapdoorBlockState(Supplier)
+     */
+    public static final BlockPropertyWrapper<Block> TRAPDOOR = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_PICKAXE)
+            .withTag(() -> BlockTags.TRAPDOORS)
+            .withModelDefinition(ModelUtil::trapdoor)
+            .withBlockStateDefinition(ModelUtil::trapdoorBlockState)
+            .build();
+    /**
      * BPW template for walls. Inherits from {@link #BASIC_PICKAXE}. Wall model, wall blockstate.
-     * Blockstate and model assume the existence of an equivalent block with the suffix {@code "_block"} (or {@code "_bricks"}
-     * if the parent block name contains {@code "_brick_"}, e.g. {@code "example_brick_wall"}). Additionally, tags the
-     * parent block with {@link BlockTags#WALLS}.
+     * Additionally, tags the parent block with {@link BlockTags#WALLS}.
      *
      * @see ModelUtil#wall(Supplier)
      * @see ModelUtil#wallBlockState(Supplier)
@@ -267,12 +275,12 @@ public final class BlockPropertyWrapperTemplates {
 
     /**
      * BPW template for wooden slabs. Inherits from {@link #BASIC_AXE}. Slab model, wooden slab blockstate,
-     * slab loot table. Blockstate and model assume the existence of an equivalent block with the suffix
-     * {@code "_planks"}. Additionally, tags the parent block with {@link BlockTags#WOODEN_SLABS}.
+     * slab loot table. Additionally, tags the parent block with {@link BlockTags#WOODEN_SLABS}.
      *
      * @see ModelUtil#slab(Supplier)
      * @see ModelUtil#slabBlockState(Supplier)
      * @see LootUtil#dropSlab(Supplier)
+     * @see RegistryUtil#standardWoodFlammability(Supplier)
      */
     public static final BlockPropertyWrapper<Block> WOODEN_SLAB = new BlockPropertyWrapper<>()
             .builder()
@@ -285,11 +293,11 @@ public final class BlockPropertyWrapperTemplates {
             .build();
     /**
      * BPW template for wooden stairs. Inherits from {@link #BASIC_AXE}. Stairs model, stairs blockstate.
-     * Blockstate and model assume the existence of an equivalent block with the suffix {@code "_planks"}. Additionally,
-     * tags the parent block with {@link BlockTags#WOODEN_STAIRS}.
+     * Additionally, tags the parent block with {@link BlockTags#WOODEN_STAIRS}.
      *
      * @see ModelUtil#stairs(Supplier)
      * @see ModelUtil#stairsBlockState(Supplier)
+     * @see RegistryUtil#standardWoodFlammability(Supplier)
      */
     public static final BlockPropertyWrapper<Block> WOODEN_STAIRS = new BlockPropertyWrapper<>()
             .builder()
@@ -302,8 +310,7 @@ public final class BlockPropertyWrapperTemplates {
     /**
      * BPW template for wooden buttons. Inherits from {@link #BASIC}. Button model, button blockstate.
      * Blockstate uses {@link MultiVariantGenerator} with different models for each combination of power state,
-     * attach face, and facing direction. Blockstate and model assume the existence of an equivalent block with the
-     * suffix {@code "_planks"} Additionally, tags the parent block with {@link BlockTags#WOODEN_BUTTONS}.
+     * attach face, and facing direction. Additionally, tags the parent block with {@link BlockTags#WOODEN_BUTTONS}.
      *
      * @see ModelUtil#button(Supplier)
      * @see ModelUtil#buttonBlockState(Supplier)
@@ -318,8 +325,7 @@ public final class BlockPropertyWrapperTemplates {
     /**
      * BPW template for wooden pressure plates. Inherits from {@link #BASIC_AXE}. Pressure plate model, pressure plate blockstate.
      * Blockstate uses {@link MultiVariantGenerator} with different models for each power state (pressed/unpressed).
-     * Blockstate and model assume the existence of an equivalent block with the suffix {@code "_planks"}. Additionally,
-     * tags the parent block with {@link BlockTags#WOODEN_PRESSURE_PLATES}.
+     * Additionally, tags the parent block with {@link BlockTags#WOODEN_PRESSURE_PLATES}.
      *
      * @see ModelUtil#pressurePlate(Supplier)
      * @see ModelUtil#pressurePlateBlockState(Supplier)
@@ -347,6 +353,53 @@ public final class BlockPropertyWrapperTemplates {
             .withModelDefinition(ModelUtil::door)
             .withBlockStateDefinition(ModelUtil::doorBlockState)
             .withLootTable(LootUtil::dropDoor)
+            .build();
+    /**
+     * BPW template for wooden trapdoors. Inherits from {@link #BASIC_AXE}. Trapdoor model, trapdoor blockstate,
+     * wooden trapdoor flammability. Blockstate uses {@link MultiVariantGenerator} with different models for each
+     * combination of facing, half, and open state. Additionally, tags the parent block with {@link BlockTags#WOODEN_TRAPDOORS}.
+     *
+     * @see ModelUtil#trapdoor(Supplier)
+     * @see ModelUtil#trapdoorBlockState(Supplier)
+     */
+    public static final BlockPropertyWrapper<Block> WOODEN_TRAPDOOR = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_AXE)
+            .withTag(() -> BlockTags.WOODEN_TRAPDOORS)
+            .withModelDefinition(ModelUtil::trapdoor)
+            .withBlockStateDefinition(ModelUtil::trapdoorBlockState)
+            .build();
+
+    /**
+     * BPW template for fences. Inherits from {@link #BASIC_AXE}. Fence model, fence blockstate.
+     * Blockstate uses {@link MultiPartGenerator} with different models for post and side connections
+     * based on adjacent block connections. Additionally, tags the parent block
+     * with {@link BlockTags#WOODEN_FENCES}.
+     *
+     * @see ModelUtil#fence(Supplier)
+     * @see ModelUtil#fenceBlockState(Supplier)
+     */
+    public static final BlockPropertyWrapper<Block> WOODEN_FENCE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_AXE)
+            .withTag(() -> BlockTags.WOODEN_FENCES)
+            .withModelDefinition(ModelUtil::fence)
+            .withBlockStateDefinition(ModelUtil::fenceBlockState)
+            .build();
+    /**
+     * BPW template for fence gates. Inherits from {@link #BASIC_AXE}. Fence gate model, fence gate blockstate.
+     * Blockstate uses {@link MultiVariantGenerator} with different models for each combination of facing,
+     * wall attachment, and open state. Additionally, tags the parent block with {@link BlockTags#FENCE_GATES}.
+     *
+     * @see ModelUtil#fenceGate(Supplier)
+     * @see ModelUtil#fenceGateBlockState(Supplier)
+     */
+    public static final BlockPropertyWrapper<Block> WOODEN_FENCE_GATE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_AXE)
+            .withTag(() -> BlockTags.FENCE_GATES)
+            .withModelDefinition(ModelUtil::fenceGate)
+            .withBlockStateDefinition(ModelUtil::fenceGateBlockState)
             .build();
 
     private BlockPropertyWrapperTemplates() {

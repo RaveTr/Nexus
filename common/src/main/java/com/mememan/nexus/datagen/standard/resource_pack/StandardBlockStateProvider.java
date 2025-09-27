@@ -61,8 +61,7 @@ public class StandardBlockStateProvider implements ModDataProvider {
         Supplier<B> parentObjSup = targetBPW.getParentObject();
         String blockClassName = parentObjSup.get().getClass().getSimpleName();
         String blockName = targetBPW.getObjectDescriptionId();
-        ResourceLocation blockStateRL = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(parentObjSup.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for block of type %s: %s", blockClassName, blockName)));
+        ResourceLocation blockStateRL = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentObjSup.get());
 
         targetBPW.getBlockStateDefinition().ifPresentOrElse(bsdMappingFunc -> {
             BlockStateDefinition mappedBSD = bsdMappingFunc.apply(parentObjSup);

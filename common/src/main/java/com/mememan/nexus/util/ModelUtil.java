@@ -148,6 +148,53 @@ public final class ModelUtil {
     }
 
     /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_ALL} template for leaves blocks.
+     * This method automatically sets the render type to {@link #CUTOUT_MIPPED_RENDER_TYPE} for proper transparency
+     * handling of leaf textures. The model will be automatically named using the leaves block's registry ID.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#ALL} -> {@code RegistryUtil.pickBlockPrefix(leavesTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the leaves {@link Block} to be used for
+     *                    automatic model location resolution.
+     * @param leavesTexture The {@link ResourceLocation} representing the texture of the leaves.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_ALL} template and {@link #CUTOUT_MIPPED_RENDER_TYPE}.
+     *
+     * @see #leaves(Supplier)
+     * @see #cubeAll(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition leaves(Supplier<Block> targetBlock, ResourceLocation leavesTexture) {
+        return cubeAll(targetBlock, leavesTexture)
+                .withRenderType(CUTOUT_MIPPED_RENDER_TYPE);
+    }
+
+    /**
+     * Overloaded variant of {@link #leaves(Supplier, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#CUBE_ALL} template for leaves blocks using automatic texture resolution.
+     * This method automatically sets the render type to {@link #CUTOUT_MIPPED_RENDER_TYPE} for proper transparency
+     * handling of leaf textures. Automatically determines the leaves texture based on the leaves block's registry ID.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#ALL} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the leaves {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_ALL} template and {@link #CUTOUT_MIPPED_RENDER_TYPE}.
+     *
+     * @see #leaves(Supplier, ResourceLocation)
+     * @see #cubeAll(Supplier)
+     */
+    public static BlockModelDefinition leaves(Supplier<Block> targetBlock) {
+        return leaves(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock));
+    }
+
+    /**
      * Creates a {@link BlockStateDefinition}, using {@link MultiVariantGenerator} with the {@link VariantProperties#MODEL}
      * property set to the supplied {@linkplain Block Block's} default model location.
      * <p>
@@ -244,8 +291,7 @@ public final class ModelUtil {
      * @see #slab(Supplier)
      */
     public static BlockModelDefinition slabTop(Supplier<Block> targetBlock, ResourceLocation bottomTexture, ResourceLocation topTexture, ResourceLocation sideTexture) {
-        ResourceLocation baseSlabId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseSlabId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return new BlockModelDefinition(ModelTemplates.SLAB_TOP)
                 .withTextureMapping(new TextureMapping()
@@ -356,7 +402,8 @@ public final class ModelUtil {
     public static BlockStateDefinition slabBlockState(Supplier<Block> targetBlock, ResourceLocation bottomModel, ResourceLocation topModel, ResourceLocation doubleSlabModel) {
         return new BlockStateDefinition(targetBlock)
                 .withBlockStateSupplier(MultiVariantGenerator.multiVariant(targetBlock.get())
-                        .with(PropertyDispatch.property(BlockStateProperties.SLAB_TYPE)
+                        .with(PropertyDispatch
+                                .property(BlockStateProperties.SLAB_TYPE)
                                 .select(SlabType.BOTTOM, Variant.variant()
                                         .with(VariantProperties.MODEL, RegistryUtil.pickBlockPrefix(bottomModel)))
                                 .select(SlabType.TOP, Variant.variant()
@@ -489,8 +536,7 @@ public final class ModelUtil {
      * @see #stairsInner(Supplier)
      */
     public static BlockModelDefinition stairsInner(Supplier<Block> targetBlock, ResourceLocation sideTexture, ResourceLocation bottomTexture, ResourceLocation topTexture) {
-        ResourceLocation baseStairsId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseStairsId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return new BlockModelDefinition(ModelTemplates.STAIRS_INNER)
                 .withTextureMapping(new TextureMapping()
@@ -546,8 +592,7 @@ public final class ModelUtil {
      * @see #stairsOuter(Supplier)
      */
     public static BlockModelDefinition stairsOuter(Supplier<Block> targetBlock, ResourceLocation sideTexture, ResourceLocation bottomTexture, ResourceLocation topTexture) {
-        ResourceLocation baseStairsId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseStairsId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return new BlockModelDefinition(ModelTemplates.STAIRS_OUTER)
                 .withTextureMapping(new TextureMapping()
@@ -640,10 +685,34 @@ public final class ModelUtil {
      *     <ul>
      *         <li>{@link BlockStateProperties#HORIZONTAL_FACING} + {@link BlockStateProperties#HALF}
      *         + {@link StairsShape#STRAIGHT} -> {@code RegistryUtil.pickBlockPrefix(straightStairsModel)}</li>
+     *         <li>{@link Direction#EAST} + {@link Half#BOTTOM} + {@link StairsShape#STRAIGHT} -> 0° rotation</li>
+     *         <li>{@link Direction#WEST} + {@link Half#BOTTOM} + {@link StairsShape#STRAIGHT} -> 180° Y rotation + UV lock</li>
+     *         <li>{@link Direction#SOUTH} + {@link Half#BOTTOM} + {@link StairsShape#STRAIGHT} -> 90° Y rotation + UV lock</li>
+     *         <li>{@link Direction#NORTH} + {@link Half#BOTTOM} + {@link StairsShape#STRAIGHT} -> 270° Y rotation + UV lock</li>
+     *         <li>{@link Direction#EAST} + {@link Half#TOP} + {@link StairsShape#STRAIGHT} -> 180° X rotation + UV lock</li>
+     *         <li>{@link Direction#WEST} + {@link Half#TOP} + {@link StairsShape#STRAIGHT} -> 180° X + 180° Y rotation + UV lock</li>
+     *         <li>{@link Direction#SOUTH} + {@link Half#TOP} + {@link StairsShape#STRAIGHT} -> 180° X + 90° Y rotation + UV lock</li>
+     *         <li>{@link Direction#NORTH} + {@link Half#TOP} + {@link StairsShape#STRAIGHT} -> 180° X + 270° Y rotation + UV lock</li>
      *         <li>{@link BlockStateProperties#HORIZONTAL_FACING} + {@link BlockStateProperties#HALF}
-     *         + {@link StairsShape#INNER_LEFT} or {@link StairsShape#INNER_RIGHT} -> {@code RegistryUtil.pickBlockPrefix(innerStairsModel)}</li>
+     *         + {@link StairsShape#OUTER_RIGHT} or {@link StairsShape#OUTER_LEFT} -> {@code RegistryUtil.pickBlockPrefix(outerStairsModel)}</li>
+     *         <li>{@link Direction#EAST} + {@link Half#BOTTOM} + {@link StairsShape#OUTER_RIGHT} -> 0° rotation</li>
+     *         <li>{@link Direction#WEST} + {@link Half#BOTTOM} + {@link StairsShape#OUTER_RIGHT} -> 180° Y rotation + UV lock</li>
+     *         <li>{@link Direction#SOUTH} + {@link Half#BOTTOM} + {@link StairsShape#OUTER_RIGHT} -> 90° Y rotation + UV lock</li>
+     *         <li>{@link Direction#NORTH} + {@link Half#BOTTOM} + {@link StairsShape#OUTER_RIGHT} -> 270° Y rotation + UV lock</li>
+     *         <li>{@link Direction#EAST} + {@link Half#BOTTOM} + {@link StairsShape#OUTER_LEFT} -> 270° Y rotation + UV lock</li>
+     *         <li>{@link Direction#WEST} + {@link Half#BOTTOM} + {@link StairsShape#OUTER_LEFT} -> 90° Y rotation + UV lock</li>
+     *         <li>{@link Direction#SOUTH} + {@link Half#BOTTOM} + {@link StairsShape#OUTER_LEFT} -> 0° rotation</li>
+     *         <li>{@link Direction#NORTH} + {@link Half#BOTTOM} + {@link StairsShape#OUTER_LEFT} -> 180° Y rotation + UV lock</li>
      *         <li>{@link BlockStateProperties#HORIZONTAL_FACING} + {@link BlockStateProperties#HALF}
-     *         + {@link StairsShape#OUTER_LEFT} or {@link StairsShape#OUTER_RIGHT} -> {@code RegistryUtil.pickBlockPrefix(outerStairsModel)}</li>
+     *         + {@link StairsShape#INNER_RIGHT} or {@link StairsShape#INNER_LEFT} -> {@code RegistryUtil.pickBlockPrefix(innerStairsModel)}</li>
+     *         <li>{@link Direction#EAST} + {@link Half#BOTTOM} + {@link StairsShape#INNER_RIGHT} -> 0° rotation</li>
+     *         <li>{@link Direction#WEST} + {@link Half#BOTTOM} + {@link StairsShape#INNER_RIGHT} -> 180° Y rotation + UV lock</li>
+     *         <li>{@link Direction#SOUTH} + {@link Half#BOTTOM} + {@link StairsShape#INNER_RIGHT} -> 90° Y rotation + UV lock</li>
+     *         <li>{@link Direction#NORTH} + {@link Half#BOTTOM} + {@link StairsShape#INNER_RIGHT} -> 270° Y rotation + UV lock</li>
+     *         <li>{@link Direction#EAST} + {@link Half#BOTTOM} + {@link StairsShape#INNER_LEFT} -> 270° Y rotation + UV lock</li>
+     *         <li>{@link Direction#WEST} + {@link Half#BOTTOM} + {@link StairsShape#INNER_LEFT} -> 90° Y rotation + UV lock</li>
+     *         <li>{@link Direction#SOUTH} + {@link Half#BOTTOM} + {@link StairsShape#INNER_LEFT} -> 0° rotation</li>
+     *         <li>{@link Direction#NORTH} + {@link Half#BOTTOM} + {@link StairsShape#INNER_LEFT} -> 180° Y rotation + UV lock</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the stairs {@link Block} to create the blockstate for.
@@ -837,12 +906,34 @@ public final class ModelUtil {
      *     <ul>
      *         <li>{@link BlockStateProperties#HORIZONTAL_FACING} + {@link BlockStateProperties#HALF}
      *         + {@link StairsShape#STRAIGHT} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get())}</li>
+     *         <li>{@link Direction#EAST} + {@link Half#BOTTOM} + {@link StairsShape#STRAIGHT} -> 0° rotation</li>
+     *         <li>{@link Direction#WEST} + {@link Half#BOTTOM} + {@link StairsShape#STRAIGHT} -> 180° Y rotation + UV lock</li>
+     *         <li>{@link Direction#SOUTH} + {@link Half#BOTTOM} + {@link StairsShape#STRAIGHT} -> 90° Y rotation + UV lock</li>
+     *         <li>{@link Direction#NORTH} + {@link Half#BOTTOM} + {@link StairsShape#STRAIGHT} -> 270° Y rotation + UV lock</li>
+     *         <li>{@link Direction#EAST} + {@link Half#TOP} + {@link StairsShape#STRAIGHT} -> 180° X rotation + UV lock</li>
+     *         <li>{@link Direction#WEST} + {@link Half#TOP} + {@link StairsShape#STRAIGHT} -> 180° X + 180° Y rotation + UV lock</li>
+     *         <li>{@link Direction#SOUTH} + {@link Half#TOP} + {@link StairsShape#STRAIGHT} -> 180° X + 90° Y rotation + UV lock</li>
+     *         <li>{@link Direction#NORTH} + {@link Half#TOP} + {@link StairsShape#STRAIGHT} -> 180° X + 270° Y rotation + UV lock</li>
      *         <li>{@link BlockStateProperties#HORIZONTAL_FACING} + {@link BlockStateProperties#HALF}
-     *         + {@link StairsShape#INNER_LEFT} or {@link StairsShape#INNER_RIGHT}
-     *         -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_inner")}</li>
+     *         + {@link StairsShape#OUTER_RIGHT} or {@link StairsShape#OUTER_LEFT} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_outer")}</li>
+     *         <li>{@link Direction#EAST} + {@link Half#BOTTOM} + {@link StairsShape#OUTER_RIGHT} -> 0° rotation</li>
+     *         <li>{@link Direction#WEST} + {@link Half#BOTTOM} + {@link StairsShape#OUTER_RIGHT} -> 180° Y rotation + UV lock</li>
+     *         <li>{@link Direction#SOUTH} + {@link Half#BOTTOM} + {@link StairsShape#OUTER_RIGHT} -> 90° Y rotation + UV lock</li>
+     *         <li>{@link Direction#NORTH} + {@link Half#BOTTOM} + {@link StairsShape#OUTER_RIGHT} -> 270° Y rotation + UV lock</li>
+     *         <li>{@link Direction#EAST} + {@link Half#BOTTOM} + {@link StairsShape#OUTER_LEFT} -> 270° Y rotation + UV lock</li>
+     *         <li>{@link Direction#WEST} + {@link Half#BOTTOM} + {@link StairsShape#OUTER_LEFT} -> 90° Y rotation + UV lock</li>
+     *         <li>{@link Direction#SOUTH} + {@link Half#BOTTOM} + {@link StairsShape#OUTER_LEFT} -> 0° rotation</li>
+     *         <li>{@link Direction#NORTH} + {@link Half#BOTTOM} + {@link StairsShape#OUTER_LEFT} -> 180° Y rotation + UV lock</li>
      *         <li>{@link BlockStateProperties#HORIZONTAL_FACING} + {@link BlockStateProperties#HALF}
-     *         + {@link StairsShape#OUTER_LEFT} or {@link StairsShape#OUTER_RIGHT}
-     *         -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_outer")}</li>
+     *         + {@link StairsShape#INNER_RIGHT} or {@link StairsShape#INNER_LEFT} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_inner")}</li>
+     *         <li>{@link Direction#EAST} + {@link Half#BOTTOM} + {@link StairsShape#INNER_RIGHT} -> 0° rotation</li>
+     *         <li>{@link Direction#WEST} + {@link Half#BOTTOM} + {@link StairsShape#INNER_RIGHT} -> 180° Y rotation + UV lock</li>
+     *         <li>{@link Direction#SOUTH} + {@link Half#BOTTOM} + {@link StairsShape#INNER_RIGHT} -> 90° Y rotation + UV lock</li>
+     *         <li>{@link Direction#NORTH} + {@link Half#BOTTOM} + {@link StairsShape#INNER_RIGHT} -> 270° Y rotation + UV lock</li>
+     *         <li>{@link Direction#EAST} + {@link Half#BOTTOM} + {@link StairsShape#INNER_LEFT} -> 270° Y rotation + UV lock</li>
+     *         <li>{@link Direction#WEST} + {@link Half#BOTTOM} + {@link StairsShape#INNER_LEFT} -> 90° Y rotation + UV lock</li>
+     *         <li>{@link Direction#SOUTH} + {@link Half#BOTTOM} + {@link StairsShape#INNER_LEFT} -> 0° rotation</li>
+     *         <li>{@link Direction#NORTH} + {@link Half#BOTTOM} + {@link StairsShape#INNER_LEFT} -> 180° Y rotation + UV lock</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the stairs {@link Block} to create the blockstate for.
@@ -877,8 +968,7 @@ public final class ModelUtil {
      * @see #wall(Supplier, ResourceLocation)
      */
     public static BlockModelDefinition wallInventory(Supplier<Block> targetBlock, ResourceLocation wallTexture) {
-        ResourceLocation baseWallId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseWallId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return new BlockModelDefinition(ModelTemplates.WALL_INVENTORY)
                 .withTextureMapping(new TextureMapping()
@@ -908,8 +998,7 @@ public final class ModelUtil {
      * @see #wall(Supplier, ResourceLocation)
      */
     public static BlockModelDefinition wallPost(Supplier<Block> targetBlock, ResourceLocation wallTexture) {
-        ResourceLocation baseWallId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseWallId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return new BlockModelDefinition(ModelTemplates.WALL_POST)
                 .withTextureMapping(new TextureMapping()
@@ -939,8 +1028,7 @@ public final class ModelUtil {
      * @see #wall(Supplier, ResourceLocation)
      */
     public static BlockModelDefinition wallSide(Supplier<Block> targetBlock, ResourceLocation wallTexture) {
-        ResourceLocation baseWallId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseWallId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return new BlockModelDefinition(ModelTemplates.WALL_LOW_SIDE)
                 .withTextureMapping(new TextureMapping()
@@ -970,8 +1058,7 @@ public final class ModelUtil {
      * @see #wall(Supplier, ResourceLocation)
      */
     public static BlockModelDefinition wallSideTall(Supplier<Block> targetBlock, ResourceLocation wallTexture) {
-        ResourceLocation baseWallId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseWallId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return new BlockModelDefinition(ModelTemplates.WALL_TALL_SIDE)
                 .withTextureMapping(new TextureMapping()
@@ -1185,8 +1272,7 @@ public final class ModelUtil {
      * @see #button(Supplier, ResourceLocation)
      */
     public static BlockModelDefinition buttonInventory(Supplier<Block> targetBlock, ResourceLocation buttonTexture) {
-        ResourceLocation baseButtonId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseButtonId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return new BlockModelDefinition(ModelTemplates.BUTTON_INVENTORY)
                 .withTextureMapping(new TextureMapping()
@@ -1215,8 +1301,7 @@ public final class ModelUtil {
      * @see #button(Supplier, ResourceLocation)
      */
     public static BlockModelDefinition buttonPressed(Supplier<Block> targetBlock, ResourceLocation buttonTexture) {
-        ResourceLocation baseButtonId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseButtonId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return new BlockModelDefinition(ModelTemplates.BUTTON_PRESSED)
                 .withTextureMapping(new TextureMapping()
@@ -1439,8 +1524,7 @@ public final class ModelUtil {
      * @see #pressurePlate(Supplier)
      */
     public static BlockModelDefinition pressurePlateDown(Supplier<Block> targetBlock, ResourceLocation pressurePlateTexture) {
-        ResourceLocation basePressurePlateId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation basePressurePlateId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return new BlockModelDefinition(ModelTemplates.PRESSURE_PLATE_DOWN)
                 .withTextureMapping(TextureMapping.defaultTexture(RegistryUtil.pickBlockPrefix(pressurePlateTexture)))
@@ -1578,8 +1662,7 @@ public final class ModelUtil {
      * @see #door(Supplier)
      */
     public static BlockModelDefinition doorBottomLeft(Supplier<Block> targetBlock, ResourceLocation bottomDoorTexture, ResourceLocation topDoorTexture) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return new BlockModelDefinition(ModelTemplates.DOOR_BOTTOM_LEFT)
                 .withTextureMapping(new TextureMapping()
@@ -1612,8 +1695,7 @@ public final class ModelUtil {
      * @see #door(Supplier)
      */
     public static BlockModelDefinition doorBottomLeft(Supplier<Block> targetBlock) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return doorBottomLeft(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
     }
@@ -1644,8 +1726,7 @@ public final class ModelUtil {
      * @see #door(Supplier)
      */
     public static BlockModelDefinition doorBottomLeftOpen(Supplier<Block> targetBlock, ResourceLocation bottomDoorTexture, ResourceLocation topDoorTexture) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return new BlockModelDefinition(ModelTemplates.DOOR_BOTTOM_LEFT_OPEN)
                 .withTextureMapping(new TextureMapping()
@@ -1678,8 +1759,7 @@ public final class ModelUtil {
      * @see #door(Supplier)
      */
     public static BlockModelDefinition doorBottomLeftOpen(Supplier<Block> targetBlock) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return doorBottomLeftOpen(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
     }
@@ -1710,8 +1790,7 @@ public final class ModelUtil {
      * @see #door(Supplier)
      */
     public static BlockModelDefinition doorBottomRight(Supplier<Block> targetBlock, ResourceLocation bottomDoorTexture, ResourceLocation topDoorTexture) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return new BlockModelDefinition(ModelTemplates.DOOR_BOTTOM_RIGHT)
                 .withTextureMapping(new TextureMapping()
@@ -1744,8 +1823,7 @@ public final class ModelUtil {
      * @see #door(Supplier)
      */
     public static BlockModelDefinition doorBottomRight(Supplier<Block> targetBlock) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return doorBottomRight(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
     }
@@ -1776,8 +1854,7 @@ public final class ModelUtil {
      * @see #door(Supplier)
      */
     public static BlockModelDefinition doorBottomRightOpen(Supplier<Block> targetBlock, ResourceLocation bottomDoorTexture, ResourceLocation topDoorTexture) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return new BlockModelDefinition(ModelTemplates.DOOR_BOTTOM_RIGHT_OPEN)
                 .withTextureMapping(new TextureMapping()
@@ -1810,8 +1887,7 @@ public final class ModelUtil {
      * @see #door(Supplier)
      */
     public static BlockModelDefinition doorBottomRightOpen(Supplier<Block> targetBlock) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return doorBottomRightOpen(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
     }
@@ -1842,8 +1918,7 @@ public final class ModelUtil {
      * @see #door(Supplier)
      */
     public static BlockModelDefinition doorTopLeft(Supplier<Block> targetBlock, ResourceLocation bottomDoorTexture, ResourceLocation topDoorTexture) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return new BlockModelDefinition(ModelTemplates.DOOR_TOP_LEFT)
                 .withTextureMapping(new TextureMapping()
@@ -1876,8 +1951,7 @@ public final class ModelUtil {
      * @see #door(Supplier)
      */
     public static BlockModelDefinition doorTopLeft(Supplier<Block> targetBlock) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return doorTopLeft(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
     }
@@ -1908,8 +1982,7 @@ public final class ModelUtil {
      * @see #door(Supplier)
      */
     public static BlockModelDefinition doorTopLeftOpen(Supplier<Block> targetBlock, ResourceLocation bottomDoorTexture, ResourceLocation topDoorTexture) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return new BlockModelDefinition(ModelTemplates.DOOR_TOP_LEFT_OPEN)
                 .withTextureMapping(new TextureMapping()
@@ -1942,8 +2015,7 @@ public final class ModelUtil {
      * @see #door(Supplier)
      */
     public static BlockModelDefinition doorTopLeftOpen(Supplier<Block> targetBlock) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return doorTopLeftOpen(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
     }
@@ -1974,8 +2046,7 @@ public final class ModelUtil {
      * @see #door(Supplier)
      */
     public static BlockModelDefinition doorTopRight(Supplier<Block> targetBlock, ResourceLocation bottomDoorTexture, ResourceLocation topDoorTexture) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return new BlockModelDefinition(ModelTemplates.DOOR_TOP_RIGHT)
                 .withTextureMapping(new TextureMapping()
@@ -2008,8 +2079,7 @@ public final class ModelUtil {
      * @see #door(Supplier)
      */
     public static BlockModelDefinition doorTopRight(Supplier<Block> targetBlock) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return doorTopRight(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
     }
@@ -2040,8 +2110,7 @@ public final class ModelUtil {
      * @see #door(Supplier)
      */
     public static BlockModelDefinition doorTopRightOpen(Supplier<Block> targetBlock, ResourceLocation bottomDoorTexture, ResourceLocation topDoorTexture) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return new BlockModelDefinition(ModelTemplates.DOOR_TOP_RIGHT_OPEN)
                 .withTextureMapping(new TextureMapping()
@@ -2074,8 +2143,7 @@ public final class ModelUtil {
      * @see #door(Supplier)
      */
     public static BlockModelDefinition doorTopRightOpen(Supplier<Block> targetBlock) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return doorTopRightOpen(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
     }
@@ -2100,8 +2168,7 @@ public final class ModelUtil {
      * @see #door(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
      */
     public static ItemModelDefinition doorItem(Supplier<Block> targetBlock) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return basicGenerated(RegistryUtil.getTextureLocationOrDefault(baseDoorId));
     }
@@ -2188,8 +2255,7 @@ public final class ModelUtil {
      * @see #doorItem(Supplier)
      */
     public static BlockModelDefinition door(Supplier<Block> targetBlock, ResourceLocation bottomTexture, ResourceLocation topTexture) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return door(targetBlock, bottomTexture, topTexture, RegistryUtil.getTextureLocation(baseDoorId, "item").orElse(baseDoorId));
     }
@@ -2225,8 +2291,7 @@ public final class ModelUtil {
      * @see #doorItem(Supplier)
      */
     public static BlockModelDefinition door(Supplier<Block> targetBlock) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetBlock.get())
-                .orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry present for Block of type %s: %s", targetBlock.getClass().getSimpleName(), targetBlock)));
+        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
         return door(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
     }
@@ -2480,6 +2545,1118 @@ public final class ModelUtil {
      */
     public static BlockStateDefinition doorBlockState(Supplier<Block> targetBlock) {
         return doorBlockState(targetBlock, ModelLocationUtils.getModelLocation(targetBlock.get(), "_top"), ModelLocationUtils.getModelLocation(targetBlock.get(), "_bottom"));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#TRAPDOOR_BOTTOM} template for trapdoor blocks.
+     * This model is specifically designed for the bottom half of closed trapdoors and promptly generates
+     * a corresponding item model.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockPrefix(trapdoorTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the trapdoor {@link Block} to be used for
+     *                    automatic model location resolution and custom naming.
+     * @param trapdoorTexture The {@link ResourceLocation} representing the texture of the trapdoor.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#TRAPDOOR_BOTTOM} template.
+     *
+     * @see #trapdoorOpen(Supplier, ResourceLocation)
+     * @see #trapdoorTop(Supplier, ResourceLocation)
+     * @see #trapdoor(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition trapdoorBottom(Supplier<Block> targetBlock, ResourceLocation trapdoorTexture) {
+        ResourceLocation targetTrapdoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
+
+        return new BlockModelDefinition(ModelTemplates.TRAPDOOR_BOTTOM)
+                .withTextureMapping(TextureMapping.defaultTexture(RegistryUtil.pickBlockPrefix(trapdoorTexture)))
+                .withOrdinalModelDefinitions(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get(), "_bottom"))))
+                .withCustomName(targetTrapdoorId.getPath().concat("_bottom"))
+                .withRenderType(CUTOUT_RENDER_TYPE);
+    }
+
+    /**
+     * Overloaded variant of {@link #trapdoorBottom(Supplier, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#TRAPDOOR_BOTTOM} template for trapdoor blocks using automatic texture resolution.
+     * Automatically determines the trapdoor texture based on the trapdoor's registry ID.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the trapdoor {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#TRAPDOOR_BOTTOM} template.
+     *
+     * @see #trapdoorBottom(Supplier, ResourceLocation)
+     * @see #trapdoorOpen(Supplier)
+     * @see #trapdoorTop(Supplier)
+     * @see #trapdoor(Supplier)
+     */
+    public static BlockModelDefinition trapdoorBottom(Supplier<Block> targetBlock) {
+        ResourceLocation baseTrapdoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
+
+        return trapdoorBottom(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseTrapdoorId));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#TRAPDOOR_OPEN} template for trapdoor blocks.
+     * This model is specifically designed for the open state of trapdoors.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockPrefix(trapdoorTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the trapdoor {@link Block} to be used for
+     *                    automatic model location resolution and custom naming.
+     * @param trapdoorTexture The {@link ResourceLocation} representing the texture of the trapdoor.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#TRAPDOOR_OPEN} template.
+     *
+     * @see #trapdoorBottom(Supplier, ResourceLocation)
+     * @see #trapdoorTop(Supplier, ResourceLocation)
+     * @see #trapdoor(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition trapdoorOpen(Supplier<Block> targetBlock, ResourceLocation trapdoorTexture) {
+        ResourceLocation targetTrapdoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
+
+        return new BlockModelDefinition(ModelTemplates.TRAPDOOR_OPEN)
+                .withTextureMapping(TextureMapping.defaultTexture(RegistryUtil.pickBlockPrefix(trapdoorTexture)))
+                .withCustomName(targetTrapdoorId.getPath().concat("_open"))
+                .withRenderType(CUTOUT_RENDER_TYPE);
+    }
+
+    /**
+     * Overloaded variant of {@link #trapdoorOpen(Supplier, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#TRAPDOOR_OPEN} template for trapdoor blocks using automatic texture resolution.
+     * Automatically determines the trapdoor texture based on the trapdoor's registry ID.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the trapdoor {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#TRAPDOOR_OPEN} template.
+     *
+     * @see #trapdoorOpen(Supplier, ResourceLocation)
+     * @see #trapdoorBottom(Supplier)
+     * @see #trapdoorTop(Supplier)
+     * @see #trapdoor(Supplier)
+     */
+    public static BlockModelDefinition trapdoorOpen(Supplier<Block> targetBlock) {
+        ResourceLocation baseTrapdoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
+
+        return trapdoorOpen(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseTrapdoorId));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#TRAPDOOR_TOP} template for trapdoor blocks.
+     * This model is specifically designed for the top half of closed trapdoors.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockPrefix(trapdoorTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the trapdoor {@link Block} to be used for
+     *                    automatic model location resolution and custom naming.
+     * @param trapdoorTexture The {@link ResourceLocation} representing the texture of the trapdoor.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#TRAPDOOR_TOP} template.
+     *
+     * @see #trapdoorBottom(Supplier, ResourceLocation)
+     * @see #trapdoorOpen(Supplier, ResourceLocation)
+     * @see #trapdoor(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition trapdoorTop(Supplier<Block> targetBlock, ResourceLocation trapdoorTexture) {
+        ResourceLocation targetTrapdoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
+
+        return new BlockModelDefinition(ModelTemplates.TRAPDOOR_TOP)
+                .withTextureMapping(TextureMapping.defaultTexture(RegistryUtil.pickBlockPrefix(trapdoorTexture)))
+                .withCustomName(targetTrapdoorId.getPath().concat("_top"))
+                .withRenderType(CUTOUT_RENDER_TYPE);
+    }
+
+    /**
+     * Overloaded variant of {@link #trapdoorTop(Supplier, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#TRAPDOOR_TOP} template for trapdoor blocks using automatic texture resolution.
+     * Automatically determines the trapdoor texture based on the trapdoor's registry ID.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the trapdoor {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#TRAPDOOR_TOP} template.
+     *
+     * @see #trapdoorTop(Supplier, ResourceLocation)
+     * @see #trapdoorBottom(Supplier)
+     * @see #trapdoorOpen(Supplier)
+     * @see #trapdoor(Supplier)
+     */
+    public static BlockModelDefinition trapdoorTop(Supplier<Block> targetBlock) {
+        ResourceLocation baseTrapdoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
+
+        return trapdoorTop(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseTrapdoorId));
+    }
+
+    /**
+     * Creates a comprehensive {@link BlockModelDefinition} with all three trapdoor variants (bottom, open, top)
+     * using the {@link ModelTemplates#TRAPDOOR_BOTTOM}, {@link ModelTemplates#TRAPDOOR_OPEN}, and {@link ModelTemplates#TRAPDOOR_TOP}
+     * templates. The bottom variant includes a corresponding item model.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockPrefix(trapdoorTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the trapdoor {@link Block} to be used for
+     *                    automatic model location resolution and custom naming.
+     * @param trapdoorTexture The {@link ResourceLocation} representing the texture of the trapdoor.
+     *
+     * @return A {@link BlockModelDefinition} with all trapdoor variants.
+     *
+     * @see #trapdoorBottom(Supplier, ResourceLocation)
+     * @see #trapdoorOpen(Supplier, ResourceLocation)
+     * @see #trapdoorTop(Supplier, ResourceLocation)
+     * @see #trapdoor(Supplier)
+     */
+    public static BlockModelDefinition trapdoor(Supplier<Block> targetBlock, ResourceLocation trapdoorTexture) {
+        return trapdoorBottom(targetBlock, trapdoorTexture)
+                .withOrdinalModelDefinitions(trapdoorOpen(targetBlock, trapdoorTexture), trapdoorTop(targetBlock, trapdoorTexture));
+    }
+
+    /**
+     * Overloaded variant of {@link #trapdoor(Supplier, ResourceLocation)}. Creates a comprehensive {@link BlockModelDefinition}
+     * with all three trapdoor variants using automatic texture resolution. Automatically determines the trapdoor texture based
+     * on the trapdoor's registry ID.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the trapdoor {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with all trapdoor variants using automatic texture resolution.
+     *
+     * @see #trapdoorBottom(Supplier, ResourceLocation)
+     * @see #trapdoorOpen(Supplier, ResourceLocation)
+     * @see #trapdoorTop(Supplier, ResourceLocation)
+     * @see #trapdoor(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition trapdoor(Supplier<Block> targetBlock) {
+        ResourceLocation baseTrapdoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
+
+        return trapdoor(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseTrapdoorId));
+    }
+
+    /**
+     * Creates a {@link BlockStateDefinition} for trapdoor blocks using {@link MultiVariantGenerator} with different models
+     * for each combination of facing, half, and open state. This method handles the complex variant system used
+     * by Minecraft trapdoors to show open/closed states and proper orientations based on placement.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link BlockStateProperties#OPEN} = {@code false} + {@link BlockStateProperties#HALF} = {@link Half#BOTTOM}
+     *         -> {@code trapdoorBottomModel} (all facings use same model for bottom-closed)</li>
+     *         <li>{@link Direction#NORTH} + {@link Half#BOTTOM} + {@code false} -> 0° rotation</li>
+     *         <li>{@link Direction#SOUTH} + {@link Half#BOTTOM} + {@code false} -> 0° rotation</li>
+     *         <li>{@link Direction#EAST} + {@link Half#BOTTOM} + {@code false} -> 0° rotation</li>
+     *         <li>{@link Direction#WEST} + {@link Half#BOTTOM} + {@code false} -> 0° rotation</li>
+     *         <li>{@link BlockStateProperties#OPEN} = {@code false} + {@link BlockStateProperties#HALF} = {@link Half#TOP}
+     *         -> {@code trapdoorTopModel} (all facings use same model for top-closed)</li>
+     *         <li>{@link Direction#NORTH} + {@link Half#TOP} + {@code false} -> 0° rotation</li>
+     *         <li>{@link Direction#SOUTH} + {@link Half#TOP} + {@code false} -> 0° rotation</li>
+     *         <li>{@link Direction#EAST} + {@link Half#TOP} + {@code false} -> 0° rotation</li>
+     *         <li>{@link Direction#WEST} + {@link Half#TOP} + {@code false} -> 0° rotation</li>
+     *         <li>{@link BlockStateProperties#OPEN} = {@code true} + {@link BlockStateProperties#HALF} = {@link Half#BOTTOM}
+     *         -> {@code trapdoorOpenModel} with Y-rotations by facing</li>
+     *         <li>{@link Direction#NORTH} + {@link Half#BOTTOM} + {@code true} -> 0° rotation</li>
+     *         <li>{@link Direction#SOUTH} + {@link Half#BOTTOM} + {@code true} -> 180° Y rotation</li>
+     *         <li>{@link Direction#EAST} + {@link Half#BOTTOM} + {@code true} -> 90° Y rotation</li>
+     *         <li>{@link Direction#WEST} + {@link Half#BOTTOM} + {@code true} -> 270° Y rotation</li>
+     *         <li>{@link BlockStateProperties#OPEN} = {@code true} + {@link BlockStateProperties#HALF} = {@link Half#TOP}
+     *         -> {@code trapdoorOpenModel} with Y-rotations by facing</li>
+     *         <li>{@link Direction#NORTH} + {@link Half#TOP} + {@code true} -> 0° rotation</li>
+     *         <li>{@link Direction#SOUTH} + {@link Half#TOP} + {@code true} -> 180° Y rotation</li>
+     *         <li>{@link Direction#EAST} + {@link Half#TOP} + {@code true} -> 90° Y rotation</li>
+     *         <li>{@link Direction#WEST} + {@link Half#TOP} + {@code true} -> 270° Y rotation</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the trapdoor {@link Block} to create the blockstate for.
+     * @param trapdoorOpenModel The {@link ResourceLocation} of the model to use for open trapdoor states.
+     * @param trapdoorTopModel The {@link ResourceLocation} of the model to use for top half closed trapdoor states.
+     * @param trapdoorBottomModel The {@link ResourceLocation} of the model to use for bottom half closed trapdoor states.
+     *
+     * @return A {@link BlockStateDefinition} with comprehensive trapdoor blockstate variants.
+     *
+     * @see #trapdoorBlockState(Supplier, ResourceLocation)
+     * @see #trapdoorBlockState(Supplier)
+     * @see #trapdoorBottom(Supplier, ResourceLocation)
+     * @see #trapdoorOpen(Supplier, ResourceLocation)
+     * @see #trapdoorTop(Supplier, ResourceLocation)
+     * @see #trapdoor(Supplier, ResourceLocation)
+     */
+    public static BlockStateDefinition trapdoorBlockState(Supplier<Block> targetBlock, ResourceLocation trapdoorOpenModel, ResourceLocation trapdoorTopModel, ResourceLocation trapdoorBottomModel) {
+        return new BlockStateDefinition(targetBlock)
+                .withBlockStateSupplier(MultiVariantGenerator.multiVariant(targetBlock.get())
+                        .with(PropertyDispatch
+                                .properties(BlockStateProperties.HORIZONTAL_FACING, BlockStateProperties.HALF, BlockStateProperties.OPEN)
+                                .select(Direction.NORTH, Half.BOTTOM, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, trapdoorBottomModel))
+                                .select(Direction.SOUTH, Half.BOTTOM, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, trapdoorBottomModel))
+                                .select(Direction.EAST, Half.BOTTOM, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, trapdoorBottomModel))
+                                .select(Direction.WEST, Half.BOTTOM, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, trapdoorBottomModel))
+                                .select(Direction.NORTH, Half.TOP, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, trapdoorTopModel))
+                                .select(Direction.SOUTH, Half.TOP, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, trapdoorTopModel))
+                                .select(Direction.EAST, Half.TOP, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, trapdoorTopModel))
+                                .select(Direction.WEST, Half.TOP, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, trapdoorTopModel))
+                                .select(Direction.NORTH, Half.BOTTOM, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, trapdoorOpenModel))
+                                .select(Direction.SOUTH, Half.BOTTOM, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, trapdoorOpenModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180))
+                                .select(Direction.EAST, Half.BOTTOM, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, trapdoorOpenModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
+                                .select(Direction.WEST, Half.BOTTOM, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, trapdoorOpenModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270))
+                                .select(Direction.NORTH, Half.TOP, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, trapdoorOpenModel))
+                                .select(Direction.SOUTH, Half.TOP, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, trapdoorOpenModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180))
+                                .select(Direction.EAST, Half.TOP, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, trapdoorOpenModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
+                                .select(Direction.WEST, Half.TOP, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, trapdoorOpenModel)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270))));
+    }
+
+    /**
+     * Overloaded variant of {@link #trapdoorBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)}.
+     * Creates a {@link BlockStateDefinition} for trapdoor blocks using {@link MultiVariantGenerator} with different models
+     * for each combination of facing, half, and open state. Automatically determines model locations using standard
+     * naming convention (base model with "_open", "_top", "_bottom" suffixes).
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link BlockStateProperties#OPEN} = {@code false} + {@link BlockStateProperties#HALF} = {@link Half#BOTTOM}
+     *         -> {@code baseTrapdoorId + "_bottom"} (all facings use same model for bottom-closed)</li>
+     *         <li>{@link Direction#NORTH} + {@link Half#BOTTOM} + {@code false} -> 0° rotation</li>
+     *         <li>{@link Direction#SOUTH} + {@link Half#BOTTOM} + {@code false} -> 0° rotation</li>
+     *         <li>{@link Direction#EAST} + {@link Half#BOTTOM} + {@code false} -> 0° rotation</li>
+     *         <li>{@link Direction#WEST} + {@link Half#BOTTOM} + {@code false} -> 0° rotation</li>
+     *         <li>{@link BlockStateProperties#OPEN} = {@code false} + {@link BlockStateProperties#HALF} = {@link Half#TOP}
+     *         -> {@code baseTrapdoorId + "_top"} (all facings use same model for top-closed)</li>
+     *         <li>{@link Direction#NORTH} + {@link Half#TOP} + {@code false} -> 0° rotation</li>
+     *         <li>{@link Direction#SOUTH} + {@link Half#TOP} + {@code false} -> 0° rotation</li>
+     *         <li>{@link Direction#EAST} + {@link Half#TOP} + {@code false} -> 0° rotation</li>
+     *         <li>{@link Direction#WEST} + {@link Half#TOP} + {@code false} -> 0° rotation</li>
+     *         <li>{@link BlockStateProperties#OPEN} = {@code true} + {@link BlockStateProperties#HALF} = {@link Half#BOTTOM}
+     *         -> {@code baseTrapdoorId + "_open"} with Y-rotations by facing</li>
+     *         <li>{@link Direction#NORTH} + {@link Half#BOTTOM} + {@code true} -> 0° rotation</li>
+     *         <li>{@link Direction#SOUTH} + {@link Half#BOTTOM} + {@code true} -> 180° Y rotation</li>
+     *         <li>{@link Direction#EAST} + {@link Half#BOTTOM} + {@code true} -> 90° Y rotation</li>
+     *         <li>{@link Direction#WEST} + {@link Half#BOTTOM} + {@code true} -> 270° Y rotation</li>
+     *         <li>{@link BlockStateProperties#OPEN} = {@code true} + {@link BlockStateProperties#HALF} = {@link Half#TOP}
+     *         -> {@code baseTrapdoorId + "_open"} with Y-rotations by facing</li>
+     *         <li>{@link Direction#NORTH} + {@link Half#TOP} + {@code true} -> 0° rotation</li>
+     *         <li>{@link Direction#SOUTH} + {@link Half#TOP} + {@code true} -> 180° Y rotation</li>
+     *         <li>{@link Direction#EAST} + {@link Half#TOP} + {@code true} -> 90° Y rotation</li>
+     *         <li>{@link Direction#WEST} + {@link Half#TOP} + {@code true} -> 270° Y rotation</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the trapdoor {@link Block} to create the blockstate for.
+     * @param baseTrapdoorId Base model location; "_open", "_top", "_bottom" are appended automatically.
+     *
+     * @return A {@link BlockStateDefinition} with comprehensive trapdoor blockstate variants using automatic model resolution.
+     *
+     * @see #trapdoorBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
+     * @see #trapdoorBlockState(Supplier)
+     * @see #trapdoorBottom(Supplier, ResourceLocation)
+     * @see #trapdoorOpen(Supplier, ResourceLocation)
+     * @see #trapdoorTop(Supplier, ResourceLocation)
+     * @see #trapdoor(Supplier, ResourceLocation)
+     */
+    public static BlockStateDefinition trapdoorBlockState(Supplier<Block> targetBlock, ResourceLocation baseTrapdoorId) {
+        return trapdoorBlockState(targetBlock, baseTrapdoorId.withSuffix("_open"), baseTrapdoorId.withSuffix("_top"), baseTrapdoorId.withSuffix("_bottom"));
+    }
+
+    /**
+     * Overloaded variant of {@link #trapdoorBlockState(Supplier, ResourceLocation)}. Creates a {@link BlockStateDefinition}
+     * for trapdoor blocks using {@link MultiVariantGenerator} with different models for each combination of facing, half,
+     * and open state. Uses fully automatic model resolution based on the trapdoor's registry ID.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link BlockStateProperties#OPEN} = false + {@link BlockStateProperties#HALF} = {@link Half#BOTTOM}
+     *         -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_bottom")} (all facings use same model for bottom-closed)</li>
+     *         <li>{@link Direction#NORTH} + {@link Half#BOTTOM} + {@code false} -> 0° rotation</li>
+     *         <li>{@link Direction#SOUTH} + {@link Half#BOTTOM} + {@code false} -> 0° rotation</li>
+     *         <li>{@link Direction#EAST} + {@link Half#BOTTOM} + {@code false} -> 0° rotation</li>
+     *         <li>{@link Direction#WEST} + {@link Half#BOTTOM} + {@code false} -> 0° rotation</li>
+     *         <li>{@link BlockStateProperties#OPEN} = false + {@link BlockStateProperties#HALF} = {@link Half#TOP}
+     *         -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_top")} (all facings use same model for top-closed)</li>
+     *         <li>{@link Direction#NORTH} + {@link Half#TOP} + {@code false} -> 0° rotation</li>
+     *         <li>{@link Direction#SOUTH} + {@link Half#TOP} + {@code false} -> 0° rotation</li>
+     *         <li>{@link Direction#EAST} + {@link Half#TOP} + {@code false} -> 0° rotation</li>
+     *         <li>{@link Direction#WEST} + {@link Half#TOP} + {@code false} -> 0° rotation</li>
+     *         <li>{@link BlockStateProperties#OPEN} = true + {@link BlockStateProperties#HALF} = {@link Half#BOTTOM}
+     *         -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_open")} with Y-rotations by facing</li>
+     *         <li>{@link Direction#NORTH} + {@link Half#BOTTOM} + {@code true} -> 0° rotation</li>
+     *         <li>{@link Direction#SOUTH} + {@link Half#BOTTOM} + {@code true} -> 180° Y rotation</li>
+     *         <li>{@link Direction#EAST} + {@link Half#BOTTOM} + {@code true} -> 90° Y rotation</li>
+     *         <li>{@link Direction#WEST} + {@link Half#BOTTOM} + {@code true} -> 270° Y rotation</li>
+     *         <li>{@link BlockStateProperties#OPEN} = true + {@link BlockStateProperties#HALF} = {@link Half#TOP}
+     *         -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_open")} with Y-rotations by facing</li>
+     *         <li>{@link Direction#NORTH} + {@link Half#TOP} + {@code true} -> 0° rotation</li>
+     *         <li>{@link Direction#SOUTH} + {@link Half#TOP} + {@code true} -> 180° Y rotation</li>
+     *         <li>{@link Direction#EAST} + {@link Half#TOP} + {@code true} -> 90° Y rotation</li>
+     *         <li>{@link Direction#WEST} + {@link Half#TOP} + {@code true} -> 270° Y rotation</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the trapdoor {@link Block} to create the blockstate for.
+     *
+     * @return A {@link BlockStateDefinition} with comprehensive trapdoor blockstate variants using fully automatic model resolution.
+     *
+     * @see #trapdoorBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
+     * @see #trapdoorBlockState(Supplier, ResourceLocation)
+     * @see #trapdoorBottom(Supplier, ResourceLocation)
+     * @see #trapdoorOpen(Supplier, ResourceLocation)
+     * @see #trapdoorTop(Supplier, ResourceLocation)
+     * @see #trapdoor(Supplier, ResourceLocation)
+     */
+    public static BlockStateDefinition trapdoorBlockState(Supplier<Block> targetBlock) {
+        return trapdoorBlockState(targetBlock, ModelLocationUtils.getModelLocation(targetBlock.get()));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#FENCE_INVENTORY} template for fence blocks.
+     * This model represents the inventory appearance of fence blocks and includes a corresponding item model.
+     * The model will be automatically named {@code targetFenceId.getPath() + "_inventory"}.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockPrefix(fenceTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the fence {@link Block} to be used for
+     *                    automatic model location resolution and custom naming.
+     * @param fenceTexture The {@link ResourceLocation} representing the texture of the fence.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#FENCE_INVENTORY} template.
+     *
+     * @see #fenceInventory(Supplier)
+     * @see #fencePost(Supplier, ResourceLocation)
+     * @see #fenceSide(Supplier, ResourceLocation)
+     * @see #fence(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition fenceInventory(Supplier<Block> targetBlock, ResourceLocation fenceTexture) {
+        ResourceLocation targetFenceId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
+
+        return new BlockModelDefinition(ModelTemplates.FENCE_INVENTORY)
+                .withTextureMapping(TextureMapping.defaultTexture(RegistryUtil.pickBlockPrefix(fenceTexture)))
+                .withOrdinalModelDefinitions(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get(), "_inventory"))))
+                .withCustomName(targetFenceId.getPath().concat("_inventory"));
+    }
+
+    /**
+     * Overloaded variant of {@link #fenceInventory(Supplier, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#FENCE_INVENTORY} template for fence blocks using automatic texture resolution.
+     * Automatically determines the fence texture based on the fence's registry ID.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the fence {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#FENCE_INVENTORY} template.
+     *
+     * @see #fenceInventory(Supplier, ResourceLocation)
+     * @see #fencePost(Supplier)
+     * @see #fenceSide(Supplier)
+     * @see #fence(Supplier)
+     */
+    public static BlockModelDefinition fenceInventory(Supplier<Block> targetBlock) {
+        return fenceInventory(targetBlock, RegistryUtil.pickBlockTexture(targetBlock));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#FENCE_POST} template for fence blocks.
+     * This model represents the central post of fence blocks. The model will be automatically named
+     * {@code targetFenceId.getPath() + "_post"}.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockPrefix(fenceTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the fence {@link Block} to be used for
+     *                    automatic model location resolution and custom naming.
+     * @param fenceTexture The {@link ResourceLocation} representing the texture of the fence.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#FENCE_POST} template.
+     *
+     * @see #fencePost(Supplier)
+     * @see #fenceInventory(Supplier, ResourceLocation)
+     * @see #fenceSide(Supplier, ResourceLocation)
+     * @see #fence(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition fencePost(Supplier<Block> targetBlock, ResourceLocation fenceTexture) {
+        ResourceLocation targetFenceId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
+
+        return new BlockModelDefinition(ModelTemplates.FENCE_POST)
+                .withTextureMapping(TextureMapping.defaultTexture(RegistryUtil.pickBlockPrefix(fenceTexture)))
+                .withCustomName(targetFenceId.getPath().concat("_post"));
+    }
+
+    /**
+     * Overloaded variant of {@link #fencePost(Supplier, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#FENCE_POST} template for fence blocks using automatic texture resolution.
+     * Automatically determines the fence texture based on the fence's registry ID.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the fence {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#FENCE_POST} template.
+     *
+     * @see #fencePost(Supplier, ResourceLocation)
+     * @see #fenceInventory(Supplier)
+     * @see #fenceSide(Supplier)
+     * @see #fence(Supplier)
+     */
+    public static BlockModelDefinition fencePost(Supplier<Block> targetBlock) {
+        return fencePost(targetBlock, RegistryUtil.pickBlockTexture(targetBlock));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#FENCE_SIDE} template for fence blocks.
+     * This model represents the side connections of fence blocks. Note that this method uses the same template
+     * as fence posts but with different naming. The model will be automatically named
+     * {@code targetFenceId.getPath() + "_side"}.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockPrefix(fenceTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the fence {@link Block} to be used for
+     *                    automatic model location resolution and custom naming.
+     * @param fenceTexture The {@link ResourceLocation} representing the texture of the fence.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#FENCE_POST} template.
+     *
+     * @see #fenceSide(Supplier)
+     * @see #fenceInventory(Supplier, ResourceLocation)
+     * @see #fencePost(Supplier, ResourceLocation)
+     * @see #fence(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition fenceSide(Supplier<Block> targetBlock, ResourceLocation fenceTexture) {
+        ResourceLocation targetFenceId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
+
+        return new BlockModelDefinition(ModelTemplates.FENCE_SIDE)
+                .withTextureMapping(TextureMapping.defaultTexture(RegistryUtil.pickBlockPrefix(fenceTexture)))
+                .withCustomName(targetFenceId.getPath().concat("_side"));
+    }
+
+    /**
+     * Overloaded variant of {@link #fenceSide(Supplier, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#FENCE_POST} template for fence blocks using automatic texture resolution.
+     * This model represents the side connections of fence blocks. Automatically determines the fence texture
+     * based on the fence's registry ID.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the fence {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#FENCE_POST} template.
+     *
+     * @see #fenceSide(Supplier, ResourceLocation)
+     * @see #fenceInventory(Supplier)
+     * @see #fencePost(Supplier)
+     * @see #fence(Supplier)
+     */
+    public static BlockModelDefinition fenceSide(Supplier<Block> targetBlock) {
+        return fenceSide(targetBlock, RegistryUtil.pickBlockTexture(targetBlock));
+    }
+
+    /**
+     * Creates a comprehensive {@link BlockModelDefinition} with all three fence variants (inventory, post, side)
+     * using the {@link ModelTemplates#FENCE_INVENTORY}, {@link ModelTemplates#FENCE_POST}, and {@link ModelTemplates#FENCE_POST}
+     * templates. The inventory variant includes a corresponding item model.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockPrefix(fenceTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the fence {@link Block} to be used for
+     *                    automatic model location resolution and custom naming.
+     * @param fenceTexture The {@link ResourceLocation} representing the texture of the fence.
+     *
+     * @return A {@link BlockModelDefinition} with all fence variants.
+     *
+     * @see #fence(Supplier)
+     * @see #fenceInventory(Supplier, ResourceLocation)
+     * @see #fencePost(Supplier, ResourceLocation)
+     * @see #fenceSide(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition fence(Supplier<Block> targetBlock, ResourceLocation fenceTexture) {
+        return fenceInventory(targetBlock, fenceTexture)
+                .withOrdinalModelDefinitions(fencePost(targetBlock, fenceTexture), fenceSide(targetBlock, fenceTexture));
+    }
+
+    /**
+     * Overloaded variant of {@link #fence(Supplier, ResourceLocation)}. Creates a comprehensive {@link BlockModelDefinition}
+     * with all three fence variants using automatic texture resolution. Automatically determines the fence texture
+     * based on the fence's registry ID.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the fence {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with all fence variants using automatic texture resolution.
+     *
+     * @see #fence(Supplier, ResourceLocation)
+     * @see #fenceInventory(Supplier)
+     * @see #fencePost(Supplier)
+     * @see #fenceSide(Supplier)
+     */
+    public static BlockModelDefinition fence(Supplier<Block> targetBlock) {
+        return fence(targetBlock, RegistryUtil.pickBlockTexture(targetBlock));
+    }
+
+    /**
+     * Creates a {@link BlockStateDefinition} for fence blocks using {@link MultiPartGenerator} with different models
+     * for the post and side connections based on block state properties. This method handles the multipart system
+     * used by Minecraft fences to show connections to adjacent blocks.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>Base fence post model (always present)</li>
+     *         <li>North connection: {@code fenceSideModel} with 0° rotation and UV lock</li>
+     *         <li>East connection: {@code fenceSideModel} with 90° Y rotation and UV lock</li>
+     *         <li>South connection: {@code fenceSideModel} with 180° Y rotation and UV lock</li>
+     *         <li>West connection: {@code fenceSideModel} with 270° Y rotation and UV lock</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the fence {@link Block} to create the blockstate for.
+     * @param fencePostModel The {@link ResourceLocation} of the model to use for the fence post.
+     * @param fenceSideModel The {@link ResourceLocation} of the model to use for fence side connections.
+     *
+     * @return A {@link BlockStateDefinition} with fence multipart variants.
+     *
+     * @see #fenceBlockState(Supplier)
+     * @see #fence(Supplier, ResourceLocation)
+     */
+    public static BlockStateDefinition fenceBlockState(Supplier<Block> targetBlock, ResourceLocation fencePostModel, ResourceLocation fenceSideModel) {
+        return new BlockStateDefinition(targetBlock)
+                .withBlockStateSupplier(MultiPartGenerator.multiPart(targetBlock.get())
+                        .with(Variant.variant()
+                                .with(VariantProperties.MODEL, fencePostModel))
+                        .with(Condition.condition()
+                                .term(BlockStateProperties.NORTH, true), Variant.variant()
+                                .with(VariantProperties.MODEL, fenceSideModel)
+                                .with(VariantProperties.UV_LOCK, true))
+                        .with(Condition.condition()
+                                .term(BlockStateProperties.EAST, true), Variant.variant()
+                                .with(VariantProperties.MODEL, fenceSideModel)
+                                .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
+                                .with(VariantProperties.UV_LOCK, true))
+                        .with(Condition.condition()
+                                .term(BlockStateProperties.SOUTH, true), Variant.variant()
+                                .with(VariantProperties.MODEL, fenceSideModel)
+                                .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180)
+                                .with(VariantProperties.UV_LOCK, true))
+                        .with(Condition.condition()
+                                .term(BlockStateProperties.WEST, true), Variant.variant()
+                                .with(VariantProperties.MODEL, fenceSideModel)
+                                .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)
+                                .with(VariantProperties.UV_LOCK, true)));
+    }
+
+    /**
+     * Overloaded variant of {@link #fenceBlockState(Supplier, ResourceLocation, ResourceLocation)}. Creates a {@link BlockStateDefinition}
+     * for fence blocks using {@link MultiPartGenerator} with automatic model resolution. Uses fully automatic model
+     * resolution based on the fence's registry ID with "_post" and "_side" suffixes.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>Base fence post model: {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_post")}</li>
+     *         <li>North connection: {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_side")} with 0° rotation and UV lock</li>
+     *         <li>East connection: {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_side")} with 90° Y rotation and UV lock</li>
+     *         <li>South connection: {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_side")} with 180° Y rotation and UV lock</li>
+     *         <li>West connection: {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_side")} with 270° Y rotation and UV lock</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the fence {@link Block} to create the blockstate for.
+     *
+     * @return A {@link BlockStateDefinition} with fence multipart variants using fully automatic model resolution.
+     *
+     * @see #fenceBlockState(Supplier, ResourceLocation, ResourceLocation)
+     * @see #fence(Supplier)
+     */
+    public static BlockStateDefinition fenceBlockState(Supplier<Block> targetBlock) {
+        return fenceBlockState(targetBlock, ModelLocationUtils.getModelLocation(targetBlock.get(), "_post"), ModelLocationUtils.getModelLocation(targetBlock.get(), "_side"));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#FENCE_GATE_CLOSED} template for fence gate blocks.
+     * This model represents the closed state of fence gates and includes a corresponding item model.
+     * The model will be automatically named using the fence gate's registry ID.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockPrefix(fenceGateTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the fence gate {@link Block} to be used for
+     *                    automatic model location resolution.
+     * @param fenceGateTexture The {@link ResourceLocation} representing the texture of the fence gate.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#FENCE_GATE_CLOSED} template.
+     *
+     * @see #fenceGateClosed(Supplier)
+     * @see #fenceGateOpen(Supplier, ResourceLocation)
+     * @see #fenceGateWallClosed(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition fenceGateClosed(Supplier<Block> targetBlock, ResourceLocation fenceGateTexture) {
+        return new BlockModelDefinition(ModelTemplates.FENCE_GATE_CLOSED)
+                .withTextureMapping(TextureMapping.defaultTexture(RegistryUtil.pickBlockPrefix(fenceGateTexture)))
+                .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get()))));
+    }
+
+    /**
+     * Overloaded variant of {@link #fenceGateClosed(Supplier, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#FENCE_GATE_CLOSED} template for fence gate blocks using automatic texture resolution.
+     * Automatically determines the fence gate texture based on the fence gate's registry ID.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the fence gate {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#FENCE_GATE_CLOSED} template.
+     *
+     * @see #fenceGateClosed(Supplier, ResourceLocation)
+     * @see #fenceGateOpen(Supplier)
+     * @see #fenceGateWallClosed(Supplier)
+     */
+    public static BlockModelDefinition fenceGateClosed(Supplier<Block> targetBlock) {
+        return fenceGateClosed(targetBlock, RegistryUtil.pickBlockTexture(targetBlock));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#FENCE_GATE_OPEN} template for fence gate blocks.
+     * This model represents the open state of fence gates. The model will be automatically named
+     * {@code targetFenceGateId.getPath() + "_open"}.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockPrefix(fenceGateTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the fence gate {@link Block} to be used for
+     *                    automatic model location resolution and custom naming.
+     * @param fenceGateTexture The {@link ResourceLocation} representing the texture of the fence gate.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#FENCE_GATE_OPEN} template.
+     *
+     * @see #fenceGateOpen(Supplier)
+     * @see #fenceGateClosed(Supplier, ResourceLocation)
+     * @see #fenceGateWallOpen(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition fenceGateOpen(Supplier<Block> targetBlock, ResourceLocation fenceGateTexture) {
+        ResourceLocation targetFenceGateId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
+
+        return new BlockModelDefinition(ModelTemplates.FENCE_GATE_OPEN)
+                .withTextureMapping(TextureMapping.defaultTexture(RegistryUtil.pickBlockPrefix(fenceGateTexture)))
+                .withCustomName(targetFenceGateId.getPath().concat("_open"));
+    }
+
+    /**
+     * Overloaded variant of {@link #fenceGateOpen(Supplier, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#FENCE_GATE_OPEN} template for fence gate blocks using automatic texture resolution.
+     * Automatically determines the fence gate texture based on the fence gate's registry ID.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the fence gate {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#FENCE_GATE_OPEN} template.
+     *
+     * @see #fenceGateOpen(Supplier, ResourceLocation)
+     * @see #fenceGateClosed(Supplier)
+     * @see #fenceGateWallOpen(Supplier)
+     */
+    public static BlockModelDefinition fenceGateOpen(Supplier<Block> targetBlock) {
+        return fenceGateOpen(targetBlock, RegistryUtil.pickBlockTexture(targetBlock));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#FENCE_GATE_WALL_CLOSED} template for fence gate blocks.
+     * This model represents the closed state of fence gates when attached to walls. The model will be automatically named
+     * {@code targetFenceGateId.getPath() + "_wall"}.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockPrefix(fenceGateTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the fence gate {@link Block} to be used for
+     *                    automatic model location resolution and custom naming.
+     * @param fenceGateTexture The {@link ResourceLocation} representing the texture of the fence gate.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#FENCE_GATE_WALL_CLOSED} template.
+     *
+     * @see #fenceGateWallClosed(Supplier)
+     * @see #fenceGateClosed(Supplier, ResourceLocation)
+     * @see #fenceGateWallOpen(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition fenceGateWallClosed(Supplier<Block> targetBlock, ResourceLocation fenceGateTexture) {
+        ResourceLocation targetFenceGateId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
+
+        return new BlockModelDefinition(ModelTemplates.FENCE_GATE_WALL_CLOSED)
+                .withTextureMapping(TextureMapping.defaultTexture(RegistryUtil.pickBlockPrefix(fenceGateTexture)))
+                .withCustomName(targetFenceGateId.getPath().concat("_wall"));
+    }
+
+    /**
+     * Overloaded variant of {@link #fenceGateWallClosed(Supplier, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#FENCE_GATE_WALL_CLOSED} template for fence gate blocks using automatic texture resolution.
+     * This model represents the closed state of fence gates when attached to walls. Automatically determines the fence gate texture
+     * based on the fence gate's registry ID.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the fence gate {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#FENCE_GATE_WALL_CLOSED} template.
+     *
+     * @see #fenceGateWallClosed(Supplier, ResourceLocation)
+     * @see #fenceGateClosed(Supplier)
+     * @see #fenceGateWallOpen(Supplier)
+     */
+    public static BlockModelDefinition fenceGateWallClosed(Supplier<Block> targetBlock) {
+        return fenceGateWallClosed(targetBlock, RegistryUtil.pickBlockTexture(targetBlock));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#FENCE_GATE_WALL_OPEN} template for fence gate blocks.
+     * This model represents the open state of fence gates when attached to walls. The model will be automatically named
+     * {@code targetFenceGateId.getPath() + "_wall_open"}.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockPrefix(fenceGateTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the fence gate {@link Block} to be used for
+     *                    automatic model location resolution and custom naming.
+     * @param fenceGateTexture The {@link ResourceLocation} representing the texture of the fence gate.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#FENCE_GATE_WALL_OPEN} template.
+     *
+     * @see #fenceGateWallOpen(Supplier)
+     * @see #fenceGateOpen(Supplier, ResourceLocation)
+     * @see #fenceGateWallClosed(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition fenceGateWallOpen(Supplier<Block> targetBlock, ResourceLocation fenceGateTexture) {
+        ResourceLocation targetFenceGateId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
+
+        return new BlockModelDefinition(ModelTemplates.FENCE_GATE_WALL_OPEN)
+                .withTextureMapping(TextureMapping.defaultTexture(RegistryUtil.pickBlockPrefix(fenceGateTexture)))
+                .withCustomName(targetFenceGateId.getPath().concat("_wall_open"));
+    }
+
+    /**
+     * Overloaded variant of {@link #fenceGateWallOpen(Supplier, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#FENCE_GATE_WALL_OPEN} template for fence gate blocks using automatic texture resolution.
+     * This model represents the open state of fence gates when attached to walls. Automatically determines the fence gate texture
+     * based on the fence gate's registry ID.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the fence gate {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#FENCE_GATE_WALL_OPEN} template.
+     *
+     * @see #fenceGateWallOpen(Supplier, ResourceLocation)
+     * @see #fenceGateOpen(Supplier)
+     * @see #fenceGateWallClosed(Supplier)
+     */
+    public static BlockModelDefinition fenceGateWallOpen(Supplier<Block> targetBlock) {
+        return fenceGateWallOpen(targetBlock, RegistryUtil.pickBlockTexture(targetBlock));
+    }
+
+    /**
+     * Creates a comprehensive {@link BlockModelDefinition} with all four fence gate variants (closed, open, wall closed, wall open)
+     * using the {@link ModelTemplates#FENCE_GATE_CLOSED}, {@link ModelTemplates#FENCE_GATE_OPEN}, {@link ModelTemplates#FENCE_GATE_WALL_CLOSED},
+     * and {@link ModelTemplates#FENCE_GATE_WALL_OPEN} templates. The closed variant includes a corresponding item model.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockPrefix(fenceGateTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the fence gate {@link Block} to be used for
+     *                    automatic model location resolution and custom naming.
+     * @param fenceGateTexture The {@link ResourceLocation} representing the texture of the fence gate.
+     *
+     * @return A {@link BlockModelDefinition} with all fence gate variants.
+     *
+     * @see #fenceGate(Supplier)
+     * @see #fenceGateClosed(Supplier, ResourceLocation)
+     * @see #fenceGateOpen(Supplier, ResourceLocation)
+     * @see #fenceGateWallClosed(Supplier, ResourceLocation)
+     * @see #fenceGateWallOpen(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition fenceGate(Supplier<Block> targetBlock, ResourceLocation fenceGateTexture) {
+        return fenceGateClosed(targetBlock, fenceGateTexture)
+                .withOrdinalModelDefinitions(fenceGateOpen(targetBlock, fenceGateTexture), fenceGateWallClosed(targetBlock, fenceGateTexture), fenceGateWallOpen(targetBlock, fenceGateTexture));
+    }
+
+    /**
+     * Overloaded variant of {@link #fenceGate(Supplier, ResourceLocation)}. Creates a comprehensive {@link BlockModelDefinition}
+     * with all four fence gate variants using automatic texture resolution. Automatically determines the fence gate texture
+     * based on the fence gate's registry ID.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the fence gate {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with all fence gate variants using automatic texture resolution.
+     *
+     * @see #fenceGate(Supplier, ResourceLocation)
+     * @see #fenceGateClosed(Supplier)
+     * @see #fenceGateOpen(Supplier)
+     * @see #fenceGateWallClosed(Supplier)
+     * @see #fenceGateWallOpen(Supplier)
+     */
+    public static BlockModelDefinition fenceGate(Supplier<Block> targetBlock) {
+        return fenceGate(targetBlock, RegistryUtil.pickBlockTexture(targetBlock));
+    }
+
+    /**
+     * Creates a {@link BlockStateDefinition} for fence gate blocks using {@link MultiVariantGenerator} with different models
+     * for each combination of facing, wall attachment, and open state. This method handles the complex variant system
+     * used by Minecraft fence gates to show open/closed states and proper orientations based on placement.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link BlockStateProperties#IN_WALL} = {@code false} + {@link BlockStateProperties#OPEN} = {@code false}
+     *         -> {@code fenceGateModel} with Y-rotations by facing</li>
+     *         <li>{@link Direction#SOUTH} + {@code false} + {@code false} -> 0° rotation</li>
+     *         <li>{@link Direction#WEST} + {@code false} + {@code false} -> 90° Y rotation</li>
+     *         <li>{@link Direction#NORTH} + {@code false} + {@code false} -> 180° Y rotation</li>
+     *         <li>{@link Direction#EAST} + {@code false} + {@code false} -> 270° Y rotation</li>
+     *         <li>{@link BlockStateProperties#IN_WALL} = {@code true} + {@link BlockStateProperties#OPEN} = {@code false}
+     *         -> {@code fenceGateWallModel} with Y-rotations by facing</li>
+     *         <li>{@link Direction#SOUTH} + {@code true} + {@code false} -> 0° rotation</li>
+     *         <li>{@link Direction#WEST} + {@code true} + {@code false} -> 90° Y rotation</li>
+     *         <li>{@link Direction#NORTH} + {@code true} + {@code false} -> 180° Y rotation</li>
+     *         <li>{@link Direction#EAST} + {@code true} + {@code false} -> 270° Y rotation</li>
+     *         <li>{@link BlockStateProperties#IN_WALL} = {@code false} + {@link BlockStateProperties#OPEN} = {@code true}
+     *         -> {@code fenceGateOpenModel} with Y-rotations by facing</li>
+     *         <li>{@link Direction#SOUTH} + {@code false} + {@code true} -> 0° rotation</li>
+     *         <li>{@link Direction#WEST} + {@code false} + {@code true} -> 90° Y rotation</li>
+     *         <li>{@link Direction#NORTH} + {@code false} + {@code true} -> 180° Y rotation</li>
+     *         <li>{@link Direction#EAST} + {@code false} + {@code true} -> 270° Y rotation</li>
+     *         <li>{@link BlockStateProperties#IN_WALL} = {@code true} + {@link BlockStateProperties#OPEN} = {@code true}
+     *         -> {@code fenceGateWallOpenModel} with Y-rotations by facing</li>
+     *         <li>{@link Direction#SOUTH} + {@code true} + {@code true} -> 0° rotation</li>
+     *         <li>{@link Direction#WEST} + {@code true} + {@code true} -> 90° Y rotation</li>
+     *         <li>{@link Direction#NORTH} + {@code true} + {@code true} -> 180° Y rotation</li>
+     *         <li>{@link Direction#EAST} + {@code true} + {@code true} -> 270° Y rotation</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the fence gate {@link Block} to create the blockstate for.
+     * @param fenceGateModel The {@link ResourceLocation} of the model to use for closed fence gates not attached to walls.
+     * @param fenceGateOpenModel The {@link ResourceLocation} of the model to use for open fence gates not attached to walls.
+     * @param fenceGateWallModel The {@link ResourceLocation} of the model to use for closed fence gates attached to walls.
+     * @param fenceGateWallOpenModel The {@link ResourceLocation} of the model to use for open fence gates attached to walls.
+     * @param uvLock Whether to lock UV coordinates for proper texture alignment.
+     *
+     * @return A {@link BlockStateDefinition} with comprehensive fence gate blockstate variants.
+     *
+     * @see #fenceGateBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation)
+     * @see #fenceGateBlockState(Supplier, ResourceLocation)
+     * @see #fenceGateBlockState(Supplier)
+     */
+    public static BlockStateDefinition fenceGateBlockState(Supplier<Block> targetBlock, ResourceLocation fenceGateModel, ResourceLocation fenceGateOpenModel, ResourceLocation fenceGateWallModel, ResourceLocation fenceGateWallOpenModel, boolean uvLock) {
+        return new BlockStateDefinition(targetBlock)
+                .withBlockStateSupplier(MultiVariantGenerator.multiVariant(targetBlock.get(), Variant.variant()
+                                .with(VariantProperties.UV_LOCK, uvLock))
+                        .with(PropertyDispatch
+                                .property(BlockStateProperties.HORIZONTAL_FACING)
+                                .select(Direction.SOUTH, Variant.variant())
+                                .select(Direction.WEST, Variant.variant()
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
+                                .select(Direction.NORTH, Variant.variant()
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180))
+                                .select(Direction.EAST, Variant.variant()
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)))
+                        .with(PropertyDispatch
+                                .properties(BlockStateProperties.IN_WALL, BlockStateProperties.OPEN)
+                                .select(false, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, fenceGateModel))
+                                .select(true, false, Variant.variant()
+                                        .with(VariantProperties.MODEL, fenceGateWallModel))
+                                .select(false, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, fenceGateOpenModel))
+                                .select(true, true, Variant.variant()
+                                        .with(VariantProperties.MODEL, fenceGateWallOpenModel))));
+    }
+
+    /**
+     * Overloaded variant of {@link #fenceGateBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, boolean)}.
+     * Creates a {@link BlockStateDefinition} for fence gate blocks using {@link MultiVariantGenerator} with different models
+     * for each combination of facing, wall attachment, and open state, with UV locking enabled by default.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link BlockStateProperties#IN_WALL} = {@code false} + {@link BlockStateProperties#OPEN} = {@code false}
+     *         -> {@code fenceGateModel} with Y-rotations by facing</li>
+     *         <li>{@link BlockStateProperties#IN_WALL} = {@code true} + {@link BlockStateProperties#OPEN} = {@code false}
+     *         -> {@code fenceGateWallModel} with Y-rotations by facing</li>
+     *         <li>{@link BlockStateProperties#IN_WALL} = {@code false} + {@link BlockStateProperties#OPEN} = {@code true}
+     *         -> {@code fenceGateOpenModel} with Y-rotations by facing</li>
+     *         <li>{@link BlockStateProperties#IN_WALL} = {@code true} + {@link BlockStateProperties#OPEN} = {@code true}
+     *         -> {@code fenceGateWallOpenModel} with Y-rotations by facing</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the fence gate {@link Block} to create the blockstate for.
+     * @param fenceGateModel The {@link ResourceLocation} of the model to use for closed fence gates not attached to walls.
+     * @param fenceGateOpenModel The {@link ResourceLocation} of the model to use for open fence gates not attached to walls.
+     * @param fenceGateWallModel The {@link ResourceLocation} of the model to use for closed fence gates attached to walls.
+     * @param fenceGateWallOpenModel The {@link ResourceLocation} of the model to use for open fence gates attached to walls.
+     *
+     * @return A {@link BlockStateDefinition} with comprehensive fence gate blockstate variants (UV lock enabled by default).
+     *
+     * @see #fenceGateBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, boolean)
+     * @see #fenceGateBlockState(Supplier, ResourceLocation)
+     * @see #fenceGateBlockState(Supplier)
+     */
+    public static BlockStateDefinition fenceGateBlockState(Supplier<Block> targetBlock, ResourceLocation fenceGateModel, ResourceLocation fenceGateOpenModel, ResourceLocation fenceGateWallModel, ResourceLocation fenceGateWallOpenModel) {
+        return fenceGateBlockState(targetBlock, fenceGateModel, fenceGateOpenModel, fenceGateWallModel, fenceGateWallOpenModel, true);
+    }
+
+    /**
+     * Overloaded variant of {@link #fenceGateBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation)}.
+     * Creates a {@link BlockStateDefinition} for fence gate blocks using {@link MultiVariantGenerator} with automatic model
+     * resolution. Automatically determines all fence gate model locations using standard naming convention with
+     * base model location plus "_open", "_wall", "_wall_open" suffixes.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link BlockStateProperties#IN_WALL} = {@code false} + {@link BlockStateProperties#OPEN} = {@code false}
+     *         -> {@code fenceGateModel} with Y-rotations by facing</li>
+     *         <li>{@link BlockStateProperties#IN_WALL} = {@code true} + {@link BlockStateProperties#OPEN} = {@code false}
+     *         -> {@code fenceGateModel + "_wall"} with Y-rotations by facing</li>
+     *         <li>{@link BlockStateProperties#IN_WALL} = {@code false} + {@link BlockStateProperties#OPEN} = {@code true}
+     *         -> {@code fenceGateModel + "_open"} with Y-rotations by facing</li>
+     *         <li>{@link BlockStateProperties#IN_WALL} = {@code true} + {@link BlockStateProperties#OPEN} = {@code true}
+     *         -> {@code fenceGateModel + "_wall_open"} with Y-rotations by facing</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the fence gate {@link Block} to create the blockstate for.
+     * @param fenceGateModel Base model location; "_open", "_wall", "_wall_open" are appended automatically.
+     *
+     * @return A {@link BlockStateDefinition} with comprehensive fence gate blockstate variants using automatic model resolution.
+     *
+     * @see #fenceGateBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, boolean)
+     * @see #fenceGateBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation)
+     * @see #fenceGateBlockState(Supplier)
+     */
+    public static BlockStateDefinition fenceGateBlockState(Supplier<Block> targetBlock, ResourceLocation fenceGateModel) {
+        return fenceGateBlockState(targetBlock, fenceGateModel, fenceGateModel.withSuffix("_open"), fenceGateModel.withSuffix("_wall"), fenceGateModel.withSuffix("_wall_open"));
+    }
+
+    /**
+     * Overloaded variant of {@link #fenceGateBlockState(Supplier, ResourceLocation)}. Creates a {@link BlockStateDefinition}
+     * for fence gate blocks using {@link MultiVariantGenerator} with fully automatic model resolution. Uses fully
+     * automatic model resolution based on the fence gate's registry ID.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link BlockStateProperties#IN_WALL} = {@code false} + {@link BlockStateProperties#OPEN} = {@code false}
+     *         -> {@code ModelLocationUtils.getModelLocation(targetBlock.get())} with Y-rotations by facing</li>
+     *         <li>{@link BlockStateProperties#IN_WALL} = {@code true} + {@link BlockStateProperties#OPEN} = {@code false}
+     *         -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_wall")} with Y-rotations by facing</li>
+     *         <li>{@link BlockStateProperties#IN_WALL} = {@code false} + {@link BlockStateProperties#OPEN} = {@code true}
+     *         -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_open")} with Y-rotations by facing</li>
+     *         <li>{@link BlockStateProperties#IN_WALL} = {@code true} + {@link BlockStateProperties#OPEN} = {@code true}
+     *         -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_wall_open")} with Y-rotations by facing</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the fence gate {@link Block} to create the blockstate for.
+     *
+     * @return A {@link BlockStateDefinition} with comprehensive fence gate blockstate variants using fully automatic model resolution.
+     *
+     * @see #fenceGateBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, boolean)
+     * @see #fenceGateBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation)
+     * @see #fenceGateBlockState(Supplier, ResourceLocation)
+     */
+    public static BlockStateDefinition fenceGateBlockState(Supplier<Block> targetBlock) {
+        return fenceGateBlockState(targetBlock, ModelLocationUtils.getModelLocation(targetBlock.get()));
     }
 
     /**

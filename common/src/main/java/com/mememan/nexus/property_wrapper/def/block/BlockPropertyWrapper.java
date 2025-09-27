@@ -140,6 +140,17 @@ public class BlockPropertyWrapper<B extends Block> extends BaseDefaultableDataGe
         return rawBuilder().flatMap(builder -> builder.blockWaxingMappingFunc);
     }
 
+    /**
+     * Gets the minimum mining level required to mine this BlockPropertyWrapper's parent block.
+     *
+     * @return The minimum mining level required to mine this BlockPropertyWrapper's parent block.
+     *
+     * @see BlockPropertyWrapperBuilder#minimumMiningLevel(int)
+     */
+    public int getMinMiningLevel() {
+        return rawBuilder().map(builder -> builder.minMiningLevel).orElse(0);
+    }
+
     @Override
     public Optional<SpecializedVanillaPropertyWrapper<B, ?, ?>> getSpecializedVanillaWrapper() {
         return Optional.of(compositeVanillaWrapper);

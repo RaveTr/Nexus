@@ -1,9 +1,10 @@
 {
   "values": [
-    "nexus:test_block_wall",
-    "nexus:test_block_slab",
-    "nexus:test_stairs",
     "nexus:test_block_pressure_plate",
+    "nexus:test_block_slab",
+    "nexus:test_trapdoor",
+    "nexus:test_stairs",
+    "nexus:test_block_wall",
     "nexus:test_button",
     "nexus:test_door"
   ]
