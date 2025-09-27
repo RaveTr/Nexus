@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer;
 import net.minecraft.world.level.storage.loot.functions.ApplyExplosionDecay;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.predicates.*;
@@ -20,6 +21,7 @@ import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -106,7 +108,8 @@ public final class LootUtil {
      *  <li><b>Applies:</b> {@link ApplyExplosionDecay#explosionDecay()}</li>
      *  <li><b>Loot Pool Entries:</b> <ul>
      *      <li><b>Loot Table Item:</b> {@code targetBlock}</li>
-     *      <li><b>When:</b> {@link LootItemBlockStatePropertyCondition#hasBlockStateProperties(Block)} (Has {@link DoorBlock#HALF}, and it's {@link DoubleBlockHalf#LOWER})</li>
+     *      <li><b>When:</b> {@link LootItemBlockStatePropertyCondition#hasBlockStateProperties(Block)} (Has
+     *      {@link DoorBlock#HALF}, and it's {@link DoubleBlockHalf#LOWER})</li>
      *  </ul></li>
      * </ul>
      *
@@ -259,7 +262,8 @@ public final class LootUtil {
      *      <li><b>When:</b> {@link BonusLevelTableCondition#bonusLevelFlatChance(Enchantment, float...)} (Passes in
      *      {@link Enchantments#BLOCK_FORTUNE} and {@link #NORMAL_LEAVES_SAPLING_CHANCES} respectively)</li></li>
      *      <li><b>When:</b> {@link ExplosionCondition#survivesExplosion()}</li></li>
-     *      <li><b>Drops:</b> {@link }</li></li>
+     *      <li><b>Drops:</b> {@code targetBlock} or
+     *      {@code RegistryUtil.getObjectFrom(targetBlock.get(), RegistryUtil.replaceSuffix("sapling"))} if present</li></li>
      *  </ul>
      * </ul>
      *
@@ -285,16 +289,18 @@ public final class LootUtil {
      * mined/decaying.
      */
     public static LootTable.Builder dropLeaves(Supplier<Block> targetBlock) {
-        LootPool.Builder pool1 = LootPool.lootPool()
-                .setRolls(ConstantValue.exactly(1.0F))
-                .when(HAS_SHEARS_OR_SILK_TOUCH)
-                .add(LootItem.lootTableItem(targetBlock.get()));
+        LootPoolSingletonContainer.Builder<?> droppedItem = LootItem.lootTableItem(targetBlock.get());
+        Optional<Block> inferredSapling = RegistryUtil.getObjectFrom(targetBlock.get(), RegistryUtil.replaceSuffix("sapling"));
 
-        /*    .otherwise(LootItem.lootTableItem(RegistryUtil.getSaplingFrom(targetBlock).get())
-                                .when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.BLOCK_FORTUNE, NORMAL_LEAVES_SAPLING_CHANCES))
-                                .when(ExplosionCondition.survivesExplosion())) */
+        inferredSapling.ifPresent(sapling -> droppedItem
+                .otherwise(LootItem.lootTableItem(sapling))
+                .when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.BLOCK_FORTUNE, NORMAL_LEAVES_SAPLING_CHANCES))
+                .when(ExplosionCondition.survivesExplosion()));
 
-        return LootTable.lootTable().withPool(pool1)
+        return LootTable.lootTable().withPool(LootPool.lootPool()
+                        .setRolls(ConstantValue.exactly(1.0F))
+                        .when(HAS_SHEARS_OR_SILK_TOUCH)
+                        .add(droppedItem))
                 .withPool(LootPool.lootPool()
                         .setRolls(ConstantValue.exactly(1.0F))
                         .when(HAS_NO_SHEARS_OR_SILK_TOUCH)
@@ -304,6 +310,27 @@ public final class LootUtil {
                                 .apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F)))));
     }
 
+    /**
+     * Creates a {@link LootTable.Builder} that will treat the given {@link Block} as a double plant and drop it based on whether
+     * it has its lower half, if it has the {@link DoublePlantBlock#HALF} property.
+     * <p>
+     * <h2>LOOT TABLE</h2>
+     * <h3>Pool 1</h3>
+     * <ul>
+     *  <li><b>Rolls:</b> 1.0</li>
+     *  <li><b>When:</b> {@link ExplosionCondition#survivesExplosion()}</li>
+     *  <li><b>Loot Pool Entries:</b> <ul>
+     *      <li><b>Loot Table Item:</b> {@code targetBlock}</li>
+     *      <li><b>When:</b> {@link LootItemBlockStatePropertyCondition#hasBlockStateProperties(Block)} (Has
+     *      {@link DoublePlantBlock#HALF}, and it's {@link DoubleBlockHalf#LOWER})</li>
+     *  </ul></li>
+     * </ul>
+     *
+     * @param targetBlock The {@link Supplier<Block>} representing the {@link Block} that will be treated as a double plant on drop.
+     *
+     * @return A {@link LootTable.Builder} that will treat the given {@link Block} as a double plant and drop it based on whether
+     * it has its lower half, if it has the {@link DoublePlantBlock#HALF} property.
+     */
     public static LootTable.Builder dropDoublePlant(Supplier<Block> targetBlock) {
         return LootTable.lootTable().withPool(LootPool.lootPool()
                 .setRolls(ConstantValue.exactly(1.0F))
@@ -313,6 +340,42 @@ public final class LootUtil {
                                 .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(DoublePlantBlock.HALF, DoubleBlockHalf.LOWER)))));
     }
 
+    /**
+     * Creates a {@link LootTable.Builder} that will treat the given {@link Block} as a double plant and only drop it when
+     * destroyed with shears or silk touch. The loot table ensures both upper and lower halves exist before dropping.
+     * <p>
+     * <h2>LOOT TABLE</h2>
+     * <h3>Pool 1 (Lower Half)</h3>
+     * <ul>
+     *  <li><b>Rolls:</b> 1.0</li>
+     *  <li><b>Loot Pool Entries:</b> <ul>
+     *      <li><b>Loot Table Item:</b> {@code targetBlock}</li>
+     *      <li><b>Applies:</b> {@link SetItemCountFunction#setCount(NumberProvider)} (Drops 1.0F)</li>
+     *      <li><b>When:</b> {@link #HAS_SHEARS_OR_SILK_TOUCH}</li>
+     *      <li><b>When:</b> {@link LootItemBlockStatePropertyCondition#hasBlockStateProperties(Block)} (Has
+     *      {@link DoublePlantBlock#HALF}, and it's {@link DoubleBlockHalf#LOWER})</li>
+     *      <li><b>When:</b> {@link LocationCheck#checkLocation(LocationPredicate.Builder, BlockPos)} (Checks for upper half at +1 Y)</li>
+     *  </ul></li>
+     * </ul>
+     *
+     * <h3>Pool 2 (Upper Half)</h3>
+     * <ul>
+     *  <li><b>Rolls:</b> 1.0</li>
+     *  <li><b>Loot Pool Entries:</b> <ul>
+     *      <li><b>Loot Table Item:</b> {@code targetBlock}</li>
+     *      <li><b>Applies:</b> {@link SetItemCountFunction#setCount(NumberProvider)} (Drops 1.0F)</li>
+     *      <li><b>When:</b> {@link #HAS_SHEARS_OR_SILK_TOUCH}</li>
+     *      <li><b>When:</b> {@link LootItemBlockStatePropertyCondition#hasBlockStateProperties(Block)} (Has
+     *      {@link DoublePlantBlock#HALF}, and it's {@link DoubleBlockHalf#UPPER})</li>
+     *      <li><b>When:</b> {@link LocationCheck#checkLocation(LocationPredicate.Builder, BlockPos)} (Checks for lower half at -1 Y)</li>
+     *  </ul></li>
+     * </ul>
+     *
+     * @param targetBlock The {@link Supplier<Block>} representing the {@link Block} that will be treated as a double plant on drop.
+     *
+     * @return A {@link LootTable.Builder} that will treat the given {@link Block} as a double plant and only drop it when
+     * destroyed with shears or silk touch, ensuring both halves exist.
+     */
     public static LootTable.Builder dropDoublePlantShearsOrSilkTouch(Supplier<Block> targetBlock) {
         return LootTable.lootTable().withPool(LootPool.lootPool()
                         .add(LootItem.lootTableItem(targetBlock.get())
@@ -342,6 +405,28 @@ public final class LootUtil {
                                         .build()), new BlockPos(0, -1, 0))));
     }
 
+    /**
+     * Creates a {@link LootTable.Builder} that will treat the given {@link Block} as a multi-face block (like glow lichen)
+     * and drop items based on how many faces of the block have the multi-face attachment.
+     * <p>
+     * <h2>LOOT TABLE</h2>
+     * <h3>Pool 1</h3>
+     * <ul>
+     *  <li><b>Rolls:</b> 1.0</li>
+     *  <li><b>Applies:</b> {@link ApplyExplosionDecay#explosionDecay()}</li>
+     *  <li><b>Loot Pool Entries:</b> <ul>
+     *      <li><b>Loot Table Item:</b> {@code targetBlock}</li>
+     *      <li><b>When:</b> {@link #HAS_SHEARS_OR_SILK_TOUCH}</li>
+     *      <li><b>Applies:</b> {@link SetItemCountFunction#setCount(NumberProvider)} for each direction where the face property is true</li>
+     *      <li><b>Applies:</b> {@link SetItemCountFunction#setCount(NumberProvider)} (Drops -1.0F as base count)</li>
+     *  </ul></li>
+     * </ul>
+     *
+     * @param targetBlock The {@link Supplier<Block>} representing the {@link Block} that will be treated as a multi-face block on drop.
+     *
+     * @return A {@link LootTable.Builder} that will treat the given {@link Block} as a multi-face block and drop items
+     * based on how many faces of the block have the multi-face attachment.
+     */
     public static LootTable.Builder dropMultiFace(Supplier<Block> targetBlock) {
         return LootTable.lootTable().withPool(LootPool.lootPool()
                 .apply(ApplyExplosionDecay.explosionDecay())

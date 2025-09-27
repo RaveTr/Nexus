@@ -22,6 +22,11 @@ import java.util.function.Supplier;
 public final class ModelUtil {
     public static final ModelTemplate EMPTY_MODEL_TEMPLATE = new ModelTemplate(Optional.empty(), Optional.empty());
     public static final TextureMapping EMPTY_TEXTURE_MAPPING = new TextureMapping();
+    public static final ResourceLocation SOLID_RENDER_TYPE = new ResourceLocation("solid");
+    public static final ResourceLocation CUTOUT_MIPPED_RENDER_TYPE = new ResourceLocation("cutout_mipped");
+    public static final ResourceLocation CUTOUT_RENDER_TYPE = new ResourceLocation("cutout");
+    public static final ResourceLocation TRANSLUCENT_RENDER_TYPE = new ResourceLocation("translucent");
+    public static final ResourceLocation TRANSLUCENT_MOVING_BLOCK_RENDER_TYPE = new ResourceLocation("translucent_moving_block");
 
     private ModelUtil() {
         throw new IllegalAccessError("Attempted to construct instance of utility class! (ModelUtil)");
@@ -1580,7 +1585,8 @@ public final class ModelUtil {
                 .withTextureMapping(new TextureMapping()
                         .put(TextureSlot.BOTTOM, RegistryUtil.pickBlockPrefix(bottomDoorTexture))
                         .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topDoorTexture)))
-                .withCustomName(baseDoorId.getPath().concat("_bottom_left"));
+                .withCustomName(baseDoorId.getPath().concat("_bottom_left"))
+                .withRenderType(CUTOUT_RENDER_TYPE);
     }
 
     /**
@@ -1645,7 +1651,8 @@ public final class ModelUtil {
                 .withTextureMapping(new TextureMapping()
                         .put(TextureSlot.BOTTOM, RegistryUtil.pickBlockPrefix(bottomDoorTexture))
                         .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topDoorTexture)))
-                .withCustomName(baseDoorId.getPath().concat("_bottom_left_open"));
+                .withCustomName(baseDoorId.getPath().concat("_bottom_left_open"))
+                .withRenderType(CUTOUT_RENDER_TYPE);
     }
 
     /**
@@ -1710,7 +1717,8 @@ public final class ModelUtil {
                 .withTextureMapping(new TextureMapping()
                         .put(TextureSlot.BOTTOM, RegistryUtil.pickBlockPrefix(bottomDoorTexture))
                         .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topDoorTexture)))
-                .withCustomName(baseDoorId.getPath().concat("_bottom_right"));
+                .withCustomName(baseDoorId.getPath().concat("_bottom_right"))
+                .withRenderType(CUTOUT_RENDER_TYPE);
     }
 
     /**
@@ -1775,7 +1783,8 @@ public final class ModelUtil {
                 .withTextureMapping(new TextureMapping()
                         .put(TextureSlot.BOTTOM, RegistryUtil.pickBlockPrefix(bottomDoorTexture))
                         .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topDoorTexture)))
-                .withCustomName(baseDoorId.getPath().concat("_bottom_right_open"));
+                .withCustomName(baseDoorId.getPath().concat("_bottom_right_open"))
+                .withRenderType(CUTOUT_RENDER_TYPE);
     }
 
     /**
@@ -1840,7 +1849,8 @@ public final class ModelUtil {
                 .withTextureMapping(new TextureMapping()
                         .put(TextureSlot.BOTTOM, RegistryUtil.pickBlockPrefix(bottomDoorTexture))
                         .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topDoorTexture)))
-                .withCustomName(baseDoorId.getPath().concat("_top_left"));
+                .withCustomName(baseDoorId.getPath().concat("_top_left"))
+                .withRenderType(CUTOUT_RENDER_TYPE);
     }
 
     /**
@@ -1905,7 +1915,8 @@ public final class ModelUtil {
                 .withTextureMapping(new TextureMapping()
                         .put(TextureSlot.BOTTOM, RegistryUtil.pickBlockPrefix(bottomDoorTexture))
                         .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topDoorTexture)))
-                .withCustomName(baseDoorId.getPath().concat("_top_left_open"));
+                .withCustomName(baseDoorId.getPath().concat("_top_left_open"))
+                .withRenderType(CUTOUT_RENDER_TYPE);
     }
 
     /**
@@ -1970,7 +1981,8 @@ public final class ModelUtil {
                 .withTextureMapping(new TextureMapping()
                         .put(TextureSlot.BOTTOM, RegistryUtil.pickBlockPrefix(bottomDoorTexture))
                         .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topDoorTexture)))
-                .withCustomName(baseDoorId.getPath().concat("_top_right"));
+                .withCustomName(baseDoorId.getPath().concat("_top_right"))
+                .withRenderType(CUTOUT_RENDER_TYPE);
     }
 
     /**
@@ -2035,7 +2047,8 @@ public final class ModelUtil {
                 .withTextureMapping(new TextureMapping()
                         .put(TextureSlot.BOTTOM, RegistryUtil.pickBlockPrefix(bottomDoorTexture))
                         .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topDoorTexture)))
-                .withCustomName(baseDoorId.getPath().concat("_top_right_open"));
+                .withCustomName(baseDoorId.getPath().concat("_top_right_open"))
+                .withRenderType(CUTOUT_RENDER_TYPE);
     }
 
     /**
