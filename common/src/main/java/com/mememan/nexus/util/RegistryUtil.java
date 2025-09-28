@@ -576,9 +576,8 @@ public final class RegistryUtil {
     }
 
     /**
-     * Overloaded variant of {@link #pickBlockId(Supplier)}. Modifies the registry path of the target block using the
-     * provided path mapping function. This method allows for custom transformation of block registry paths based on
-     * specific naming conventions or requirements.
+     * Modifies the registry path of the target block using the provided path mapping function. This method allows for
+     * custom transformation of block registry paths based on specific naming conventions or requirements.
      *
      * @param targetBlock The {@link Supplier} of the target {@link Block} to modify the registry path for.
      * @param pathIdMapper The {@link Function} to apply to the block's registry path for transformation.
@@ -642,6 +641,7 @@ public final class RegistryUtil {
             // Normalize brick/plank singulars to plurals in both middle and trailing positions.
             if (work.contains("_brick_")) work = work.replace("_brick_", "_bricks_");
             if (work.endsWith("_brick")) work = work.substring(0, work.length() - 6).concat("_bricks");
+
             if (work.contains("_plank_")) work = work.replace("_plank_", "_planks_");
             if (work.endsWith("_plank")) work = work.substring(0, work.length() - 6).concat("_planks");
 

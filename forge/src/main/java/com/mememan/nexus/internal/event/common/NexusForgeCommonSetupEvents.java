@@ -5,10 +5,15 @@ import com.mememan.nexus.NexusForge;
 import com.mememan.nexus.internal.ForgeVanillaCompat;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.specialised.vanilla.VanillaBasedPropertyWrapper;
+import com.mememan.nexus.property_wrapper.def.entity.EntityTypePropertyWrapper;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.util.MutableHashedLinkedMap;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
+import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 
@@ -42,5 +47,14 @@ public class NexusForgeCommonSetupEvents {
                     return !parentStack.isEmpty() && !tabEntries.contains(parentStack) && curWrapper.getParentCreativeModeTabs().stream().anyMatch(curCMTSup -> Objects.equals(curCMTSup.get(), curTab));
                 })
                 .forEach(curWrapper -> tabEntries.put(curWrapper.getParentObject().get().asItem().getDefaultInstance(), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS));
+    }
+
+    @SubscribeEvent
+    public static void onEntityAttributeCreationEvent(EntityAttributeCreationEvent event) {
+        PropertyWrapper.PropertyWrappersContainer.getInferrableWrappersOfType(EntityTypePropertyWrapper.class)
+                .stream()
+                .map(curPW -> (EntityTypePropertyWrapper<?>) curPW)
+                .filter(curPW -> !Objects.equals(curPW.getParentObject().get().getCategory(), MobCategory.MISC) && curPW.getEntityTypeAttributes().isPresent())
+                .forEach(curPW -> event.put((EntityType<? extends LivingEntity>) curPW.getParentObject().get(), curPW.getEntityTypeAttributes().get().build()));
     }
 }

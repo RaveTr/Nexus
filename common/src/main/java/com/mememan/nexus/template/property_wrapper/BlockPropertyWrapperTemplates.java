@@ -5,6 +5,7 @@ import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapperBuilder;
 import com.mememan.nexus.util.LootUtil;
 import com.mememan.nexus.util.ModelUtil;
+import com.mememan.nexus.util.RecipeUtil;
 import com.mememan.nexus.util.RegistryUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.models.blockstates.MultiPartGenerator;
@@ -18,6 +19,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -169,10 +171,12 @@ public final class BlockPropertyWrapperTemplates {
 
     /**
      * BPW template for slabs. Inherits from {@link #BASIC_PICKAXE}. Slab loot table, slab blockstate, slab model.
-     * Additionally, tags the parent block with {@link BlockTags#SLABS}.
+     * Additionally, tags the parent block with {@link BlockTags#SLABS}. Automatically maps a recipe for the parent slab.
      *
      * @see ModelUtil#slab(Supplier)
      * @see ModelUtil#slabBlockState(Supplier)
+     * @see LootUtil#dropSlab(Supplier)
+     * @see RecipeUtil#slabRecipeFrom(Consumer)
      */
     public static final BlockPropertyWrapper<Block> SLAB = new BlockPropertyWrapper<>()
             .builder()
@@ -181,13 +185,15 @@ public final class BlockPropertyWrapperTemplates {
             .withModelDefinition(ModelUtil::slab)
             .withBlockStateDefinition(ModelUtil::slabBlockState)
             .withLootTable(LootUtil::dropSlab)
+            .withRecipe(RecipeUtil::slabRecipeFrom)
             .build();
     /**
      * BPW template for stairs. Inherits from {@link #BASIC_PICKAXE}. Stairs model, stairs blockstate.
-     * Additionally, tags the parent block with {@link BlockTags#STAIRS}.
+     * Additionally, tags the parent block with {@link BlockTags#STAIRS}. Automatically maps a recipe for the parent stairs.
      *
      * @see ModelUtil#stairs(Supplier)
      * @see ModelUtil#stairsBlockState(Supplier)
+     * @see RecipeUtil#stairsRecipeFrom(Consumer)
      */
     public static final BlockPropertyWrapper<Block> STAIRS = new BlockPropertyWrapper<>()
             .builder()
@@ -195,6 +201,7 @@ public final class BlockPropertyWrapperTemplates {
             .withTag(() -> BlockTags.STAIRS)
             .withModelDefinition(ModelUtil::stairs)
             .withBlockStateDefinition(ModelUtil::stairsBlockState)
+            .withRecipe(RecipeUtil::stairsRecipeFrom)
             .build();
     /**
      * BPW template for buttons. Inherits from {@link #BASIC}. Button model, button blockstate.
@@ -260,7 +267,7 @@ public final class BlockPropertyWrapperTemplates {
             .build();
     /**
      * BPW template for walls. Inherits from {@link #BASIC_PICKAXE}. Wall model, wall blockstate.
-     * Additionally, tags the parent block with {@link BlockTags#WALLS}.
+     * Additionally, tags the parent block with {@link BlockTags#WALLS}. Automatically maps a recipe for the parent wall.
      *
      * @see ModelUtil#wall(Supplier)
      * @see ModelUtil#wallBlockState(Supplier)
@@ -271,16 +278,19 @@ public final class BlockPropertyWrapperTemplates {
             .withTag(() -> BlockTags.WALLS)
             .withModelDefinition(ModelUtil::wall)
             .withBlockStateDefinition(ModelUtil::wallBlockState)
+            .withRecipe(RecipeUtil::wallRecipeFrom)
             .build();
 
     /**
      * BPW template for wooden slabs. Inherits from {@link #BASIC_AXE}. Slab model, wooden slab blockstate,
-     * slab loot table. Additionally, tags the parent block with {@link BlockTags#WOODEN_SLABS}.
+     * slab loot table. Additionally, tags the parent block with {@link BlockTags#WOODEN_SLABS}. Automatically
+     * maps a recipe for the parent slab.
      *
      * @see ModelUtil#slab(Supplier)
      * @see ModelUtil#slabBlockState(Supplier)
      * @see LootUtil#dropSlab(Supplier)
      * @see RegistryUtil#standardWoodFlammability(Supplier)
+     * @see RecipeUtil#woodenSlabRecipeFrom(Consumer)
      */
     public static final BlockPropertyWrapper<Block> WOODEN_SLAB = new BlockPropertyWrapper<>()
             .builder()
@@ -289,14 +299,17 @@ public final class BlockPropertyWrapperTemplates {
             .withModelDefinition(ModelUtil::slab)
             .withBlockStateDefinition(ModelUtil::slabBlockState)
             .withLootTable(LootUtil::dropSlab)
+            .withRecipe(RecipeUtil::woodenSlabRecipeFrom)
             .withFlammability(RegistryUtil::standardWoodFlammability)
             .build();
     /**
      * BPW template for wooden stairs. Inherits from {@link #BASIC_AXE}. Stairs model, stairs blockstate.
-     * Additionally, tags the parent block with {@link BlockTags#WOODEN_STAIRS}.
+     * Additionally, tags the parent block with {@link BlockTags#WOODEN_STAIRS}. Automatically maps a recipe for the
+     * parent slab.
      *
      * @see ModelUtil#stairs(Supplier)
      * @see ModelUtil#stairsBlockState(Supplier)
+     * @see RecipeUtil#woodenStairsRecipeFrom(Consumer)
      * @see RegistryUtil#standardWoodFlammability(Supplier)
      */
     public static final BlockPropertyWrapper<Block> WOODEN_STAIRS = new BlockPropertyWrapper<>()
@@ -305,6 +318,7 @@ public final class BlockPropertyWrapperTemplates {
             .withTag(() -> BlockTags.WOODEN_STAIRS)
             .withModelDefinition(ModelUtil::stairs)
             .withBlockStateDefinition(ModelUtil::stairsBlockState)
+            .withRecipe(RecipeUtil::woodenStairsRecipeFrom)
             .withFlammability(RegistryUtil::standardWoodFlammability)
             .build();
     /**

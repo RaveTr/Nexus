@@ -3,15 +3,20 @@ package com.mememan.nexus.internal;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.specialised.vanilla.VanillaBasedPropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapper;
+import com.mememan.nexus.property_wrapper.def.entity.EntityTypePropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.tag.TagPropertyWrapper;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.IntIntMutablePair;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.registry.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -21,6 +26,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -95,6 +101,14 @@ public final class FabricVanillaCompat {
                             .filter(flammabilityProperties -> parentTagKey.isFor(Registries.BLOCK))
                             .ifPresent(flammabilityProperties -> FlammableBlockRegistry.getDefaultInstance().add((TagKey<Block>) parentTagKey, Math.abs(flammabilityProperties.leftInt()), Math.abs(flammabilityProperties.rightInt())));
                 });
+
+        // EntityTypes
+        PropertyWrapper.PropertyWrappersContainer.getInferrableWrappersOfType(EntityTypePropertyWrapper.class)
+                .stream()
+                .map(curPW -> (EntityTypePropertyWrapper<?>) curPW)
+                .filter(curPW -> !Objects.equals(curPW.getParentObject().get().getCategory(), MobCategory.MISC))
+                .map(curPW -> (EntityTypePropertyWrapper<? extends LivingEntity>) curPW)
+                .forEach(FabricVanillaCompat::registerEntityTypeAttributes);
     }
 
     /**
@@ -150,5 +164,18 @@ public final class FabricVanillaCompat {
 
             if (waxedParentBlock != null) OxidizableBlocksRegistry.registerWaxableBlockPair(parentBlock, waxedParentBlock);
         });
+    }
+
+    /**
+     * Handles the registration of entity type attributes for a given {@link EntityTypePropertyWrapper}. Assumes the parent
+     * {@link EntityType} extends {@link LivingEntity}, as per the generic defined in this method.
+     *
+     * @param targetWrapper The wrapper whose parent {@link EntityType} should be validated and attributes registered
+     *                      accordingly.
+     *
+     * @param <LE> Any {@link LivingEntity} type.
+     */
+    private static <LE extends LivingEntity> void registerEntityTypeAttributes(EntityTypePropertyWrapper<LE> targetWrapper) {
+        targetWrapper.getEntityTypeAttributes().ifPresent(entityTypeAttributes -> FabricDefaultAttributeRegistry.register(targetWrapper.getParentObject().get(), entityTypeAttributes));
     }
 }

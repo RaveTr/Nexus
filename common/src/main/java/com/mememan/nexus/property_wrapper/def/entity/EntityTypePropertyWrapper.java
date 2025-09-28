@@ -5,6 +5,7 @@ import com.mememan.nexus.property_wrapper.impl.generic.misc.BaseDefaultableBareD
 import com.mememan.nexus.property_wrapper.impl.specialised.loot.SpecializedLootPropertyWrapper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -29,6 +30,10 @@ public class EntityTypePropertyWrapper<E extends Entity> extends BaseDefaultable
         super(EntityTypePropertyWrapperBuilder::new);
 
         this.compositeLootWrapper = new SpecializedLootPropertyWrapper<>();
+    }
+
+    public Optional<AttributeSupplier.Builder> getEntityTypeAttributes() {
+        return rawBuilder().flatMap(builder -> builder.entityTypeAttributes);
     }
 
     @Override
