@@ -609,8 +609,8 @@ public final class RegistryUtil {
      *         <li>Normalizes singular family terms to plurals: {@code _brick} → {@code _bricks},
      *         {@code _plank} → {@code _planks} (applies to middle and trailing positions).</li>
      *         <li>Wood-family heuristic: for wood-only components, if the base looks like a vanilla wood key
-     *         (e.g., {@code oak}, {@code spruce}, {@code bamboo}, {@code crimson}, {@code warped}), append
-     *         {@code _planks} unless already present.</li>
+     *         (e.g., {@code oak}, {@code spruce}, {@code bamboo}, {@code crimson}, {@code warped}) or the block itself
+     *         seems to be a wood-family block, append {@code _planks} unless already present.</li>
      *         <li>Appends {@code _block} when appropriate: if the source contained {@code _block} anywhere, or a
      *         derived suffix was stripped and the resulting base is not a plural family ({@code _bricks}/{@code _planks}).</li>
      *     </ul>
@@ -650,7 +650,7 @@ public final class RegistryUtil {
             if (removedSuffix != null && StringUtil.containsSuffix(WOOD_COMPONENT_SUFFIXES, removedSuffix)) { // Wood-family heuristic: if we stripped a wood-only component and the base looks like a wood key, append _planks.
                 String lastToken = StringUtil.lastToken(work);
 
-                if (StringUtil.containsSuffix(VANILLA_WOOD_MATERIALS, work) || StringUtil.containsSuffix(VANILLA_WOOD_MATERIALS, lastToken)) {
+                if (StringUtil.containsSuffix(VANILLA_WOOD_MATERIALS, work) || StringUtil.containsSuffix(VANILLA_WOOD_MATERIALS, lastToken) || targetBlock.get().builtInRegistryHolder().tags().anyMatch(curTag -> curTag.location().getPath().contains("wooden_"))) {
                     if (!work.endsWith("_planks") && !work.contains("plank")) work = work.concat("_planks");
 
                     woodFamilyBaseDetected = true;
@@ -687,6 +687,6 @@ public final class RegistryUtil {
      * @see #pickBlockId(Supplier)
      */
     public static ResourceLocation pickBlockTexture(Supplier<Block> targetBlock) {
-        return RegistryUtil.getTextureLocationOrDefault(targetBlock, RegistryUtil.getTextureLocationOrDefault(pickBlockId(targetBlock)));
+        return getTextureLocationOrDefault(targetBlock, getTextureLocationOrDefault(pickBlockId(targetBlock)));
     }
 }

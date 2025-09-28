@@ -197,6 +197,7 @@ public final class BlockPropertyWrapperTemplates {
      * BPW template for buttons. Inherits from {@link #BASIC}. Button model, button blockstate.
      * Blockstate uses {@link MultiVariantGenerator} with different models for each combination of power state,
      * attach face, and facing direction. Additionally, tags the parent block with {@link BlockTags#BUTTONS}.
+     * Automatically maps a recipe for the parent button.
      */
     public static final BlockPropertyWrapper<Block> BUTTON = new BlockPropertyWrapper<>()
             .builder()
@@ -204,11 +205,13 @@ public final class BlockPropertyWrapperTemplates {
             .withTag(() -> BlockTags.BUTTONS)
             .withModelDefinition(ModelUtil::button)
             .withBlockStateDefinition(ModelUtil::buttonBlockState)
+            .withRecipe(RecipeUtil::buttonRecipeFrom)
             .build();
     /**
      * BPW template for pressure plates. Inherits from {@link #BASIC_PICKAXE}. Pressure plate model, pressure plate blockstate.
      * Blockstate uses {@link MultiVariantGenerator} with different models for each power state (pressed/unpressed).
-     * Additionally, tags the parent block with {@link BlockTags#PRESSURE_PLATES}.
+     * Additionally, tags the parent block with {@link BlockTags#PRESSURE_PLATES}. Automatically maps a recipe for the
+     * parent pressure plate.
      */
     public static final BlockPropertyWrapper<Block> PRESSURE_PLATE = new BlockPropertyWrapper<>()
             .builder()
@@ -216,11 +219,12 @@ public final class BlockPropertyWrapperTemplates {
             .withTag(() -> BlockTags.PRESSURE_PLATES)
             .withModelDefinition(ModelUtil::pressurePlate)
             .withBlockStateDefinition(ModelUtil::pressurePlateBlockState)
+            .withRecipe(RecipeUtil::pressurePlateRecipeFrom)
             .build();
     /**
      * BPW template for doors. Inherits from {@link #BASIC_PICKAXE}. Door model, door blockstate. Blockstate uses
      * {@link MultiVariantGenerator} with different models for each combination of hinge side, half, and open state.
-     * Additionally, tags the parent block with {@link BlockTags#DOORS}.
+     * Additionally, tags the parent block with {@link BlockTags#DOORS}. Automatically maps a recipe for the parent door.
      */
     public static final BlockPropertyWrapper<Block> DOOR = new BlockPropertyWrapper<>()
             .builder()
@@ -228,12 +232,14 @@ public final class BlockPropertyWrapperTemplates {
             .withTag(() -> BlockTags.DOORS)
             .withModelDefinition(ModelUtil::door)
             .withBlockStateDefinition(ModelUtil::doorBlockState)
+            .withRecipe(RecipeUtil::doorRecipeFrom)
             .withLootTable(LootUtil::dropDoor)
             .build();
     /**
      * BPW template for trapdoors. Inherits from {@link #BASIC_PICKAXE}. Trapdoor model, trapdoor blockstate.
      * Blockstate uses {@link MultiVariantGenerator} with different models for each combination of facing, half,
-     * and open state. Additionally, tags the parent block with {@link BlockTags#TRAPDOORS}.
+     * and open state. Additionally, tags the parent block with {@link BlockTags#TRAPDOORS}. Automatically maps a recipe
+     * for the parent trapdoor.
      */
     public static final BlockPropertyWrapper<Block> TRAPDOOR = new BlockPropertyWrapper<>()
             .builder()
@@ -241,6 +247,7 @@ public final class BlockPropertyWrapperTemplates {
             .withTag(() -> BlockTags.TRAPDOORS)
             .withModelDefinition(ModelUtil::trapdoor)
             .withBlockStateDefinition(ModelUtil::trapdoorBlockState)
+            .withRecipe(RecipeUtil::trapdoorRecipeFrom)
             .build();
     /**
      * BPW template for walls. Inherits from {@link #BASIC_PICKAXE}. Wall model, wall blockstate.
@@ -273,7 +280,7 @@ public final class BlockPropertyWrapperTemplates {
     /**
      * BPW template for wooden stairs. Inherits from {@link #BASIC_AXE}. Stairs model, stairs blockstate.
      * Additionally, tags the parent block with {@link BlockTags#WOODEN_STAIRS}. Automatically maps a recipe for the
-     * parent slab.
+     * parent stairs.
      */
     public static final BlockPropertyWrapper<Block> WOODEN_STAIRS = new BlockPropertyWrapper<>()
             .builder()
@@ -288,9 +295,7 @@ public final class BlockPropertyWrapperTemplates {
      * BPW template for wooden buttons. Inherits from {@link #BASIC}. Button model, button blockstate.
      * Blockstate uses {@link MultiVariantGenerator} with different models for each combination of power state,
      * attach face, and facing direction. Additionally, tags the parent block with {@link BlockTags#WOODEN_BUTTONS}.
-     *
-     * @see ModelUtil#button(Supplier)
-     * @see ModelUtil#buttonBlockState(Supplier)
+     * Automatically maps a recipe for the parent button.
      */
     public static final BlockPropertyWrapper<Block> WOODEN_BUTTON = new BlockPropertyWrapper<>()
             .builder()
@@ -298,11 +303,13 @@ public final class BlockPropertyWrapperTemplates {
             .withTag(() -> BlockTags.WOODEN_BUTTONS)
             .withModelDefinition(ModelUtil::button)
             .withBlockStateDefinition(ModelUtil::buttonBlockState)
+            .withRecipe(RecipeUtil::buttonRecipeFrom)
             .build();
     /**
      * BPW template for wooden pressure plates. Inherits from {@link #BASIC_AXE}. Pressure plate model, pressure plate blockstate.
      * Blockstate uses {@link MultiVariantGenerator} with different models for each power state (pressed/unpressed).
-     * Additionally, tags the parent block with {@link BlockTags#WOODEN_PRESSURE_PLATES}.
+     * Additionally, tags the parent block with {@link BlockTags#WOODEN_PRESSURE_PLATES}. Automatically maps a recipe for
+     * the parent pressure plate.
      */
     public static final BlockPropertyWrapper<Block> WOODEN_PRESSURE_PLATE = new BlockPropertyWrapper<>()
             .builder()
@@ -310,11 +317,12 @@ public final class BlockPropertyWrapperTemplates {
             .withTag(() -> BlockTags.WOODEN_PRESSURE_PLATES)
             .withModelDefinition(ModelUtil::pressurePlate)
             .withBlockStateDefinition(ModelUtil::pressurePlateBlockState)
+            .withRecipe(RecipeUtil::pressurePlateRecipeFrom)
             .build();
     /**
      * BPW template for wooden doors. Inherits from {@link #BASIC_AXE}. Door model, door blockstate. Blockstate
      * and model assume the existence of an equivalent block with the suffix {@code "_planks"}. Additionally, tags the
-     * parent block with {@link BlockTags#WOODEN_DOORS}.
+     * parent block with {@link BlockTags#WOODEN_DOORS}. Automatically maps a recipe for the parent door.
      */
     public static final BlockPropertyWrapper<Block> WOODEN_DOOR = new BlockPropertyWrapper<>()
             .builder()
@@ -323,11 +331,13 @@ public final class BlockPropertyWrapperTemplates {
             .withModelDefinition(ModelUtil::door)
             .withBlockStateDefinition(ModelUtil::doorBlockState)
             .withLootTable(LootUtil::dropDoor)
+            .withRecipe(RecipeUtil::doorRecipeFrom)
             .build();
     /**
      * BPW template for wooden trapdoors. Inherits from {@link #BASIC_AXE}. Trapdoor model, trapdoor blockstate,
      * wooden trapdoor flammability. Blockstate uses {@link MultiVariantGenerator} with different models for each
      * combination of facing, half, and open state. Additionally, tags the parent block with {@link BlockTags#WOODEN_TRAPDOORS}.
+     * Automatically maps a recipe for the parent trapdoor.
      */
     public static final BlockPropertyWrapper<Block> WOODEN_TRAPDOOR = new BlockPropertyWrapper<>()
             .builder()
@@ -335,12 +345,14 @@ public final class BlockPropertyWrapperTemplates {
             .withTag(() -> BlockTags.WOODEN_TRAPDOORS)
             .withModelDefinition(ModelUtil::trapdoor)
             .withBlockStateDefinition(ModelUtil::trapdoorBlockState)
+            .withRecipe(RecipeUtil::woodenTrapdoorRecipeFrom)
             .build();
 
     /**
      * BPW template for fences. Inherits from {@link #BASIC_AXE}. Fence model, fence blockstate.
      * Blockstate uses {@link MultiPartGenerator} with different models for post and side connections
      * based on adjacent block connections. Additionally, tags the parent block with {@link BlockTags#WOODEN_FENCES}.
+     * Automatically maps a recipe for the parent fence.
      */
     public static final BlockPropertyWrapper<Block> WOODEN_FENCE = new BlockPropertyWrapper<>()
             .builder()
@@ -348,11 +360,13 @@ public final class BlockPropertyWrapperTemplates {
             .withTag(() -> BlockTags.WOODEN_FENCES)
             .withModelDefinition(ModelUtil::fence)
             .withBlockStateDefinition(ModelUtil::fenceBlockState)
+            .withRecipe(RecipeUtil::fenceRecipeFrom)
             .build();
     /**
      * BPW template for fence gates. Inherits from {@link #BASIC_AXE}. Fence gate model, fence gate blockstate.
      * Blockstate uses {@link MultiVariantGenerator} with different models for each combination of facing,
      * wall attachment, and open state. Additionally, tags the parent block with {@link BlockTags#FENCE_GATES}.
+     * Automatically maps a recipe for the parent fence gate.
      */
     public static final BlockPropertyWrapper<Block> WOODEN_FENCE_GATE = new BlockPropertyWrapper<>()
             .builder()
@@ -360,6 +374,7 @@ public final class BlockPropertyWrapperTemplates {
             .withTag(() -> BlockTags.FENCE_GATES)
             .withModelDefinition(ModelUtil::fenceGate)
             .withBlockStateDefinition(ModelUtil::fenceGateBlockState)
+            .withRecipe(RecipeUtil::fenceGateRecipeFrom)
             .build();
 
     private BlockPropertyWrapperTemplates() {
