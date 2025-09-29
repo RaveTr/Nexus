@@ -1,5 +1,6 @@
 package com.mememan.nexus.property_wrapper.def.entity;
 
+import com.mememan.nexus.client.entity.EntityClientData;
 import com.mememan.nexus.property_wrapper.base.specialised.loot.DefaultableLootBasedPropertyWrapper;
 import com.mememan.nexus.property_wrapper.impl.generic.misc.BaseDefaultableBareDataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.impl.specialised.loot.SpecializedLootPropertyWrapper;
@@ -32,8 +33,36 @@ public class EntityTypePropertyWrapper<E extends Entity> extends BaseDefaultable
         this.compositeLootWrapper = new SpecializedLootPropertyWrapper<>();
     }
 
-    public Optional<AttributeSupplier.Builder> getEntityTypeAttributes() {
+    /**
+     * Gets the {@link Supplier} describing the parent entity type's default attributes.
+     *
+     * @return The parent entity type's {@link AttributeSupplier.Builder}. May be empty.
+     *
+     * @see EntityTypePropertyWrapperBuilder#withAttributes(Supplier)
+     */
+    public Optional<Supplier<AttributeSupplier.Builder>> getEntityTypeAttributes() {
         return rawBuilder().flatMap(builder -> builder.entityTypeAttributes);
+    }
+
+    /**
+     * Gets the side-safe {@link Supplier} for the parent entity type's client-side data.
+     *
+     * @return The parent entity type's {@link EntityClientData}. May be empty.
+     *
+     * @see EntityTypePropertyWrapperBuilder#withClientData(Supplier)
+     */
+    public Optional<Supplier<EntityClientData<E>>> getEntityClientData() {
+        return rawBuilder().flatMap(builder -> builder.clientData);
+    }
+
+    @Override
+    public Optional<String> getDescriptionIdPrefix() {
+        return Optional.of("entity");
+    }
+
+    @Override
+    public @NotNull String getLootTableDir() {
+        return "entities";
     }
 
     @Override

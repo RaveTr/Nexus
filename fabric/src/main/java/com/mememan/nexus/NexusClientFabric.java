@@ -1,26 +1,34 @@
 package com.mememan.nexus;
 
-import com.mememan.nexus.client.item.WrappedClampedItemPropertyFunction;
+import com.mememan.nexus.client.entity.EntityClientData;
 import com.mememan.nexus.internal.services.FabricNetworkManager;
 import com.mememan.nexus.network.BasePacket;
 import com.mememan.nexus.network.NetworkSide;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.specialised.vanilla.VanillaBasedPropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapper;
+import com.mememan.nexus.property_wrapper.def.entity.EntityTypePropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.item.ItemPropertyWrapper;
 import com.mememan.nexus.util.ClientUtil;
+import it.unimi.dsi.fastutil.Pair;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
+import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.item.ItemProperties;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 
-import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -35,6 +43,8 @@ public class NexusClientFabric implements ClientModInitializer {
 
         registerColorProviders();
         registerItemModelPredicates();
+
+        registerEntityRenderersAndModelLayerDefinitions();
     }
 
     private static <MSGT> void registerClientNetworkReceivers() {
@@ -87,12 +97,33 @@ public class NexusClientFabric implements ClientModInitializer {
     private static <I extends Item> void registerItemModelPredicates() {
         PropertyWrapper.PropertyWrappersContainer.getInferrableWrappersOfType(ItemPropertyWrapper.class).stream()
                 .map(curPW -> (ItemPropertyWrapper<I>) curPW)
-                .forEach(curPW -> {
-                    Map<ResourceLocation, WrappedClampedItemPropertyFunction> itemModelPredicates = curPW.getItemModelPredicates();
+                .filter(curPW -> !curPW.getItemModelPredicates().isEmpty())
+                .forEach(curPW -> curPW.getItemModelPredicates().forEach((predicateId, curItemPropertyFunc) -> ItemProperties.register(curPW.getParentObject().get(), predicateId, ClientUtil.toClampedItemPropertyFunction(curItemPropertyFunc))));
+    }
 
-                    if (!itemModelPredicates.isEmpty()) {
-                        itemModelPredicates.forEach((predicateId, curItemPropertyFunc) -> ItemProperties.register(curPW.getParentObject().get(), predicateId, ClientUtil.toClampedItemPropertyFunction(curItemPropertyFunc)));
-                    }
+    private static <E extends Entity> void registerEntityRenderersAndModelLayerDefinitions() {
+        PropertyWrapper.PropertyWrappersContainer.getInferrableWrappersOfType(EntityTypePropertyWrapper.class).stream()
+                .map(curPW -> (EntityTypePropertyWrapper<E>) curPW)
+                .filter(curPW -> curPW.getEntityClientData().filter(curClientData -> curClientData.get() != null).isPresent())
+                .forEach(curPW -> {
+                    curPW.getEntityClientData().ifPresent(curClientData -> {
+                        EntityClientData<E> clientData = curClientData.get();
+
+                        if (clientData != null) {
+                            Function<EntityRendererProvider.Context, EntityRenderer<E>> entityRendererMapper = clientData.entityRendererMapper();
+                            Supplier<Pair<ModelLayerLocation, LayerDefinition>> mappedLayerDefSup = clientData.mappedModelLayerDefinition();
+
+                            if (entityRendererMapper != null) EntityRendererRegistry.register(curPW.getParentObject().get(), entityRendererMapper::apply);
+
+                            if (mappedLayerDefSup != null && mappedLayerDefSup.get() != null) {
+                                Pair<ModelLayerLocation, LayerDefinition> mappedModelLayerDef = mappedLayerDefSup.get();
+                                ModelLayerLocation layerLoc = mappedModelLayerDef.left();
+                                LayerDefinition layerDef = mappedModelLayerDef.right();
+
+                                if (layerLoc != null && layerDef != null) EntityModelLayerRegistry.registerModelLayer(layerLoc, () -> layerDef);
+                            }
+                        }
+                    });
                 });
     }
 }

@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import java.util.Map;
 
 /**
- * Universal resource reload listener for codec-based resources. Can be either server-based (data pack) or client-based
+ * Universal resource reload listener for codec-based resources. Can either be server-based (data pack) or client-based
  * (resource pack).
  *
  * @param <T> The object type being wrapped by this listener. Typically, this should have a corresponding {@link Codec}

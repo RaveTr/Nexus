@@ -54,7 +54,7 @@ public class NexusForgeCommonSetupEvents {
         PropertyWrapper.PropertyWrappersContainer.getInferrableWrappersOfType(EntityTypePropertyWrapper.class)
                 .stream()
                 .map(curPW -> (EntityTypePropertyWrapper<?>) curPW)
-                .filter(curPW -> !Objects.equals(curPW.getParentObject().get().getCategory(), MobCategory.MISC) && curPW.getEntityTypeAttributes().isPresent())
-                .forEach(curPW -> event.put((EntityType<? extends LivingEntity>) curPW.getParentObject().get(), curPW.getEntityTypeAttributes().get().build()));
+                .filter(curPW -> !Objects.equals(curPW.getParentObject().get().getCategory(), MobCategory.MISC) && curPW.getEntityTypeAttributes().filter(attribBuilderSup -> attribBuilderSup.get() != null).isPresent())
+                .forEach(curPW -> event.put((EntityType<? extends LivingEntity>) curPW.getParentObject().get(), curPW.getEntityTypeAttributes().get().get().build()));
     }
 }

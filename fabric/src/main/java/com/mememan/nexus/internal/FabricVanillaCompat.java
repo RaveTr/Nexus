@@ -17,6 +17,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -176,6 +177,10 @@ public final class FabricVanillaCompat {
      * @param <LE> Any {@link LivingEntity} type.
      */
     private static <LE extends LivingEntity> void registerEntityTypeAttributes(EntityTypePropertyWrapper<LE> targetWrapper) {
-        targetWrapper.getEntityTypeAttributes().ifPresent(entityTypeAttributes -> FabricDefaultAttributeRegistry.register(targetWrapper.getParentObject().get(), entityTypeAttributes));
+        targetWrapper.getEntityTypeAttributes().ifPresent(entityTypeAttributes -> {
+            AttributeSupplier.Builder attribBuilder = entityTypeAttributes.get();
+
+            if (attribBuilder != null) FabricDefaultAttributeRegistry.register(targetWrapper.getParentObject().get(), attribBuilder);
+        });
     }
 }

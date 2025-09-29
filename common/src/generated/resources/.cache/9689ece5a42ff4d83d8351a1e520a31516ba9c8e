@@ -1,4 +1,4 @@
-// 1.20.1	2025-09-28T18:37:31.1033311	nexus/Tags [nexus]
+// 1.20.1	2025-09-29T21:12:30.5912872	nexus/Tags [nexus]
 34298d8964212039d1899287eacecdca57412ce2 data\minecraft\tags\blocks\buttons.json
 9e2575563e1191fa6f7659ad78bafc830ef35036 data\minecraft\tags\damage_type\bypasses_armor.json
 26be0e70f09e140eca82bfec766b309d3e74989c data\minecraft\tags\blocks\walls.json
@@ -8,8 +8,8 @@ f91831f74b481eb5f4c8cb98ae0b024a08c36068 data\nexus\tags\blocks\test\sometagtest
 ff1e216954c2c388313b348f168ea269fc07f327 data\minecraft\tags\blocks\trapdoors.json
 f37e14f5a8d46fe3bf20d9040c0030ad097e84f5 data\minecraft\tags\blocks\stairs.json
 4f34cd023352f37c9e9ef969e1c31594d42ffd83 data\minecraft\tags\blocks\doors.json
-1b987a44e31c2b5f162c87e1e371c85f3ca438a1 data\minecraft\tags\blocks\mineable\axe.json
-ce15d1db3af322edd9a667eecfa8b8ec83cd23f2 data\minecraft\tags\blocks\mineable\pickaxe.json
+d98c80de732bf7d26d9d3d4369256b143318196a data\minecraft\tags\blocks\mineable\axe.json
+676b07af2d03eaa637e88defbd5c139991f15d82 data\minecraft\tags\blocks\mineable\pickaxe.json
 5e07d35bcb9daa32e21ed635542d99cc89d73064 data\minecraft\tags\blocks\slabs.json
 17fd70fce130bd0f5a874ac1f39bb185068fcfb4 data\minecraft\tags\blocks\fence_gates.json
 58f3480468a7169a379f818ad23b50ff607a06eb data\minecraft\tags\blocks\wooden_fences.json
