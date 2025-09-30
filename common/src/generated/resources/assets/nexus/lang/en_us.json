@@ -12,6 +12,5 @@
   "block.nexus.test_stairs": "Test Stairs",
   "block.nexus.test_trapdoor": "Test Trapdoor",
   "effect.nexus.test_mob_effect": "Test Mob Effect",
-  "entity.nexus.test_entity": "Test Entity",
   "item.nexus.test_item": "Test Item"
 }

@@ -417,6 +417,43 @@ public final class BlockPropertyWrapperTemplates {
     }
 
     /**
+     * Registers and returns the provided {@link Block}.
+     *
+     * @param blockId The target {@linkplain Block Block's} {@linkplain ResourceLocation registry ID}.
+     * @param blockSup The {@link Block} object to register.
+     * @param blockSupCol An optional {@link Collection} to track the registered {@link Block}. Primarily useful if you
+     *                    want a shorthand method of tracking your own registered blocks.
+     * @param blockItemSupCol An optional {@link Collection} to track the registered {@link BlockItem}. Primarily useful if you
+     *                        want a shorthand method of tracking your own registered block items.
+     *
+     * @return The {@link Supplier} of the registered {@link Block}.
+     *
+     * @param <B> Any {@link Block} type.
+     */
+    public static <B extends Block> Supplier<B> registerBlockWithItem(ResourceLocation blockId, Supplier<B> blockSup, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> blockItemSupCol) {
+        Supplier<B> registeredBlock = NexusServices.REGISTRAR.registerObject(blockId, blockSup, BuiltInRegistries.BLOCK);
+
+        if (blockSupCol != null) blockSupCol.add((Supplier<Block>) registeredBlock);
+
+        return registeredBlock;
+    }
+
+    /**
+     * Overloaded variant of {@link #registerBlockWithItem(ResourceLocation, Supplier, Collection, Collection)} that
+     * does not track the registered {@link Block} to any custom {@link Collection}.
+     *
+     * @param blockId The target {@linkplain Block Block's} {@linkplain ResourceLocation registry ID}.
+     * @param blockSup The {@link Block} object to register.
+     *
+     * @return The {@link Supplier} of the registered {@link Block}.
+     *
+     * @param <B> Any {@link Block} type.
+     */
+    public static <B extends Block> Supplier<B> registerBlockWithItem(ResourceLocation blockId, Supplier<B> blockSup) {
+        return registerBlockWithItem(blockId, blockSup, null, null);
+    }
+
+    /**
      * Registers and returns the provided {@link Block}, mapping it to a new {@link BlockPropertyWrapper} inheriting
      * from the provided {@link BlockPropertyWrapper} template. Optionally tracks the registered {@link Block} to a
      * custom {@link Collection}.
@@ -544,6 +581,43 @@ public final class BlockPropertyWrapperTemplates {
      */
     public static <B extends Block> BlockPropertyWrapperBuilder<B> registerAndChain(ResourceLocation blockId, Supplier<B> blockSup, BlockPropertyWrapper<Block> templateBPW) {
         return registerAndChain(blockId, blockSup, templateBPW, null);
+    }
+
+    /**
+     * Registers the provided {@link Block} and returns its {@link BlockPropertyWrapperBuilder}. Optionally tracks the
+     * registered {@link Block} to a custom {@link Collection}.
+     *
+     * @param blockId The target {@linkplain Block Block's} {@linkplain ResourceLocation registry ID}.
+     * @param blockSup The {@link Block} object to register.
+     * @param blockSupCol An optional {@link Collection} to track the registered {@link Block}. Primarily useful if you
+     *                    want a shorthand method of tracking your own registered blocks.
+     *
+     * @return The {@link BlockPropertyWrapperBuilder} of the registered {@link Block}, chaining from its own
+     * {@link BlockPropertyWrapperBuilder}.
+     *
+     * @param <B> Any {@link Block} type.
+     */
+    public static <B extends Block> BlockPropertyWrapperBuilder<B> registerAndChain(ResourceLocation blockId, Supplier<B> blockSup, @Nullable Collection<Supplier<Block>> blockSupCol) {
+        Supplier<B> registeredBlock = registerBlock(blockId, blockSup, blockSupCol);
+
+        return new BlockPropertyWrapper<>(registeredBlock, blockId.getNamespace())
+                .builder();
+    }
+
+    /**
+     * Overloaded variant of {@link #registerAndChain(ResourceLocation, Supplier, BlockPropertyWrapper, Collection)} that does not track the
+     * registered {@link Block} to any custom {@link Collection}.
+     *
+     * @param blockId The target {@linkplain Block Block's} {@linkplain ResourceLocation registry ID}.
+     * @param blockSup The {@link Block} object to register.
+     *
+     * @return The {@link BlockPropertyWrapperBuilder} of the registered {@link Block}, chaining from its own
+     * {@link BlockPropertyWrapperBuilder}.
+     *
+     * @param <B> Any {@link Block} type.
+     */
+    public static <B extends Block> BlockPropertyWrapperBuilder<B> registerAndChain(ResourceLocation blockId, Supplier<B> blockSup) {
+        return registerAndChain(blockId, blockSup, (Collection<Supplier<Block>>) null);
     }
 
     /**

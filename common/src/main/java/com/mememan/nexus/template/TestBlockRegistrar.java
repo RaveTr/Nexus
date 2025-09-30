@@ -28,7 +28,7 @@ import java.util.function.Supplier;
 public class TestBlockRegistrar {
     private static final ObjectArrayList<Supplier<Block>> BLOCKS = new ObjectArrayList<>();
 
-    public static final Supplier<Block> BLAH = new BlockPropertyWrapper<>(registerBlock(new ResourceLocation("nexus", "test_block"), () -> new Block(BlockBehaviour.Properties.of())), "nexus")
+    public static final Supplier<Block> BLAH = new BlockPropertyWrapper<>(registerBlock(new ResourceLocation("nexus", "test_block"), () -> new Block(BlockBehaviour.Properties.of().strength(0.2F).requiresCorrectToolForDrops())), "nexus")
             .builder()
             .copyFromType(BlockPropertyWrapperTemplates.BASIC)
             .asCompostable(parentBlock -> 45.0F)
@@ -36,6 +36,7 @@ public class TestBlockRegistrar {
             .withBlockTilling(parentBlock -> Pair.of((ctx) -> true, (ctx) -> ctx.getLevel().setBlock(ctx.getClickedPos(), Blocks.FARMLAND.defaultBlockState(), Block.UPDATE_ALL)))
             .withParentTab(() -> CreativeModeTabs.allTabs().get(3))
             .withTag(() -> BlockTags.MINEABLE_WITH_AXE)
+            .minimumMiningLevel(5)
             .buildAndGet();
 
     public static final Supplier<Block> BLAH_SLAB = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(NexusConstants.prefix("test_block_slab"), () -> new SlabBlock(BlockBehaviour.Properties.of()), BlockPropertyWrapperTemplates.SLAB);

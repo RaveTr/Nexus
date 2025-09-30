@@ -83,8 +83,8 @@ public final class EntityTypePropertyWrapperTemplates {
     }
 
     /**
-     * Overloaded variant of {@link #registerEntityTypeFromTemplate(ResourceLocation, Supplier, EntityTypePropertyWrapper, Collection)} that does not track the
-     * registered {@link EntityType} to any custom {@link Collection}.
+     * Overloaded variant of {@link #registerEntityTypeFromTemplate(ResourceLocation, Supplier, EntityTypePropertyWrapper, Collection)}
+     * that does not track the registered {@link EntityType} to any custom {@link Collection}.
      *
      * @param entityId The target {@linkplain EntityType EntityType's} {@linkplain ResourceLocation registry ID}.
      * @param entitySup The {@link EntityType} object to register.

@@ -7,6 +7,7 @@
   "mixins": [
     "forge.datagen.DatagenModLoaderMixin",
     "forge.registries.DataPackRegistriesHooksAccessor",
+    "item.DiggerItemMixin",
     "item.HoeItemMixin"
   ],
   "client": [

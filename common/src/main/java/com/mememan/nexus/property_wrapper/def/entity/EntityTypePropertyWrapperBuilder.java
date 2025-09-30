@@ -49,7 +49,7 @@ public class EntityTypePropertyWrapperBuilder<E extends Entity> extends BaseDefa
      * Defines the client-side data for the parent entity type. Should be hidden behind a lambda expression (see
      * references below).
      *
-     * @param clientData the supplier providing the client data.
+     * @param clientData The {@link EntityClientData} {@link Supplier} to associate with the parent entity type.
      *
      * @return {@link #self()} (builder method).
      *

@@ -9,6 +9,7 @@
     "fabric_api.datagen.FabricDataGenHelperMixin",
     "fabric_api.datagen.PackAccessor",
     "fabric_api.resource_loader.ResourceManagerHelperImplMixin",
+    "item.DiggerItemMixin",
     "server.PlayerListMixin"
   ],
   "client": [
