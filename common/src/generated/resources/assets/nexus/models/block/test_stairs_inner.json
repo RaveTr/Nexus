@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/inner_stairs",
-  "textures": {
-    "bottom": "nexus:block/zamn/test_block",
-    "side": "nexus:block/zamn/test_block",
-    "top": "nexus:block/zamn/test_block"
-  }
-}

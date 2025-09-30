@@ -315,9 +315,9 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
         }
 
         /**
-         * Attempts to compute a registry {@link ResourceKey} for the provided {@code targetObj}.
+         * Attempts to compute a registry {@link ResourceKey} for the provided {@code targetObjClazz}.
          * <br></br>
-         * First attempts to find a registry key for the provided {@code targetObj} in the base
+         * First attempts to find a registry key for the provided {@code targetObjClazz} in the base
          * {@link #NATIVE_REGISTRY_KEY_LOOKUP} {@link Map}. If no exact match is found, then a value is looked up from
          * the same {@link Map} and returned based on whether any of the base types are assignable from the provided
          * {@code targetObj} (i.e. {@link Class#isAssignableFrom(Class)}).
@@ -327,11 +327,11 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
          * each (appropriate) registry. Finally, if no match is found at all, {@link #UNMAPPED_REGISTRY} is mapped to the
          * provided object's {@code class} to indicate that it has no registry {@link ResourceKey}.
          *
-         * @param targetObj The object to use as base for registry key lookup.
+         * @param targetObjClazz The object {@code class} to use as base for registry key lookup.
          *
          * @return An {@link Optional} containing the registry {@link ResourceKey} for the provided object. If no
          * registry {@link ResourceKey} is found, an {@link Optional} containing {@link #UNMAPPED_REGISTRY} is returned.
-         * If the provided {@code targetObj} is {@code null}, an empty {@link Optional} is returned.
+         * If the provided {@code targetObjClazz} is {@code null}, an empty {@link Optional} is returned.
          *
          * @param <T> The parent object type.
          *
@@ -343,9 +343,10 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
          * looked up actually exists, and only O(k + m + n) on first lookup otherwise.
          *
          * @see #ofRegistryKey(ResourceKey)
+         * @see #computeForClass(Class)
          */
-        public static <T> Optional<ResourceKey<Registry<? super T>>> computeForObject(T targetObj) {
-            return targetObj == null ? Optional.empty() : ofRegistryKey(NATIVE_REGISTRY_KEY_LOOKUP.computeIfAbsent(targetObj.getClass(), objClazz -> NATIVE_REGISTRY_KEY_LOOKUP.entrySet().stream()
+        public static <T> Optional<ResourceKey<Registry<? super T>>> computeForClass(Class<T> targetObjClazz) {
+            return targetObjClazz == null ? Optional.empty() : ofRegistryKey(NATIVE_REGISTRY_KEY_LOOKUP.computeIfAbsent(targetObjClazz, objClazz -> NATIVE_REGISTRY_KEY_LOOKUP.entrySet().stream()
                     .filter(regEntry -> regEntry.getKey().isAssignableFrom(objClazz))
                     .map(Map.Entry::getValue)
                     .findFirst()
@@ -358,6 +359,24 @@ public interface DataGenPropertyWrapper<T, SELF extends PropertyWrapper<T, SELF,
                             .findFirst()
                             .flatMap(RegistryLookupContainer::ofRegistryKey)
                             .orElse((ResourceKey<Registry<? super Object>>) UNMAPPED_REGISTRY))));
+        }
+
+        /**
+         * Overloaded variant of {@link #computeForClass(Class)} that passes the object's {@code class} in.
+         *
+         * @param targetObj The object to use as base for registry key lookup.
+         *
+         * @return An {@link Optional} containing the registry {@link ResourceKey} for the provided object. If no
+         * registry {@link ResourceKey} is found, an {@link Optional} containing {@link #UNMAPPED_REGISTRY} is returned.
+         * If the provided {@code targetObj} is {@code null}, an empty {@link Optional} is returned.
+         *
+         * @param <T> The parent object type.
+         *
+         * @see #ofRegistryKey(ResourceKey)
+         * @see #computeForClass(Class)
+         */
+        public static <T> Optional<ResourceKey<Registry<? super T>>> computeForObject(T targetObj) {
+            return computeForClass(targetObj == null ? null : (Class<T>) targetObj.getClass());
         }
 
         /**

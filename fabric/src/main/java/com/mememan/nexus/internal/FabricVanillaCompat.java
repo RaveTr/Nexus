@@ -7,6 +7,7 @@ import com.mememan.nexus.property_wrapper.def.entity.EntityTypePropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.tag.TagPropertyWrapper;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.IntIntMutablePair;
+import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.registry.*;
@@ -86,22 +87,33 @@ public final class FabricVanillaCompat {
                 });
 
         // Tags (Blocks/Items)
-        PropertyWrapper.PropertyWrappersContainer.getInferrableWrappersOfType(TagPropertyWrapper.class)
-                .stream()
-                .map(curPW -> (TagPropertyWrapper<?, ? extends TagKey<?>>) curPW)
-                .forEach(curPW -> {
-                    Optional<Integer> tagCookTime = curPW.getCookTime();
-                    Optional<IntIntMutablePair> tagFlammabilityProperties = curPW.getFlammabilityPair();
-                    Supplier<? extends TagKey<?>> parentTagKeySup = curPW.getParentObject();
-                    TagKey<?> parentTagKey = parentTagKeySup.get();
+        CommonLifecycleEvents.TAGS_LOADED.register((regLookup, onClient) -> { // Need to do it on tag reload to guarantee that we can loop over tag entries if we need to indirectly map objects to their properties
+            PropertyWrapper.PropertyWrappersContainer.getInferrableWrappersOfType(TagPropertyWrapper.class)
+                    .stream()
+                    .map(curPW -> (TagPropertyWrapper<?, ? extends TagKey<?>>) curPW)
+                    .forEach(curPW -> {
+                        Optional<Integer> tagCookTime = curPW.getCookTime();
+                        Optional<IntIntMutablePair> tagFlammabilityProperties = curPW.getFlammabilityPair();
+                        Supplier<? extends TagKey<?>> parentTagKeySup = curPW.getParentObject();
+                        TagKey<?> parentTagKey = parentTagKeySup.get();
 
-                    tagCookTime
-                            .filter(cookTime -> parentTagKey.isFor(Registries.ITEM))
-                            .ifPresent(cookTime -> FuelRegistry.INSTANCE.add((TagKey<Item>) parentTagKey, Math.abs(cookTime)));
-                    tagFlammabilityProperties
-                            .filter(flammabilityProperties -> parentTagKey.isFor(Registries.BLOCK))
-                            .ifPresent(flammabilityProperties -> FlammableBlockRegistry.getDefaultInstance().add((TagKey<Block>) parentTagKey, Math.abs(flammabilityProperties.leftInt()), Math.abs(flammabilityProperties.rightInt())));
-                });
+                        tagCookTime
+                                .filter(cookTime -> parentTagKey.isFor(Registries.ITEM) || parentTagKey.isFor(Registries.BLOCK))
+                                .flatMap(cookTime -> curPW.getCookTime())
+                                .ifPresent(cookTime -> {
+                                    if (parentTagKey.isFor(Registries.BLOCK)) {
+                                        BuiltInRegistries.BLOCK.getTagOrEmpty((TagKey<Block>) parentTagKey).forEach(curBlockHolder -> {
+                                            Item curBlockItem = curBlockHolder.value().asItem();
+
+                                            if (!curBlockItem.getDefaultInstance().isEmpty()) FuelRegistry.INSTANCE.add(curBlockItem, Math.abs(cookTime));
+                                        });
+                                    } else FuelRegistry.INSTANCE.add((TagKey<Item>) parentTagKey, Math.abs(cookTime));
+                                });
+                        tagFlammabilityProperties
+                                .filter(flammabilityProperties -> parentTagKey.isFor(Registries.BLOCK))
+                                .ifPresent(flammabilityProperties -> FlammableBlockRegistry.getDefaultInstance().add((TagKey<Block>) parentTagKey, Math.abs(flammabilityProperties.leftInt()), Math.abs(flammabilityProperties.rightInt())));
+                    });
+        });
 
         // EntityTypes
         PropertyWrapper.PropertyWrappersContainer.getInferrableWrappersOfType(EntityTypePropertyWrapper.class)

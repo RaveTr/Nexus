@@ -4,16 +4,11 @@ import com.mememan.nexus.internal.event.common.NexusForgeCommonMiscEvents;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.specialised.vanilla.VanillaBasedPropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapper;
-import com.mememan.nexus.property_wrapper.def.tag.TagPropertyWrapper;
 import it.unimi.dsi.fastutil.ints.IntIntMutablePair;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.HoneycombItem;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.*;
 
-import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -22,10 +17,11 @@ import java.util.function.Supplier;
 public final class ForgeVanillaCompat {
 
     /**
-     * Internal method responsible for the registration of hardcoded Vanilla compatibility features from Block/Item/Tag
+     * Internal method responsible for the registration of hardcoded Vanilla compatibility features from Block/Item
      * Property Wrappers.
      *
-     * @apiNote Tool actions (stripping, tilling, flattening) and fuel are handled separately in their corresponding events.
+     * @apiNote Tool actions (stripping, tilling, flattening) and fuel + flammability are handled separately in their
+     * corresponding events, see references below.
      *
      * @param <IL> Any {@link ItemLike} type. Primarily used for compile-time generic type safety.
      *
@@ -45,20 +41,6 @@ public final class ForgeVanillaCompat {
                             .ifPresent(compostMapper -> ComposterBlock.COMPOSTABLES.put(parentItemLike.asItem(), Math.abs(compostMapper.apply(parentItemLikeSup))));
 
                     if (curPW instanceof BlockPropertyWrapper<?> curBPW) registerBlockVanillaIntegration(curBPW);
-                });
-
-        // Tags (Blocks)
-        PropertyWrapper.PropertyWrappersContainer.getInferrableWrappersOfType(TagPropertyWrapper.class)
-                .stream()
-                .map(curPW -> (TagPropertyWrapper<?, ? extends TagKey<?>>) curPW)
-                .forEach(curPW -> {
-                    Optional<IntIntMutablePair> tagFlammabilityProperties = curPW.getFlammabilityPair();
-                    Supplier<? extends TagKey<?>> parentTagKeySup = curPW.getParentObject();
-                    TagKey<?> parentTagKey = parentTagKeySup.get();
-
-                    tagFlammabilityProperties
-                            .filter(flammabilityProperties -> parentTagKey.isFor(Registries.BLOCK))
-                            .ifPresent(flammabilityProperties -> BuiltInRegistries.BLOCK.getTagOrEmpty((TagKey<Block>) parentTagKey).forEach(blockEntryHolder -> ((FireBlock) Blocks.FIRE).setFlammable(blockEntryHolder.get(), Math.abs(flammabilityProperties.leftInt()), Math.abs(flammabilityProperties.rightInt()))));
                 });
     }
 
@@ -80,7 +62,7 @@ public final class ForgeVanillaCompat {
             IntIntMutablePair flammabilityProperties = flammabilityMapper.apply(parentBlockSup);
 
             if (flammabilityProperties != null) {
-                ((FireBlock) Blocks.FIRE).setFlammable(parentBlock, Math.abs(flammabilityProperties.leftInt()), Math.abs(flammabilityProperties.rightInt()));
+                ((FireBlock) Blocks.FIRE).setFlammable(parentBlock, Math.abs(flammabilityProperties.leftInt()), Math.abs(flammabilityProperties.rightInt())); // No need to act stingy and safe about it here in this case since blocks aren't reloadable resources in 1.20.1 (duh)
             }
         });
         targetBPW.getBlockOxidizationMapper().ifPresent(oxidizationMapper -> {

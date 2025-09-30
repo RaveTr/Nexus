@@ -11,6 +11,7 @@ import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.tag.TagPropertyWrapper;
 import com.mememan.nexus.resource.config.ResourceReloadListenerConfig;
 import it.unimi.dsi.fastutil.Pair;
+import it.unimi.dsi.fastutil.ints.IntIntMutablePair;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -32,6 +33,7 @@ import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
+import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.furnace.FurnaceFuelBurnTimeEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -75,26 +77,13 @@ public class NexusForgeCommonMiscEvents {
                 .forEach(curPW -> {
                     curPW.getFuelMapper().ifPresent(fuelMapper -> {
                         Supplier<ItemLike> parentItemLikeSup = curPW.getParentObject();
+                        Item parentItem = parentItemLikeSup.get().asItem();
 
-                        fuelTimeMap.put(parentItemLikeSup.get().asItem(), Math.abs(fuelMapper.apply(parentItemLikeSup)));
+                        if (!parentItem.getDefaultInstance().isEmpty()) fuelTimeMap.put(parentItem, Math.abs(fuelMapper.apply(parentItemLikeSup)));
                     });
                 });
-
-        // Tags (Items)
-        PropertyWrapper.PropertyWrappersContainer.getInferrableWrappersOfType(TagPropertyWrapper.class)
-                .stream()
-                .map(curPW -> (TagPropertyWrapper<?, ? extends TagKey<?>>) curPW)
-                .filter(curPW -> curPW.getParentObject().get().isFor(Registries.ITEM) && curPW.getCookTime().isPresent())
-                .map(curPW -> (TagPropertyWrapper<Item, TagKey<Item>>) curPW)
-                .forEach(curPW -> {
-                    TagKey<Item> parentTagKeySup = curPW.getParentObject().get();
-
-                    curPW.getCookTime().ifPresent(cookTime -> // Functional-style expression (we can already guarantee that it's present but meh, whatever)
-                            BuiltInRegistries.ITEM.getTagOrEmpty(parentTagKeySup)
-                                    .forEach(curItemHolder -> fuelTimeMap.put(curItemHolder.value(), Math.abs(cookTime)))
-                    );
-                });
     });
+    private static final Object2IntOpenHashMap<Item> CACHED_FUEL_TIME_BY_TAG = new Object2IntOpenHashMap<>();
     private static final ObjectArrayList<PreparableReloadListener> CACHED_RESOURCE_RELOAD_LISTENERS = Util.make(new ObjectArrayList<>(), resourceReloadListenerList -> {
         ForgeRegistrar.getCachedResourceReloadListeners().values().stream()
                 .filter(curListenerPair -> curListenerPair.second()
@@ -110,6 +99,7 @@ public class NexusForgeCommonMiscEvents {
                         .orElse(false))
                 .forEach(curListenerEntry -> syncableResourceReloadListenerMap.putIfAbsent(curListenerEntry.getKey(), ObjectObjectImmutablePair.of(curListenerEntry.getValue().first(), curListenerEntry.getValue().second().get())));
     });
+    public static final Object2ObjectOpenHashMap<Block, IntIntMutablePair> CACHED_FLAMMABILITY_BY_TAG = new Object2ObjectOpenHashMap<>(); // Allow for dynamic resource reloads to actually affect tagged objects appropriately
     public static final Object2ObjectOpenHashMap<Block, Function<Supplier<Block>, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>>>> CACHED_BLOCK_TILLING_BEHAVIOURS = Util.make(new Object2ObjectOpenHashMap<>(), tillingBehaviourMap -> {
         PropertyWrapper.PropertyWrappersContainer.getInferrableWrappersOfType(BlockPropertyWrapper.class)
                 .stream()
@@ -121,6 +111,35 @@ public class NexusForgeCommonMiscEvents {
                     curBPW.getBlockTillingMapper().ifPresent(tillingMapper -> tillingBehaviourMap.put(parentBlock, tillingMapper));
                 });
     }); // Separate cause hoe tilling is handled differently
+
+    @SubscribeEvent
+    public static void onTagsUpdatedEvent(TagsUpdatedEvent event) {
+        CACHED_FUEL_TIME_BY_TAG.clear();
+        CACHED_FLAMMABILITY_BY_TAG.clear();
+
+        PropertyWrapper.PropertyWrappersContainer.getInferrableWrappersOfType(TagPropertyWrapper.class)
+                .stream()
+                .map(curPW -> (TagPropertyWrapper<?, ? extends TagKey<?>>) curPW)
+                .forEach(curPW -> {
+                    TagKey<?> parentTagKey = curPW.getParentObject().get();
+
+                    curPW.getCookTime()
+                            .filter(curPair -> parentTagKey.isFor(Registries.BLOCK) || parentTagKey.isFor(Registries.ITEM))
+                            .ifPresent(cookTime -> {
+                                if (parentTagKey.isFor(Registries.BLOCK)) {
+                                    BuiltInRegistries.BLOCK.getTagOrEmpty((TagKey<Block>) parentTagKey).forEach(curBlockHolder -> {
+                                        Item curBlockItem = curBlockHolder.value().asItem();
+
+                                        if (!curBlockItem.getDefaultInstance().isEmpty()) CACHED_FUEL_TIME_BY_TAG.put(curBlockItem, Math.abs(cookTime));
+                                    });
+                                } else BuiltInRegistries.ITEM.getTagOrEmpty((TagKey<Item>) parentTagKey).forEach(curItemHolder -> CACHED_FUEL_TIME_BY_TAG.put(curItemHolder.value(), Math.abs(cookTime)));
+                            });
+
+                    curPW.getFlammabilityPair()
+                            .filter(curPair -> parentTagKey.isFor(Registries.BLOCK))
+                            .ifPresent(flammabilityPair -> BuiltInRegistries.BLOCK.getTagOrEmpty((TagKey<Block>) parentTagKey).forEach(curBlockHolder -> CACHED_FLAMMABILITY_BY_TAG.put(curBlockHolder.value(), flammabilityPair)));
+                });
+    }
 
     @SubscribeEvent
     public static void onBlockToolModificationEvent(BlockEvent.BlockToolModificationEvent event) { // Handling tool actions (stripping, tilling, flattening) with as little performance overhead and intrusion as possible
@@ -145,7 +164,7 @@ public class NexusForgeCommonMiscEvents {
     @SubscribeEvent
     public static void onFurnaceFuelBurnTimeEvent(FurnaceFuelBurnTimeEvent event) {
         Item targetItem = event.getItemStack().getItem();
-        int cookTime = CACHED_FUEL_TIME.getOrDefault(targetItem, 0);
+        int cookTime = CACHED_FUEL_TIME.getOrDefault(targetItem, CACHED_FUEL_TIME_BY_TAG.getOrDefault(targetItem, 0));
 
         if (cookTime != 0) event.setBurnTime(cookTime);
     }

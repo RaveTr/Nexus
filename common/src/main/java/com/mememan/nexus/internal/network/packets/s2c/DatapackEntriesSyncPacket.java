@@ -51,7 +51,7 @@ public class DatapackEntriesSyncPacket<T> {
         Pair<PreparableReloadListener, Optional<ResourceReloadListenerConfig<PreparableReloadListener>>> targetListenerPair = NexusServices.REGISTRAR.getMappedResourceReloadListeners().get(listenerId);
 
         return (Codec<T>) Optional.ofNullable(targetListenerPair)
-                .orElseThrow(() -> new IllegalArgumentException(String.format("Attempted to decode data for invalid listener of id '%s'", listenerId)))
+                .orElseThrow(() -> new IllegalArgumentException(String.format("Attempted to sync data for invalid listener of id '%s'", listenerId))) // Buncha fallbacks JIC
                 .second()
                 .map(curConfig -> {
                     PackType targetPackType = curConfig.listenerPackType();
