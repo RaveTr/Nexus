@@ -130,8 +130,8 @@ public final class CreativeModePropertyWrapperTemplates {
      * @param tabSup The {@link CreativeModeTab} object to register.
      * @param templateBPW The {@link CreativeModeTabPropertyWrapper} template to inherit from.
      *
-     * @return The {@link CreativeModeTabPropertyWrapperBuilder} of the registered {@link CreativeModeTab}, inheriting from the provided
-     * {@code templateBPW}.
+     * @return The {@link CreativeModeTabPropertyWrapperBuilder} of the registered {@link CreativeModeTab}, inheriting
+     * from the provided {@code templateBPW}.
      *
      * @param <CMT> Any {@link CreativeModeTab} type.
      */

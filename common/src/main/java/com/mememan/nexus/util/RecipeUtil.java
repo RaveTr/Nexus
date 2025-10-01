@@ -48,7 +48,7 @@ public final class RecipeUtil {
     }
 
     public static <B extends Block> Consumer<Supplier<B>> slabRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
-        return slabRecipeFrom(finishedRecipe, parentSlab -> RegistryUtil.getObjectFrom(parentSlab, parentSlabId -> RegistryUtil.pickBlockId(() -> parentSlab)).get(), recipeIdMapper);
+        return slabRecipeFrom(finishedRecipe, parentSlab -> RegistryUtil.getObjectFrom(parentSlab, parentSlabId -> RegistryUtil.pickBlockId(() -> parentSlab)).orElse(null), recipeIdMapper);
     }
 
     public static <B extends Block> Consumer<Supplier<B>> slabRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
@@ -76,7 +76,7 @@ public final class RecipeUtil {
     }
 
     public static <B extends Block> Consumer<Supplier<B>> woodenSlabRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
-        return woodenSlabRecipeFrom(finishedRecipe, parentSlab -> RegistryUtil.getObjectFrom(parentSlab, parentSlabId -> RegistryUtil.pickBlockId(() -> parentSlab)).get(), recipeIdMapper);
+        return woodenSlabRecipeFrom(finishedRecipe, parentSlab -> RegistryUtil.getObjectFrom(parentSlab, parentSlabId -> RegistryUtil.pickBlockId(() -> parentSlab)).orElse(null), recipeIdMapper);
     }
 
     public static <B extends Block> Consumer<Supplier<B>> woodenSlabRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
@@ -110,7 +110,7 @@ public final class RecipeUtil {
     }
 
     public static <B extends Block> Consumer<Supplier<B>> stairsRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
-        return stairsRecipeFrom(finishedRecipe, parentStairs -> RegistryUtil.getObjectFrom(parentStairs, parentStairsId -> RegistryUtil.pickBlockId(() -> parentStairs)).get(), recipeIdMapper);
+        return stairsRecipeFrom(finishedRecipe, parentStairs -> RegistryUtil.getObjectFrom(parentStairs, parentStairsId -> RegistryUtil.pickBlockId(() -> parentStairs)).orElse(null), recipeIdMapper);
     }
 
     public static <B extends Block> Consumer<Supplier<B>> stairsRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
@@ -140,7 +140,7 @@ public final class RecipeUtil {
     }
 
     public static <B extends Block> Consumer<Supplier<B>> woodenStairsRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
-        return woodenStairsRecipeFrom(finishedRecipe, parentStairs -> RegistryUtil.getObjectFrom(parentStairs, parentStairsId -> RegistryUtil.pickBlockId(() -> parentStairs)).get(), recipeIdMapper);
+        return woodenStairsRecipeFrom(finishedRecipe, parentStairs -> RegistryUtil.getObjectFrom(parentStairs, parentStairsId -> RegistryUtil.pickBlockId(() -> parentStairs)).orElse(null), recipeIdMapper);
     }
 
     public static <B extends Block> Consumer<Supplier<B>> woodenStairsRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
@@ -173,7 +173,7 @@ public final class RecipeUtil {
     }
 
     public static <B extends Block> Consumer<Supplier<B>> wallRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
-        return wallRecipeFrom(finishedRecipe, parentWall -> RegistryUtil.getObjectFrom(parentWall, parentWallId -> RegistryUtil.pickBlockId(() -> parentWall)).get(), recipeIdMapper);
+        return wallRecipeFrom(finishedRecipe, parentWall -> RegistryUtil.getObjectFrom(parentWall, parentWallId -> RegistryUtil.pickBlockId(() -> parentWall)).orElse(null), recipeIdMapper);
     }
 
     public static <B extends Block> Consumer<Supplier<B>> wallRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
@@ -203,7 +203,7 @@ public final class RecipeUtil {
     }
 
     public static <B extends Block> Consumer<Supplier<B>> doorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
-        return doorRecipeFrom(finishedRecipe, parentDoor -> RegistryUtil.getObjectFrom(parentDoor, parentDoorId -> RegistryUtil.pickBlockId(() -> parentDoor)).get(), recipeIdMapper);
+        return doorRecipeFrom(finishedRecipe, parentDoor -> RegistryUtil.getObjectFrom(parentDoor, parentDoorId -> RegistryUtil.pickBlockId(() -> parentDoor)).orElse(null), recipeIdMapper);
     }
 
     public static <B extends Block> Consumer<Supplier<B>> doorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
@@ -232,7 +232,7 @@ public final class RecipeUtil {
     }
 
     public static <B extends Block> Consumer<Supplier<B>> trapdoorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
-        return trapdoorRecipeFrom(finishedRecipe, parentTrapdoor -> RegistryUtil.getObjectFrom(parentTrapdoor, parentTrapdoorId -> RegistryUtil.pickBlockId(() -> parentTrapdoor)).get(), recipeIdMapper);
+        return trapdoorRecipeFrom(finishedRecipe, parentTrapdoor -> RegistryUtil.getObjectFrom(parentTrapdoor, parentTrapdoorId -> RegistryUtil.pickBlockId(() -> parentTrapdoor)).orElse(null), recipeIdMapper);
     }
 
     public static <B extends Block> Consumer<Supplier<B>> trapdoorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
@@ -261,7 +261,7 @@ public final class RecipeUtil {
     }
 
     public static <B extends Block> Consumer<Supplier<B>> woodenTrapdoorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
-        return woodenTrapdoorRecipeFrom(finishedRecipe, parentWoodenTrapdoor -> RegistryUtil.getObjectFrom(parentWoodenTrapdoor, parentWoodenTrapdoorId -> RegistryUtil.pickBlockId(() -> parentWoodenTrapdoor)).get(), recipeIdMapper);
+        return woodenTrapdoorRecipeFrom(finishedRecipe, parentWoodenTrapdoor -> RegistryUtil.getObjectFrom(parentWoodenTrapdoor, parentWoodenTrapdoorId -> RegistryUtil.pickBlockId(() -> parentWoodenTrapdoor)).orElse(null), recipeIdMapper);
     }
 
     public static <B extends Block> Consumer<Supplier<B>> woodenTrapdoorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
@@ -291,7 +291,7 @@ public final class RecipeUtil {
     }
 
     public static <B extends Block> Consumer<Supplier<B>> fenceRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
-        return fenceRecipeFrom(finishedRecipe, parentFence -> RegistryUtil.getObjectFrom(parentFence, parentFenceId -> RegistryUtil.pickBlockId(() -> parentFence)).get(), recipeIdMapper);
+        return fenceRecipeFrom(finishedRecipe, parentFence -> RegistryUtil.getObjectFrom(parentFence, parentFenceId -> RegistryUtil.pickBlockId(() -> parentFence)).orElse(null), recipeIdMapper);
     }
 
     public static <B extends Block> Consumer<Supplier<B>> fenceRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
@@ -321,7 +321,7 @@ public final class RecipeUtil {
     }
 
     public static <B extends Block> Consumer<Supplier<B>> fenceGateRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
-        return fenceGateRecipeFrom(finishedRecipe, parentFenceGate -> RegistryUtil.getObjectFrom(parentFenceGate, parentFenceGateId -> RegistryUtil.pickBlockId(() -> parentFenceGate)).get(), recipeIdMapper);
+        return fenceGateRecipeFrom(finishedRecipe, parentFenceGate -> RegistryUtil.getObjectFrom(parentFenceGate, parentFenceGateId -> RegistryUtil.pickBlockId(() -> parentFenceGate)).orElse(null), recipeIdMapper);
     }
 
     public static <B extends Block> Consumer<Supplier<B>> fenceGateRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
@@ -348,7 +348,7 @@ public final class RecipeUtil {
     }
 
     public static <B extends Block> Consumer<Supplier<B>> buttonRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
-        return buttonRecipeFrom(finishedRecipe, parentButton -> RegistryUtil.getObjectFrom(parentButton, parentButtonId -> RegistryUtil.pickBlockId(() -> parentButton)).get(), recipeIdMapper);
+        return buttonRecipeFrom(finishedRecipe, parentButton -> RegistryUtil.getObjectFrom(parentButton, parentButtonId -> RegistryUtil.pickBlockId(() -> parentButton)).orElse(null), recipeIdMapper);
     }
 
     public static <B extends Block> Consumer<Supplier<B>> buttonRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
@@ -376,7 +376,7 @@ public final class RecipeUtil {
     }
 
     public static <B extends Block> Consumer<Supplier<B>> pressurePlateRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
-        return pressurePlateRecipeFrom(finishedRecipe, parentPressurePlate -> RegistryUtil.getObjectFrom(parentPressurePlate, parentPressurePlateId -> RegistryUtil.pickBlockId(() -> parentPressurePlate)).get(), recipeIdMapper);
+        return pressurePlateRecipeFrom(finishedRecipe, parentPressurePlate -> RegistryUtil.getObjectFrom(parentPressurePlate, parentPressurePlateId -> RegistryUtil.pickBlockId(() -> parentPressurePlate)).orElse(null), recipeIdMapper);
     }
 
     public static <B extends Block> Consumer<Supplier<B>> pressurePlateRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {

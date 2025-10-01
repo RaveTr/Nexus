@@ -162,7 +162,7 @@ jar {
 }
 
 tasks.jarJar {
-    archiveClassifier.set(null)
+    archiveClassifier.set("")
 }
 
 publishing {

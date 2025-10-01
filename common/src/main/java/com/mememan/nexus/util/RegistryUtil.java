@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.Util;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CarpetBlock;
@@ -55,6 +56,9 @@ public final class RegistryUtil {
     };
     private static final String[] VANILLA_WOOD_MATERIALS = new String[] {
             "oak", "spruce", "birch", "jungle", "acacia", "dark_oak", "mangrove", "cherry", "bamboo", "crimson", "warped"
+    };
+    private static final String[] NORMALIZABLE_SUFFIXES = new String[] {
+            "_brick", "_plank"
     };
 
     private RegistryUtil() {
@@ -607,12 +611,13 @@ public final class RegistryUtil {
      *         {@code _fence_gate}, {@code _trapdoor}, {@code _button}, {@code _stairs}, {@code _slab},
      *         {@code _fence}, {@code _wall}, {@code _door}, {@code _sign}.</li>
      *         <li>Normalizes singular family terms to plurals: {@code _brick} → {@code _bricks},
-     *         {@code _plank} → {@code _planks} (applies to middle and trailing positions).</li>
+     *         {@code _plank} → {@code _planks} (applies to trailing positions).</li>
      *         <li>Wood-family heuristic: for wood-only components, if the base looks like a vanilla wood key
      *         (e.g., {@code oak}, {@code spruce}, {@code bamboo}, {@code crimson}, {@code warped}) or the block itself
-     *         seems to be a wood-family block, append {@code _planks} unless already present.</li>
+     *         seems to be a wood-family block via tag checks, append {@code _planks} unless already present.</li>
      *         <li>Appends {@code _block} when appropriate: if the source contained {@code _block} anywhere, or a
-     *         derived suffix was stripped and the resulting base is not a plural family ({@code _bricks}/{@code _planks}).</li>
+     *         derived suffix was stripped and the resulting base is not a plural family ({@code _bricks}/{@code _planks})
+     *         AND the provided {@code targetBlock} does not exist based on the current path.</li>
      *     </ul>
      *
      * @param targetBlock The {@link Supplier} of the target {@link Block} to derive a base block ID for.
@@ -638,12 +643,13 @@ public final class RegistryUtil {
                 }
             }
 
-            // Normalize brick/plank singulars to plurals in both middle and trailing positions.
-            if (work.contains("_brick_")) work = work.replace("_brick_", "_bricks_");
-            if (work.endsWith("_brick")) work = work.substring(0, work.length() - 6).concat("_bricks");
-
-            if (work.contains("_plank_")) work = work.replace("_plank_", "_planks_");
-            if (work.endsWith("_plank")) work = work.substring(0, work.length() - 6).concat("_planks");
+            // Normalize brick/plank singulars to plurals in trailing positions.
+            for (String suffix : NORMALIZABLE_SUFFIXES) {
+                if (work.endsWith(suffix)) {
+                    work = work.substring(0, work.length() - suffix.length()).concat(StringUtil.pluralize(suffix));
+                    break;
+                }
+            }
 
             boolean woodFamilyBaseDetected = work.endsWith("_planks");
 
@@ -664,8 +670,10 @@ public final class RegistryUtil {
                  * Append "_block" when either:
                  * - Source name contains "_block" anywhere
                  * - We stripped a derived suffix and the base is not a wood family (e.g. <wood>_planks)
+                 * AND
+                 * - No block exists for the target ID after its suffix has been stripped
                  */
-                boolean expectBlockBase = sourceContainedBlockToken || (removedSuffix != null && !woodFamilyBaseDetected);
+                boolean expectBlockBase = BuiltInRegistries.BLOCK.getOptional(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get()).withPath(work)).isEmpty() && (sourceContainedBlockToken || (removedSuffix != null && !woodFamilyBaseDetected));
 
                 if (expectBlockBase && !work.endsWith("_block")) work = work.concat("_block");
             }
