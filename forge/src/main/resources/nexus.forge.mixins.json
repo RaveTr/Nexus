@@ -1,0 +1,24 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.mememan.nexus.mixins",
+  "refmap": "${mod_id}.refmap.json",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "block.FireBlockMixin",
+    "forge.datagen.DatagenModLoaderMixin",
+    "forge.registries.DataPackRegistriesHooksAccessor",
+    "item.DiggerItemMixin",
+    "item.HoeItemMixin"
+  ],
+  "client": [
+  ],
+  "server": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "mixinextras": {
+    "minVersion": "${mixinextras_version}"
+  }
+}
