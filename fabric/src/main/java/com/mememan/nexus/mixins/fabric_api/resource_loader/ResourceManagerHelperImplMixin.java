@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  * This mixin {@code class} exists solely due to the fact that Fabric wants to be different instead of allowing you to
  * register a {@link PreparableReloadListener} of your own choosing and mapping that to a {@link ResourceLocation}.
  * <br></br>
- * In other words, this {@code class} handles resource reload listener registration for Fabric.
+ * In other words, this {@code class} handles resource reload listener registration on Fabric.
  *
  * @see PlayerListMixin
  */
