@@ -1,11 +1,15 @@
 package com.mememan.nexus.util;
 
+import com.mememan.nexus.client.block.WrappedBlockColor;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.IntIntMutablePair;
+import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.GrassColor;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -105,5 +109,22 @@ public final class VanillaUtil {
                 .or(() -> RegistryUtil.getObjectFrom(targetBlock, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_path", ""))))
                 .map(Block::defaultBlockState)
                 .orElse(null);
+    }
+
+    /**
+     * Creates a {@link WrappedBlockColor} for the given block, using Vanilla grass color logic.
+     * <br></br>
+     * The returned block color mapper uses biome colors to calculate the grass color based on the block's position
+     * (biome determination). If the block is not a grass block, it returns the default grass color (0.5, 1.0).
+     *
+     * @param targetBlock The {@link Supplier<Block>} representing the block to create the block color mapper for.
+     *
+     * @return The {@link WrappedBlockColor} for the given block, using the vanilla grass color logic.
+     */
+    @NotNull
+    public static WrappedBlockColor standardGrassColor(Supplier<Block> targetBlock) {
+        return (targetState, tintGetter, targetPos, tint) -> tintGetter != null && targetPos != null
+                ? BiomeColors.getAverageGrassColor(tintGetter, targetPos)
+                : GrassColor.get(0.5D, 1.0D);
     }
 }

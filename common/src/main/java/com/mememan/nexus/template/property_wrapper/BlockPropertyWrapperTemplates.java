@@ -427,6 +427,14 @@ public final class BlockPropertyWrapperTemplates {
             .withLootTable(LootUtil::dropFarmland)
             .build();
 
+    public static final BlockPropertyWrapper<Block> PLANT = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC)
+            .withModelDefinition(ModelUtil::tintedCrossCutout)
+            .withLootTable(LootUtil::dropSilkTouchOrShears)
+            .withBlockColor(VanillaUtil::standardGrassColor)
+            .build();
+
     private BlockPropertyWrapperTemplates() {
         throw new IllegalAccessError("Attempted to construct instance of template utility class! (BlockPropertyWrapperTemplates)");
     }
