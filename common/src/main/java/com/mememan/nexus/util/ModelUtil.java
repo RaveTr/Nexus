@@ -195,6 +195,224 @@ public final class ModelUtil {
     }
 
     /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#CARPET} template.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#WOOL} -> {@code RegistryUtil.pickBlockPrefix(carpetTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the carpet {@link Block} to be used for
+     *                    automatic model location resolution.
+     * @param carpetTexture The {@link ResourceLocation} representing the texture of the carpet.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CARPET} template.
+     *
+     * @see #simpleBlockState(Supplier)
+     * @see #carpet(Supplier)
+     */
+    public static BlockModelDefinition carpet(Supplier<Block> targetBlock, ResourceLocation carpetTexture) {
+        return new BlockModelDefinition(ModelTemplates.CARPET)
+                .withTextureMapping(TextureMapping.wool(RegistryUtil.pickBlockPrefix(carpetTexture)))
+                .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get()))));
+    }
+
+    /**
+     * Overloaded variant of {@link #carpet(Supplier, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#CARPET} template using automatic texture resolution.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#WOOL} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the carpet {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CARPET} template.
+     *
+     * @see #simpleBlockState(Supplier)
+     * @see #carpet(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition carpet(Supplier<Block> targetBlock) {
+        return carpet(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#CROSS} template.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.pickBlockPrefix(crossTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the cross {@link Block} to be used for
+     *                    automatic model location resolution.
+     * @param crossTexture The {@link ResourceLocation} representing the texture of the cross.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CROSS} template.
+     *
+     * @see #cross(Supplier)
+     */
+    public static BlockModelDefinition cross(Supplier<Block> targetBlock, ResourceLocation crossTexture) {
+        return new BlockModelDefinition(ModelTemplates.CROSS)
+                .withTextureMapping(TextureMapping.cross(RegistryUtil.pickBlockPrefix(crossTexture)))
+                .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get()))));
+    }
+
+    /**
+     * Overloaded variant of {@link #cross(Supplier, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#CROSS} template using automatic texture resolution.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the cross {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CROSS} template.
+     *
+     * @see #cross(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition cross(Supplier<Block> targetBlock) {
+        return cross(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#CROSS} template and sets the render type
+     * to {@link #CUTOUT_RENDER_TYPE} for proper transparency handling.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.pickBlockPrefix(crossTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the cross {@link Block} to be used for
+     *                    automatic model location resolution.
+     * @param crossTexture The {@link ResourceLocation} representing the texture of the cross.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CROSS} template and {@link #CUTOUT_RENDER_TYPE}.
+     *
+     * @see #crossCutout(Supplier)
+     * @see #cross(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition crossCutout(Supplier<Block> targetBlock, ResourceLocation crossTexture) {
+        return cross(targetBlock, crossTexture)
+                .withRenderType(CUTOUT_RENDER_TYPE);
+    }
+
+    /**
+     * Overloaded variant of {@link #crossCutout(Supplier, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#CROSS} template using automatic texture resolution and sets the render type
+     * to {@link #CUTOUT_RENDER_TYPE} for proper transparency handling.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the cross {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CROSS} template and {@link #CUTOUT_RENDER_TYPE}.
+     *
+     * @see #crossCutout(Supplier, ResourceLocation)
+     * @see #cross(Supplier)
+     */
+    public static BlockModelDefinition crossCutout(Supplier<Block> targetBlock) {
+        return crossCutout(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#TINTED_CROSS} template.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.pickBlockPrefix(tintedCrossTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the tinted cross {@link Block} to be used for
+     *                    automatic model location resolution.
+     * @param tintedCrossTexture The {@link ResourceLocation} representing the texture of the tinted cross.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#TINTED_CROSS} template.
+     *
+     * @see #tintedCross(Supplier)
+     */
+    public static BlockModelDefinition tintedCross(Supplier<Block> targetBlock, ResourceLocation tintedCrossTexture) {
+        return new BlockModelDefinition(ModelTemplates.TINTED_CROSS)
+                .withTextureMapping(TextureMapping.cross(RegistryUtil.pickBlockPrefix(tintedCrossTexture)))
+                .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get()))));
+    }
+
+    /**
+     * Overloaded variant of {@link #tintedCross(Supplier, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#TINTED_CROSS} template using automatic texture resolution.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the tinted cross {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#TINTED_CROSS} template.
+     *
+     * @see #tintedCross(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition tintedCross(Supplier<Block> targetBlock) {
+        return tintedCross(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#TINTED_CROSS} template and sets the render type
+     * to {@link #CUTOUT_RENDER_TYPE} for proper transparency handling.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.pickBlockPrefix(tintedCrossTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the tinted cross {@link Block} to be used for
+     *                    automatic model location resolution.
+     * @param tintedCrossTexture The {@link ResourceLocation} representing the texture of the tinted cross.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#TINTED_CROSS} template and {@link #CUTOUT_RENDER_TYPE}.
+     *
+     * @see #tintedCrossCutout(Supplier)
+     * @see #tintedCross(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition tintedCrossCutout(Supplier<Block> targetBlock, ResourceLocation tintedCrossTexture) {
+        return tintedCross(targetBlock, tintedCrossTexture)
+                .withRenderType(CUTOUT_RENDER_TYPE);
+    }
+
+    /**
+     * Overloaded variant of {@link #tintedCrossCutout(Supplier, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#TINTED_CROSS} template using automatic texture resolution and sets the render type
+     * to {@link #CUTOUT_RENDER_TYPE} for proper transparency handling.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the tinted cross {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#TINTED_CROSS} template and {@link #CUTOUT_RENDER_TYPE}.
+     *
+     * @see #tintedCrossCutout(Supplier, ResourceLocation)
+     * @see #tintedCross(Supplier)
+     */
+    public static BlockModelDefinition tintedCrossCutout(Supplier<Block> targetBlock) {
+        return tintedCrossCutout(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock));
+    }
+
+    /**
      * Creates a {@link BlockStateDefinition}, using {@link MultiVariantGenerator} with the {@link VariantProperties#MODEL}
      * property set to the supplied {@linkplain Block Block's} default model location.
      * <p>
@@ -3657,6 +3875,70 @@ public final class ModelUtil {
      */
     public static BlockStateDefinition fenceGateBlockState(Supplier<Block> targetBlock) {
         return fenceGateBlockState(targetBlock, ModelLocationUtils.getModelLocation(targetBlock.get()));
+    }
+
+    public static BlockModelDefinition farmlandDry(Supplier<Block> targetBlock, ResourceLocation dryFarmlandTexture, ResourceLocation dirtTexture) {
+        return new BlockModelDefinition(ModelTemplates.FARMLAND)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.DIRT, RegistryUtil.pickBlockPrefix(dirtTexture))
+                        .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(dryFarmlandTexture)))
+                .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get()))));
+    }
+
+    public static BlockModelDefinition farmlandDry(Supplier<Block> targetBlock, ResourceLocation dryFarmlandTexture) {
+        return farmlandDry(targetBlock, dryFarmlandTexture, RegistryUtil.getTextureLocationOrDefault(
+                dryFarmlandTexture.withPath(dryFarmlandTexture.getPath().replace("_farmland", "_dirt")),
+                RegistryUtil.getTextureLocationOrDefault(dryFarmlandTexture.withPath(dryFarmlandTexture.getPath().replace("_farmland", "")))));
+    }
+
+    public static BlockModelDefinition farmlandDry(Supplier<Block> targetBlock) {
+        return farmlandDry(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock));
+    }
+
+    public static BlockModelDefinition farmlandMoist(Supplier<Block> targetBlock, ResourceLocation moistFarmlandTexture, ResourceLocation dirtTexture) {
+        return new BlockModelDefinition(ModelTemplates.FARMLAND)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.DIRT, RegistryUtil.pickBlockPrefix(dirtTexture))
+                        .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(moistFarmlandTexture)))
+                .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get()))));
+    }
+
+    public static BlockModelDefinition farmlandMoist(Supplier<Block> targetBlock, ResourceLocation moistFarmlandTexture) {
+        return farmlandMoist(targetBlock, moistFarmlandTexture, RegistryUtil.getTextureLocationOrDefault(
+                moistFarmlandTexture.withPath(moistFarmlandTexture.getPath().replace("_farmland_moist", "_dirt")),
+                RegistryUtil.getTextureLocationOrDefault(moistFarmlandTexture.withPath(moistFarmlandTexture.getPath().replace("_farmland_moist", "")))));
+    }
+
+    public static BlockModelDefinition farmlandMoist(Supplier<Block> targetBlock) {
+        return farmlandMoist(targetBlock, RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_moist"));
+    }
+
+    public static BlockModelDefinition farmland(Supplier<Block> targetBlock, ResourceLocation dryFarmlandTexture, ResourceLocation moistFarmlandTexture, ResourceLocation dirtTexture) {
+        return farmlandDry(targetBlock, dryFarmlandTexture, dirtTexture)
+                .withOrdinalModelDefinition(farmlandMoist(targetBlock, moistFarmlandTexture, dirtTexture));
+    }
+
+    public static BlockModelDefinition farmland(Supplier<Block> targetBlock, ResourceLocation dryFarmlandTexture, ResourceLocation moistFarmlandTexture) {
+        return farmlandDry(targetBlock, dryFarmlandTexture)
+                .withOrdinalModelDefinition(farmlandMoist(targetBlock, moistFarmlandTexture));
+    }
+
+    public static BlockModelDefinition farmland(Supplier<Block> targetBlock) {
+        return farmlandDry(targetBlock)
+                .withOrdinalModelDefinition(farmlandMoist(targetBlock));
+    }
+
+    public static BlockStateDefinition farmlandBlockState(Supplier<Block> targetBlock, ResourceLocation dryFarmlandModel, ResourceLocation moistFarmlandModel) {
+        return new BlockStateDefinition(targetBlock)
+                .withBlockStateSupplier(MultiVariantGenerator.multiVariant(targetBlock.get())
+                        .with(PropertyDispatch.property(BlockStateProperties.MOISTURE)
+                                .generate(moistureLevel -> moistureLevel.compareTo(7) >= 0
+                                        ? Variant.variant().with(VariantProperties.MODEL, moistFarmlandModel)
+                                        : Variant.variant().with(VariantProperties.MODEL, dryFarmlandModel))));
+    }
+
+    public static BlockStateDefinition farmlandBlockState(Supplier<Block> targetBlock) {
+        return farmlandBlockState(targetBlock, ModelLocationUtils.getModelLocation(targetBlock.get()), ModelLocationUtils.getModelLocation(targetBlock.get()).withSuffix("_moist"));
     }
 
     /**

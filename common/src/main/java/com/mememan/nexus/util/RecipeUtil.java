@@ -382,4 +382,32 @@ public final class RecipeUtil {
     public static <B extends Block> Consumer<Supplier<B>> pressurePlateRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
         return pressurePlateRecipeFrom(finishedRecipe, Function.identity());
     }
+
+    public static <B extends Block> Consumer<Supplier<B>> woolCarpetRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<B, B> woolCarpetComponentMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return parentItemLikeSup -> {
+            B parentItemLike = parentItemLikeSup.get();
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+
+            B componentItemLike = woolCarpetComponentMapper.apply(parentItemLike);
+
+            if (componentItemLike != null) {
+                ResourceLocation componentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(componentItemLike);
+                ResourceLocation baseRecipeId = recipeIdMapper.apply(parentItemLikeId);
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.MISC, parentItemLike, 3)
+                        .define('#', componentItemLike)
+                        .pattern("##")
+                        .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
+                        .save(finishedRecipe, baseRecipeId);
+            }
+        };
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woolCarpetRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return woolCarpetRecipeFrom(finishedRecipe, parentWoolCarpet -> RegistryUtil.getObjectFrom(parentWoolCarpet, parentWoolCarpetId -> RegistryUtil.pickBlockId(() -> parentWoolCarpet, parentWoolCarpetPath -> parentWoolCarpetPath.replace("_carpet", "_wool"))).orElse(null), recipeIdMapper);
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woolCarpetRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return woolCarpetRecipeFrom(finishedRecipe, Function.identity());
+    }
 }

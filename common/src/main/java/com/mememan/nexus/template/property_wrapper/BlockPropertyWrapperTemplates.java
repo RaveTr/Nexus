@@ -3,10 +3,7 @@ package com.mememan.nexus.template.property_wrapper;
 import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapperBuilder;
-import com.mememan.nexus.util.LootUtil;
-import com.mememan.nexus.util.ModelUtil;
-import com.mememan.nexus.util.RecipeUtil;
-import com.mememan.nexus.util.RegistryUtil;
+import com.mememan.nexus.util.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.models.blockstates.MultiPartGenerator;
 import net.minecraft.data.models.blockstates.MultiVariantGenerator;
@@ -275,7 +272,7 @@ public final class BlockPropertyWrapperTemplates {
             .withBlockStateDefinition(ModelUtil::slabBlockState)
             .withLootTable(LootUtil::dropSlab)
             .withRecipe(RecipeUtil::woodenSlabRecipeFrom)
-            .withFlammability(RegistryUtil::standardWoodFlammability)
+            .withFlammability(VanillaUtil::standardFlammability)
             .build();
     /**
      * BPW template for wooden stairs. Inherits from {@link #BASIC_AXE}. Stairs model, stairs blockstate.
@@ -289,7 +286,7 @@ public final class BlockPropertyWrapperTemplates {
             .withModelDefinition(ModelUtil::stairs)
             .withBlockStateDefinition(ModelUtil::stairsBlockState)
             .withRecipe(RecipeUtil::woodenStairsRecipeFrom)
-            .withFlammability(RegistryUtil::standardWoodFlammability)
+            .withFlammability(VanillaUtil::standardFlammability)
             .build();
     /**
      * BPW template for wooden buttons. Inherits from {@link #BASIC}. Button model, button blockstate.
@@ -375,6 +372,59 @@ public final class BlockPropertyWrapperTemplates {
             .withModelDefinition(ModelUtil::fenceGate)
             .withBlockStateDefinition(ModelUtil::fenceGateBlockState)
             .withRecipe(RecipeUtil::fenceGateRecipeFrom)
+            .build();
+
+    /**
+     * BPW template for carpets. Inherits from {@link #BASIC}. Carpet model, simple blockstate, drops self.
+     */
+    public static final BlockPropertyWrapper<Block> CARPET = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC)
+            .withModelDefinition(ModelUtil::carpet)
+            .build();
+
+    /**
+     * BPW template for wool. Inherits from {@link #BASIC}. Cube model, simple blockstate, drops self.
+     * Additionally, tags the parent block with {@link BlockTags#WOOL}.
+     */
+    public static final BlockPropertyWrapper<Block> WOOL = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC)
+            .withTag(() -> BlockTags.WOOL)
+            .withFlammability(VanillaUtil::standardFlammability)
+            .build();
+    /**
+     * BPW template for wool carpets. Inherits from {@link #CARPET}. Wool carpet model, simple blockstate, drops self.
+     * Additionally, tags the parent block with {@link BlockTags#WOOL_CARPETS}. Automatically maps a recipe for the
+     * parent carpet.
+     */
+    public static final BlockPropertyWrapper<Block> WOOL_CARPET = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(CARPET)
+            .withTag(() -> BlockTags.WOOL_CARPETS)
+            .withRecipe(RecipeUtil::woolCarpetRecipeFrom)
+            .build();
+
+    /**
+     * BPW template for dirt. Inherits from {@link #BASIC_SHOVEL}. Dirt model, simple blockstate, drops self.
+     * Additionally, tags the parent block with {@link BlockTags#DIRT}.
+     */
+    public static final BlockPropertyWrapper<Block> DIRT = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_SHOVEL)
+            .withTag(() -> BlockTags.DIRT)
+            .withBlockTilling(VanillaUtil::dirtFarmlandTillingAction)
+            .withBlockFlattening(VanillaUtil::dirtPathFlatteningAction)
+            .build();
+    /**
+     * BPW template for farmland. Inherits from {@link #BASIC_SHOVEL}. Farmland model, farmland blockstate.
+     */
+    public static final BlockPropertyWrapper<Block> FARMLAND = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_SHOVEL)
+            .withModelDefinition(ModelUtil::farmland)
+            .withBlockStateDefinition(ModelUtil::farmlandBlockState)
+            .withLootTable(LootUtil::dropFarmland)
             .build();
 
     private BlockPropertyWrapperTemplates() {

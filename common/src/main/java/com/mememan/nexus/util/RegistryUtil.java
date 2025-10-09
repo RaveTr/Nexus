@@ -2,17 +2,13 @@ package com.mememan.nexus.util;
 
 import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
-import it.unimi.dsi.fastutil.ints.IntIntMutablePair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.Util;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.CarpetBlock;
-import net.minecraft.world.level.block.FireBlock;
-import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.*;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -544,39 +540,6 @@ public final class RegistryUtil {
      */
     public static <T> T getObjectFromOrThrow(T baseObj, Function<ResourceLocation, ResourceLocation> targetObjIdMapper) {
         return getObjectFrom(baseObj, targetObjIdMapper, true).get();
-    }
-
-    /**
-     * Calculates standard flammability values for wooden blocks following the flammability property patterns used in
-     * Minecraft's {@link net.minecraft.world.level.block.FireBlock}. Returns an {@link IntIntMutablePair} where the first
-     * value represents the encouragement value (how easily fire spreads from this block) and the second value represents
-     * the flammability value (how easily this block catches fire).
-     * <p>
-     *     <h3>Flammability Patterns</h3>
-     *     <ul>
-     *         <li>Leaf blocks (description ID ending with {@code "_leaves"} or {@link LeavesBlock} instances):
-     *         (30, 60) - High flammability</li>
-     *         <li>Carpet blocks (description ID ending with {@code "_carpet"} or {@link CarpetBlock} instances):
-     *         (60, 20) - Medium flammability</li>
-     *         <li>All other (presumably wooden) blocks: (5, 20) - Low flammability</li>
-     *     </ul>
-     *
-     * @param targetBlock The {@link Supplier} of the target {@link Block} to calculate flammability values for.
-     *
-     * @return An {@link IntIntMutablePair} containing the encouragement value (first) and flammability value (second).
-     *
-     * @see FireBlock
-     * @see LeavesBlock
-     * @see CarpetBlock
-     */
-    public static IntIntMutablePair standardWoodFlammability(Supplier<Block> targetBlock) {
-        Block targetBlockObj = targetBlock.get();
-
-        return targetBlockObj.getDescriptionId().endsWith("_leaves") || targetBlockObj instanceof LeavesBlock
-                ? IntIntMutablePair.of(30, 60)
-                : targetBlockObj.getDescriptionId().endsWith("_carpet") || targetBlockObj instanceof CarpetBlock
-                ? IntIntMutablePair.of(60, 20)
-                : IntIntMutablePair.of(5, 20);
     }
 
     /**

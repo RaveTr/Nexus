@@ -107,7 +107,7 @@ publishMods {
         projectId = "1349508"
         projectSlug = "nexus-api"
         accessToken = providers.environmentVariable("CURSEFORGE_API_KEY")
-        announcementTitle = "New Nexus API CurseForge Release (Fabric)"
+        announcementTitle = "New ${mod_name} CurseForge Release (Fabric) - v${mod_version} for MC ${minecraft_version}"
 
         getMinecraftVersions().add(minecraft_version)
     }
@@ -115,7 +115,7 @@ publishMods {
     modrinth {
         projectId = "JmAeaceC"
         accessToken = providers.environmentVariable("MODRINTH_API_KEY")
-        announcementTitle = "New Nexus API Modrinth Release (Fabric)"
+        announcementTitle = "New ${mod_name} Modrinth Release (Fabric) - v${mod_version} for MC ${minecraft_version}"
 
         getMinecraftVersions().add(minecraft_version)
     }
