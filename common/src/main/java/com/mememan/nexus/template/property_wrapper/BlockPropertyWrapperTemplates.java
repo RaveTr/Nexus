@@ -427,6 +427,10 @@ public final class BlockPropertyWrapperTemplates {
             .withLootTable(LootUtil::dropFarmland)
             .build();
 
+    /**
+     * BPW template for plants. Inherits from {@link #BASIC}. Tinted cross cutout model, simple blockstate, drops only
+     * with silk touch or shears.
+     */
     public static final BlockPropertyWrapper<Block> PLANT = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC)
