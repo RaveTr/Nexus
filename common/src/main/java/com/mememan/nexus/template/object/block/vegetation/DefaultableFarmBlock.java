@@ -37,9 +37,9 @@ public class DefaultableFarmBlock extends FarmBlock {
     public DefaultableFarmBlock(Properties properties) {
         super(properties);
 
-        Block ownerRef = this; // Peak Java generic type inference
-        this.mappedDirtBlock = RegistryUtil.getSuppliedObjectFrom(() -> ownerRef, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_farmland", "_dirt")))
-                .orElse(RegistryUtil.getSuppliedObjectFrom(() -> ownerRef, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_farmland", ""))).orElse(null));
+        Supplier<Block> ownerRefSup = () -> this; // Peak Java generic type inference
+        this.mappedDirtBlock = RegistryUtil.getSuppliedObjectFrom(ownerRefSup, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_farmland", "_dirt")))
+                .orElse(RegistryUtil.getSuppliedObjectFrom(ownerRefSup, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_farmland", ""))).orElse(null));
     }
 
     @Override
@@ -75,6 +75,7 @@ public class DefaultableFarmBlock extends FarmBlock {
         fallingEntity.causeFallDamage(fallDistance, 1.0F, fallingEntity.damageSources().fall()); // No super() call to prevent it from being reverted to normal dirt afterwards (Sorry mixin mods [lol])
     }
 
+    @NotNull
     public Supplier<Block> getMappedDirtBlock() {
         return mappedDirtBlock;
     }

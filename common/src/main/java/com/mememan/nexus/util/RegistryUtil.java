@@ -204,7 +204,7 @@ public final class RegistryUtil {
      */
     @NotNull
     public static <T> ResourceLocation getTextureLocationOrDefaultWithPrefix(Supplier<T> targetObj, String prefix) {
-        return getTextureLocationOrDefault(targetObj).withPrefix(prefix);
+        return pickPrefix(getTextureLocationOrDefault(targetObj), prefix);
     }
 
     /**
@@ -224,7 +224,7 @@ public final class RegistryUtil {
      */
     @NotNull
     public static <T> ResourceLocation getTextureLocationOrDefaultWithSuffix(Supplier<T> targetObj, String suffix) {
-        return getTextureLocationOrDefault(targetObj).withSuffix(suffix);
+        return pickSuffix(getTextureLocationOrDefault(targetObj), suffix);
     }
 
     /**
@@ -242,6 +242,20 @@ public final class RegistryUtil {
      */
     public static ResourceLocation pickPrefix(ResourceLocation baseLoc, String prefix) {
         return baseLoc.getPath().startsWith(prefix) ? baseLoc : baseLoc.withPrefix(prefix);
+    }
+
+    /**
+     * Modifies the {@link ResourceLocation} passed in by appending the provided {@code suffix} to its path if it isn't
+     * already... suffixed with said {@code suffix} (duh).
+     *
+     * @param baseLoc The {@link ResourceLocation} to pick the provided {@code suffix} for.
+     * @param suffix The path suffix to search for/append the provided {@code baseLoc} with.
+     *
+     * @return A modified variant of the provided {@code baseLoc} with the provided {@code suffix} picked/appropriately
+     * and safely appended.
+     */
+    public static ResourceLocation pickSuffix(ResourceLocation baseLoc, String suffix) {
+        return baseLoc.getPath().endsWith(suffix) ? baseLoc : baseLoc.withSuffix(suffix);
     }
 
     /**
@@ -288,7 +302,7 @@ public final class RegistryUtil {
      * @see #pickPrefix(ResourceLocation, String)
      */
     public static Function<ResourceLocation, ResourceLocation> pickPrefix(String prefix) {
-        return baseLoc -> baseLoc.getPath().startsWith(prefix) ? baseLoc : baseLoc.withPrefix(prefix);
+        return baseLoc -> pickPrefix(baseLoc, prefix);
     }
 
     /**
@@ -298,9 +312,11 @@ public final class RegistryUtil {
      * @param suffix The path suffix to search for/append.
      *
      * @return A {@link Function} that appends the provided {@code suffix} to a {@link ResourceLocation}'s path.
+     *
+     * @see #pickSuffix(ResourceLocation, String)
      */
     public static Function<ResourceLocation, ResourceLocation> pickSuffix(String suffix) {
-        return baseLoc -> baseLoc.getPath().endsWith(suffix) ? baseLoc : baseLoc.withSuffix(suffix);
+        return baseLoc -> pickSuffix(baseLoc, suffix);
     }
 
     /**

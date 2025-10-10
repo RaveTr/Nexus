@@ -1,5 +1,6 @@
 package com.mememan.nexus.template.object.block.vegetation;
 
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
@@ -23,7 +24,7 @@ public class DefaultableDoublePlantBlock extends DoublePlantBlock implements Con
     }
 
     public DefaultableDoublePlantBlock(Properties properties) {
-        this(properties, Set.of(() -> BlockTags.DIRT));
+        this(properties, ObjectOpenHashSet.of(() -> BlockTags.DIRT));
     }
 
     @Override

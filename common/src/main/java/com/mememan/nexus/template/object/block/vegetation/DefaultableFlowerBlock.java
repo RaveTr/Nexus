@@ -1,6 +1,8 @@
 package com.mememan.nexus.template.object.block.vegetation;
 
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.core.BlockPos;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
@@ -27,6 +29,10 @@ public class DefaultableFlowerBlock extends FlowerBlock implements ConfigurableP
 
     public DefaultableFlowerBlock(Properties properties, Set<Supplier<TagKey<Block>>> validPlacementTags) {
         this(null, 0, properties, validPlacementTags);
+    }
+
+    public DefaultableFlowerBlock(Properties properties) {
+        this(properties, ObjectOpenHashSet.of(() -> BlockTags.DIRT));
     }
 
     @Override

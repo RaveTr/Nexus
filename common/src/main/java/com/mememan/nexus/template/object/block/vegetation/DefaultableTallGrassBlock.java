@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.TallGrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 import java.util.function.Supplier;
@@ -35,8 +36,8 @@ public class DefaultableTallGrassBlock extends TallGrassBlock implements Configu
 
         this.validPlacementTags = validPlacementTags;
 
-        Block ownerRef = this; // Peak Java generic type inference
-        this.tallPlantBlock = () -> RegistryUtil.getObjectFrom(() -> ownerRef, null)
+        Supplier<Block> ownerRefSup = () -> this; // Peak Java generic type inference
+        this.tallPlantBlock = () -> RegistryUtil.getObjectFrom(ownerRefSup, parentBlockId -> RegistryUtil.pickPrefix(parentBlockId, "tall_"))
                 .filter(ownerBlock -> ownerBlock instanceof DoublePlantBlock)
                 .map(ownerBlock -> (DoublePlantBlock) ownerBlock)
                 .orElse(null);
@@ -84,5 +85,10 @@ public class DefaultableTallGrassBlock extends TallGrassBlock implements Configu
     @Override
     public Set<Supplier<TagKey<Block>>> getValidPlacementTags() {
         return validPlacementTags;
+    }
+
+    @NotNull
+    public Supplier<DoublePlantBlock> getTallPlantBlock() {
+        return tallPlantBlock;
     }
 }
