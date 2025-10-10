@@ -41,7 +41,7 @@ public class DefaultableFlowerBlock extends FlowerBlock implements ConfigurableP
 
     @Override
     public @NotNull MobEffect getSuspiciousEffect() {
-        return suspiciousStewEffect == null ? null : suspiciousStewEffect.get();
+        return suspiciousStewEffect == null ? MobEffects.CONFUSION : suspiciousStewEffect.get();
     }
 
     @Override

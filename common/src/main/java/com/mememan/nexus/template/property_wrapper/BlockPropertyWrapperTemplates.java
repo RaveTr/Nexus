@@ -3,10 +3,12 @@ package com.mememan.nexus.template.property_wrapper;
 import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapperBuilder;
-import com.mememan.nexus.util.*;
+import com.mememan.nexus.util.LootUtil;
+import com.mememan.nexus.util.ModelUtil;
+import com.mememan.nexus.util.RecipeUtil;
+import com.mememan.nexus.util.VanillaUtil;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.models.blockstates.MultiPartGenerator;
-import net.minecraft.data.models.blockstates.MultiVariantGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.BlockItem;
@@ -23,9 +25,6 @@ import java.util.function.Supplier;
  * shortcut utility methods for registration.
  */
 public final class BlockPropertyWrapperTemplates {
-    /**
-     * Basic BPW template for plain blocks. Cube model, simple blockstate, drops self.
-     */
     public static final BlockPropertyWrapper<Block> BASIC = new BlockPropertyWrapper<>()
             .builder()
             .withModelDefinition(ModelUtil::cubeAll)
@@ -33,142 +32,90 @@ public final class BlockPropertyWrapperTemplates {
             .withLootTable(LootUtil::dropSelf)
             .build();
 
-    /**
-     * Basic BPW template for blocks that can be mined with a pickaxe. Inherits from {@link #BASIC}.
-     */
     public static final BlockPropertyWrapper<Block> BASIC_PICKAXE = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC)
             .withTag(() -> BlockTags.MINEABLE_WITH_PICKAXE)
             .build();
-    /**
-     * Basic BPW template for blocks that can be mined with a stone pickaxe or better. Inherits from {@link #BASIC_PICKAXE}.
-     */
     public static final BlockPropertyWrapper<Block> BASIC_PICKAXE_STONE = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_PICKAXE)
             .withTag(() -> BlockTags.NEEDS_STONE_TOOL)
             .build();
-    /**
-     * Basic BPW template for blocks that can be mined with an iron pickaxe or better. Inherits from {@link #BASIC_PICKAXE}.
-     */
     public static final BlockPropertyWrapper<Block> BASIC_PICKAXE_IRON = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_PICKAXE)
             .withTag(() -> BlockTags.NEEDS_IRON_TOOL)
             .build();
-    /**
-     * Basic BPW template for blocks that can be mined with a diamond pickaxe or better. Inherits from {@link #BASIC_PICKAXE}.
-     */
     public static final BlockPropertyWrapper<Block> BASIC_PICKAXE_DIAMOND = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_PICKAXE)
             .withTag(() -> BlockTags.NEEDS_DIAMOND_TOOL)
             .build();
 
-    /**
-     * Basic BPW template for blocks that can be mined with an axe. Inherits from {@link #BASIC}.
-     */
     public static final BlockPropertyWrapper<Block> BASIC_AXE = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC)
             .withTag(() -> BlockTags.MINEABLE_WITH_AXE)
             .build();
-    /**
-     * Basic BPW template for blocks that can be mined with a stone axe or better. Inherits from {@link #BASIC_AXE}.
-     */
     public static final BlockPropertyWrapper<Block> BASIC_AXE_STONE = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_AXE)
             .withTag(() -> BlockTags.NEEDS_STONE_TOOL)
             .build();
-    /**
-     * Basic BPW template for blocks that can be mined with an iron axe or better. Inherits from {@link #BASIC_AXE}.
-     */
     public static final BlockPropertyWrapper<Block> BASIC_AXE_IRON = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_AXE)
             .withTag(() -> BlockTags.NEEDS_IRON_TOOL)
             .build();
-    /**
-     * Basic BPW template for blocks that can be mined with a diamond axe or better. Inherits from {@link #BASIC_AXE}.
-     */
     public static final BlockPropertyWrapper<Block> BASIC_AXE_DIAMOND = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_AXE)
             .withTag(() -> BlockTags.NEEDS_DIAMOND_TOOL)
             .build();
 
-    /**
-     * Basic BPW template for blocks that can be mined with a hoe. Inherits from {@link #BASIC}.
-     */
     public static final BlockPropertyWrapper<Block> BASIC_HOE = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC)
             .withTag(() -> BlockTags.MINEABLE_WITH_HOE)
             .build();
-    /**
-     * Basic BPW template for blocks that can be mined with a stone hoe or better. Inherits from {@link #BASIC_HOE}.
-     */
     public static final BlockPropertyWrapper<Block> BASIC_HOE_STONE = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_HOE)
             .withTag(() -> BlockTags.NEEDS_STONE_TOOL)
             .build();
-    /**
-     * Basic BPW template for blocks that can be mined with an iron hoe or better. Inherits from {@link #BASIC_HOE}.
-     */
     public static final BlockPropertyWrapper<Block> BASIC_HOE_IRON = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_HOE)
             .withTag(() -> BlockTags.NEEDS_IRON_TOOL)
             .build();
-    /**
-     * Basic BPW template for blocks that can be mined with a diamond hoe or better. Inherits from {@link #BASIC_HOE}.
-     */
     public static final BlockPropertyWrapper<Block> BASIC_HOE_DIAMOND = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_HOE)
             .withTag(() -> BlockTags.NEEDS_DIAMOND_TOOL)
             .build();
 
-    /**
-     * Basic BPW template for blocks that can be mined with a shovel. Inherits from {@link #BASIC}.
-     */
     public static final BlockPropertyWrapper<Block> BASIC_SHOVEL = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC)
             .withTag(() -> BlockTags.MINEABLE_WITH_SHOVEL)
             .build();
-    /**
-     * Basic BPW template for blocks that can be mined with a stone shovel or better. Inherits from {@link #BASIC_SHOVEL}.
-     */
     public static final BlockPropertyWrapper<Block> BASIC_SHOVEL_STONE = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_SHOVEL)
             .withTag(() -> BlockTags.NEEDS_STONE_TOOL)
             .build();
-    /**
-     * Basic BPW template for blocks that can be mined with an iron shovel or better. Inherits from {@link #BASIC_SHOVEL}.
-     */
     public static final BlockPropertyWrapper<Block> BASIC_SHOVEL_IRON = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_SHOVEL)
             .withTag(() -> BlockTags.NEEDS_IRON_TOOL)
             .build();
-    /**
-     * Basic BPW template for blocks that can be mined with a diamond shovel or better. Inherits from {@link #BASIC_SHOVEL}.
-     */
     public static final BlockPropertyWrapper<Block> BASIC_SHOVEL_DIAMOND = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_SHOVEL)
             .withTag(() -> BlockTags.NEEDS_DIAMOND_TOOL)
             .build();
 
-    /**
-     * BPW template for slabs. Inherits from {@link #BASIC_PICKAXE}. Slab loot table, slab blockstate, slab model.
-     * Additionally, tags the parent block with {@link BlockTags#SLABS}. Automatically maps a recipe for the parent slab.
-     */
     public static final BlockPropertyWrapper<Block> SLAB = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_PICKAXE)
@@ -178,10 +125,6 @@ public final class BlockPropertyWrapperTemplates {
             .withLootTable(LootUtil::dropSlab)
             .withRecipe(RecipeUtil::slabRecipeFrom)
             .build();
-    /**
-     * BPW template for stairs. Inherits from {@link #BASIC_PICKAXE}. Stairs model, stairs blockstate.
-     * Additionally, tags the parent block with {@link BlockTags#STAIRS}. Automatically maps a recipe for the parent stairs.
-     */
     public static final BlockPropertyWrapper<Block> STAIRS = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_PICKAXE)
@@ -190,12 +133,6 @@ public final class BlockPropertyWrapperTemplates {
             .withBlockStateDefinition(ModelUtil::stairsBlockState)
             .withRecipe(RecipeUtil::stairsRecipeFrom)
             .build();
-    /**
-     * BPW template for buttons. Inherits from {@link #BASIC}. Button model, button blockstate.
-     * Blockstate uses {@link MultiVariantGenerator} with different models for each combination of power state,
-     * attach face, and facing direction. Additionally, tags the parent block with {@link BlockTags#BUTTONS}.
-     * Automatically maps a recipe for the parent button.
-     */
     public static final BlockPropertyWrapper<Block> BUTTON = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_PICKAXE)
@@ -204,12 +141,6 @@ public final class BlockPropertyWrapperTemplates {
             .withBlockStateDefinition(ModelUtil::buttonBlockState)
             .withRecipe(RecipeUtil::buttonRecipeFrom)
             .build();
-    /**
-     * BPW template for pressure plates. Inherits from {@link #BASIC_PICKAXE}. Pressure plate model, pressure plate blockstate.
-     * Blockstate uses {@link MultiVariantGenerator} with different models for each power state (pressed/unpressed).
-     * Additionally, tags the parent block with {@link BlockTags#PRESSURE_PLATES}. Automatically maps a recipe for the
-     * parent pressure plate.
-     */
     public static final BlockPropertyWrapper<Block> PRESSURE_PLATE = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_PICKAXE)
@@ -218,11 +149,6 @@ public final class BlockPropertyWrapperTemplates {
             .withBlockStateDefinition(ModelUtil::pressurePlateBlockState)
             .withRecipe(RecipeUtil::pressurePlateRecipeFrom)
             .build();
-    /**
-     * BPW template for doors. Inherits from {@link #BASIC_PICKAXE}. Door model, door blockstate. Blockstate uses
-     * {@link MultiVariantGenerator} with different models for each combination of hinge side, half, and open state.
-     * Additionally, tags the parent block with {@link BlockTags#DOORS}. Automatically maps a recipe for the parent door.
-     */
     public static final BlockPropertyWrapper<Block> DOOR = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_PICKAXE)
@@ -232,12 +158,6 @@ public final class BlockPropertyWrapperTemplates {
             .withRecipe(RecipeUtil::doorRecipeFrom)
             .withLootTable(LootUtil::dropDoor)
             .build();
-    /**
-     * BPW template for trapdoors. Inherits from {@link #BASIC_PICKAXE}. Trapdoor model, trapdoor blockstate.
-     * Blockstate uses {@link MultiVariantGenerator} with different models for each combination of facing, half,
-     * and open state. Additionally, tags the parent block with {@link BlockTags#TRAPDOORS}. Automatically maps a recipe
-     * for the parent trapdoor.
-     */
     public static final BlockPropertyWrapper<Block> TRAPDOOR = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_PICKAXE)
@@ -246,10 +166,6 @@ public final class BlockPropertyWrapperTemplates {
             .withBlockStateDefinition(ModelUtil::trapdoorBlockState)
             .withRecipe(RecipeUtil::trapdoorRecipeFrom)
             .build();
-    /**
-     * BPW template for walls. Inherits from {@link #BASIC_PICKAXE}. Wall model, wall blockstate.
-     * Additionally, tags the parent block with {@link BlockTags#WALLS}. Automatically maps a recipe for the parent wall.
-     */
     public static final BlockPropertyWrapper<Block> WALL = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_PICKAXE)
@@ -259,11 +175,6 @@ public final class BlockPropertyWrapperTemplates {
             .withRecipe(RecipeUtil::wallRecipeFrom)
             .build();
 
-    /**
-     * BPW template for wooden slabs. Inherits from {@link #BASIC_AXE}. Slab model, wooden slab blockstate,
-     * slab loot table. Additionally, tags the parent block with {@link BlockTags#WOODEN_SLABS}. Automatically
-     * maps a recipe for the parent slab.
-     */
     public static final BlockPropertyWrapper<Block> WOODEN_SLAB = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_AXE)
@@ -274,11 +185,6 @@ public final class BlockPropertyWrapperTemplates {
             .withRecipe(RecipeUtil::woodenSlabRecipeFrom)
             .withFlammability(VanillaUtil::standardFlammability)
             .build();
-    /**
-     * BPW template for wooden stairs. Inherits from {@link #BASIC_AXE}. Stairs model, stairs blockstate.
-     * Additionally, tags the parent block with {@link BlockTags#WOODEN_STAIRS}. Automatically maps a recipe for the
-     * parent stairs.
-     */
     public static final BlockPropertyWrapper<Block> WOODEN_STAIRS = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_AXE)
@@ -288,12 +194,6 @@ public final class BlockPropertyWrapperTemplates {
             .withRecipe(RecipeUtil::woodenStairsRecipeFrom)
             .withFlammability(VanillaUtil::standardFlammability)
             .build();
-    /**
-     * BPW template for wooden buttons. Inherits from {@link #BASIC}. Button model, button blockstate.
-     * Blockstate uses {@link MultiVariantGenerator} with different models for each combination of power state,
-     * attach face, and facing direction. Additionally, tags the parent block with {@link BlockTags#WOODEN_BUTTONS}.
-     * Automatically maps a recipe for the parent button.
-     */
     public static final BlockPropertyWrapper<Block> WOODEN_BUTTON = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_AXE)
@@ -302,12 +202,6 @@ public final class BlockPropertyWrapperTemplates {
             .withBlockStateDefinition(ModelUtil::buttonBlockState)
             .withRecipe(RecipeUtil::buttonRecipeFrom)
             .build();
-    /**
-     * BPW template for wooden pressure plates. Inherits from {@link #BASIC_AXE}. Pressure plate model, pressure plate blockstate.
-     * Blockstate uses {@link MultiVariantGenerator} with different models for each power state (pressed/unpressed).
-     * Additionally, tags the parent block with {@link BlockTags#WOODEN_PRESSURE_PLATES}. Automatically maps a recipe for
-     * the parent pressure plate.
-     */
     public static final BlockPropertyWrapper<Block> WOODEN_PRESSURE_PLATE = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_AXE)
@@ -316,11 +210,6 @@ public final class BlockPropertyWrapperTemplates {
             .withBlockStateDefinition(ModelUtil::pressurePlateBlockState)
             .withRecipe(RecipeUtil::pressurePlateRecipeFrom)
             .build();
-    /**
-     * BPW template for wooden doors. Inherits from {@link #BASIC_AXE}. Door model, door blockstate. Blockstate
-     * and model assume the existence of an equivalent block with the suffix {@code "_planks"}. Additionally, tags the
-     * parent block with {@link BlockTags#WOODEN_DOORS}. Automatically maps a recipe for the parent door.
-     */
     public static final BlockPropertyWrapper<Block> WOODEN_DOOR = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_AXE)
@@ -330,12 +219,6 @@ public final class BlockPropertyWrapperTemplates {
             .withLootTable(LootUtil::dropDoor)
             .withRecipe(RecipeUtil::doorRecipeFrom)
             .build();
-    /**
-     * BPW template for wooden trapdoors. Inherits from {@link #BASIC_AXE}. Trapdoor model, trapdoor blockstate,
-     * wooden trapdoor flammability. Blockstate uses {@link MultiVariantGenerator} with different models for each
-     * combination of facing, half, and open state. Additionally, tags the parent block with {@link BlockTags#WOODEN_TRAPDOORS}.
-     * Automatically maps a recipe for the parent trapdoor.
-     */
     public static final BlockPropertyWrapper<Block> WOODEN_TRAPDOOR = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_AXE)
@@ -344,13 +227,6 @@ public final class BlockPropertyWrapperTemplates {
             .withBlockStateDefinition(ModelUtil::trapdoorBlockState)
             .withRecipe(RecipeUtil::woodenTrapdoorRecipeFrom)
             .build();
-
-    /**
-     * BPW template for fences. Inherits from {@link #BASIC_AXE}. Fence model, fence blockstate.
-     * Blockstate uses {@link MultiPartGenerator} with different models for post and side connections
-     * based on adjacent block connections. Additionally, tags the parent block with {@link BlockTags#WOODEN_FENCES}.
-     * Automatically maps a recipe for the parent fence.
-     */
     public static final BlockPropertyWrapper<Block> WOODEN_FENCE = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_AXE)
@@ -359,12 +235,6 @@ public final class BlockPropertyWrapperTemplates {
             .withBlockStateDefinition(ModelUtil::fenceBlockState)
             .withRecipe(RecipeUtil::fenceRecipeFrom)
             .build();
-    /**
-     * BPW template for fence gates. Inherits from {@link #BASIC_AXE}. Fence gate model, fence gate blockstate.
-     * Blockstate uses {@link MultiVariantGenerator} with different models for each combination of facing,
-     * wall attachment, and open state. Additionally, tags the parent block with {@link BlockTags#FENCE_GATES}.
-     * Automatically maps a recipe for the parent fence gate.
-     */
     public static final BlockPropertyWrapper<Block> WOODEN_FENCE_GATE = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_AXE)
@@ -374,30 +244,18 @@ public final class BlockPropertyWrapperTemplates {
             .withRecipe(RecipeUtil::fenceGateRecipeFrom)
             .build();
 
-    /**
-     * BPW template for carpets. Inherits from {@link #BASIC}. Carpet model, simple blockstate, drops self.
-     */
     public static final BlockPropertyWrapper<Block> CARPET = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC)
             .withModelDefinition(ModelUtil::carpet)
             .build();
 
-    /**
-     * BPW template for wool. Inherits from {@link #BASIC}. Cube model, simple blockstate, drops self.
-     * Additionally, tags the parent block with {@link BlockTags#WOOL}.
-     */
     public static final BlockPropertyWrapper<Block> WOOL = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC)
             .withTag(() -> BlockTags.WOOL)
             .withFlammability(VanillaUtil::standardFlammability)
             .build();
-    /**
-     * BPW template for wool carpets. Inherits from {@link #CARPET}. Wool carpet model, simple blockstate, drops self.
-     * Additionally, tags the parent block with {@link BlockTags#WOOL_CARPETS}. Automatically maps a recipe for the
-     * parent carpet.
-     */
     public static final BlockPropertyWrapper<Block> WOOL_CARPET = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(CARPET)
@@ -405,10 +263,6 @@ public final class BlockPropertyWrapperTemplates {
             .withRecipe(RecipeUtil::woolCarpetRecipeFrom)
             .build();
 
-    /**
-     * BPW template for dirt. Inherits from {@link #BASIC_SHOVEL}. Dirt model, simple blockstate, drops self.
-     * Additionally, tags the parent block with {@link BlockTags#DIRT}.
-     */
     public static final BlockPropertyWrapper<Block> DIRT = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_SHOVEL)
@@ -416,9 +270,6 @@ public final class BlockPropertyWrapperTemplates {
             .withBlockTilling(VanillaUtil::dirtFarmlandTillingAction)
             .withBlockFlattening(VanillaUtil::dirtPathFlatteningAction)
             .build();
-    /**
-     * BPW template for farmland. Inherits from {@link #BASIC_SHOVEL}. Farmland model, farmland blockstate.
-     */
     public static final BlockPropertyWrapper<Block> FARMLAND = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_SHOVEL)
@@ -427,16 +278,52 @@ public final class BlockPropertyWrapperTemplates {
             .withLootTable(LootUtil::dropFarmland)
             .build();
 
-    /**
-     * BPW template for plants. Inherits from {@link #BASIC}. Tinted cross cutout model, simple blockstate, drops only
-     * with silk touch or shears.
-     */
     public static final BlockPropertyWrapper<Block> PLANT = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC)
             .withModelDefinition(ModelUtil::tintedCrossCutout)
             .withLootTable(LootUtil::dropSilkTouchOrShears)
             .withBlockColor(VanillaUtil::standardGrassColor)
+            .build();
+    public static final BlockPropertyWrapper<Block> TALL_PLANT = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(PLANT)
+            .withModelDefinition(ModelUtil::tintedDoublePlant)
+            .withBlockStateDefinition(ModelUtil::doublePlantBlockState)
+            .withLootTable(LootUtil::dropDoublePlantShearsOrSilkTouch)
+            .build();
+    public static final BlockPropertyWrapper<Block> NO_TINT_PLANT = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(PLANT)
+            .withBlockColor(null)
+            .build();
+    public static final BlockPropertyWrapper<Block> NO_TINT_TALL_PLANT = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(TALL_PLANT)
+            .withBlockColor(null)
+            .build();
+
+    public static final BlockPropertyWrapper<Block> FLOWER = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(PLANT)
+            .withTag(() -> BlockTags.FLOWERS)
+            .withModelDefinition(ModelUtil::crossCutout)
+            .withLootTable(LootUtil::dropSelf)
+            .withBlockColor(null)
+            .withFlammability(VanillaUtil::standardFlammability)
+            .build();
+    public static final BlockPropertyWrapper<Block> SMALL_FLOWER = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(FLOWER)
+            .setTags(ObjectArrayList.of(() -> BlockTags.SMALL_FLOWERS))
+            .build();
+    public static final BlockPropertyWrapper<Block> TALL_FLOWER = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(FLOWER)
+            .setTags(ObjectArrayList.of(() -> BlockTags.TALL_FLOWERS))
+            .withModelDefinition(ModelUtil::doublePlant)
+            .withBlockStateDefinition(ModelUtil::doublePlantBlockState)
+            .withLootTable(LootUtil::dropDoublePlant)
             .build();
 
     private BlockPropertyWrapperTemplates() {

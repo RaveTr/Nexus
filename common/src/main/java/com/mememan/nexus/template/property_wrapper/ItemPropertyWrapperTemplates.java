@@ -17,16 +17,10 @@ import java.util.function.Supplier;
  * shortcut utility methods for registration.
  */
 public final class ItemPropertyWrapperTemplates {
-    /**
-     * Basic IPW template for standard items. Generated (standard) item model.
-     */
     public static final ItemPropertyWrapper<Item> BASIC_GENERATED = new ItemPropertyWrapper<>()
             .builder()
             .withModelDefinition(ModelUtil::basicGenerated)
             .build();
-    /**
-     * Basic IPW template for standard items. Handheld (standard) item model.
-     */
     public static final ItemPropertyWrapper<Item> BASIC_HANDHELD = new ItemPropertyWrapper<>()
             .builder()
             .withModelDefinition(ModelUtil::basicHandheld)

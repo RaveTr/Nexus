@@ -4,6 +4,7 @@ import com.mememan.nexus.client.block.BlockStateDefinition;
 import com.mememan.nexus.client.model.block.BlockModelDefinition;
 import com.mememan.nexus.client.model.item.ItemModelDefinition;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.Direction;
 import net.minecraft.data.models.blockstates.*;
 import net.minecraft.data.models.model.*;
@@ -410,6 +411,170 @@ public final class ModelUtil {
      */
     public static BlockModelDefinition tintedCrossCutout(Supplier<Block> targetBlock) {
         return tintedCrossCutout(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock));
+    }
+
+    /**
+     * Creates two {@link BlockModelDefinition}s for a double plant block, with separate top and bottom {@link ModelTemplates#CROSS}
+     * models using {@link #CUTOUT_RENDER_TYPE}. Generates a single item model from the bottom model.
+     * <p>
+     *     <h3>Required Texture Slots (Top Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.pickBlockPrefix(topTexture)}</li>
+     *     </ul>
+     *     <h3>Required Texture Slots (Bottom Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.pickBlockPrefix(bottomTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the double plant {@link Block} to be used for
+     *                    automatic model location resolution.
+     * @param topTexture The {@link ResourceLocation} representing the texture of the upper half.
+     * @param bottomTexture The {@link ResourceLocation} representing the texture of the lower half.
+     *
+     * @return A {@link BlockModelDefinition} with nested top and bottom {@link ModelTemplates#CROSS} models.
+     *
+     * @see #doublePlant(Supplier)
+     * @see #doublePlantBlockState(Supplier, ResourceLocation, ResourceLocation)
+     */
+    public static BlockModelDefinition doublePlant(Supplier<Block> targetBlock, ResourceLocation topTexture, ResourceLocation bottomTexture) {
+        return crossCutout(targetBlock, topTexture)
+                .withOrdinalModelDefinition(crossCutout(targetBlock, bottomTexture)
+                        .setOrdinalModelDefinitions(ObjectArrayList.of())); // Ensure generation of 1 item model, not 2
+    }
+
+    /**
+     * Overloaded variant of {@link #doublePlant(Supplier, ResourceLocation, ResourceLocation)}. Creates two
+     * {@link BlockModelDefinition}s for a double plant block using automatic texture resolution with {@code _top} and
+     * {@code _bottom} suffixes.
+     * <p>
+     *     <h3>Required Texture Slots (Top Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_top")}</li>
+     *     </ul>
+     *     <h3>Required Texture Slots (Bottom Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_bottom")}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the double plant {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with nested top and bottom {@link ModelTemplates#CROSS} models.
+     *
+     * @see #doublePlant(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doublePlantBlockState(Supplier)
+     */
+    public static BlockModelDefinition doublePlant(Supplier<Block> targetBlock) {
+        return doublePlant(targetBlock, RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_top"), RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_bottom"));
+    }
+
+    /**
+     * Creates two {@link BlockModelDefinition}s for a tinted double plant block, with separate top and bottom
+     * {@link ModelTemplates#TINTED_CROSS} models using {@link #CUTOUT_RENDER_TYPE}. Generates a single item model from
+     * the bottom model.
+     * <p>
+     *     <h3>Required Texture Slots (Top Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.pickBlockPrefix(topTexture)}</li>
+     *     </ul>
+     *     <h3>Required Texture Slots (Bottom Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.pickBlockPrefix(bottomTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the tinted double plant {@link Block} to be used for
+     *                    automatic model location resolution.
+     * @param topTexture The {@link ResourceLocation} representing the texture of the upper half.
+     * @param bottomTexture The {@link ResourceLocation} representing the texture of the lower half.
+     *
+     * @return A {@link BlockModelDefinition} with nested top and bottom {@link ModelTemplates#TINTED_CROSS} models.
+     *
+     * @see #tintedDoublePlant(Supplier)
+     * @see #doublePlant(Supplier, ResourceLocation, ResourceLocation)
+     */
+    public static BlockModelDefinition tintedDoublePlant(Supplier<Block> targetBlock, ResourceLocation topTexture, ResourceLocation bottomTexture) {
+        return tintedCrossCutout(targetBlock, topTexture)
+                .withOrdinalModelDefinition(tintedCrossCutout(targetBlock, bottomTexture)
+                        .setOrdinalModelDefinitions(ObjectArrayList.of())); // Ensure generation of 1 item model, not 2
+    }
+
+    /**
+     * Overloaded variant of {@link #tintedDoublePlant(Supplier, ResourceLocation, ResourceLocation)}. Creates two
+     * {@link BlockModelDefinition}s for a tinted double plant block using automatic texture resolution with {@code _top}
+     * and {@code _bottom} suffixes.
+     * <p>
+     *     <h3>Required Texture Slots (Top Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_top")}</li>
+     *     </ul>
+     *     <h3>Required Texture Slots (Bottom Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_bottom")}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the tinted double plant {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with nested top and bottom {@link ModelTemplates#TINTED_CROSS} models.
+     *
+     * @see #tintedDoublePlant(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doublePlant(Supplier)
+     */
+    public static BlockModelDefinition tintedDoublePlant(Supplier<Block> targetBlock) {
+        return tintedDoublePlant(targetBlock, RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_top"), RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_bottom"));
+    }
+
+    /**
+     * Creates a {@link BlockStateDefinition} for a double plant block using {@link MultiVariantGenerator} with
+     * {@link BlockStateProperties#DOUBLE_BLOCK_HALF} property dispatch. Maps {@link DoubleBlockHalf#LOWER} to the
+     * bottom model and {@link DoubleBlockHalf#UPPER} to the top model.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link DoubleBlockHalf#LOWER} -> {@link VariantProperties#MODEL} = {@code bottomModel}</li>
+     *         <li>{@link DoubleBlockHalf#UPPER} -> {@link VariantProperties#MODEL} = {@code topModel}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the double plant {@link Block}.
+     * @param topModel The {@link ResourceLocation} pointing to the model for the upper half.
+     * @param bottomModel The {@link ResourceLocation} pointing to the model for the lower half.
+     *
+     * @return A {@link BlockStateDefinition} with {@link BlockStateProperties#DOUBLE_BLOCK_HALF} property dispatch.
+     *
+     * @see #doublePlantBlockState(Supplier)
+     * @see #doublePlant(Supplier, ResourceLocation, ResourceLocation)
+     */
+    public static BlockStateDefinition doublePlantBlockState(Supplier<Block> targetBlock, ResourceLocation topModel, ResourceLocation bottomModel) {
+        return new BlockStateDefinition(targetBlock)
+                .withBlockStateSupplier(MultiVariantGenerator.multiVariant(targetBlock.get())
+                        .with(PropertyDispatch.property(BlockStateProperties.DOUBLE_BLOCK_HALF)
+                                .select(DoubleBlockHalf.LOWER, Variant.variant()
+                                        .with(VariantProperties.MODEL, bottomModel))
+                                .select(DoubleBlockHalf.UPPER, Variant.variant()
+                                        .with(VariantProperties.MODEL, topModel))));
+    }
+
+    /**
+     * Overloaded variant of {@link #doublePlantBlockState(Supplier, ResourceLocation, ResourceLocation)}. Creates a
+     * {@link BlockStateDefinition} for a double plant block using automatic model location resolution with {@code _top}
+     * and {@code _bottom} suffixes.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link DoubleBlockHalf#LOWER} -> {@link VariantProperties#MODEL} = {@code RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_bottom")}</li>
+     *         <li>{@link DoubleBlockHalf#UPPER} -> {@link VariantProperties#MODEL} = {@code RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_top")}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the double plant {@link Block} to be used for
+     *                    automatic model location resolution.
+     *
+     * @return A {@link BlockStateDefinition} with {@link BlockStateProperties#DOUBLE_BLOCK_HALF} property dispatch.
+     *
+     * @see #doublePlantBlockState(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doublePlant(Supplier)
+     */
+    public static BlockStateDefinition doublePlantBlockState(Supplier<Block> targetBlock) {
+        return doublePlantBlockState(targetBlock, RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_top"), RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_bottom"));
     }
 
     /**

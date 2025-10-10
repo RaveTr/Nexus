@@ -33,7 +33,8 @@ public final class VanillaUtil {
      * <p>
      *     <h3>Flammability Patterns</h3>
      *     <ul>
-     *         <li>Vegetation blocks ({@link FlowerBlock}/{@link TallGrassBlock} instances): (60, 100) - High flammability</li>
+     *         <li>Vegetation blocks ({@link FlowerBlock}/{@link TallFlowerBlock}/{@link TallGrassBlock} instances):
+     *         (60, 100) - High flammability</li>
      *         <li>Leaf blocks (description ID ending with {@code "_leaves"}/{@code "_wool"} or {@link LeavesBlock} instances):
      *         (30, 60) - High flammability</li>
      *         <li>Carpet blocks (description ID ending with {@code "_carpet"} or {@link CarpetBlock} instances):
@@ -53,7 +54,7 @@ public final class VanillaUtil {
     public static IntIntMutablePair standardFlammability(Supplier<Block> targetBlock) {
         Block targetBlockObj = targetBlock.get();
 
-        return targetBlockObj instanceof TallGrassBlock || targetBlockObj instanceof FlowerBlock
+        return targetBlockObj instanceof TallGrassBlock || targetBlockObj instanceof FlowerBlock || targetBlockObj instanceof TallFlowerBlock
                 ? IntIntMutablePair.of(60, 100)
                 : targetBlockObj.getDescriptionId().endsWith("_leaves") || targetBlockObj instanceof LeavesBlock || targetBlockObj.getDescriptionId().endsWith("_wool")
                 ? IntIntMutablePair.of(30, 60)
