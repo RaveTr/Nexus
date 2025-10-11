@@ -325,6 +325,12 @@ public final class BlockPropertyWrapperTemplates {
             .withBlockStateDefinition(ModelUtil::doublePlantBlockState)
             .withLootTable(LootUtil::dropDoublePlant)
             .build();
+    public static final BlockPropertyWrapper<Block> FLOWER_POT = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC)
+            .withTag(() -> BlockTags.FLOWER_POTS)
+            .withModelDefinition(ModelUtil::flowerPotCross)
+            .build();
 
     private BlockPropertyWrapperTemplates() {
         throw new IllegalAccessError("Attempted to construct instance of template utility class! (BlockPropertyWrapperTemplates)");

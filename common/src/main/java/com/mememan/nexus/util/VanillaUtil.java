@@ -81,6 +81,7 @@ public final class VanillaUtil {
      * @return A {@link Pair} containing the tilling predicate (first) and consumer (second), or {@code null} if no
      *         corresponding farmland block is found.
      *
+     * @see #grassBlockFarmlandTillingAction(Supplier)
      * @see HoeItem#onlyIfAirAbove
      * @see HoeItem#changeIntoState(BlockState)
      */
@@ -88,6 +89,35 @@ public final class VanillaUtil {
         Function<Block, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>>> tillingBehaviourMapper = parentBlock -> Pair.of(HoeItem::onlyIfAirAbove, HoeItem.changeIntoState(parentBlock.defaultBlockState()));
 
         return RegistryUtil.getObjectFrom(targetBlock, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_dirt", "_farmland")))
+                .or(() -> RegistryUtil.getObjectFrom(targetBlock, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_farmland", ""))))
+                .map(tillingBehaviourMapper)
+                .orElse(null);
+    }
+
+    /**
+     * Creates a {@link Pair} containing the tilling behavior for converting grass block to farmland using a hoe.
+     * The returned pair consists of a predicate that checks if tilling can occur (air above) and a consumer
+     * that performs the tilling action by converting the block to its corresponding farmland variant.
+     * <p>
+     * The method attempts to find the corresponding farmland block by:
+     * <ol>
+     *     <li>Replacing {@code _grass_block} suffix with {@code _farmland}</li>
+     *     <li>Removing {@code _farmland} suffix if the first attempt fails</li>
+     * </ol>
+     *
+     * @param targetBlock The {@link Supplier<Block>} representing the dirt {@link Block} to create tilling behavior for.
+     *
+     * @return A {@link Pair} containing the tilling predicate (first) and consumer (second), or {@code null} if no
+     *         corresponding farmland block is found.
+     *
+     * @see #dirtFarmlandTillingAction(Supplier)
+     * @see HoeItem#onlyIfAirAbove
+     * @see HoeItem#changeIntoState(BlockState)
+     */
+    public static Pair<Predicate<UseOnContext>, Consumer<UseOnContext>> grassBlockFarmlandTillingAction(Supplier<Block> targetBlock) {
+        Function<Block, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>>> tillingBehaviourMapper = parentBlock -> Pair.of(HoeItem::onlyIfAirAbove, HoeItem.changeIntoState(parentBlock.defaultBlockState()));
+
+        return RegistryUtil.getObjectFrom(targetBlock, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_grass_block", "_farmland")))
                 .or(() -> RegistryUtil.getObjectFrom(targetBlock, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_farmland", ""))))
                 .map(tillingBehaviourMapper)
                 .orElse(null);

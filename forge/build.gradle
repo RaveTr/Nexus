@@ -39,7 +39,7 @@ legacyForge {
                             "-XX:G1NewSizePercent=35", "-XX:G1MaxNewSizePercent=60",
                             "-XX:G1MixedGCLiveThresholdPercent=50", "-XX:+AlwaysPreTouch", "-Dterminal.ansi=true"]
 
-            logLevel = org.slf4j.event.Level.DEBUG
+            systemProperty("forge.logging.console.level", "debug")
         }
 
         client {
@@ -65,8 +65,6 @@ legacyForge {
         }
     }
 }
-
-sourceSets.main.resources.srcDir project(":common").file("src/generated/resources")
 
 dependencies {
     // Base
@@ -97,12 +95,6 @@ jar {
     manifest.attributes([
             "MixinConfigs": "${mod_id}.mixins.json,${mod_id}.forge.mixins.json"
     ])
-}
-
-processResources {
-    exclude '**/.cache/'
-
-    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 }
 
 publishMods {

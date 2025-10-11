@@ -414,6 +414,73 @@ public final class ModelUtil {
     }
 
     /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#FLOWER_POT_CROSS} template.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PLANT} -> {@code RegistryUtil.pickBlockPrefix(flowerPotTexture)}</li>
+     *     </ul>
+     *
+     * @param flowerPotTexture The {@link ResourceLocation} representing the texture of the potted flower.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#FLOWER_POT_CROSS} template.
+     *
+     * @see #flowerPotCross(Supplier)
+     */
+    public static BlockModelDefinition flowerPotCross(ResourceLocation flowerPotTexture) {
+        return new BlockModelDefinition(ModelTemplates.FLOWER_POT_CROSS)
+                .withTextureMapping(TextureMapping.plant(RegistryUtil.pickBlockPrefix(flowerPotTexture)));
+    }
+
+    /**
+     * Overloaded variant of {@link #flowerPotCross(ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#FLOWER_POT_CROSS} template.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PLANT} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the potted flower {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#FLOWER_POT_CROSS} template.
+     *
+     * @see #flowerPotCross(ResourceLocation)
+     */
+    public static BlockModelDefinition flowerPotCross(Supplier<Block> targetBlock) {
+        return flowerPotCross(RegistryUtil.getTextureLocationOrDefault(RegistryUtil.pickBlockId(
+                        targetBlock,
+                        parentBlockPath ->
+                                parentBlockPath.startsWith("potted_")
+                                        ? parentBlockPath.substring("potted_".length())
+                                        : parentBlockPath)
+                )
+        );
+    }
+
+    /**
+     * Creates a {@link BlockStateDefinition}, using {@link MultiVariantGenerator} with the {@link VariantProperties#MODEL}
+     * property set to the supplied {@linkplain Block Block's} default model location.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link VariantProperties#MODEL} -> {@link ModelLocationUtils#getModelLocation(Block)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@linkplain Block Block} to use as the base for the {@link BlockStateDefinition}.
+     *
+     * @return A new {@link BlockStateDefinition} with a {@code simpleBlock} template.
+     *
+     * @see #cubeAll(Supplier)
+     */
+    public static BlockStateDefinition simpleBlockState(Supplier<Block> targetBlock) {
+        return new BlockStateDefinition(targetBlock)
+                .withBlockStateSupplier(MultiVariantGenerator.multiVariant(targetBlock.get(), Variant.variant()
+                        .with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(targetBlock.get()))));
+    }
+
+    /**
      * Creates two {@link BlockModelDefinition}s for a double plant block, with separate top and bottom {@link ModelTemplates#CROSS}
      * models using {@link #CUTOUT_RENDER_TYPE}. Generates a single item model from the bottom model.
      * <p>
@@ -575,27 +642,6 @@ public final class ModelUtil {
      */
     public static BlockStateDefinition doublePlantBlockState(Supplier<Block> targetBlock) {
         return doublePlantBlockState(targetBlock, RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_top"), RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_bottom"));
-    }
-
-    /**
-     * Creates a {@link BlockStateDefinition}, using {@link MultiVariantGenerator} with the {@link VariantProperties#MODEL}
-     * property set to the supplied {@linkplain Block Block's} default model location.
-     * <p>
-     *     <h3>Variants</h3>
-     *     <ul>
-     *         <li>{@link VariantProperties#MODEL} -> {@link ModelLocationUtils#getModelLocation(Block)}</li>
-     *     </ul>
-     *
-     * @param targetBlock The {@linkplain Block Block} to use as the base for the {@link BlockStateDefinition}.
-     *
-     * @return A new {@link BlockStateDefinition} with a {@code simpleBlock} template.
-     *
-     * @see #cubeAll(Supplier)
-     */
-    public static BlockStateDefinition simpleBlockState(Supplier<Block> targetBlock) {
-        return new BlockStateDefinition(targetBlock)
-                .withBlockStateSupplier(MultiVariantGenerator.multiVariant(targetBlock.get(), Variant.variant()
-                        .with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(targetBlock.get()))));
     }
 
     /**

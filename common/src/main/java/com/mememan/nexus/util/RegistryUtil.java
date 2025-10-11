@@ -1,5 +1,6 @@
 package com.mememan.nexus.util;
 
+import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -110,7 +111,11 @@ public final class RegistryUtil {
      */
     @NotNull
     public static ResourceLocation getTextureLocationOrDefault(ResourceLocation textureName, @NotNull ResourceLocation defaultTextureLocation) {
-        return getTextureLocation(textureName).orElse(defaultTextureLocation);
+        return getTextureLocation(textureName).orElseGet(() -> {
+            NexusConstants.LOGGER.warn("Attempted to locate non-existent texture '{}', falling back to provided default texture '{}'", textureName, defaultTextureLocation);
+
+            return defaultTextureLocation;
+        });
     }
 
     /**
@@ -145,7 +150,7 @@ public final class RegistryUtil {
      * @see #getTextureLocation(ResourceLocation)
      */
     public static <T> Optional<ResourceLocation> getTextureLocation(Supplier<T> targetObj) {
-        return getTextureLocation(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryId(targetObj.get()).orElse(null));
+        return getTextureLocation(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetObj.get()));
     }
 
     /**
@@ -165,7 +170,11 @@ public final class RegistryUtil {
      */
     @NotNull
     public static <T> ResourceLocation getTextureLocationOrDefault(Supplier<T> targetObj, @NotNull ResourceLocation defaultTextureLocation) {
-        return getTextureLocation(targetObj).orElse(defaultTextureLocation);
+        return getTextureLocation(targetObj).orElseGet(() -> {
+            NexusConstants.LOGGER.warn("Attempted to locate non-existent texture for {} '{}', falling back to provided default texture '{}'", targetObj.get().getClass().getSimpleName(), DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetObj.get()), defaultTextureLocation);
+
+            return defaultTextureLocation;
+        });
     }
 
     /**
