@@ -337,6 +337,8 @@ public interface ModelBasedPropertyWrapper<T, SELF extends PropertyWrapper<T, SE
          *
          * @return The custom render type location. May be empty.
          *
+         * @apiNote This currently only applies to blocks and fluids.
+         *
          * @see net.minecraft.client.renderer.RenderType
          */
         Optional<ResourceLocation> getRenderType();

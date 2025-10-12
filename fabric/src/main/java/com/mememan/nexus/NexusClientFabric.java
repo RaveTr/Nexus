@@ -5,28 +5,35 @@ import com.mememan.nexus.internal.services.FabricNetworkManager;
 import com.mememan.nexus.network.BasePacket;
 import com.mememan.nexus.network.NetworkSide;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
+import com.mememan.nexus.property_wrapper.base.specialised.model.ModelBasedPropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.specialised.vanilla.VanillaBasedPropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.entity.EntityTypePropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.item.ItemPropertyWrapper;
 import com.mememan.nexus.util.ClientUtil;
 import it.unimi.dsi.fastutil.Pair;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.minecraft.Util;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.Fluid;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -36,6 +43,54 @@ import java.util.function.Supplier;
  * Fabric.
  */
 public class NexusClientFabric implements ClientModInitializer {
+    private static final Object2ObjectOpenHashMap<ResourceLocation, RenderType> RENDER_TYPE_LOOKUP = Util.make(new Object2ObjectOpenHashMap<>(), typeMap -> {
+        // Basic render types
+        typeMap.put(new ResourceLocation("solid"), RenderType.solid());
+        typeMap.put(new ResourceLocation("cutout_mipped"), RenderType.cutoutMipped());
+        typeMap.put(new ResourceLocation("cutout"), RenderType.cutout());
+        typeMap.put(new ResourceLocation("translucent"), RenderType.translucent());
+        typeMap.put(new ResourceLocation("translucent_moving_block"), RenderType.translucentMovingBlock());
+        typeMap.put(new ResourceLocation("translucent_no_crumbling"), RenderType.translucentNoCrumbling());
+        
+        // Special render types [Most things under here are a big fat TBD/are unused for now]
+        typeMap.put(new ResourceLocation("leash"), RenderType.leash());
+        typeMap.put(new ResourceLocation("water_mask"), RenderType.waterMask());
+        typeMap.put(new ResourceLocation("armor_glint"), RenderType.armorGlint());
+        typeMap.put(new ResourceLocation("armor_entity_glint"), RenderType.armorEntityGlint());
+        typeMap.put(new ResourceLocation("glint_translucent"), RenderType.glintTranslucent());
+        typeMap.put(new ResourceLocation("glint"), RenderType.glint());
+        typeMap.put(new ResourceLocation("glint_direct"), RenderType.glintDirect());
+        typeMap.put(new ResourceLocation("entity_glint"), RenderType.entityGlint());
+        typeMap.put(new ResourceLocation("entity_glint_direct"), RenderType.entityGlintDirect());
+        typeMap.put(new ResourceLocation("lightning"), RenderType.lightning());
+        typeMap.put(new ResourceLocation("tripwire"), RenderType.tripwire());
+        typeMap.put(new ResourceLocation("end_portal"), RenderType.endPortal());
+        typeMap.put(new ResourceLocation("end_gateway"), RenderType.endGateway());
+        
+        // Line render types
+        typeMap.put(new ResourceLocation("lines"), RenderType.lines());
+        typeMap.put(new ResourceLocation("line_strip"), RenderType.lineStrip());
+        typeMap.put(new ResourceLocation("debug_line_strip"), RenderType.debugLineStrip(1.0));
+        typeMap.put(new ResourceLocation("debug_filled_box"), RenderType.debugFilledBox());
+        typeMap.put(new ResourceLocation("debug_quads"), RenderType.debugQuads());
+        typeMap.put(new ResourceLocation("debug_section_quads"), RenderType.debugSectionQuads());
+        
+        // GUI render types
+        typeMap.put(new ResourceLocation("gui"), RenderType.gui());
+        typeMap.put(new ResourceLocation("gui_overlay"), RenderType.guiOverlay());
+        typeMap.put(new ResourceLocation("gui_text_highlight"), RenderType.guiTextHighlight());
+        typeMap.put(new ResourceLocation("gui_ghost_recipe_overlay"), RenderType.guiGhostRecipeOverlay());
+        
+        // Text render types
+        typeMap.put(new ResourceLocation("text"), RenderType.text(new ResourceLocation("textures/font/ascii.png")));
+        typeMap.put(new ResourceLocation("text_background"), RenderType.textBackground());
+        typeMap.put(new ResourceLocation("text_intensity"), RenderType.textIntensity(new ResourceLocation("textures/font/ascii.png")));
+        typeMap.put(new ResourceLocation("text_polygon_offset"), RenderType.textPolygonOffset(new ResourceLocation("textures/font/ascii.png")));
+        typeMap.put(new ResourceLocation("text_intensity_polygon_offset"), RenderType.textIntensityPolygonOffset(new ResourceLocation("textures/font/ascii.png")));
+        typeMap.put(new ResourceLocation("text_see_through"), RenderType.textSeeThrough(new ResourceLocation("textures/font/ascii.png")));
+        typeMap.put(new ResourceLocation("text_background_see_through"), RenderType.textBackgroundSeeThrough());
+        typeMap.put(new ResourceLocation("text_intensity_see_through"), RenderType.textIntensitySeeThrough(new ResourceLocation("textures/font/ascii.png")));
+    });
 
     @Override
     public void onInitializeClient() {
@@ -45,6 +100,8 @@ public class NexusClientFabric implements ClientModInitializer {
         registerItemModelPredicates();
 
         registerEntityRenderersAndModelLayerDefinitions();
+
+        registerRenderTypes();
     }
 
     private static <MSGT> void registerClientNetworkReceivers() {
@@ -123,6 +180,26 @@ public class NexusClientFabric implements ClientModInitializer {
                                 if (layerLoc != null && layerDef != null) EntityModelLayerRegistry.registerModelLayer(layerLoc, () -> layerDef);
                             }
                         }
+                    });
+                });
+    }
+
+    private static <T> void registerRenderTypes() {
+        PropertyWrapper.PropertyWrappersContainer.getInferrableWrappersOfType(ModelBasedPropertyWrapper.class).stream()
+                .map(curPW -> (ModelBasedPropertyWrapper<T, ?, ?>) curPW)
+                .filter(curPW -> curPW.getModelDefinition()
+                        .map(curDef -> curDef.apply(curPW.getParentObject()).getRenderType().isPresent())
+                        .orElse(false))
+                .forEach(curPW -> {
+                    Supplier<T> parentObjectSup = curPW.getParentObject();
+
+                    curPW.getModelDefinition().ifPresent(curDef -> { // JIC + Functional style go brrr
+                        curDef.apply(parentObjectSup).getRenderType().ifPresent(curRenderType -> {
+                            T parentObject = parentObjectSup.get();
+
+                            if (parentObject instanceof Block parentBlock && RENDER_TYPE_LOOKUP.containsKey(curRenderType)) BlockRenderLayerMap.INSTANCE.putBlock(parentBlock, RENDER_TYPE_LOOKUP.get(curRenderType));
+                            if (parentObject instanceof Fluid parentFluid && RENDER_TYPE_LOOKUP.containsKey(curRenderType)) BlockRenderLayerMap.INSTANCE.putFluid(parentFluid, RENDER_TYPE_LOOKUP.get(curRenderType));
+                        });
                     });
                 });
     }
