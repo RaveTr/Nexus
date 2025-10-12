@@ -193,13 +193,14 @@ public class NexusClientFabric implements ClientModInitializer {
                 .forEach(curPW -> {
                     Supplier<T> parentObjectSup = curPW.getParentObject();
 
-                    curPW.getModelDefinition().ifPresent(curDef -> { // JIC + Functional style go brrr
-                        curDef.apply(parentObjectSup).getRenderType().ifPresent(curRenderType -> {
-                            T parentObject = parentObjectSup.get();
+                    // JIC + Functional style go brrr
+                    curPW.getModelDefinition().flatMap(curDef -> curDef.apply(parentObjectSup).getRenderType()).ifPresent(curRenderType -> {
+                        T parentObject = parentObjectSup.get();
 
-                            if (parentObject instanceof Block parentBlock && RENDER_TYPE_LOOKUP.containsKey(curRenderType)) BlockRenderLayerMap.INSTANCE.putBlock(parentBlock, RENDER_TYPE_LOOKUP.get(curRenderType));
-                            if (parentObject instanceof Fluid parentFluid && RENDER_TYPE_LOOKUP.containsKey(curRenderType)) BlockRenderLayerMap.INSTANCE.putFluid(parentFluid, RENDER_TYPE_LOOKUP.get(curRenderType));
-                        });
+                        if (parentObject instanceof Block parentBlock && RENDER_TYPE_LOOKUP.containsKey(curRenderType))
+                            BlockRenderLayerMap.INSTANCE.putBlock(parentBlock, RENDER_TYPE_LOOKUP.get(curRenderType));
+                        if (parentObject instanceof Fluid parentFluid && RENDER_TYPE_LOOKUP.containsKey(curRenderType))
+                            BlockRenderLayerMap.INSTANCE.putFluid(parentFluid, RENDER_TYPE_LOOKUP.get(curRenderType));
                     });
                 });
     }
