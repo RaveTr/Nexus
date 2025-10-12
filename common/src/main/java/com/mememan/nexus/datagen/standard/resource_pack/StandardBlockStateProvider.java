@@ -47,6 +47,16 @@ public class StandardBlockStateProvider implements ModDataProvider {
         this.mappedBlockPWs = PropertyWrapper.PropertyWrappersContainer.getInferrableDataGennableWrappersOfType(BlockPropertyWrapper.class, modId);
     }
 
+    /**
+     * Entrypoint for generating all known BPW-based blockstates. Streams through {@link #mappedBlockPWs}, maps them
+     * to their serialized counterparts (where applicable), and gathers the stream of futures into a single array.
+     *
+     * @param cachedOutput The {@link CachedOutput} instance to use for saving generated data to disk.
+     *
+     * @return A {@link CompletableFuture} that completes when all blockstates have been generated.
+     *
+     * @see #generateBlockState(CachedOutput, BlockPropertyWrapper, ObjectArrayList)
+     */
     @Override
     public @NotNull CompletableFuture<?> run(CachedOutput cachedOutput) {
         ObjectArrayList<CompletableFuture<?>> savedStateFutures = new ObjectArrayList<>();
@@ -57,6 +67,20 @@ public class StandardBlockStateProvider implements ModDataProvider {
                 .toArray(CompletableFuture[]::new));
     }
 
+    /**
+     * Generates a blockstate for the provided {@link BlockPropertyWrapper}. Handles missing/{@code null} blockstates
+     * accordingly. Defers duplicate handling and serializable entry population (see references below).
+     *
+     * @param targetOutput The {@link CachedOutput} instance to use for saving generated data to disk.
+     * @param targetBPW The {@link BlockPropertyWrapper} to generate a blockstate for.
+     * @param savedStateFutures The {@link ObjectArrayList} to add the generated blockstate future to for saving.
+     *
+     * @param <B> Any {@link Block} type.
+     *
+     * @see #handleDuplicateState(ResourceLocation, String, Runnable)
+     * @see #serializeBlockStateJson(BlockStateDefinition, String, String)
+     * @see #run(CachedOutput)
+     */
     protected <B extends Block> void generateBlockState(CachedOutput targetOutput, BlockPropertyWrapper<B> targetBPW, ObjectArrayList<CompletableFuture<?>> savedStateFutures) {
         Supplier<B> parentObjSup = targetBPW.getParentObject();
         String blockClassName = parentObjSup.get().getClass().getSimpleName();
@@ -80,6 +104,17 @@ public class StandardBlockStateProvider implements ModDataProvider {
         });
     }
 
+    /**
+     * Handles duplicate blockstate entries for the given {@code targetBlockId} based on {@link #dupeStrat} before running
+     * the provided {@code stateSaveTask} callback.
+     *
+     * @param targetBlockId The block {@linkplain ResourceLocation id} used to validate presence of duplicates.
+     * @param blockClassName The {@code class} name of the target {@link Block} associated with the provided
+     *                       {@code targetBlockId}. Primarily used for logging.
+     * @param stateSaveTask The callback to run if the blockstate is not a duplicate (or if it is a duplicate and the
+     *                      specified {@link #dupeStrat} is {@link DuplicateDataPolicy#OVERRIDE_WARN} or
+     *                      {@link DuplicateDataPolicy#OVERRIDE_SILENT}).
+     */
     protected void handleDuplicateState(ResourceLocation targetBlockId, String blockClassName, Runnable stateSaveTask) {
         if (!trackedBlockStates.add(targetBlockId)) {
             switch (getDuplicateDataPolicy()) {
@@ -120,6 +155,22 @@ public class StandardBlockStateProvider implements ModDataProvider {
         return dupeStrat;
     }
 
+    /**
+     * Shortcut delegator method responsible for serializing the provided {@code mappedBSD} based on its
+     * {@linkplain BlockStateDefinition#getBlockStateSupplier() BlockStateGenerator}. Handles registry-related
+     * exceptions accordingly.
+     *
+     * @param mappedBSD The {@link BlockStateDefinition} whose generator should be serialized (via
+     *                  {@link BlockStateGenerator#get()}).
+     * @param blockClassName The {@code class} name associated with the mapped {@link Block} whose block state is being
+     *                       generated. Primarily used for logging.
+     * @param blockName The name (typically description ID) of the associated {@link Block} whose block state is being
+     *                  generated. Primarily used for logging.
+     *
+     * @return A {@link JsonElement} representing the serialized blockstate JSON.
+     *
+     * @see BlockStateGenerator
+     */
     protected static JsonElement serializeBlockStateJson(BlockStateDefinition mappedBSD, String blockClassName, String blockName) {
         BlockStateGenerator stateGen = Optional.ofNullable(mappedBSD.getBlockStateSupplier())
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Failed to retrieve block state generator for %s: %s (No generator present via %s#getBlockStateSupplier())", blockClassName, blockName, mappedBSD.getClass().getSimpleName())));

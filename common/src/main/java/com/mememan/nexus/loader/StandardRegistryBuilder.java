@@ -43,7 +43,7 @@ public class StandardRegistryBuilder<T, R extends Registry<T>> {
      *
      * @param registryKey The registry's {@linkplain ResourceKey identifier key}.
      * @param regTypeClazz Dummy placeholder for the object type within the registry (e.g. {@link Item}) to bypass
-     *                     Java's generic type invariance.
+     *                     Java's generic type inference.
      *
      * @return A new {@code StandardRegistryBuilder}, ready for configuration.
      *
@@ -63,7 +63,7 @@ public class StandardRegistryBuilder<T, R extends Registry<T>> {
      *
      * @param registryId The registry's {@linkplain ResourceLocation identifier}.
      * @param regTypeClazz Dummy placeholder for the object type within the registry (e.g. {@link Item}) to bypass
-     *                     Java's generic type invariance.
+     *                     Java's generic type inference.
      *
      * @return A new {@code StandardRegistryBuilder}, ready for configuration.
      *
