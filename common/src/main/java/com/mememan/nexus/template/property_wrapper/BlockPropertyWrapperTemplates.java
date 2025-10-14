@@ -338,6 +338,7 @@ public final class BlockPropertyWrapperTemplates {
             .copyFrom(BASIC)
             .withTag(() -> BlockTags.FLOWER_POTS)
             .withModelDefinition(ModelUtil::flowerPotCross)
+            .withLootTable(LootUtil::dropPottedContents)
             .build();
 
     private BlockPropertyWrapperTemplates() {

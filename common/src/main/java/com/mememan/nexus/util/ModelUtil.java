@@ -249,7 +249,8 @@ public final class ModelUtil {
      *
      * @param targetBlock The {@code Supplier<Block>} representing the cross {@link Block} to be used for
      *                    automatic model location resolution.
-     * @param crossTexture The {@link ResourceLocation} representing the texture of the cross.
+     * @param crossTexture The {@link ResourceLocation} representing the texture of the cross. Item model uses the same
+     *                     texture.
      *
      * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CROSS} template.
      *
@@ -258,7 +259,7 @@ public final class ModelUtil {
     public static BlockModelDefinition cross(Supplier<Block> targetBlock, ResourceLocation crossTexture) {
         return new BlockModelDefinition(ModelTemplates.CROSS)
                 .withTextureMapping(TextureMapping.cross(RegistryUtil.pickBlockPrefix(crossTexture)))
-                .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get()))));
+                .withOrdinalModelDefinition(generatedBlock(crossTexture));
     }
 
     /**
@@ -336,7 +337,8 @@ public final class ModelUtil {
      *
      * @param targetBlock The {@code Supplier<Block>} representing the tinted cross {@link Block} to be used for
      *                    automatic model location resolution.
-     * @param tintedCrossTexture The {@link ResourceLocation} representing the texture of the tinted cross.
+     * @param tintedCrossTexture The {@link ResourceLocation} representing the texture of the tinted cross. Item model
+     *                           uses the same texture.
      *
      * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#TINTED_CROSS} template.
      *
@@ -345,7 +347,7 @@ public final class ModelUtil {
     public static BlockModelDefinition tintedCross(Supplier<Block> targetBlock, ResourceLocation tintedCrossTexture) {
         return new BlockModelDefinition(ModelTemplates.TINTED_CROSS)
                 .withTextureMapping(TextureMapping.cross(RegistryUtil.pickBlockPrefix(tintedCrossTexture)))
-                .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get()))));
+                .withOrdinalModelDefinition(generatedBlock(tintedCrossTexture));
     }
 
     /**
@@ -4412,6 +4414,46 @@ public final class ModelUtil {
      */
     public static ItemModelDefinition basicGenerated(Supplier<Item> targetItem) {
         return basicGenerated(RegistryUtil.getTextureLocationOrDefault(targetItem));
+    }
+
+    /**
+     * Creates a {@link ItemModelDefinition} with the {@link ModelTemplates#FLAT_ITEM} template (for "generated" item
+     * models).
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.pickBlockPrefix(texLoc)}</li>
+     *     </ul>
+     *
+     * @param texLoc The location to use for the {@code layer0} texture slot.
+     *
+     * @return A new {@link ItemModelDefinition} with the {@link ModelTemplates#FLAT_ITEM} template.
+     *
+     * @see #generatedBlock(Supplier)
+     */
+    public static ItemModelDefinition generatedBlock(ResourceLocation texLoc) {
+        return new ItemModelDefinition(ModelTemplates.FLAT_ITEM)
+                .withTextureMapping(TextureMapping.layer0(RegistryUtil.pickBlockPrefix(texLoc)));
+    }
+
+    /**
+     * Overloaded variant of {@link #generatedBlock(ResourceLocation)}. Creates a {@link ItemModelDefinition} with the
+     * {@link ModelTemplates#FLAT_ITEM} template (for "generated" item models).
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@linkplain Block Block} to use as the base for the {@link ItemModelDefinition} {@code layer0}
+     *                    texture lookup.
+     *
+     * @return A new {@link ItemModelDefinition} with the {@link ModelTemplates#FLAT_ITEM} template.
+     *
+     * @see #generatedBlock(ResourceLocation)
+     */
+    public static ItemModelDefinition generatedBlock(Supplier<Block> targetBlock) {
+        return generatedBlock(RegistryUtil.getTextureLocationOrDefault(targetBlock));
     }
 
     /**

@@ -512,4 +512,38 @@ public final class LootUtil {
                 .when(ExplosionCondition.survivesExplosion())
                 .add(grassBlockDrop));
     }
+
+    /**
+     * Creates a {@link LootTable.Builder} that will drop the potted plant and its contents when destroyed.
+     * <p>
+     * <h2>LOOT TABLE</h2>
+     * <h3>Pool 1</h3>
+     * <ul>
+     *     <li>{@link #dropSelf(Supplier)} -> ({@link Blocks#FLOWER_POT}</li>
+     * </ul>
+     * <h3>Pool 2 (Only if {@code targetBlock.get()} is a {@link FlowerPotBlock})</h3>
+     * <ul>
+     *      <li><b>Rolls:</b> 1.0</li>
+     *      <li><b>Loot Table Item:</b> {@code targetBlock.get().getContent()}</li>
+     *      <li><b>When:</b> {@link ExplosionCondition#survivesExplosion()}</li>
+     * </ul>
+     *
+     * @param targetBlock A {@code Supplier<Block>} representing the potted plant block.
+     *
+     * @return A {@link LootTable.Builder} configured to drop both the pot and its contents.
+     *
+     * @see #dropSelf(Supplier)
+     */
+    public static LootTable.Builder dropPottedContents(Supplier<Block> targetBlock) {
+        LootTable.Builder basePotBuilder = dropSelf(() -> Blocks.FLOWER_POT);
+
+        if (targetBlock.get() instanceof FlowerPotBlock targetFlowerPotBlock) {
+            basePotBuilder.withPool(LootPool.lootPool()
+                    .setRolls(ConstantValue.exactly(1.0F))
+                    .when(ExplosionCondition.survivesExplosion())
+                    .add(LootItem.lootTableItem(targetFlowerPotBlock.getContent())));
+        }
+
+        return basePotBuilder;
+    }
 }
