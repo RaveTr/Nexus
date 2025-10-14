@@ -12,7 +12,6 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.entries.AlternativesEntry;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer;
 import net.minecraft.world.level.storage.loot.functions.ApplyExplosionDecay;
@@ -476,5 +475,41 @@ public final class LootUtil {
                 .setRolls(ConstantValue.exactly(1.0F))
                 .when(ExplosionCondition.survivesExplosion())
                 .add(farmlandDrop));
+    }
+
+    /**
+     * Creates a {@link LootTable.Builder} that will treat the given {@link Block} as a grass block and drop it when destroyed
+     * with silk touch, otherwise dropping the corresponding dirt block.
+     * <p>
+     * <h2>LOOT TABLE</h2>
+     * <h3>Pool 1</h3>
+     * <ul>
+     *  <li><b>Rolls:</b> 1.0</li>
+     *  <li><b>When:</b> {@link ExplosionCondition#survivesExplosion()}</li>
+     *  <li><b>Loot Pool Entries:</b> <ul>
+     *      <li><b>Loot Table Item:</b> {@code targetBlock}</li>
+     *      <li><b>When:</b> {@link #HAS_SILK_TOUCH} -> {@code targetBlock}</li>
+     *      <li><b>Otherwise:</b> Corresponding dirt block ({@code targetBlock} with {@code _grass_block} suffix replaced with {@code _dirt})</li>
+     *  </ul></li>
+     * </ul>
+     *
+     * @param targetBlock The {@link Supplier<Block>} representing the grass {@link Block} to create loot table for.
+     *
+     * @return A {@link LootTable.Builder} that will treat the given {@link Block} as a grass block and drop it when destroyed
+     * with silk touch, otherwise dropping the corresponding dirt block.
+     */
+    public static LootTable.Builder dropGrassBlock(Supplier<Block> targetBlock) {
+        LootPoolSingletonContainer.Builder<?> grassBlockDrop = LootItem.lootTableItem(targetBlock.get());
+
+        Optional<Block> alternateDirtBlock = RegistryUtil.getObjectFrom(targetBlock, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_grass_block", "_dirt")));
+
+        alternateDirtBlock.ifPresent(alternateDirt -> grassBlockDrop
+                .when(HAS_SILK_TOUCH)
+                .otherwise(LootItem.lootTableItem(alternateDirt)));
+
+        return LootTable.lootTable().withPool(LootPool.lootPool()
+                .setRolls(ConstantValue.exactly(1.0F))
+                .when(ExplosionCondition.survivesExplosion())
+                .add(grassBlockDrop));
     }
 }

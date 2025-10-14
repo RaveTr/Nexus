@@ -270,6 +270,14 @@ public final class BlockPropertyWrapperTemplates {
             .withBlockTilling(VanillaUtil::dirtFarmlandTillingAction)
             .withBlockFlattening(VanillaUtil::dirtPathFlatteningAction)
             .build();
+    public static final BlockPropertyWrapper<Block> GRASS_BLOCK = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_SHOVEL)
+            .withBlockTilling(VanillaUtil::grassBlockFarmlandTillingAction)
+            .withBlockFlattening(VanillaUtil::grassBlockPathFlatteningAction)
+            .withBlockColor(VanillaUtil::standardGrassColor)
+            .withLootTable(LootUtil::dropGrassBlock)
+            .build();
     public static final BlockPropertyWrapper<Block> FARMLAND = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_SHOVEL)

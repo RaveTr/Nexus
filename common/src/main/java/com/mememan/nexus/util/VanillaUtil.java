@@ -124,7 +124,7 @@ public final class VanillaUtil {
     }
 
     /**
-     * Creates the flattening behavior for converting dirt to path blocks when walked on by entities.
+     * Creates the flattening behavior for converting dirt to path blocks when flattened by shovel.
      * The method attempts to find the corresponding path block by:
      * <ol>
      *     <li>Replacing {@code _dirt} suffix with {@code _path}</li>
@@ -138,6 +138,25 @@ public final class VanillaUtil {
     public static BlockState dirtPathFlatteningAction(Supplier<Block> targetBlock) {
         return RegistryUtil.getObjectFrom(targetBlock, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_dirt", "_path")))
                 .or(() -> RegistryUtil.getObjectFrom(targetBlock, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_path", ""))))
+                .map(Block::defaultBlockState)
+                .orElse(null);
+    }
+
+    /**
+     * Creates the flattening behavior for converting grass blocks to path blocks when flattened by shovel.
+     * The method attempts to find the corresponding path block by:
+     * <ol>
+     *     <li>Replacing {@code _grass_block} suffix with {@code _path}</li>
+     *     <li>Removing {@code _path} suffix if the first attempt fails</li>
+     * </ol>
+     *
+     * @param targetBlock The {@link Supplier<Block>} representing the grass {@link Block} to create path flattening for.
+     *
+     * @return The {@link BlockState} of the corresponding path block, or {@code null} if no corresponding path block is found.
+     */
+    public static BlockState grassBlockPathFlatteningAction(Supplier<Block> targetBlock) {
+        return RegistryUtil.getObjectFrom(targetBlock, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_grass_block", "_path")))
+                .or(() -> RegistryUtil.getObjectFrom(targetBlock, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_grass_block", ""))))
                 .map(Block::defaultBlockState)
                 .orElse(null);
     }

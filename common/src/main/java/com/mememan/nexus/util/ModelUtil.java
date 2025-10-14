@@ -4088,6 +4088,28 @@ public final class ModelUtil {
         return fenceGateBlockState(targetBlock, ModelLocationUtils.getModelLocation(targetBlock.get()));
     }
 
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#FARMLAND} template for farmland blocks.
+     * This model represents the dry farmland top and includes a corresponding item model.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#DIRT} -> {@code RegistryUtil.pickBlockPrefix(dirtTexture)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(dryFarmlandTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the farmland {@link Block} to be used for
+     *                    automatic model location resolution.
+     * @param dryFarmlandTexture The {@link ResourceLocation} representing the texture of the dry farmland top.
+     * @param dirtTexture The {@link ResourceLocation} representing the texture of the dirt sides.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#FARMLAND} template.
+     *
+     * @see #farmlandDry(Supplier, ResourceLocation)
+     * @see #farmlandDry(Supplier)
+     * @see #farmlandMoist(Supplier, ResourceLocation, ResourceLocation)
+     * @see #farmland(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
+     */
     public static BlockModelDefinition farmlandDry(Supplier<Block> targetBlock, ResourceLocation dryFarmlandTexture, ResourceLocation dirtTexture) {
         return new BlockModelDefinition(ModelTemplates.FARMLAND)
                 .withTextureMapping(new TextureMapping()
@@ -4096,16 +4118,77 @@ public final class ModelUtil {
                 .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get()))));
     }
 
+    /**
+     * Overloaded variant of {@link #farmlandDry(Supplier, ResourceLocation, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#FARMLAND} template for farmland blocks using automatic texture resolution for the dirt sides.
+     * This model represents the dry farmland top and includes a corresponding item model.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(dryFarmlandTexture)}</li>
+     *         <li>{@link TextureSlot#DIRT} -> resolved automatically</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the farmland {@link Block} to be used for
+     *                    automatic model location resolution.
+     * @param dryFarmlandTexture The {@link ResourceLocation} representing the texture of the dry farmland top.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#FARMLAND} template.
+     *
+     * @see #farmlandDry(Supplier, ResourceLocation, ResourceLocation)
+     * @see #farmlandDry(Supplier)
+     */
     public static BlockModelDefinition farmlandDry(Supplier<Block> targetBlock, ResourceLocation dryFarmlandTexture) {
         return farmlandDry(targetBlock, dryFarmlandTexture, RegistryUtil.getTextureLocationOrDefault(
                 dryFarmlandTexture.withPath(dryFarmlandTexture.getPath().replace("_farmland", "_dirt")),
                 RegistryUtil.getTextureLocationOrDefault(dryFarmlandTexture.withPath(dryFarmlandTexture.getPath().replace("_farmland", "")))));
     }
 
+    /**
+     * Overloaded variant of {@link #farmlandDry(Supplier, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#FARMLAND} template for farmland blocks using automatic texture resolution.
+     * This model represents the dry farmland top and includes a corresponding item model.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(RegistryUtil.getTextureLocationOrDefault(targetBlock))}</li>
+     *         <li>{@link TextureSlot#DIRT} -> resolved automatically</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the farmland {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#FARMLAND} template.
+     *
+     * @see #farmlandDry(Supplier, ResourceLocation)
+     * @see #farmlandDry(Supplier, ResourceLocation, ResourceLocation)
+     */
     public static BlockModelDefinition farmlandDry(Supplier<Block> targetBlock) {
         return farmlandDry(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock));
     }
 
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#FARMLAND} template for farmland blocks.
+     * This model represents the moist farmland top and includes a corresponding item model.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#DIRT} -> {@code RegistryUtil.pickBlockPrefix(dirtTexture)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(moistFarmlandTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the farmland {@link Block} to be used for
+     *                    automatic model location resolution.
+     * @param moistFarmlandTexture The {@link ResourceLocation} representing the texture of the moist farmland top.
+     * @param dirtTexture The {@link ResourceLocation} representing the texture of the dirt sides.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#FARMLAND} template.
+     *
+     * @see #farmlandMoist(Supplier, ResourceLocation)
+     * @see #farmlandMoist(Supplier)
+     * @see #farmlandDry(Supplier, ResourceLocation, ResourceLocation)
+     * @see #farmland(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
+     */
     public static BlockModelDefinition farmlandMoist(Supplier<Block> targetBlock, ResourceLocation moistFarmlandTexture, ResourceLocation dirtTexture) {
         return new BlockModelDefinition(ModelTemplates.FARMLAND)
                 .withTextureMapping(new TextureMapping()
@@ -4114,31 +4197,153 @@ public final class ModelUtil {
                 .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get()))));
     }
 
+    /**
+     * Overloaded variant of {@link #farmlandMoist(Supplier, ResourceLocation, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#FARMLAND} template for farmland blocks using automatic texture resolution for the dirt sides.
+     * This model represents the moist farmland top and includes a corresponding item model.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(moistFarmlandTexture)}</li>
+     *         <li>{@link TextureSlot#DIRT} -> resolved automatically</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the farmland {@link Block} to be used for
+     *                    automatic model location resolution.
+     * @param moistFarmlandTexture The {@link ResourceLocation} representing the texture of the moist farmland top.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#FARMLAND} template.
+     *
+     * @see #farmlandMoist(Supplier, ResourceLocation, ResourceLocation)
+     * @see #farmlandMoist(Supplier)
+     */
     public static BlockModelDefinition farmlandMoist(Supplier<Block> targetBlock, ResourceLocation moistFarmlandTexture) {
         return farmlandMoist(targetBlock, moistFarmlandTexture, RegistryUtil.getTextureLocationOrDefault(
                 moistFarmlandTexture.withPath(moistFarmlandTexture.getPath().replace("_farmland_moist", "_dirt")),
                 RegistryUtil.getTextureLocationOrDefault(moistFarmlandTexture.withPath(moistFarmlandTexture.getPath().replace("_farmland_moist", "")))));
     }
 
+    /**
+     * Overloaded variant of {@link #farmlandMoist(Supplier, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * with the {@link ModelTemplates#FARMLAND} template for farmland blocks using automatic texture resolution.
+     * This model represents the moist farmland top and includes a corresponding item model.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_moist"))}</li>
+     *         <li>{@link TextureSlot#DIRT} -> resolved automatically</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the farmland {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#FARMLAND} template.
+     *
+     * @see #farmlandMoist(Supplier, ResourceLocation)
+     * @see #farmlandMoist(Supplier, ResourceLocation, ResourceLocation)
+     */
     public static BlockModelDefinition farmlandMoist(Supplier<Block> targetBlock) {
         return farmlandMoist(targetBlock, RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_moist"));
     }
 
+    /**
+     * Creates a comprehensive {@link BlockModelDefinition} with both dry and moist farmland variants using the
+     * {@link ModelTemplates#FARMLAND} template. Each variant includes a corresponding item model.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#DIRT} -> {@code RegistryUtil.pickBlockPrefix(dirtTexture)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(dryFarmlandTexture)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(moistFarmlandTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the farmland {@link Block} to be used for
+     *                    automatic model location resolution and custom naming.
+     * @param dryFarmlandTexture The {@link ResourceLocation} representing the texture of the dry farmland top.
+     * @param moistFarmlandTexture The {@link ResourceLocation} representing the texture of the moist farmland top.
+     * @param dirtTexture The {@link ResourceLocation} representing the texture of the dirt sides.
+     *
+     * @return A {@link BlockModelDefinition} with both dry and moist farmland variants.
+     *
+     * @see #farmland(Supplier, ResourceLocation, ResourceLocation)
+     * @see #farmland(Supplier)
+     * @see #farmlandDry(Supplier, ResourceLocation, ResourceLocation)
+     * @see #farmlandMoist(Supplier, ResourceLocation, ResourceLocation)
+     */
     public static BlockModelDefinition farmland(Supplier<Block> targetBlock, ResourceLocation dryFarmlandTexture, ResourceLocation moistFarmlandTexture, ResourceLocation dirtTexture) {
         return farmlandDry(targetBlock, dryFarmlandTexture, dirtTexture)
                 .withOrdinalModelDefinition(farmlandMoist(targetBlock, moistFarmlandTexture, dirtTexture));
     }
 
+    /**
+     * Overloaded variant of {@link #farmland(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)}.
+     * Creates a comprehensive {@link BlockModelDefinition} with both dry and moist farmland variants using automatic
+     * texture resolution for the dirt sides.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(dryFarmlandTexture)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(moistFarmlandTexture)}</li>
+     *         <li>{@link TextureSlot#DIRT} -> resolved automatically</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the farmland {@link Block} to be used for
+     *                    automatic model location resolution and custom naming.
+     * @param dryFarmlandTexture The {@link ResourceLocation} representing the texture of the dry farmland top.
+     * @param moistFarmlandTexture The {@link ResourceLocation} representing the texture of the moist farmland top.
+     *
+     * @return A {@link BlockModelDefinition} with both dry and moist farmland variants.
+     *
+     * @see #farmland(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
+     * @see #farmland(Supplier)
+     */
     public static BlockModelDefinition farmland(Supplier<Block> targetBlock, ResourceLocation dryFarmlandTexture, ResourceLocation moistFarmlandTexture) {
         return farmlandDry(targetBlock, dryFarmlandTexture)
                 .withOrdinalModelDefinition(farmlandMoist(targetBlock, moistFarmlandTexture));
     }
 
+    /**
+     * Overloaded variant of {@link #farmland(Supplier, ResourceLocation, ResourceLocation)}. Creates a comprehensive
+     * {@link BlockModelDefinition} with both dry and moist farmland variants using automatic texture resolution.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(RegistryUtil.getTextureLocationOrDefault(targetBlock))}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_moist"))}</li>
+     *         <li>{@link TextureSlot#DIRT} -> resolved automatically</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the farmland {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with both dry and moist farmland variants using automatic texture resolution.
+     *
+     * @see #farmland(Supplier, ResourceLocation, ResourceLocation)
+     * @see #farmland(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
+     */
     public static BlockModelDefinition farmland(Supplier<Block> targetBlock) {
         return farmlandDry(targetBlock)
                 .withOrdinalModelDefinition(farmlandMoist(targetBlock));
     }
 
+    /**
+     * Creates a {@link BlockStateDefinition} for farmland blocks using {@link MultiVariantGenerator} with different models
+     * based on moisture level.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@code MOISTURE >= 7} -> {@code moistFarmlandModel}</li>
+     *         <li>{@code MOISTURE < 7} -> {@code dryFarmlandModel}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the farmland {@link Block} to create the blockstate for.
+     * @param dryFarmlandModel The {@link ResourceLocation} of the model to use for the dry farmland variant.
+     * @param moistFarmlandModel The {@link ResourceLocation} of the model to use for the moist farmland variant.
+     *
+     * @return A {@link BlockStateDefinition} with farmland moisture variants.
+     *
+     * @see #farmlandBlockState(Supplier)
+     */
     public static BlockStateDefinition farmlandBlockState(Supplier<Block> targetBlock, ResourceLocation dryFarmlandModel, ResourceLocation moistFarmlandModel) {
         return new BlockStateDefinition(targetBlock)
                 .withBlockStateSupplier(MultiVariantGenerator.multiVariant(targetBlock.get())
@@ -4148,6 +4353,23 @@ public final class ModelUtil {
                                         : Variant.variant().with(VariantProperties.MODEL, dryFarmlandModel))));
     }
 
+    /**
+     * Overloaded variant of {@link #farmlandBlockState(Supplier, ResourceLocation, ResourceLocation)}. Creates a
+     * {@link BlockStateDefinition} for farmland blocks using {@link MultiVariantGenerator} with fully automatic model
+     * resolution based on the farmland block's registry ID ("_moist" suffix for the moist variant).
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@code MOISTURE >= 7} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get()).withSuffix("_moist")}</li>
+     *         <li>{@code MOISTURE < 7} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get())}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the farmland {@link Block} to create the blockstate for.
+     *
+     * @return A {@link BlockStateDefinition} with farmland moisture variants using fully automatic model resolution.
+     *
+     * @see #farmlandBlockState(Supplier, ResourceLocation, ResourceLocation)
+     */
     public static BlockStateDefinition farmlandBlockState(Supplier<Block> targetBlock) {
         return farmlandBlockState(targetBlock, ModelLocationUtils.getModelLocation(targetBlock.get()), ModelLocationUtils.getModelLocation(targetBlock.get()).withSuffix("_moist"));
     }
