@@ -4495,4 +4495,44 @@ public final class ModelUtil {
     public static ItemModelDefinition basicHandheld(Supplier<Item> targetItem) {
         return basicHandheld(RegistryUtil.getTextureLocationOrDefault(targetItem));
     }
+
+    /**
+     * Creates a handheld rod item model definition with the specified texture location.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.pickItemPrefix(texLoc)}</li>
+     *     </ul>
+     *
+     * @param texLoc The {@link ResourceLocation} of the texture to be used for the rod item.
+     *
+     * @return An {@link ItemModelDefinition} with the {@link ModelTemplates#FLAT_HANDHELD_ROD_ITEM} template.
+     *
+     * @see ModelTemplates#FLAT_HANDHELD_ROD_ITEM
+     * @see TextureMapping#layer0(ResourceLocation)
+     */
+    public static ItemModelDefinition handheldRod(ResourceLocation texLoc) {
+        return new ItemModelDefinition(ModelTemplates.FLAT_HANDHELD_ROD_ITEM)
+                .withTextureMapping(TextureMapping.layer0(RegistryUtil.pickItemPrefix(texLoc)));
+    }
+
+    /**
+     * Overloaded variant of {@link #handheldRod(ResourceLocation)}. Creates a handheld rod item model definition using
+     * the texture location derived from the provided item.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.pickItemPrefix(RegistryUtil.getTextureLocationOrDefault(targetItem))}</li>
+     *     </ul>
+     *
+     * @param targetItem The {@code Supplier<Item>} used to automatically resolve the texture location.
+     *
+     * @return An {@link ItemModelDefinition} with the {@link ModelTemplates#FLAT_HANDHELD_ROD_ITEM} template.
+     *
+     * @see #handheldRod(ResourceLocation)
+     * @see RegistryUtil#getTextureLocationOrDefault(Supplier)
+     */
+    public static ItemModelDefinition handheldRod(Supplier<Item> targetItem) {
+        return handheldRod(RegistryUtil.getTextureLocationOrDefault(targetItem));
+    }
 }

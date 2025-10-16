@@ -341,6 +341,8 @@ public final class BlockPropertyWrapperTemplates {
             .withLootTable(LootUtil::dropPottedContents)
             .build();
 
+    
+
     private BlockPropertyWrapperTemplates() {
         throw new IllegalAccessError("Attempted to construct instance of template utility class! (BlockPropertyWrapperTemplates)");
     }

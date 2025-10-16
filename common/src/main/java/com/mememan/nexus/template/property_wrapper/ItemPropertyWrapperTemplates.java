@@ -4,6 +4,7 @@ import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.property_wrapper.def.item.ItemPropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.item.ItemPropertyWrapperBuilder;
 import com.mememan.nexus.util.ModelUtil;
+import com.mememan.nexus.util.RecipeUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -24,6 +25,17 @@ public final class ItemPropertyWrapperTemplates {
     public static final ItemPropertyWrapper<Item> BASIC_HANDHELD = new ItemPropertyWrapper<>()
             .builder()
             .withModelDefinition(ModelUtil::basicHandheld)
+            .build();
+
+    public static final ItemPropertyWrapper<Item> ROD = new ItemPropertyWrapper<>()
+            .builder()
+            .withModelDefinition(ModelUtil::handheldRod)
+            .build();
+
+    public static final ItemPropertyWrapper<Item> COOKED_FOOD = new ItemPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_GENERATED)
+            .withRecipe(RecipeUtil::cookedFoodFrom)
             .build();
 
     private ItemPropertyWrapperTemplates() {

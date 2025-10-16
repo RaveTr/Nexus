@@ -145,3 +145,6 @@ accessible class net/minecraft/core/RegistrySynchronization$NetworkedRegistryDat
 
 # RegistrySynchronization
 accessible field net/minecraft/core/RegistrySynchronization NETWORKABLE_REGISTRIES Ljava/util/Map;
+
+# FoodOnAStickItem
+accessible field net/minecraft/world/item/FoodOnAStickItem consumeItemDamage I

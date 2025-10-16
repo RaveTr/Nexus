@@ -3,6 +3,7 @@ package com.mememan.nexus.util;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import net.minecraft.data.recipes.*;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
@@ -409,5 +410,100 @@ public final class RecipeUtil {
 
     public static <B extends Block> Consumer<Supplier<B>> woolCarpetRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
         return woolCarpetRecipeFrom(finishedRecipe, Function.identity());
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> cookedFoodFromSmelting(Consumer<FinishedRecipe> finishedRecipe, Function<I, I> cookedFoodComponentMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return parentItemLikeSup -> {
+            I parentItemLike = parentItemLikeSup.get();
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+
+            I componentItemLike = cookedFoodComponentMapper.apply(parentItemLike);
+
+            if (componentItemLike != null) {
+                ResourceLocation componentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(componentItemLike);
+                ResourceLocation baseRecipeId = recipeIdMapper.apply(parentItemLikeId);
+
+                SimpleCookingRecipeBuilder.smelting(Ingredient.of(componentItemLike), RecipeCategory.FOOD, parentItemLike, 0.35F, 200)
+                        .group(parentItemLikeId.getNamespace())
+                        .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
+                        .save(finishedRecipe, baseRecipeId.withPath(baseRecipeId.getPath() + "_from_smelting_" + componentItemLikeId.getPath()));
+            }
+        };
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> cookedFoodFromSmelting(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return cookedFoodFromSmelting(finishedRecipe, parentCookedFood -> RegistryUtil.getObjectFrom(parentCookedFood, parentCookedFoodId -> parentCookedFoodId.withPath(parentCookedFoodId.getPath().replace("cooked_", "raw_")))
+                .or(() -> RegistryUtil.getObjectFrom(parentCookedFood, parentCookedFoodId -> parentCookedFoodId.withPath(parentCookedFoodId.getPath().replace("cooked_", ""))))
+                .orElse(null), recipeIdMapper);
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> cookedFoodFromSmelting(Consumer<FinishedRecipe> finishedRecipe) {
+        return cookedFoodFromSmelting(finishedRecipe, Function.identity());
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> cookedFoodFromSmoking(Consumer<FinishedRecipe> finishedRecipe, Function<I, I> cookedFoodComponentMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return parentItemLikeSup -> {
+            I parentItemLike = parentItemLikeSup.get();
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+
+            I componentItemLike = cookedFoodComponentMapper.apply(parentItemLike);
+
+            if (componentItemLike != null) {
+                ResourceLocation componentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(componentItemLike);
+                ResourceLocation baseRecipeId = recipeIdMapper.apply(parentItemLikeId);
+
+                SimpleCookingRecipeBuilder.smoking(Ingredient.of(componentItemLike), RecipeCategory.FOOD, parentItemLike, 0.35F, 100)
+                        .group(parentItemLikeId.getNamespace())
+                        .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
+                        .save(finishedRecipe, baseRecipeId.withPath(baseRecipeId.getPath() + "_from_smoking_" + componentItemLikeId.getPath()));
+            }
+        };
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> cookedFoodFromSmoking(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return cookedFoodFromSmoking(finishedRecipe, parentCookedFood -> RegistryUtil.getObjectFrom(parentCookedFood, parentCookedFoodId -> parentCookedFoodId.withPath(parentCookedFoodId.getPath().replace("cooked_", "raw_")))
+                .or(() -> RegistryUtil.getObjectFrom(parentCookedFood, parentCookedFoodId -> parentCookedFoodId.withPath(parentCookedFoodId.getPath().replace("cooked_", ""))))
+                .orElse(null), recipeIdMapper);
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> cookedFoodFromSmoking(Consumer<FinishedRecipe> finishedRecipe) {
+        return cookedFoodFromSmoking(finishedRecipe, Function.identity());
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> cookedFoodFromCampfireCooking(Consumer<FinishedRecipe> finishedRecipe, Function<I, I> cookedFoodComponentMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return parentItemLikeSup -> {
+            I parentItemLike = parentItemLikeSup.get();
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+
+            I componentItemLike = cookedFoodComponentMapper.apply(parentItemLike);
+
+            if (componentItemLike != null) {
+                ResourceLocation componentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(componentItemLike);
+                ResourceLocation baseRecipeId = recipeIdMapper.apply(parentItemLikeId);
+
+                SimpleCookingRecipeBuilder.campfireCooking(Ingredient.of(componentItemLike), RecipeCategory.FOOD, parentItemLike, 0.35F, 600)
+                        .group(parentItemLikeId.getNamespace())
+                        .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
+                        .save(finishedRecipe, baseRecipeId.withPath(baseRecipeId.getPath() + "_from_campfire_cooking_" + componentItemLikeId.getPath()));
+            }
+        };
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> cookedFoodFromCampfireCooking(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return cookedFoodFromCampfireCooking(finishedRecipe, parentCookedFood -> RegistryUtil.getObjectFrom(parentCookedFood, parentCookedFoodId -> parentCookedFoodId.withPath(parentCookedFoodId.getPath().replace("cooked_", "raw_")))
+                .or(() -> RegistryUtil.getObjectFrom(parentCookedFood, parentCookedFoodId -> parentCookedFoodId.withPath(parentCookedFoodId.getPath().replace("cooked_", ""))))
+                .orElse(null), recipeIdMapper);
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> cookedFoodFromCampfireCooking(Consumer<FinishedRecipe> finishedRecipe) {
+        return cookedFoodFromCampfireCooking(finishedRecipe, Function.identity());
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> cookedFoodFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return parentItemLikeSup -> {
+            cookedFoodFromSmelting(finishedRecipe).accept((Supplier<Item>) parentItemLikeSup);
+            cookedFoodFromSmoking(finishedRecipe).accept((Supplier<Item>) parentItemLikeSup);
+            cookedFoodFromCampfireCooking(finishedRecipe).accept((Supplier<Item>) parentItemLikeSup);
+        };
     }
 }
