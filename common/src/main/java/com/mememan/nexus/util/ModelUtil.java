@@ -451,7 +451,7 @@ public final class ModelUtil {
      * @see #flowerPotCross(ResourceLocation)
      */
     public static BlockModelDefinition flowerPotCross(Supplier<Block> targetBlock) {
-        return flowerPotCross(RegistryUtil.getTextureLocationOrDefault(RegistryUtil.pickBlockId(
+        return flowerPotCross(RegistryUtil.getTextureLocationOrDefault(RegistryUtil.pickItemLikeId(
                         targetBlock,
                         parentBlockPath ->
                                 parentBlockPath.startsWith("potted_")
@@ -876,7 +876,7 @@ public final class ModelUtil {
      *     <ul>
      *         <li>{@link SlabType#BOTTOM} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get())}</li>
      *         <li>{@link SlabType#TOP} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_top")}</li>
-     *         <li>{@link SlabType#DOUBLE} -> {@code RegistryUtil.pickBlockId(targetBlock)}</li>
+     *         <li>{@link SlabType#DOUBLE} -> {@code RegistryUtil.pickItemLikeId(targetBlock)}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the slab {@link Block} to create the blockstate for.

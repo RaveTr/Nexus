@@ -1,6 +1,7 @@
 package com.mememan.nexus.util;
 
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -16,9 +17,9 @@ import java.util.function.Supplier;
  * Utility {@code class} containing helpful recipe shortcut/delegator helper methods, as well as some re-used constants
  * related to recipes in general.
  * <br></br>
- * Conventionally, recipe utility methods generate recipes from provided parent objects, not the other way around.
+ * Conventionally, recipe utility methods generate recipes for provided parent objects, not the other way around.
  */
-public final class RecipeUtil {
+public final class RecipeUtil { //TODO Refactor tf out of this
 
     private RecipeUtil() {
         throw new IllegalAccessError("Attempted to construct instance of utility class! (RecipeUtil)");
@@ -405,11 +406,158 @@ public final class RecipeUtil {
     }
 
     public static <B extends Block> Consumer<Supplier<B>> woolCarpetRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
-        return woolCarpetRecipeFrom(finishedRecipe, parentWoolCarpet -> RegistryUtil.getObjectFrom(parentWoolCarpet, parentWoolCarpetId -> RegistryUtil.pickBlockId(() -> parentWoolCarpet, parentWoolCarpetPath -> parentWoolCarpetPath.replace("_carpet", "_wool"))).orElse(null), recipeIdMapper);
+        return woolCarpetRecipeFrom(finishedRecipe, parentWoolCarpet -> RegistryUtil.getObjectFrom(parentWoolCarpet, parentWoolCarpetId -> RegistryUtil.pickItemLikeId(() -> parentWoolCarpet, parentWoolCarpetPath -> parentWoolCarpetPath.replace("_carpet", "_wool"))).orElse(null), recipeIdMapper);
     }
 
     public static <B extends Block> Consumer<Supplier<B>> woolCarpetRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
         return woolCarpetRecipeFrom(finishedRecipe, Function.identity());
+    }
+
+    public static <B extends Block, I extends Item> Consumer<Supplier<B>> materialBlockFrom(Consumer<FinishedRecipe> finishedRecipe, Function<B, I> materialComponentMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return parentItemLikeSup -> {
+            B parentItemLike = parentItemLikeSup.get();
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+
+            I componentItemLike = materialComponentMapper.apply(parentItemLike);
+
+            if (componentItemLike != null) {
+                ResourceLocation componentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(componentItemLike);
+                ResourceLocation baseRecipeId = recipeIdMapper.apply(parentItemLikeId);
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, parentItemLike)
+                        .define('#', componentItemLike)
+                        .pattern("###")
+                        .pattern("###")
+                        .pattern("###")
+                        .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
+                        .save(finishedRecipe, baseRecipeId);
+            }
+        };
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> materialBlockFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return materialBlockFrom(finishedRecipe, parentBlock -> RegistryUtil.getObjectFrom(parentBlock.asItem(), parentBlockId -> RegistryUtil.pickMaterialIngotId(parentBlock::asItem))
+                .or(() -> RegistryUtil.getObjectFrom(parentBlock.asItem(), parentBlockId -> RegistryUtil.pickMaterialId(parentBlock::asItem, "_lump")))
+                .or(() -> RegistryUtil.getObjectFrom(parentBlock.asItem(), parentBlockId -> RegistryUtil.pickMaterialId(parentBlock::asItem, "_gem")))
+                .or(() -> RegistryUtil.getObjectFrom(parentBlock.asItem(), parentBlockId -> RegistryUtil.pickMaterialId(parentBlock::asItem, "_crystal")))
+                .or(() -> RegistryUtil.getObjectFrom(parentBlock.asItem(), parentBlockId -> RegistryUtil.pickMaterialId(parentBlock::asItem)))
+                .orElse(null), recipeIdMapper);
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> materialBlockFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return materialBlockFrom(finishedRecipe, Function.identity());
+    }
+
+    public static <I extends Item, B extends Block> Consumer<Supplier<I>> materialFromOre(Consumer<FinishedRecipe> finishedRecipe, Function<I, B> materialComponentMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return parentItemLikeSup -> {
+            I parentItemLike = parentItemLikeSup.get();
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+
+            B componentItemLike = materialComponentMapper.apply(parentItemLike);
+            B deepslateComponentItemLike = RegistryUtil.getObjectFrom(componentItemLike, parentComponentItemLikeId -> RegistryUtil.pickMaterialDeepslateOreId(() -> componentItemLike)).orElse(null);
+            ResourceLocation baseRecipeId = recipeIdMapper.apply(parentItemLikeId);
+
+            if (componentItemLike != null) {
+                ResourceLocation componentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(componentItemLike);
+
+                SimpleCookingRecipeBuilder.smelting(Ingredient.of(componentItemLike), RecipeCategory.MISC, parentItemLike, 0.35F, 200)
+                        .group(parentItemLikeId.getNamespace())
+                        .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
+                        .save(finishedRecipe, baseRecipeId.withPath(baseRecipeId.getPath() + "_from_smelting_" + componentItemLikeId.getPath()));
+
+                SimpleCookingRecipeBuilder.blasting(Ingredient.of(componentItemLike), RecipeCategory.MISC, parentItemLike, 0.7F, 100)
+                        .group(parentItemLikeId.getNamespace())
+                        .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
+                        .save(finishedRecipe, baseRecipeId.withPath(baseRecipeId.getPath() + "_from_blasting_" + componentItemLikeId.getPath()));
+            }
+
+            if (deepslateComponentItemLike != null) {
+                ResourceLocation deepslateComponentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(deepslateComponentItemLike);
+
+                SimpleCookingRecipeBuilder.smelting(Ingredient.of(deepslateComponentItemLike), RecipeCategory.MISC, parentItemLike, 0.35F, 200)
+                        .group(parentItemLikeId.getNamespace())
+                        .unlockedBy("has_" + deepslateComponentItemLikeId.getPath(), PredicateUtil.has(deepslateComponentItemLike))
+                        .save(finishedRecipe, baseRecipeId.withPath(baseRecipeId.getPath() + "_from_smelting_" + deepslateComponentItemLikeId.getPath()));
+
+                SimpleCookingRecipeBuilder.blasting(Ingredient.of(deepslateComponentItemLike), RecipeCategory.MISC, parentItemLike, 0.7F, 100)
+                        .group(parentItemLikeId.getNamespace())
+                        .unlockedBy("has_" + deepslateComponentItemLikeId.getPath(), PredicateUtil.has(deepslateComponentItemLike))
+                        .save(finishedRecipe, baseRecipeId.withPath(baseRecipeId.getPath() + "_from_blasting_" + deepslateComponentItemLikeId.getPath()));
+            }
+        };
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> materialFromOre(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return materialFromOre(finishedRecipe, parentMaterial -> BuiltInRegistries.BLOCK.get(RegistryUtil.pickMaterialOreId(() -> parentMaterial)), recipeIdMapper);
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> materialFromOre(Consumer<FinishedRecipe> finishedRecipe) {
+        return materialFromOre(finishedRecipe, Function.identity());
+    }
+
+    public static <I extends Item, B extends Block> Consumer<Supplier<I>> materialFromBlock(Consumer<FinishedRecipe> finishedRecipe, Function<I, B> materialComponentMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return parentItemLikeSup -> {
+            I parentItemLike = parentItemLikeSup.get();
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+
+            B componentItemLike = materialComponentMapper.apply(parentItemLike);
+
+            if (componentItemLike != null) {
+                ResourceLocation componentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(componentItemLike);
+                ResourceLocation baseRecipeId = recipeIdMapper.apply(parentItemLikeId);
+
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, parentItemLike, 9)
+                        .requires(componentItemLike)
+                        .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
+                        .save(finishedRecipe, baseRecipeId.withPath(baseRecipeId.getPath() + "_from_" + componentItemLikeId.getPath()));
+            }
+        };
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> materialFromBlock(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return materialFromBlock(finishedRecipe, parentMaterial -> BuiltInRegistries.BLOCK.get(RegistryUtil.pickMaterialOreId(() -> parentMaterial)), recipeIdMapper);
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> materialFromBlock(Consumer<FinishedRecipe> finishedRecipe) {
+        return materialFromBlock(finishedRecipe, Function.identity());
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> materialFromNugget(Consumer<FinishedRecipe> finishedRecipe, Function<I, I> materialComponentMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return parentItemLikeSup -> {
+            I parentItemLike = parentItemLikeSup.get();
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+
+            I componentItemLike = materialComponentMapper.apply(parentItemLike);
+
+            if (componentItemLike != null) {
+                ResourceLocation componentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(componentItemLike);
+                ResourceLocation baseRecipeId = recipeIdMapper.apply(parentItemLikeId);
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.MISC, parentItemLike)
+                        .define('#', componentItemLike)
+                        .pattern("###")
+                        .pattern("###")
+                        .pattern("###")
+                        .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
+                        .save(finishedRecipe, baseRecipeId);
+            }
+        };
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> materialFromNugget(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return materialFromNugget(finishedRecipe, parentIngot -> RegistryUtil.getObjectFrom(parentIngot, parentIngotId -> RegistryUtil.pickMaterialNuggetId(() -> parentIngot)).orElse(null), recipeIdMapper);
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> materialFromNugget(Consumer<FinishedRecipe> finishedRecipe) {
+        return materialFromNugget(finishedRecipe, Function.identity());
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> materialFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return parentItemLikeSup -> {
+            materialFromNugget(finishedRecipe).accept((Supplier<Item>) parentItemLikeSup);
+            materialFromBlock(finishedRecipe).accept((Supplier<Item>) parentItemLikeSup);
+            materialFromOre(finishedRecipe).accept((Supplier<Item>) parentItemLikeSup);
+        };
     }
 
     public static <I extends Item> Consumer<Supplier<I>> cookedFoodFromSmelting(Consumer<FinishedRecipe> finishedRecipe, Function<I, I> cookedFoodComponentMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {

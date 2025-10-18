@@ -3,6 +3,7 @@ package com.mememan.nexus.util;
 import net.minecraft.advancements.critereon.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -545,5 +546,100 @@ public final class LootUtil {
         }
 
         return basePotBuilder;
+    }
+
+    /**
+     * Creates a {@link LootTable.Builder} that will drop either the block itself (when harvested with Silk Touch) or
+     * attempt to drop a material component of the block (such as a lump, crystal, or dust) when destroyed.
+     * <p>
+     * <h2>LOOT TABLE</h2>
+     * <h3>Pool 1 (Silk Touch)</h3>
+     * <ul>
+     *  <li><b>Rolls:</b> 1.0</li>
+     *  <li><b>Applies:</b> {@link ApplyExplosionDecay#explosionDecay()}</li>
+     *  <li><b>When:</b> {@link #HAS_SILK_TOUCH}</li>
+     *  <li><b>Drops:</b> {@code targetBlock} (1x)</li>
+     * </ul>
+     * <h3>Pool 2 (Material Components)</h3>
+     * <ul>
+     *  <li><b>Rolls:</b> 1.0</li>
+     *  <li><b>Applies:</b> {@link ApplyExplosionDecay#explosionDecay()}</li>
+     *  <li><b>Drops:</b> Either:
+     *      <ul>
+     *          <li>Material component (lump/crystal/dust) with count between {@code minCount} and {@code maxCount}.</li>
+     *          <li>Or the block itself (1x) if no material component is found.</li>
+     *      </ul>
+     *  </li>
+     * </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the block that will drop components.
+     * @param minCount The minimum number of material components to drop.
+     * @param maxCount The maximum number of material components to drop.
+     *
+     * @return A {@link LootTable.Builder} that handles dropping either the block or its material components.
+     *
+     * @see RegistryUtil#pickMaterialId(Supplier, String)
+     * @see #dropComponents(Supplier)
+     */
+    public static LootTable.Builder dropComponents(Supplier<Block> targetBlock, int minCount, int maxCount) {
+        LootPool.Builder potentialComponentPool = LootPool.lootPool()
+                .setRolls(ConstantValue.exactly(1.0F))
+                .apply(ApplyExplosionDecay.explosionDecay());
+
+        Supplier<Item> targetBlockItem = targetBlock.get()::asItem;;
+        Optional<Item> pickedMaterialComponent = targetBlockItem.get().getDefaultInstance().isEmpty()
+                ? Optional.empty()
+                : RegistryUtil.getObjectFrom(targetBlockItem, targetParentBlockId -> RegistryUtil.pickMaterialId(targetBlock, "_lump"))
+                .or(() -> RegistryUtil.getObjectFrom(targetBlockItem, parentBlockId -> RegistryUtil.pickMaterialId(targetBlock, "_crystal")))
+                .or(() -> RegistryUtil.getObjectFrom(targetBlockItem, parentBlockId -> RegistryUtil.pickMaterialId(targetBlock, "_dust")))
+                .or(() -> RegistryUtil.getObjectFrom(targetBlockItem, parentBlockId -> RegistryUtil.pickMaterialId(targetBlock)));
+
+        pickedMaterialComponent.ifPresentOrElse(chosenMaterialComponent -> potentialComponentPool.add(LootItem.lootTableItem(chosenMaterialComponent)
+                        .apply(SetItemCountFunction.setCount(UniformGenerator.between(minCount, maxCount), true))),
+                () -> potentialComponentPool.add(LootItem.lootTableItem(targetBlock.get())
+                        .apply(SetItemCountFunction.setCount(ConstantValue.exactly(1), true))));
+
+        return LootTable.lootTable().withPool(LootPool.lootPool()
+                        .setRolls(ConstantValue.exactly(1.0F))
+                        .apply(ApplyExplosionDecay.explosionDecay())
+                        .when(HAS_SILK_TOUCH)
+                        .add(LootItem.lootTableItem(targetBlock.get())
+                                .apply(SetItemCountFunction.setCount(ConstantValue.exactly(1), true))))
+                .withPool(potentialComponentPool);
+    }
+
+    /**
+     * Overloaded variant of {@link #dropComponents(Supplier, int, int)}. Creates a {@link LootTable.Builder} that will
+     * drop either the block itself (when harvested with Silk Touch) or attempt to drop a material component of the block
+     * (such as a lump, crystal, or dust) when destroyed. Sets the min and max counts to 4 and 9 respectively.
+     * <p>
+     * <h2>LOOT TABLE</h2>
+     * <h3>Pool 1 (Silk Touch)</h3>
+     * <ul>
+     *  <li><b>Rolls:</b> 1.0</li>
+     *  <li><b>Applies:</b> {@link ApplyExplosionDecay#explosionDecay()}</li>
+     *  <li><b>When:</b> {@link #HAS_SILK_TOUCH}</li>
+     *  <li><b>Drops:</b> {@code targetBlock} (1x)</li>
+     * </ul>
+     * <h3>Pool 2 (Material Components)</h3>
+     * <ul>
+     *  <li><b>Rolls:</b> 1.0</li>
+     *  <li><b>Applies:</b> {@link ApplyExplosionDecay#explosionDecay()}</li>
+     *  <li><b>Drops:</b> Either:
+     *      <ul>
+     *          <li>Material component (lump/crystal/dust) with count between 4 and 9.</li>
+     *          <li>Or the block itself (1x) if no material component is found.</li>
+     *      </ul>
+     *  </li>
+     * </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the block that will drop components.
+     *
+     * @return A {@link LootTable.Builder} that handles dropping either the block or its material components.
+     *
+     * @see #dropComponents(Supplier, int, int)
+     */
+    public static LootTable.Builder dropComponents(Supplier<Block> targetBlock) {
+        return dropComponents(targetBlock, 4, 9);
     }
 }

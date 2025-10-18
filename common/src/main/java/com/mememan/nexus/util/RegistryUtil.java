@@ -9,6 +9,7 @@ import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.*;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -56,6 +57,9 @@ public final class RegistryUtil {
     };
     private static final String[] NORMALIZABLE_SUFFIXES = new String[] {
             "_brick", "_plank"
+    };
+    private static final String[] MATERIAL_SUFFIXES = new String[] {
+            "_ingot", "_nugget", "_gem", "_shard", "_dust", "_crystal", "_ore", "_block"
     };
 
     private RegistryUtil() {
@@ -393,6 +397,9 @@ public final class RegistryUtil {
      *
      * @throws IllegalArgumentException If {@code throwIfMissing} is true and the target object is not found.
      *
+     * @apiNote This method searches within the same registry that the base object is registered in (determined based
+     * on its type, see {@link DataGenPropertyWrapper.RegistryLookupContainer#getRegistryForObject(Object)}).
+     *
      * @see #getObjectFrom(Supplier, Function, boolean)
      */
     public static <T> Optional<Supplier<T>> getSuppliedObjectFrom(Supplier<T> baseObjSup, Function<ResourceLocation, ResourceLocation> targetObjIdMapper, boolean throwIfMissing) {
@@ -408,7 +415,7 @@ public final class RegistryUtil {
 
         if (throwIfMissing && targetObj.get() == null) throw new IllegalArgumentException(String.format("Attempted to compute invalid object '%s' from %s '%s'", targetObjLoc, targetObjClassName, baseObjLoc));
 
-        return Optional.of(targetObj);
+        return Optional.ofNullable(targetObj);
     }
 
     /**
@@ -571,21 +578,23 @@ public final class RegistryUtil {
      * Modifies the registry path of the target block using the provided path mapping function. This method allows for
      * custom transformation of block registry paths based on specific naming conventions or requirements.
      *
-     * @param targetBlock The {@link Supplier} of the target {@link Block} to modify the registry path for.
+     * @param targetItemLike The {@link Supplier} of the target {@link IL} to modify the registry path for.
      * @param pathIdMapper The {@link Function} to apply to the block's registry path for transformation.
      *
      * @return A new {@link ResourceLocation} with the modified registry path.
+     *
+     * @param <IL> Any {@link ItemLike} type.
      *
      * @throws IllegalArgumentException If no registry entry is present for the target block.
      *
      * @see #pickBlockId(Supplier)
      */
-    public static ResourceLocation pickBlockId(Supplier<Block> targetBlock, Function<String, String> pathIdMapper) {
-        ResourceLocation baseBlockId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
-        String baseBlockPath = baseBlockId.getPath();
-        String chosenBlockId = pathIdMapper.apply(baseBlockPath);
+    public static <IL extends ItemLike> ResourceLocation pickItemLikeId(Supplier<IL> targetItemLike, Function<String, String> pathIdMapper) {
+        ResourceLocation baseILId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetItemLike.get());
+        String baseILPath = baseILId.getPath();
+        String chosenILId = pathIdMapper.apply(baseILPath);
 
-        return baseBlockId.withPath(chosenBlockId);
+        return baseILId.withPath(chosenILId);
     }
 
     /**
@@ -614,10 +623,10 @@ public final class RegistryUtil {
      *
      * @throws IllegalArgumentException If no registry entry is present for the target block.
      *
-     * @see #pickBlockId(Supplier, Function)
+     * @see #pickItemLikeId(Supplier, Function)
      */
     public static ResourceLocation pickBlockId(Supplier<Block> targetBlock) {
-        return pickBlockId(targetBlock, baseBlockPath -> {
+        return pickItemLikeId(targetBlock, baseBlockPath -> {
             String work = baseBlockPath;
             String removedSuffix = null;
 
@@ -684,5 +693,51 @@ public final class RegistryUtil {
      */
     public static ResourceLocation pickBlockTexture(Supplier<Block> targetBlock) {
         return getTextureLocationOrDefault(targetBlock, getTextureLocationOrDefault(pickBlockId(targetBlock)));
+    }
+
+    public static <IL extends ItemLike> ResourceLocation pickMaterialId(Supplier<IL> targetMaterialObject, String addedPrefix, String addedSuffix) {
+        return pickItemLikeId(targetMaterialObject, baseMaterialPath -> {
+            String work = baseMaterialPath;
+
+            for (String potentiallyRemovableSuffix : DERIVED_BLOCK_SUFFIXES) {
+                if (work.endsWith(potentiallyRemovableSuffix)) {
+                    work = work.substring(0, work.length() - potentiallyRemovableSuffix.length());
+                    break;
+                }
+            }
+
+            if (!addedPrefix.isBlank() && !work.startsWith(addedPrefix)) work = addedPrefix.concat(work);
+            if (!addedSuffix.isBlank() && !work.endsWith(addedSuffix)) work = work.concat(addedSuffix);
+
+            return work;
+        });
+    }
+
+    public static <IL extends ItemLike> ResourceLocation pickMaterialId(Supplier<IL> targetMaterialObject, String addedSuffix) {
+        return pickMaterialId(targetMaterialObject, "", addedSuffix);
+    }
+
+    public static <IL extends ItemLike> ResourceLocation pickMaterialId(Supplier<IL> targetMaterialObject) {
+        return pickMaterialId(targetMaterialObject, "");
+    }
+
+    public static <IL extends ItemLike> ResourceLocation pickMaterialBlockId(Supplier<IL> targetMaterialObject) {
+        return pickMaterialId(targetMaterialObject, "_block");
+    }
+
+    public static <IL extends ItemLike> ResourceLocation pickMaterialOreId(Supplier<IL> targetMaterialObject) {
+        return pickMaterialId(targetMaterialObject, "_ore");
+    }
+
+    public static <IL extends ItemLike> ResourceLocation pickMaterialDeepslateOreId(Supplier<IL> targetMaterialObject) {
+        return pickMaterialId(targetMaterialObject, "deepslate_", "_ore");
+    }
+
+    public static <IL extends ItemLike> ResourceLocation pickMaterialIngotId(Supplier<IL> targetMaterialObject) {
+        return pickMaterialId(targetMaterialObject, "_ingot");
+    }
+
+    public static <IL extends ItemLike> ResourceLocation pickMaterialNuggetId(Supplier<IL> targetMaterialObject) {
+        return pickMaterialId(targetMaterialObject, "_nugget");
     }
 }

@@ -341,7 +341,51 @@ public final class BlockPropertyWrapperTemplates {
             .withLootTable(LootUtil::dropPottedContents)
             .build();
 
-    
+    public static final BlockPropertyWrapper<Block> MATERIAL_BLOCK_PICKAXE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_PICKAXE)
+            .withRecipe(RecipeUtil::materialBlockFrom)
+            .build();
+    public static final BlockPropertyWrapper<Block> MATERIAL_BLOCK_HOE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_HOE)
+            .withRecipe(RecipeUtil::materialBlockFrom)
+            .build();
+    public static final BlockPropertyWrapper<Block> MATERIAL_BLOCK_AXE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_AXE)
+            .withRecipe(RecipeUtil::materialBlockFrom)
+            .build();
+    public static final BlockPropertyWrapper<Block> MATERIAL_BLOCK_SHOVEL = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_SHOVEL)
+            .withRecipe(RecipeUtil::materialBlockFrom)
+            .build();
+
+    public static final BlockPropertyWrapper<Block> COMPONENT_BLOCK_PICKAXE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_PICKAXE)
+            .withRecipe(RecipeUtil::materialBlockFrom)
+            .withLootTable(LootUtil::dropComponents)
+            .build();
+    public static final BlockPropertyWrapper<Block> COMPONENT_BLOCK_HOE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_HOE)
+            .withRecipe(RecipeUtil::materialBlockFrom)
+            .withLootTable(LootUtil::dropComponents)
+            .build();
+    public static final BlockPropertyWrapper<Block> COMPONENT_BLOCK_AXE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_AXE)
+            .withRecipe(RecipeUtil::materialBlockFrom)
+            .withLootTable(LootUtil::dropComponents)
+            .build();
+    public static final BlockPropertyWrapper<Block> COMPONENT_BLOCK_SHOVEL = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_SHOVEL)
+            .withRecipe(RecipeUtil::materialBlockFrom)
+            .withLootTable(LootUtil::dropComponents)
+            .build();
 
     private BlockPropertyWrapperTemplates() {
         throw new IllegalAccessError("Attempted to construct instance of template utility class! (BlockPropertyWrapperTemplates)");
