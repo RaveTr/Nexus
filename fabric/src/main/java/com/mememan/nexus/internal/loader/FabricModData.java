@@ -114,8 +114,8 @@ public class FabricModData implements ModData {
      * Path-mapping method capable of handling both standard and nested mods within scanned JAR files. Additionally,
      * handles caching annotation data.
      * <br></br>
-     * Has an overall O(m * (n + p)) time complexity (where {@code m} is the number of root paths in the given {@code
-     * targetModContainer}, {@code n} is the number of files/paths per root path (usually 1), and {@code p} is the number
+     * Has an overall O(m * (n + p)) time complexity (where {@code m} is the number of root paths (usually 1) in the given
+     * {@code targetModContainer}, {@code n} is the number of files/paths per root path, and {@code p} is the number
      * of {@code class} files scanned (for annotation parsing)).
      *
      * @param targetModContainer The {@link ModContainer} to index the paths of. Typically defaults to the owning JAR
@@ -222,8 +222,8 @@ public class FabricModData implements ModData {
      * Delegator method for processing paths found within a JAR file (typically for prod).
      * <br></br>
      * Handles edge cases, formats files, and caches annotation data. Unlike
-     * {@link #processDirectory(Path, ObjectArrayList, ModContainer)}, this doesn't have to deal with Fabric's odd path
-     * recursive duplication, and it thus has a time complexity of roughly O(n * k), where {@code n} is the number of
+     * {@link #processDirectory(Path, ObjectArrayList, ModContainer)}, this doesn't have to deal with Fabric's odd recursive
+     * path duplication, and it thus has a time complexity of roughly O(n * k), where {@code n} is the number of
      * files/paths within the target JAR, and {@code k} is the average processing time of each JAR file (if any nested
      * JARs are present).
      *

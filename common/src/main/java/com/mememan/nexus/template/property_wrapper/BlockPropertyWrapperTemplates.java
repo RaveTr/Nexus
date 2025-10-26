@@ -1,16 +1,15 @@
 package com.mememan.nexus.template.property_wrapper;
 
 import com.mememan.nexus.platform.NexusServices;
+import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapperBuilder;
-import com.mememan.nexus.util.LootUtil;
-import com.mememan.nexus.util.ModelUtil;
-import com.mememan.nexus.util.RecipeUtil;
-import com.mememan.nexus.util.VanillaUtil;
+import com.mememan.nexus.util.*;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -116,10 +115,68 @@ public final class BlockPropertyWrapperTemplates {
             .withTag(() -> BlockTags.NEEDS_DIAMOND_TOOL)
             .build();
 
+    public static final BlockPropertyWrapper<Block> ROTATED_PILLAR_PICKAXE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_PICKAXE)
+            .withModelDefinition(ModelUtil::rotatedPillar)
+            .withBlockStateDefinition(ModelUtil::rotatedPillarBlockState)
+            .build();
+    public static final BlockPropertyWrapper<Block> ROTATED_PILLAR_AXE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_AXE)
+            .withModelDefinition(ModelUtil::rotatedPillar)
+            .withBlockStateDefinition(ModelUtil::rotatedPillarBlockState)
+            .build();
+    public static final BlockPropertyWrapper<Block> ROTATED_PILLAR_HOE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_HOE)
+            .withModelDefinition(ModelUtil::rotatedPillar)
+            .withBlockStateDefinition(ModelUtil::rotatedPillarBlockState)
+            .build();
+    public static final BlockPropertyWrapper<Block> ROTATED_PILLAR_SHOVEL = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_SHOVEL)
+            .withModelDefinition(ModelUtil::rotatedPillar)
+            .withBlockStateDefinition(ModelUtil::rotatedPillarBlockState)
+            .build();
+
+    public static final BlockPropertyWrapper<Block> AXIS_ALIGNED_PICKAXE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_PICKAXE)
+            .withModelDefinition(ModelUtil::cubeColumn)
+            .withBlockStateDefinition(ModelUtil::axisAlignedBlock)
+            .build();
+    public static final BlockPropertyWrapper<Block> AXIS_ALIGNED_AXE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_AXE)
+            .withModelDefinition(ModelUtil::cubeColumn)
+            .withBlockStateDefinition(ModelUtil::axisAlignedBlock)
+            .build();
+    public static final BlockPropertyWrapper<Block> AXIS_ALIGNED_HOE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_HOE)
+            .withModelDefinition(ModelUtil::cubeColumn)
+            .withBlockStateDefinition(ModelUtil::axisAlignedBlock)
+            .build();
+    public static final BlockPropertyWrapper<Block> AXIS_ALIGNED_SHOVEL = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_SHOVEL)
+            .withModelDefinition(ModelUtil::cubeColumn)
+            .withBlockStateDefinition(ModelUtil::axisAlignedBlock)
+            .build();
+
+    public static final BlockPropertyWrapper<Block> LOG = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(ROTATED_PILLAR_AXE)
+            .withTag(() -> BlockTags.LOGS)
+            .withAdditionalTag(() -> ItemTags.LOGS)
+            .build();
+
     public static final BlockPropertyWrapper<Block> SLAB = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_PICKAXE)
             .withTag(() -> BlockTags.SLABS)
+            .withAdditionalTag(() -> ItemTags.SLABS)
             .withModelDefinition(ModelUtil::slab)
             .withBlockStateDefinition(ModelUtil::slabBlockState)
             .withLootTable(LootUtil::dropSlab)
@@ -129,6 +186,7 @@ public final class BlockPropertyWrapperTemplates {
             .builder()
             .copyFrom(BASIC_PICKAXE)
             .withTag(() -> BlockTags.STAIRS)
+            .withAdditionalTag(() -> ItemTags.STAIRS)
             .withModelDefinition(ModelUtil::stairs)
             .withBlockStateDefinition(ModelUtil::stairsBlockState)
             .withRecipe(RecipeUtil::stairsRecipeFrom)
@@ -137,6 +195,7 @@ public final class BlockPropertyWrapperTemplates {
             .builder()
             .copyFrom(BASIC_PICKAXE)
             .withTag(() -> BlockTags.BUTTONS)
+            .withAdditionalTag(() -> ItemTags.BUTTONS)
             .withModelDefinition(ModelUtil::button)
             .withBlockStateDefinition(ModelUtil::buttonBlockState)
             .withRecipe(RecipeUtil::buttonRecipeFrom)
@@ -153,6 +212,7 @@ public final class BlockPropertyWrapperTemplates {
             .builder()
             .copyFrom(BASIC_PICKAXE)
             .withTag(() -> BlockTags.DOORS)
+            .withAdditionalTag(() -> ItemTags.DOORS)
             .withModelDefinition(ModelUtil::door)
             .withBlockStateDefinition(ModelUtil::doorBlockState)
             .withRecipe(RecipeUtil::doorRecipeFrom)
@@ -162,6 +222,7 @@ public final class BlockPropertyWrapperTemplates {
             .builder()
             .copyFrom(BASIC_PICKAXE)
             .withTag(() -> BlockTags.TRAPDOORS)
+            .withAdditionalTag(() -> ItemTags.TRAPDOORS)
             .withModelDefinition(ModelUtil::trapdoor)
             .withBlockStateDefinition(ModelUtil::trapdoorBlockState)
             .withRecipe(RecipeUtil::trapdoorRecipeFrom)
@@ -170,6 +231,7 @@ public final class BlockPropertyWrapperTemplates {
             .builder()
             .copyFrom(BASIC_PICKAXE)
             .withTag(() -> BlockTags.WALLS)
+            .withAdditionalTag(() -> ItemTags.WALLS)
             .withModelDefinition(ModelUtil::wall)
             .withBlockStateDefinition(ModelUtil::wallBlockState)
             .withRecipe(RecipeUtil::wallRecipeFrom)
@@ -179,6 +241,7 @@ public final class BlockPropertyWrapperTemplates {
             .builder()
             .copyFrom(BASIC_AXE)
             .withTag(() -> BlockTags.WOODEN_SLABS)
+            .withAdditionalTag(() -> ItemTags.WOODEN_SLABS)
             .withModelDefinition(ModelUtil::slab)
             .withBlockStateDefinition(ModelUtil::slabBlockState)
             .withLootTable(LootUtil::dropSlab)
@@ -189,6 +252,7 @@ public final class BlockPropertyWrapperTemplates {
             .builder()
             .copyFrom(BASIC_AXE)
             .withTag(() -> BlockTags.WOODEN_STAIRS)
+            .withAdditionalTag(() -> ItemTags.WOODEN_STAIRS)
             .withModelDefinition(ModelUtil::stairs)
             .withBlockStateDefinition(ModelUtil::stairsBlockState)
             .withRecipe(RecipeUtil::woodenStairsRecipeFrom)
@@ -198,31 +262,35 @@ public final class BlockPropertyWrapperTemplates {
             .builder()
             .copyFrom(BASIC_AXE)
             .withTag(() -> BlockTags.WOODEN_BUTTONS)
+            .withAdditionalTag(() -> ItemTags.WOODEN_BUTTONS)
             .withModelDefinition(ModelUtil::button)
             .withBlockStateDefinition(ModelUtil::buttonBlockState)
-            .withRecipe(RecipeUtil::buttonRecipeFrom)
+            .withRecipe(RecipeUtil::woodenButtonRecipeFrom)
             .build();
     public static final BlockPropertyWrapper<Block> WOODEN_PRESSURE_PLATE = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_AXE)
             .withTag(() -> BlockTags.WOODEN_PRESSURE_PLATES)
+            .withAdditionalTag(() -> ItemTags.WOODEN_PRESSURE_PLATES)
             .withModelDefinition(ModelUtil::pressurePlate)
             .withBlockStateDefinition(ModelUtil::pressurePlateBlockState)
-            .withRecipe(RecipeUtil::pressurePlateRecipeFrom)
+            .withRecipe(RecipeUtil::woodenPressurePlateRecipeFrom)
             .build();
     public static final BlockPropertyWrapper<Block> WOODEN_DOOR = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_AXE)
             .withTag(() -> BlockTags.WOODEN_DOORS)
+            .withAdditionalTag(() -> ItemTags.WOODEN_DOORS)
             .withModelDefinition(ModelUtil::door)
             .withBlockStateDefinition(ModelUtil::doorBlockState)
             .withLootTable(LootUtil::dropDoor)
-            .withRecipe(RecipeUtil::doorRecipeFrom)
+            .withRecipe(RecipeUtil::woodenDoorRecipeFrom)
             .build();
     public static final BlockPropertyWrapper<Block> WOODEN_TRAPDOOR = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_AXE)
             .withTag(() -> BlockTags.WOODEN_TRAPDOORS)
+            .withAdditionalTag(() -> ItemTags.WOODEN_TRAPDOORS)
             .withModelDefinition(ModelUtil::trapdoor)
             .withBlockStateDefinition(ModelUtil::trapdoorBlockState)
             .withRecipe(RecipeUtil::woodenTrapdoorRecipeFrom)
@@ -231,6 +299,7 @@ public final class BlockPropertyWrapperTemplates {
             .builder()
             .copyFrom(BASIC_AXE)
             .withTag(() -> BlockTags.WOODEN_FENCES)
+            .withAdditionalTag(() -> ItemTags.WOODEN_FENCES)
             .withModelDefinition(ModelUtil::fence)
             .withBlockStateDefinition(ModelUtil::fenceBlockState)
             .withRecipe(RecipeUtil::fenceRecipeFrom)
@@ -239,9 +308,54 @@ public final class BlockPropertyWrapperTemplates {
             .builder()
             .copyFrom(BASIC_AXE)
             .withTag(() -> BlockTags.FENCE_GATES)
+            .withAdditionalTag(() -> ItemTags.FENCE_GATES)
             .withModelDefinition(ModelUtil::fenceGate)
             .withBlockStateDefinition(ModelUtil::fenceGateBlockState)
             .withRecipe(RecipeUtil::fenceGateRecipeFrom)
+            .build();
+
+    public static final BlockPropertyWrapper<Block> WOODEN_LOG = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(ROTATED_PILLAR_AXE)
+            .withTag(() -> BlockTags.LOGS_THAT_BURN)
+            .withAdditionalTag(() -> ItemTags.LOGS_THAT_BURN)
+            .withBlockStripping(VanillaUtil::standardWoodLogStrippingState)
+            .withFlammability(VanillaUtil::standardFlammability)
+            .build();
+    public static final BlockPropertyWrapper<Block> STRIPPED_WOODEN_LOG = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(WOODEN_LOG)
+            .withModelDefinition(parentBlock ->
+                    ModelUtil.rotatedPillar(
+                            parentBlock,
+                            RegistryUtil.getTextureLocationOrDefault(parentBlock),
+                            RegistryUtil.getTextureLocationOrDefaultWithSuffix(parentBlock, "_top")
+                    )
+            )
+            .withBlockStripping(null)
+            .build();
+    public static final BlockPropertyWrapper<Block> WOODEN_PLANKS = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_PICKAXE)
+            .withTag(() -> BlockTags.PLANKS)
+            .withAdditionalTag(() -> ItemTags.PLANKS)
+            .withRecipe(RecipeUtil::woodenPlanksRecipeFromComponents)
+            .withFlammability(VanillaUtil::standardFlammability)
+            .build();
+    public static final BlockPropertyWrapper<Block> WOOD = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(AXIS_ALIGNED_AXE)
+            .withTag(() -> BlockTags.LOGS_THAT_BURN)
+            .withAdditionalTag(() -> ItemTags.LOGS_THAT_BURN)
+            .withModelDefinition(parentBlock -> {
+                ResourceLocation parentBlockId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentBlock.get());
+                ResourceLocation logTexLoc = parentBlockId.withPath(parentBlockId.getPath().replace("_wood", "_log"));
+
+                return ModelUtil.cubeColumn(parentBlock, RegistryUtil.getTextureLocation(logTexLoc.withSuffix("_side")).orElse(RegistryUtil.getTextureLocationOrDefault(logTexLoc)));
+            })
+            .withRecipe(RecipeUtil::woodRecipeFrom)
+            .withBlockStripping(VanillaUtil::standardWoodLogStrippingState)
+            .withFlammability(VanillaUtil::standardFlammability)
             .build();
 
     public static final BlockPropertyWrapper<Block> CARPET = new BlockPropertyWrapper<>()
@@ -254,12 +368,14 @@ public final class BlockPropertyWrapperTemplates {
             .builder()
             .copyFrom(BASIC)
             .withTag(() -> BlockTags.WOOL)
+            .withAdditionalTag(() -> ItemTags.WOOL)
             .withFlammability(VanillaUtil::standardFlammability)
             .build();
     public static final BlockPropertyWrapper<Block> WOOL_CARPET = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(CARPET)
             .withTag(() -> BlockTags.WOOL_CARPETS)
+            .withAdditionalTag(() -> ItemTags.WOOL_CARPETS)
             .withRecipe(RecipeUtil::woolCarpetRecipeFrom)
             .build();
 
@@ -267,6 +383,7 @@ public final class BlockPropertyWrapperTemplates {
             .builder()
             .copyFrom(BASIC_SHOVEL)
             .withTag(() -> BlockTags.DIRT)
+            .withAdditionalTag(() -> ItemTags.DIRT)
             .withBlockTilling(VanillaUtil::dirtFarmlandTillingAction)
             .withBlockFlattening(VanillaUtil::dirtPathFlatteningAction)
             .build();
@@ -315,6 +432,7 @@ public final class BlockPropertyWrapperTemplates {
             .builder()
             .copyFrom(PLANT)
             .withTag(() -> BlockTags.FLOWERS)
+            .withAdditionalTag(() -> ItemTags.FLOWERS)
             .withModelDefinition(ModelUtil::crossCutout)
             .withLootTable(LootUtil::dropSelf)
             .withBlockColor(null)
@@ -324,11 +442,13 @@ public final class BlockPropertyWrapperTemplates {
             .builder()
             .copyFrom(FLOWER)
             .setTags(ObjectArrayList.of(() -> BlockTags.SMALL_FLOWERS))
+            .setAdditionalTags(ObjectArrayList.of(() -> ItemTags.SMALL_FLOWERS))
             .build();
     public static final BlockPropertyWrapper<Block> TALL_FLOWER = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(FLOWER)
             .setTags(ObjectArrayList.of(() -> BlockTags.TALL_FLOWERS))
+            .setAdditionalTags(ObjectArrayList.of(() -> ItemTags.TALL_FLOWERS))
             .withModelDefinition(ModelUtil::doublePlant)
             .withBlockStateDefinition(ModelUtil::doublePlantBlockState)
             .withLootTable(LootUtil::dropDoublePlant)
@@ -364,26 +484,22 @@ public final class BlockPropertyWrapperTemplates {
 
     public static final BlockPropertyWrapper<Block> COMPONENT_BLOCK_PICKAXE = new BlockPropertyWrapper<>()
             .builder()
-            .copyFrom(BASIC_PICKAXE)
-            .withRecipe(RecipeUtil::materialBlockFrom)
+            .copyFrom(MATERIAL_BLOCK_PICKAXE)
             .withLootTable(LootUtil::dropComponents)
             .build();
     public static final BlockPropertyWrapper<Block> COMPONENT_BLOCK_HOE = new BlockPropertyWrapper<>()
             .builder()
-            .copyFrom(BASIC_HOE)
-            .withRecipe(RecipeUtil::materialBlockFrom)
+            .copyFrom(MATERIAL_BLOCK_HOE)
             .withLootTable(LootUtil::dropComponents)
             .build();
     public static final BlockPropertyWrapper<Block> COMPONENT_BLOCK_AXE = new BlockPropertyWrapper<>()
             .builder()
-            .copyFrom(BASIC_AXE)
-            .withRecipe(RecipeUtil::materialBlockFrom)
+            .copyFrom(MATERIAL_BLOCK_AXE)
             .withLootTable(LootUtil::dropComponents)
             .build();
     public static final BlockPropertyWrapper<Block> COMPONENT_BLOCK_SHOVEL = new BlockPropertyWrapper<>()
             .builder()
-            .copyFrom(BASIC_SHOVEL)
-            .withRecipe(RecipeUtil::materialBlockFrom)
+            .copyFrom(MATERIAL_BLOCK_SHOVEL)
             .withLootTable(LootUtil::dropComponents)
             .build();
 

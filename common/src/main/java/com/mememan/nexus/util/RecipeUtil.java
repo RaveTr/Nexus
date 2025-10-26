@@ -4,6 +4,7 @@ import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.*;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -25,11 +26,115 @@ public final class RecipeUtil { //TODO Refactor tf out of this
         throw new IllegalAccessError("Attempted to construct instance of utility class! (RecipeUtil)");
     }
 
+    public static <B extends Block> Consumer<Supplier<B>> woodenPlanksRecipeFromTag(Consumer<FinishedRecipe> finishedRecipe, TagKey<Item> componentTag, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return parentItemLikeSup -> {
+            B parentItemLike = parentItemLikeSup.get();
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+
+            if (componentTag != null) {
+                ResourceLocation componentTagIdPath = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(componentTag);
+                ResourceLocation baseRecipeId = recipeIdMapper.apply(parentItemLikeId);
+
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, parentItemLike, 4)
+                        .requires(componentTag)
+                        .group("planks")
+                        .unlockedBy("has_any_" + componentTagIdPath.getPath(), PredicateUtil.has(componentTag))
+                        .save(finishedRecipe, baseRecipeId);
+            }
+        };
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodenPlanksRecipeFromTag(Consumer<FinishedRecipe> finishedRecipe, TagKey<Item> componentTag) {
+        return woodenPlanksRecipeFromTag(finishedRecipe, componentTag, Function.identity());
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodenPlanksRecipeFromComponent(Consumer<FinishedRecipe> finishedRecipe, Function<B, B> planksComponentMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return parentItemLikeSup -> {
+            B parentItemLike = parentItemLikeSup.get();
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+
+            B componentItemLike = planksComponentMapper.apply(parentItemLike);
+
+            if (componentItemLike != null) {
+                ResourceLocation componentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(componentItemLike);
+                ResourceLocation baseRecipeId = recipeIdMapper.apply(parentItemLikeId);
+
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, parentItemLike, 4)
+                        .requires(componentItemLike)
+                        .group("planks")
+                        .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
+                        .save(finishedRecipe, baseRecipeId);
+            }
+        };
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodenPlanksRecipeFromLog(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return woodenPlanksRecipeFromComponent(finishedRecipe, parentPlanks -> RegistryUtil.getObjectFrom(parentPlanks, parentPlanksId -> parentPlanksId.withPath(parentPlanksId.getPath().replace("_planks", "_log"))).orElse(null), recipeIdMapper);
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodenPlanksRecipeFromLog(Consumer<FinishedRecipe> finishedRecipe) {
+        return woodenPlanksRecipeFromLog(finishedRecipe, Function.identity());
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodenPlanksRecipeFromStrippedLog(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return woodenPlanksRecipeFromComponent(finishedRecipe, parentPlanks -> RegistryUtil.getObjectFrom(parentPlanks, parentPlanksId -> parentPlanksId.withPrefix("stripped_").withPath(parentPlanksId.getPath().replace("_planks", "_log"))).orElse(null), recipeIdMapper);
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodenPlanksRecipeFromStrippedLog(Consumer<FinishedRecipe> finishedRecipe) {
+        return woodenPlanksRecipeFromStrippedLog(finishedRecipe, Function.identity());
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodenPlanksRecipeFromWood(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return woodenPlanksRecipeFromComponent(finishedRecipe, parentPlanks -> RegistryUtil.getObjectFrom(parentPlanks, parentPlanksId -> parentPlanksId.withPath(parentPlanksId.getPath().replace("_planks", "_wood"))).orElse(null), recipeIdMapper);
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodenPlanksRecipeFromWood(Consumer<FinishedRecipe> finishedRecipe) {
+        return woodenPlanksRecipeFromWood(finishedRecipe, Function.identity());
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodenPlanksRecipeFromComponents(Consumer<FinishedRecipe> finishedRecipe) { // Default to this unless the end-developer specifies a particular tag for their wood types via #woodenPlanksRecipeFromTag(...) (as such recipes should be)
+        return parentItemLikeSup -> {
+            woodenPlanksRecipeFromLog(finishedRecipe).accept((Supplier<Block>) parentItemLikeSup);
+            woodenPlanksRecipeFromStrippedLog(finishedRecipe).accept((Supplier<Block>) parentItemLikeSup);
+            woodenPlanksRecipeFromWood(finishedRecipe).accept((Supplier<Block>) parentItemLikeSup);
+        };
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<B, B> woodComponentMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return parentItemLikeSup -> {
+            B parentItemLike = parentItemLikeSup.get();
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+
+            B componentItemLike = woodComponentMapper.apply(parentItemLike);
+
+            if (componentItemLike != null) {
+                ResourceLocation componentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(componentItemLike);
+                ResourceLocation baseRecipeId = recipeIdMapper.apply(parentItemLikeId);
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, parentItemLike, 3)
+                        .define('#', componentItemLike)
+                        .pattern("##")
+                        .pattern("##")
+                        .group("bark")
+                        .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
+                        .save(finishedRecipe, baseRecipeId);
+            }
+        };
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return woodRecipeFrom(finishedRecipe, parentWood -> RegistryUtil.getObjectFrom(parentWood, parentWoodId -> parentWoodId.withPath(parentWoodId.getPath().replace("_wood", "_log"))).orElse(null), recipeIdMapper);
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return woodRecipeFrom(finishedRecipe, Function.identity());
+    }
+
     public static <B extends Block> Consumer<Supplier<B>> slabRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<B, B> slabComponentMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             B parentItemLike = parentItemLikeSup.get();
             ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
-                    
+
             B componentItemLike = slabComponentMapper.apply(parentItemLike);
 
             if (componentItemLike != null) {
@@ -71,6 +176,7 @@ public final class RecipeUtil { //TODO Refactor tf out of this
                 ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, parentItemLike, 6)
                         .define('#', componentItemLike)
                         .pattern("###")
+                        .group("wooden_slab")
                         .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
                         .save(finishedRecipe, baseRecipeId);
             }
@@ -135,6 +241,7 @@ public final class RecipeUtil { //TODO Refactor tf out of this
                         .pattern("#  ")
                         .pattern("## ")
                         .pattern("###")
+                        .group("wooden_stairs")
                         .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
                         .save(finishedRecipe, baseRecipeId);
             }
@@ -193,7 +300,7 @@ public final class RecipeUtil { //TODO Refactor tf out of this
                 ResourceLocation componentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(componentItemLike);
                 ResourceLocation baseRecipeId = recipeIdMapper.apply(parentItemLikeId);
 
-                ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, parentItemLike, 3)
+                ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, parentItemLike)
                         .define('#', componentItemLike)
                         .pattern("##")
                         .pattern("##")
@@ -210,6 +317,37 @@ public final class RecipeUtil { //TODO Refactor tf out of this
 
     public static <B extends Block> Consumer<Supplier<B>> doorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
         return doorRecipeFrom(finishedRecipe, Function.identity());
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodenDoorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<B, B> doorComponentMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return parentItemLikeSup -> {
+            B parentItemLike = parentItemLikeSup.get();
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+
+            B componentItemLike = doorComponentMapper.apply(parentItemLike);
+
+            if (componentItemLike != null) {
+                ResourceLocation componentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(componentItemLike);
+                ResourceLocation baseRecipeId = recipeIdMapper.apply(parentItemLikeId);
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, parentItemLike, 3)
+                        .define('#', componentItemLike)
+                        .pattern("##")
+                        .pattern("##")
+                        .pattern("##")
+                        .group("wooden_door")
+                        .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
+                        .save(finishedRecipe, baseRecipeId);
+            }
+        };
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodenDoorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return woodenDoorRecipeFrom(finishedRecipe, parentDoor -> RegistryUtil.getObjectFrom(parentDoor, parentDoorId -> RegistryUtil.pickBlockId(() -> parentDoor)).orElse(null), recipeIdMapper);
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodenDoorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return woodenDoorRecipeFrom(finishedRecipe, Function.identity());
     }
 
     public static <B extends Block> Consumer<Supplier<B>> trapdoorRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<B, B> trapdoorComponentMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
@@ -256,6 +394,7 @@ public final class RecipeUtil { //TODO Refactor tf out of this
                         .define('#', componentItemLike)
                         .pattern("##")
                         .pattern("##")
+                        .group("wooden_trapdoor")
                         .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
                         .save(finishedRecipe, baseRecipeId);
             }
@@ -286,6 +425,7 @@ public final class RecipeUtil { //TODO Refactor tf out of this
                         .define('S', Items.STICK)
                         .pattern("#S#")
                         .pattern("#S#")
+                        .group("wooden_fence")
                         .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
                         .save(finishedRecipe, baseRecipeId);
             }
@@ -316,6 +456,7 @@ public final class RecipeUtil { //TODO Refactor tf out of this
                         .define('S', Items.STICK)
                         .pattern("S#S")
                         .pattern("S#S")
+                        .group("wooden_fence_gate")
                         .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
                         .save(finishedRecipe, baseRecipeId);
             }
@@ -357,6 +498,34 @@ public final class RecipeUtil { //TODO Refactor tf out of this
         return buttonRecipeFrom(finishedRecipe, Function.identity());
     }
 
+    public static <B extends Block> Consumer<Supplier<B>> woodenButtonRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<B, B> buttonComponentMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return parentItemLikeSup -> {
+            B parentItemLike = parentItemLikeSup.get();
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+
+            B componentItemLike = buttonComponentMapper.apply(parentItemLike);
+
+            if (componentItemLike != null) {
+                ResourceLocation componentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(componentItemLike);
+                ResourceLocation baseRecipeId = recipeIdMapper.apply(parentItemLikeId);
+
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.REDSTONE, parentItemLike)
+                        .requires(componentItemLike)
+                        .group("wooden_button")
+                        .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
+                        .save(finishedRecipe, baseRecipeId);
+            }
+        };
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodenButtonRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return woodenButtonRecipeFrom(finishedRecipe, parentButton -> RegistryUtil.getObjectFrom(parentButton, parentButtonId -> RegistryUtil.pickBlockId(() -> parentButton)).orElse(null), recipeIdMapper);
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodenButtonRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return woodenButtonRecipeFrom(finishedRecipe, Function.identity());
+    }
+
     public static <B extends Block> Consumer<Supplier<B>> pressurePlateRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<B, B> pressurePlateComponentMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
         return parentItemLikeSup -> {
             B parentItemLike = parentItemLikeSup.get();
@@ -368,7 +537,7 @@ public final class RecipeUtil { //TODO Refactor tf out of this
                 ResourceLocation componentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(componentItemLike);
                 ResourceLocation baseRecipeId = recipeIdMapper.apply(parentItemLikeId);
 
-                ShapedRecipeBuilder.shaped(RecipeCategory.MISC, parentItemLike)
+                ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, parentItemLike)
                         .define('#', componentItemLike)
                         .pattern("##")
                         .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
@@ -383,6 +552,35 @@ public final class RecipeUtil { //TODO Refactor tf out of this
 
     public static <B extends Block> Consumer<Supplier<B>> pressurePlateRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
         return pressurePlateRecipeFrom(finishedRecipe, Function.identity());
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodenPressurePlateRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<B, B> pressurePlateComponentMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return parentItemLikeSup -> {
+            B parentItemLike = parentItemLikeSup.get();
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+
+            B componentItemLike = pressurePlateComponentMapper.apply(parentItemLike);
+
+            if (componentItemLike != null) {
+                ResourceLocation componentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(componentItemLike);
+                ResourceLocation baseRecipeId = recipeIdMapper.apply(parentItemLikeId);
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, parentItemLike)
+                        .define('#', componentItemLike)
+                        .pattern("##")
+                        .group("wooden_pressure_plate")
+                        .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
+                        .save(finishedRecipe, baseRecipeId);
+            }
+        };
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodenPressurePlateRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return woodenPressurePlateRecipeFrom(finishedRecipe, parentPressurePlate -> RegistryUtil.getObjectFrom(parentPressurePlate, parentPressurePlateId -> RegistryUtil.pickBlockId(() -> parentPressurePlate)).orElse(null), recipeIdMapper);
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodenPressurePlateRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return woodenPressurePlateRecipeFrom(finishedRecipe, Function.identity());
     }
 
     public static <B extends Block> Consumer<Supplier<B>> woolCarpetRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<B, B> woolCarpetComponentMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
@@ -454,11 +652,11 @@ public final class RecipeUtil { //TODO Refactor tf out of this
             ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
 
             B componentItemLike = materialComponentMapper.apply(parentItemLike);
-            B deepslateComponentItemLike = RegistryUtil.getObjectFrom(componentItemLike, parentComponentItemLikeId -> RegistryUtil.pickMaterialDeepslateOreId(() -> componentItemLike)).orElse(null);
-            ResourceLocation baseRecipeId = recipeIdMapper.apply(parentItemLikeId);
 
             if (componentItemLike != null) {
                 ResourceLocation componentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(componentItemLike);
+                B deepslateComponentItemLike = RegistryUtil.getObjectFrom(componentItemLike, parentComponentItemLikeId -> RegistryUtil.pickMaterialDeepslateOreId(() -> componentItemLike)).orElse(null);
+                ResourceLocation baseRecipeId = recipeIdMapper.apply(parentItemLikeId);
 
                 SimpleCookingRecipeBuilder.smelting(Ingredient.of(componentItemLike), RecipeCategory.MISC, parentItemLike, 0.35F, 200)
                         .group(parentItemLikeId.getNamespace())
@@ -469,26 +667,26 @@ public final class RecipeUtil { //TODO Refactor tf out of this
                         .group(parentItemLikeId.getNamespace())
                         .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
                         .save(finishedRecipe, baseRecipeId.withPath(baseRecipeId.getPath() + "_from_blasting_" + componentItemLikeId.getPath()));
-            }
 
-            if (deepslateComponentItemLike != null) {
-                ResourceLocation deepslateComponentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(deepslateComponentItemLike);
+                if (deepslateComponentItemLike != null) {
+                    ResourceLocation deepslateComponentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(deepslateComponentItemLike);
 
-                SimpleCookingRecipeBuilder.smelting(Ingredient.of(deepslateComponentItemLike), RecipeCategory.MISC, parentItemLike, 0.35F, 200)
-                        .group(parentItemLikeId.getNamespace())
-                        .unlockedBy("has_" + deepslateComponentItemLikeId.getPath(), PredicateUtil.has(deepslateComponentItemLike))
-                        .save(finishedRecipe, baseRecipeId.withPath(baseRecipeId.getPath() + "_from_smelting_" + deepslateComponentItemLikeId.getPath()));
+                    SimpleCookingRecipeBuilder.smelting(Ingredient.of(deepslateComponentItemLike), RecipeCategory.MISC, parentItemLike, 0.35F, 200)
+                            .group(parentItemLikeId.getNamespace())
+                            .unlockedBy("has_" + deepslateComponentItemLikeId.getPath(), PredicateUtil.has(deepslateComponentItemLike))
+                            .save(finishedRecipe, baseRecipeId.withPath(baseRecipeId.getPath() + "_from_smelting_" + deepslateComponentItemLikeId.getPath()));
 
-                SimpleCookingRecipeBuilder.blasting(Ingredient.of(deepslateComponentItemLike), RecipeCategory.MISC, parentItemLike, 0.7F, 100)
-                        .group(parentItemLikeId.getNamespace())
-                        .unlockedBy("has_" + deepslateComponentItemLikeId.getPath(), PredicateUtil.has(deepslateComponentItemLike))
-                        .save(finishedRecipe, baseRecipeId.withPath(baseRecipeId.getPath() + "_from_blasting_" + deepslateComponentItemLikeId.getPath()));
+                    SimpleCookingRecipeBuilder.blasting(Ingredient.of(deepslateComponentItemLike), RecipeCategory.MISC, parentItemLike, 0.7F, 100)
+                            .group(parentItemLikeId.getNamespace())
+                            .unlockedBy("has_" + deepslateComponentItemLikeId.getPath(), PredicateUtil.has(deepslateComponentItemLike))
+                            .save(finishedRecipe, baseRecipeId.withPath(baseRecipeId.getPath() + "_from_blasting_" + deepslateComponentItemLikeId.getPath()));
+                }
             }
         };
     }
 
     public static <I extends Item> Consumer<Supplier<I>> materialFromOre(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
-        return materialFromOre(finishedRecipe, parentMaterial -> BuiltInRegistries.BLOCK.get(RegistryUtil.pickMaterialOreId(() -> parentMaterial)), recipeIdMapper);
+        return materialFromOre(finishedRecipe, parentMaterial -> BuiltInRegistries.BLOCK.getOptional(RegistryUtil.pickMaterialOreId(() -> parentMaterial)).orElse(null), recipeIdMapper);
     }
 
     public static <I extends Item> Consumer<Supplier<I>> materialFromOre(Consumer<FinishedRecipe> finishedRecipe) {
@@ -515,7 +713,7 @@ public final class RecipeUtil { //TODO Refactor tf out of this
     }
 
     public static <I extends Item> Consumer<Supplier<I>> materialFromBlock(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
-        return materialFromBlock(finishedRecipe, parentMaterial -> BuiltInRegistries.BLOCK.get(RegistryUtil.pickMaterialOreId(() -> parentMaterial)), recipeIdMapper);
+        return materialFromBlock(finishedRecipe, parentMaterial -> BuiltInRegistries.BLOCK.getOptional(RegistryUtil.pickMaterialBlockId(() -> parentMaterial)).orElse(null), recipeIdMapper);
     }
 
     public static <I extends Item> Consumer<Supplier<I>> materialFromBlock(Consumer<FinishedRecipe> finishedRecipe) {
@@ -539,13 +737,13 @@ public final class RecipeUtil { //TODO Refactor tf out of this
                         .pattern("###")
                         .pattern("###")
                         .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
-                        .save(finishedRecipe, baseRecipeId);
+                        .save(finishedRecipe, baseRecipeId.withPath(baseRecipeId.getPath() + "_from_" + componentItemLikeId.getPath()));
             }
         };
     }
 
     public static <I extends Item> Consumer<Supplier<I>> materialFromNugget(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
-        return materialFromNugget(finishedRecipe, parentIngot -> RegistryUtil.getObjectFrom(parentIngot, parentIngotId -> RegistryUtil.pickMaterialNuggetId(() -> parentIngot)).orElse(null), recipeIdMapper);
+        return materialFromNugget(finishedRecipe, parentMaterial -> RegistryUtil.getObjectFrom(parentMaterial, parentMaterialId -> RegistryUtil.pickMaterialNuggetId(() -> parentMaterial)).orElse(null), recipeIdMapper);
     }
 
     public static <I extends Item> Consumer<Supplier<I>> materialFromNugget(Consumer<FinishedRecipe> finishedRecipe) {
@@ -558,6 +756,33 @@ public final class RecipeUtil { //TODO Refactor tf out of this
             materialFromBlock(finishedRecipe).accept((Supplier<Item>) parentItemLikeSup);
             materialFromOre(finishedRecipe).accept((Supplier<Item>) parentItemLikeSup);
         };
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> materialPieceFrom(Consumer<FinishedRecipe> finishedRecipe, Function<I, I> materialPieceComponentMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return parentItemLikeSup -> {
+            I parentItemLike = parentItemLikeSup.get();
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+
+            I componentItemLike = materialPieceComponentMapper.apply(parentItemLike);
+
+            if (componentItemLike != null) {
+                ResourceLocation componentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(componentItemLike);
+                ResourceLocation baseRecipeId = recipeIdMapper.apply(parentItemLikeId);
+
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, parentItemLike, 9)
+                        .requires(componentItemLike)
+                        .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
+                        .save(finishedRecipe, baseRecipeId.withPath(baseRecipeId.getPath() + "_from_" + componentItemLikeId.getPath()));
+            }
+        };
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> materialPieceFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return materialPieceFrom(finishedRecipe, parentMaterialPiece -> RegistryUtil.getObjectFrom(parentMaterialPiece, parentMaterialPieceId -> RegistryUtil.pickMaterialId(() -> parentMaterialPiece)).orElse(null), recipeIdMapper);
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> materialPieceFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return materialPieceFrom(finishedRecipe, Function.identity());
     }
 
     public static <I extends Item> Consumer<Supplier<I>> cookedFoodFromSmelting(Consumer<FinishedRecipe> finishedRecipe, Function<I, I> cookedFoodComponentMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {

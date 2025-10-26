@@ -163,7 +163,7 @@ public class StandardModelProvider extends ModelProvider implements ModDataProvi
                 .map(curDir -> curDir.endsWith("/") ? curDir : curDir.concat("/"))
                 .orElse("")
                 .concat(convertedDefinition.getCustomModelName()
-                        .orElse(weaklyFormattedDescId)));
+                        .orElse(weaklyFormattedDescId.concat(convertedDefinition.getParentModel().suffix.orElse("")))));
     }
 
     /**

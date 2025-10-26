@@ -9,8 +9,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Accessor {@code interface} to allow for registryLookup access from Fabric's {@link FabricDataGenerator} to be used
- * for context during datagen initialization.
+ * Accessor {@code interface} to allow for {@code registryLookup} access from Fabric's {@link FabricDataGenerator} to be
+ * used for context during datagen initialization.
  *
  * @see com.mememan.nexus.internal.services.FabricDataGenerator#onInitializeDataGenerator(FabricDataGenerator)
  */

@@ -53,7 +53,7 @@ import java.util.function.Supplier;
  * @see ForgeVanillaCompat
  */
 public class NexusForgeCommonMiscEvents {
-    private static final Object2ObjectOpenHashMap<ToolAction, Object2ObjectOpenHashMap<Block, Function<Supplier<Block>, BlockState>>> CACHED_BLOCK_TOOL_ACTIONS = Util.make(new Object2ObjectOpenHashMap<>(), toolActionMap -> {
+    private static final Object2ObjectOpenHashMap<ToolAction, Object2ObjectOpenHashMap<Block, Function<BlockState, BlockState>>> CACHED_BLOCK_TOOL_ACTIONS = Util.make(new Object2ObjectOpenHashMap<>(), toolActionMap -> {
         PropertyWrapper.PropertyWrappersContainer.getInferrableWrappersOfType(BlockPropertyWrapper.class)
                 .stream()
                 .map(curPW -> (BlockPropertyWrapper<Block>) curPW)
@@ -147,14 +147,15 @@ public class NexusForgeCommonMiscEvents {
 
         if (stateTransformationAction == null) return; // JIC
 
-        Object2ObjectOpenHashMap<Block, Function<Supplier<Block>, BlockState>> toolActionMap = CACHED_BLOCK_TOOL_ACTIONS.get(stateTransformationAction);
+        Object2ObjectOpenHashMap<Block, Function<BlockState, BlockState>> toolActionMap = CACHED_BLOCK_TOOL_ACTIONS.get(stateTransformationAction);
 
         if (toolActionMap != null && !toolActionMap.isEmpty()) {
-            Block initialBlock = event.getState().getBlock();
-            Function<Supplier<Block>, BlockState> stateTransformer = toolActionMap.get(initialBlock);
+            BlockState curState = event.getState();
+            Block initialBlock = curState.getBlock();
+            Function<BlockState, BlockState> stateTransformer = toolActionMap.get(initialBlock);
 
             if (stateTransformer != null) {
-                BlockState transformedState = stateTransformer.apply(() -> initialBlock); // Not using Suppliers#ofInstance since this could probably change
+                BlockState transformedState = stateTransformer.apply(curState);
 
                 if (transformedState != null) event.setFinalState(transformedState);
             }

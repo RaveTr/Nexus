@@ -1,6 +1,7 @@
 package com.mememan.nexus.util;
 
 import com.mememan.nexus.client.block.WrappedBlockColor;
+import com.mememan.nexus.template.property_wrapper.BlockPropertyWrapperTemplates;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.IntIntMutablePair;
 import net.minecraft.client.renderer.BiomeColors;
@@ -26,10 +27,10 @@ public final class VanillaUtil {
     }
 
     /**
-     * Calculates standard flammability values for wooden + other blocks following the flammability property patterns used in
-     * Minecraft's {@link net.minecraft.world.level.block.FireBlock}. Returns an {@link IntIntMutablePair} where the first
-     * value represents the ignition value (how easily the block catches fire) and the second value represents
-     * the burn value (probability the block gets consumed by the fire).
+     * Calculates standard flammability values for wooden + other blocks, following the flammability property patterns
+     * used in Minecraft's {@link FireBlock}. Returns an {@link IntIntMutablePair} where the first value represents the
+     * ignition value (how easily the block catches fire) and the second value represents the burn value (probability
+     * the block gets consumed by the fire).
      * <p>
      *     <h3>Flammability Patterns</h3>
      *     <ul>
@@ -63,6 +64,31 @@ public final class VanillaUtil {
                 : targetBlockObj.getDescriptionId().endsWith("_log")
                 ? IntIntMutablePair.of(5, 5)
                 : IntIntMutablePair.of(5, 20);
+    }
+
+    /**
+     * Creates a stripped log variant for the given block if a corresponding stripped version exists.
+     * <p>
+     * The method attempts to find the corresponding stripped log block by:
+     * <ol>
+     *     <li>Removing the "_wood" suffix from the block's ID and replacing it with "_log", if applicable</li>
+     *     <li>Prefixing the block's ID with "stripped_"</li>
+     * </ol>
+     *
+     * @param targetBlockState The {@link BlockState} representing the log block to create stripping behavior for, passed
+     *                         as a state to allow for axis property retention.
+     *
+     * @return The {@link BlockState} of the corresponding stripped log block, or {@code null} if no matching stripped variant exists.
+     *
+     * @see #standardFlammability(Supplier)
+     * @see BlockPropertyWrapperTemplates#WOODEN_LOG
+     */
+    public static BlockState standardWoodLogStrippingState(BlockState targetBlockState) {
+        return RegistryUtil.getObjectFrom(targetBlockState.getBlock(), parentBlockId -> parentBlockId.getPath().endsWith("_wood")
+                        ? RegistryUtil.pickPrefix(parentBlockId.withPath(parentBlockId.getPath().replace("_wood", "_log")), "stripped_")
+                        : RegistryUtil.pickPrefix(parentBlockId, "stripped_"))
+                .map(strippedState -> strippedState.defaultBlockState().setValue(RotatedPillarBlock.AXIS, targetBlockState.getValue(RotatedPillarBlock.AXIS)))
+                .orElse(null);
     }
 
     /**
@@ -124,20 +150,20 @@ public final class VanillaUtil {
     }
 
     /**
-     * Creates the flattening behavior for converting dirt to path blocks when flattened by shovel.
-     * The method attempts to find the corresponding path block by:
+     * Creates the flattening behavior for converting dirt to path blocks when flattened by shovel. Attempts to find the
+     * corresponding path block by:
      * <ol>
      *     <li>Replacing {@code _dirt} suffix with {@code _path}</li>
      *     <li>Removing {@code _path} suffix if the first attempt fails</li>
      * </ol>
      *
-     * @param targetBlock The {@link Supplier<Block>} representing the dirt {@link Block} to create path flattening for.
+     * @param targetBlockState The {@link BlockState} representing the dirt {@link Block} to create path flattening for.
      *
      * @return The {@link BlockState} of the corresponding path block, or {@code null} if no corresponding path block is found.
      */
-    public static BlockState dirtPathFlatteningAction(Supplier<Block> targetBlock) {
-        return RegistryUtil.getObjectFrom(targetBlock, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_dirt", "_path")))
-                .or(() -> RegistryUtil.getObjectFrom(targetBlock, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_path", ""))))
+    public static BlockState dirtPathFlatteningAction(BlockState targetBlockState) {
+        return RegistryUtil.getObjectFrom(targetBlockState.getBlock(), parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_dirt", "_path")))
+                .or(() -> RegistryUtil.getObjectFrom(targetBlockState.getBlock(), parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_path", ""))))
                 .map(Block::defaultBlockState)
                 .orElse(null);
     }
@@ -150,13 +176,13 @@ public final class VanillaUtil {
      *     <li>Removing {@code _path} suffix if the first attempt fails</li>
      * </ol>
      *
-     * @param targetBlock The {@link Supplier<Block>} representing the grass {@link Block} to create path flattening for.
+     * @param targetBlockState The {@link BlockState} representing the grass {@link Block} to create path flattening for.
      *
      * @return The {@link BlockState} of the corresponding path block, or {@code null} if no corresponding path block is found.
      */
-    public static BlockState grassBlockPathFlatteningAction(Supplier<Block> targetBlock) {
-        return RegistryUtil.getObjectFrom(targetBlock, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_grass_block", "_path")))
-                .or(() -> RegistryUtil.getObjectFrom(targetBlock, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_grass_block", ""))))
+    public static BlockState grassBlockPathFlatteningAction(BlockState targetBlockState) {
+        return RegistryUtil.getObjectFrom(targetBlockState.getBlock(), parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_grass_block", "_path")))
+                .or(() -> RegistryUtil.getObjectFrom(targetBlockState.getBlock(), parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_grass_block", ""))))
                 .map(Block::defaultBlockState)
                 .orElse(null);
     }

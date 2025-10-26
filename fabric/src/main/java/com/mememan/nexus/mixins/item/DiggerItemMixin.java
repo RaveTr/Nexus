@@ -17,7 +17,7 @@ import java.util.Objects;
 
 /**
  * Mixin {@code class} that adds a small additional hook to allow for deterministic behaviour of blocks mapped to
- * {@linkplain BlockPropertyWrapper BlockPropertyWrappers} to specify custom mining levels. This is lower priority
+ * {@linkplain BlockPropertyWrapper BlockPropertyWrappers} to specify custom mining levels. This is lower in priority
  * than each loader's respective tier API checks.
  * <br></br>
  * Only reason this is done on a loader-specific basis is that Forge has its own hook which effectively ignores the

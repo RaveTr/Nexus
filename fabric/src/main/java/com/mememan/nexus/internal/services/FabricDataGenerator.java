@@ -84,7 +84,7 @@ public class FabricDataGenerator implements DataGenerator, DataGeneratorEntrypoi
             GLOBAL_DATA_GENERATOR_INSTANCE.set(fabricDataGenerator);
 
             if (FabricDataGeneratorAccessor.class.isAssignableFrom(fabricDataGenerator.getClass())) {
-                FabricDataGeneratorAccessor dataGenAccessor = (FabricDataGeneratorAccessor) (Object) fabricDataGenerator; // Duck typing FTW
+                FabricDataGeneratorAccessor dataGenAccessor = (FabricDataGeneratorAccessor) (Object) fabricDataGenerator; // Wavecasting FTW
                 CompletableFuture<HolderLookup.Provider> regLookupProvider = dataGenAccessor.getRegistriesFuture();
                 FabricDataOutput rootPackOutput = dataGenAccessor.getFabricOutput();
                 Path rootOutputPath = rootPackOutput.getOutputFolder();

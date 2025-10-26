@@ -26,9 +26,9 @@ public class BlockPropertyWrapperBuilder<B extends Block> extends BaseDefaultabl
     protected Optional<Function<Supplier<B>, BlockStateDefinition>> blockStateDefMapperFunc = Optional.empty();
     protected Optional<Function<Supplier<B>, WrappedBlockColor>> blockColorMappingFunc = Optional.empty();
     protected Optional<Function<Supplier<B>, IntIntMutablePair>> flammabilityMappingFunc = Optional.empty();
-    protected Optional<Function<Supplier<B>, BlockState>> blockStrippingMappingFunc = Optional.empty();
+    protected Optional<Function<BlockState, BlockState>> blockStrippingMappingFunc = Optional.empty();
     protected Optional<Function<Supplier<B>, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>>>> blockTillingMappingFunc = Optional.empty();
-    protected Optional<Function<Supplier<B>, BlockState>> blockFlatteningMappingFunc = Optional.empty();
+    protected Optional<Function<BlockState, BlockState>> blockFlatteningMappingFunc = Optional.empty();
     protected Optional<Function<Supplier<B>, Supplier<Block>>> blockOxidizationMappingFunc = Optional.empty();
     protected Optional<Function<Supplier<B>, Supplier<Block>>> blockWaxingMappingFunc = Optional.empty();
     protected int minMiningLevel = 0;
@@ -101,12 +101,12 @@ public class BlockPropertyWrapperBuilder<B extends Block> extends BaseDefaultabl
      * occurs when the parent block is right-clicked with an axe.
      *
      * @param blockStrippingMappingFunc The mapping function used to output the resultant {@link BlockState} for the
-     *                                  parent block when right-clicked with an axe, with the parent block as the input.
-     *                                  May be {@code null}.
+     *                                  parent block when right-clicked with an axe, with the parent block's state as
+     *                                  the input. May be {@code null}.
      *
      * @return {@link #self()} (builder method).
      */
-    public BlockPropertyWrapperBuilder<B> withBlockStripping(Function<Supplier<B>, BlockState> blockStrippingMappingFunc) {
+    public BlockPropertyWrapperBuilder<B> withBlockStripping(Function<BlockState, BlockState> blockStrippingMappingFunc) {
         this.blockStrippingMappingFunc = Optional.ofNullable(blockStrippingMappingFunc);
         return self();
     }
@@ -132,12 +132,12 @@ public class BlockPropertyWrapperBuilder<B extends Block> extends BaseDefaultabl
      * {@link Block}, which occurs when the parent block is right-clicked with a shovel.
      *
      * @param blockFlatteningMappingFunc The mapping function used to output the resultant {@link BlockState} for the
-     *                                   parent block when right-clicked with a shovel, with the parent block as the input.
-     *                                   May be {@code null}.
+     *                                   parent block when right-clicked with a shovel, with the parent block's state
+     *                                   as the input. May be {@code null}.
      *
      * @return {@link #self()} (builder method).
      */
-    public BlockPropertyWrapperBuilder<B> withBlockFlattening(Function<Supplier<B>, BlockState> blockFlatteningMappingFunc) {
+    public BlockPropertyWrapperBuilder<B> withBlockFlattening(Function<BlockState, BlockState> blockFlatteningMappingFunc) {
         this.blockFlatteningMappingFunc = Optional.ofNullable(blockFlatteningMappingFunc);
         return self();
     }

@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 /**
  * Mixin {@code class} for properly applying custom hoe tilling behaviour set by BPWs.
  *
- * @see NexusForgeCommonMiscEvents
+ * @see NexusForgeCommonMiscEvents#CACHED_BLOCK_TILLING_BEHAVIOURS
  */
 @Mixin(HoeItem.class)
 public abstract class HoeItemMixin {

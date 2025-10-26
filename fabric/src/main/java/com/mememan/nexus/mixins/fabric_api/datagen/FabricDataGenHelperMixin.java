@@ -17,7 +17,7 @@ import java.util.Objects;
  * Mixin {@code class} that allows Nexus API to bypass Fabric's default mod ID filter for creating and running data
  * generators from entrypoints, allowing dependant mods to let Nexus do all the heavy lifting.
  * <br></br>
- * Additionally, helps improve determinism since you can still stop Nexus from running entirely via {@link ModDatagenConfig}
+ * Additionally helps improve determinism, since you can still stop Nexus from running entirely via {@link ModDatagenConfig}
  * if needed.
  *
  * @see FabricDataGenHelper#MOD_ID_FILTER

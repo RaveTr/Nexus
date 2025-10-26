@@ -50,7 +50,7 @@ public final class RegistryUtil {
             "_sign"
     };
     private static final String[] WOOD_COMPONENT_SUFFIXES = new String[] { // Wood-only components; if we strip one of these and the base looks like a wood family name, append _planks.
-            "_door", "_trapdoor", "_button", "_pressure_plate", "_fence", "_fence_gate", "_sign", "_hanging_sign"
+            "_pressure_plate", "_hanging_sign", "_fence_gate", "_trapdoor", "_stairs", "_button", "_fence", "_door", "_slab", "_sign"
     };
     private static final String[] VANILLA_WOOD_MATERIALS = new String[] {
             "oak", "spruce", "birch", "jungle", "acacia", "dark_oak", "mangrove", "cherry", "bamboo", "crimson", "warped"
@@ -238,6 +238,46 @@ public final class RegistryUtil {
     @NotNull
     public static <T> ResourceLocation getTextureLocationOrDefaultWithSuffix(Supplier<T> targetObj, String suffix) {
         return pickSuffix(getTextureLocationOrDefault(targetObj), suffix);
+    }
+
+    /**
+     * Overloaded variant of {@link #getTextureLocationOrDefault(ResourceLocation)}. Attempts to retrieve the
+     * {@link ResourceLocation} of the texture based on the given {@code baseLoc} from {@link #CACHED_TEXTURE_LOOKUP}
+     * and prepends the provided {@code prefix} to the resulting path.
+     *
+     * @param baseLoc The base texture location to use for resolution.
+     * @param prefix The prefix to prepend to the texture path.
+     *
+     * @param <T> The type of the target object.
+     *
+     * @return The {@link ResourceLocation} of the texture for the given {@code targetObj} with the provided
+     * {@code prefix} prepended to its path.
+     *
+     * @see #getTextureLocationOrDefault(ResourceLocation)
+     */
+    @NotNull
+    public static <T> ResourceLocation getTextureLocationOrDefaultWithPrefix(ResourceLocation baseLoc, String prefix) {
+        return pickPrefix(getTextureLocationOrDefault(baseLoc), prefix);
+    }
+
+    /**
+     * Overloaded variant of {@link #getTextureLocationOrDefault(ResourceLocation)}. Attempts to retrieve the
+     * {@link ResourceLocation} of the texture based on the given {@code baseLoc} from {@link #CACHED_TEXTURE_LOOKUP}
+     * and appends the provided {@code suffix} to the resulting path.
+     *
+     * @param baseLoc The base texture location to use for resolution.
+     * @param suffix The suffix to append to the texture path.
+     *
+     * @param <T> The type of the target object.
+     *
+     * @return The {@link ResourceLocation} of the texture for the given {@code targetObj} with the provided
+     * {@code suffix} appended to its path.
+     *
+     * @see #getTextureLocationOrDefault(Supplier)
+     */
+    @NotNull
+    public static <T> ResourceLocation getTextureLocationOrDefaultWithSuffix(ResourceLocation baseLoc, String suffix) {
+        return pickSuffix(getTextureLocationOrDefault(baseLoc), suffix);
     }
 
     /**
@@ -652,15 +692,16 @@ public final class RegistryUtil {
 
             if (removedSuffix != null && StringUtil.containsSuffix(WOOD_COMPONENT_SUFFIXES, removedSuffix)) { // Wood-family heuristic: if we stripped a wood-only component and the base looks like a wood key, append _planks.
                 String lastToken = StringUtil.lastToken(work);
+                ResourceLocation targetBlockId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
-                if (StringUtil.containsSuffix(VANILLA_WOOD_MATERIALS, work) || StringUtil.containsSuffix(VANILLA_WOOD_MATERIALS, lastToken) || targetBlock.get().builtInRegistryHolder().tags().anyMatch(curTag -> curTag.location().getPath().contains("wooden_"))) {
+                if (StringUtil.containsSuffix(VANILLA_WOOD_MATERIALS, work) || StringUtil.containsSuffix(VANILLA_WOOD_MATERIALS, lastToken) || BuiltInRegistries.BLOCK.getOptional(targetBlockId.withPath(work.concat("_planks"))).isPresent() || targetBlock.get().builtInRegistryHolder().tags().anyMatch(curTag -> curTag.location().getPath().contains("wooden"))) {
                     if (!work.endsWith("_planks") && !work.contains("plank")) work = work.concat("_planks");
 
                     woodFamilyBaseDetected = true;
                 }
             }
 
-            boolean endsWithFamilyBase = work.endsWith("_bricks") || work.endsWith("_planks"); // Prefer <base>_block unless it's plural or a wood family base (always keep "_block" if present)
+            boolean endsWithFamilyBase = work.endsWith("_bricks") || woodFamilyBaseDetected; // Prefer <base>_block unless it's plural or a wood family base (always keep "_block" if present)
 
             if (!endsWithFamilyBase) {
                 /*
@@ -699,7 +740,7 @@ public final class RegistryUtil {
         return pickItemLikeId(targetMaterialObject, baseMaterialPath -> {
             String work = baseMaterialPath;
 
-            for (String potentiallyRemovableSuffix : DERIVED_BLOCK_SUFFIXES) {
+            for (String potentiallyRemovableSuffix : MATERIAL_SUFFIXES) {
                 if (work.endsWith(potentiallyRemovableSuffix)) {
                     work = work.substring(0, work.length() - potentiallyRemovableSuffix.length());
                     break;

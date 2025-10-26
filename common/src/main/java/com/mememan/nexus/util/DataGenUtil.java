@@ -49,7 +49,15 @@ public final class DataGenUtil {
             });
         }
 
-        result.add("values", values);
+        // Deterministically-sort values to prevent annoying file writes on each datagen due to tag order changing between runs
+        JsonArray orderedValues = new JsonArray();
+
+        values.asList().stream()
+                .map(JsonElement::getAsString)
+                .sorted()
+                .forEach(orderedValues::add);
+
+        result.add("values", orderedValues);
 
         // Handle replace flag (if present)
         if (newObj.has("replace")) result.addProperty("replace", newObj.get("replace").getAsBoolean());

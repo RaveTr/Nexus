@@ -85,7 +85,7 @@ public class BlockPropertyWrapper<B extends Block> extends BaseDefaultableDataGe
      *
      * @see BlockPropertyWrapperBuilder#withBlockStripping(Function)
      */
-    public Optional<Function<Supplier<B>, BlockState>> getBlockStrippingMapper() {
+    public Optional<Function<BlockState, BlockState>> getBlockStrippingMapper() {
         return rawBuilder().flatMap(builder -> builder.blockStrippingMappingFunc);
     }
 
@@ -110,7 +110,7 @@ public class BlockPropertyWrapper<B extends Block> extends BaseDefaultableDataGe
      *
      * @see BlockPropertyWrapperBuilder#withBlockFlattening(Function)
      */
-    public Optional<Function<Supplier<B>, BlockState>> getBlockFlatteningMapper() {
+    public Optional<Function<BlockState, BlockState>> getBlockFlatteningMapper() {
         return rawBuilder().flatMap(builder -> builder.blockFlatteningMappingFunc);
     }
 

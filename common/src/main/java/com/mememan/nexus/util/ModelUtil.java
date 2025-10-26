@@ -247,8 +247,6 @@ public final class ModelUtil {
      *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.pickBlockPrefix(crossTexture)}</li>
      *     </ul>
      *
-     * @param targetBlock The {@code Supplier<Block>} representing the cross {@link Block} to be used for
-     *                    automatic model location resolution.
      * @param crossTexture The {@link ResourceLocation} representing the texture of the cross. Item model uses the same
      *                     texture.
      *
@@ -256,14 +254,14 @@ public final class ModelUtil {
      *
      * @see #cross(Supplier)
      */
-    public static BlockModelDefinition cross(Supplier<Block> targetBlock, ResourceLocation crossTexture) {
+    public static BlockModelDefinition cross(ResourceLocation crossTexture) {
         return new BlockModelDefinition(ModelTemplates.CROSS)
                 .withTextureMapping(TextureMapping.cross(RegistryUtil.pickBlockPrefix(crossTexture)))
                 .withOrdinalModelDefinition(generatedBlock(crossTexture));
     }
 
     /**
-     * Overloaded variant of {@link #cross(Supplier, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * Overloaded variant of {@link #cross(ResourceLocation)}. Creates a {@link BlockModelDefinition}
      * with the {@link ModelTemplates#CROSS} template using automatic texture resolution.
      * <p>
      *     <h3>Required Texture Slots</h3>
@@ -276,10 +274,10 @@ public final class ModelUtil {
      *
      * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CROSS} template.
      *
-     * @see #cross(Supplier, ResourceLocation)
+     * @see #cross(ResourceLocation)
      */
     public static BlockModelDefinition cross(Supplier<Block> targetBlock) {
-        return cross(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock));
+        return cross(RegistryUtil.getTextureLocationOrDefault(targetBlock));
     }
 
     /**
@@ -291,22 +289,20 @@ public final class ModelUtil {
      *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.pickBlockPrefix(crossTexture)}</li>
      *     </ul>
      *
-     * @param targetBlock The {@code Supplier<Block>} representing the cross {@link Block} to be used for
-     *                    automatic model location resolution.
      * @param crossTexture The {@link ResourceLocation} representing the texture of the cross.
      *
      * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CROSS} template and {@link #CUTOUT_RENDER_TYPE}.
      *
      * @see #crossCutout(Supplier)
-     * @see #cross(Supplier, ResourceLocation)
+     * @see #cross(ResourceLocation)
      */
-    public static BlockModelDefinition crossCutout(Supplier<Block> targetBlock, ResourceLocation crossTexture) {
-        return cross(targetBlock, crossTexture)
+    public static BlockModelDefinition crossCutout(ResourceLocation crossTexture) {
+        return cross(crossTexture)
                 .withRenderType(CUTOUT_RENDER_TYPE);
     }
 
     /**
-     * Overloaded variant of {@link #crossCutout(Supplier, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * Overloaded variant of {@link #crossCutout(ResourceLocation)}. Creates a {@link BlockModelDefinition}
      * with the {@link ModelTemplates#CROSS} template using automatic texture resolution and sets the render type
      * to {@link #CUTOUT_RENDER_TYPE} for proper transparency handling.
      * <p>
@@ -320,11 +316,11 @@ public final class ModelUtil {
      *
      * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CROSS} template and {@link #CUTOUT_RENDER_TYPE}.
      *
-     * @see #crossCutout(Supplier, ResourceLocation)
+     * @see #crossCutout(ResourceLocation)
      * @see #cross(Supplier)
      */
     public static BlockModelDefinition crossCutout(Supplier<Block> targetBlock) {
-        return crossCutout(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock));
+        return crossCutout(RegistryUtil.getTextureLocationOrDefault(targetBlock));
     }
 
     /**
@@ -483,6 +479,350 @@ public final class ModelUtil {
     }
 
     /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_COLUMN} template.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.pickBlockPrefix(sideTexture)}</li>
+     *         <li>{@link TextureSlot#END} -> {@code RegistryUtil.pickBlockPrefix(endTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the owner {@link Block} to be used for
+     *                   automatic model location resolution.
+     * @param sideTexture The {@link ResourceLocation} pointing towards the side texture for the block model.
+     * @param endTexture The {@link ResourceLocation} pointing towards the end texture for the block model.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_COLUMN} template.
+     */
+    public static BlockModelDefinition cubeColumn(Supplier<Block> targetBlock, ResourceLocation sideTexture, ResourceLocation endTexture) {
+        return new BlockModelDefinition(ModelTemplates.CUBE_COLUMN)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.SIDE, RegistryUtil.pickBlockPrefix(sideTexture))
+                        .put(TextureSlot.END, RegistryUtil.pickBlockPrefix(endTexture)))
+                .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get()))));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_COLUMN} template using the same texture for all sides.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.pickBlockPrefix(baseTexture)}</li>
+     *         <li>{@link TextureSlot#END} -> {@code RegistryUtil.pickBlockPrefix(baseTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the owner {@link Block} to be used for
+     *                   automatic model location resolution.
+     * @param baseTexture The {@link ResourceLocation} pointing towards the texture to use for all sides of the block model.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_COLUMN} template.
+     */
+    public static BlockModelDefinition cubeColumn(Supplier<Block> targetBlock, ResourceLocation baseTexture) {
+        return cubeColumn(targetBlock, baseTexture, baseTexture);
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_COLUMN} template using default texture locations.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock)}</li>
+     *         <li>{@link TextureSlot#END} -> {@code RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_top")}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the owner {@link Block} to be used for
+     *                   automatic texture and model location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_COLUMN} template.
+     */
+    public static BlockModelDefinition cubeColumn(Supplier<Block> targetBlock) {
+        return cubeColumn(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock), RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_top"));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_COLUMN_HORIZONTAL} template.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.pickBlockPrefix(sideTexture)}</li>
+     *         <li>{@link TextureSlot#END} -> {@code RegistryUtil.pickBlockPrefix(endTexture)}</li>
+     *     </ul>
+     *
+     * @param sideTexture The {@link ResourceLocation} pointing towards the side texture for the block model.
+     * @param endTexture The {@link ResourceLocation} pointing towards the end texture for the block model.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_COLUMN_HORIZONTAL} template.
+     */
+    public static BlockModelDefinition cubeColumnHorizontal(ResourceLocation sideTexture, ResourceLocation endTexture) {
+        return new BlockModelDefinition(ModelTemplates.CUBE_COLUMN_HORIZONTAL)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.SIDE, RegistryUtil.pickBlockPrefix(sideTexture))
+                        .put(TextureSlot.END, RegistryUtil.pickBlockPrefix(endTexture)));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_COLUMN_HORIZONTAL} template using the same texture for all sides.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.pickBlockPrefix(baseTexture)}</li>
+     *         <li>{@link TextureSlot#END} -> {@code RegistryUtil.pickBlockPrefix(baseTexture)}</li>
+     *     </ul>
+     *
+     * @param baseTexture The {@link ResourceLocation} pointing towards the texture to use for all sides of the block model.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_COLUMN_HORIZONTAL} template.
+     */
+    public static BlockModelDefinition cubeColumnHorizontal(ResourceLocation baseTexture) {
+        return cubeColumnHorizontal(baseTexture, baseTexture);
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_COLUMN_HORIZONTAL} template using default texture locations.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *         <li>{@link TextureSlot#END} -> {@code RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_top")}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the owner {@link Block} to be used for
+     *                   automatic texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_COLUMN_HORIZONTAL} template.
+     */
+    public static BlockModelDefinition cubeColumnHorizontal(Supplier<Block> targetBlock) {
+        return cubeColumnHorizontal(RegistryUtil.getTextureLocationOrDefault(targetBlock), RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_top"));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_COLUMN_MIRRORED} template.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.pickBlockPrefix(sideTexture)}</li>
+     *         <li>{@link TextureSlot#END} -> {@code RegistryUtil.pickBlockPrefix(endTexture)}</li>
+     *     </ul>
+     *
+     * @param sideTexture The {@link ResourceLocation} pointing towards the side texture for the block model.
+     * @param endTexture The {@link ResourceLocation} pointing towards the end texture for the block model.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_COLUMN_MIRRORED} template.
+     */
+    public static BlockModelDefinition cubeColumnMirrored(ResourceLocation sideTexture, ResourceLocation endTexture) {
+        return new BlockModelDefinition(ModelTemplates.CUBE_COLUMN_MIRRORED)
+                .withTextureMapping(new TextureMapping().put(TextureSlot.SIDE, RegistryUtil.pickBlockPrefix(sideTexture)))
+                .withTextureMapping(new TextureMapping().put(TextureSlot.END, RegistryUtil.pickBlockPrefix(endTexture)));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_COLUMN_MIRRORED} template using the same texture for all sides.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.pickBlockPrefix(baseTexture)}</li>
+     *         <li>{@link TextureSlot#END} -> {@code RegistryUtil.pickBlockPrefix(baseTexture)}</li>
+     *     </ul>
+     *
+     * @param baseTexture The {@link ResourceLocation} pointing towards the texture to use for all sides of the block model.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_COLUMN_MIRRORED} template.
+     */
+    public static BlockModelDefinition cubeColumnMirrored(ResourceLocation baseTexture) {
+        return cubeColumnMirrored(baseTexture, baseTexture);
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_COLUMN_MIRRORED} template using default texture locations.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *         <li>{@link TextureSlot#END} -> {@code RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_top")}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the owner {@link Block} to be used for
+     *                   automatic texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_COLUMN_MIRRORED} template.
+     */
+    public static BlockModelDefinition cubeColumnMirrored(Supplier<Block> targetBlock) {
+        return cubeColumnMirrored(RegistryUtil.getTextureLocationOrDefault(targetBlock), RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_top"));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} for a rotatable pillar block with the specified textures.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.pickBlockPrefix(sideTexture)}</li>
+     *         <li>{@link TextureSlot#END} -> {@code RegistryUtil.pickBlockPrefix(endTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the owner {@link Block} to be used for
+     *                   automatic model location resolution.
+     * @param sideTexture The {@link ResourceLocation} pointing towards the side texture for the pillar.
+     * @param endTexture The {@link ResourceLocation} pointing towards the end texture for the pillar.
+     *
+     * @return A {@link BlockModelDefinition} with both vertical and horizontal pillar models.
+     *
+     * @see #rotatedPillar(Supplier)
+     * @see #rotatedPillarBlockState(Supplier, ResourceLocation, ResourceLocation)
+     */
+    public static BlockModelDefinition rotatedPillar(Supplier<Block> targetBlock, ResourceLocation sideTexture, ResourceLocation endTexture) {
+        return cubeColumn(targetBlock, sideTexture, endTexture)
+                .withOrdinalModelDefinition(cubeColumnHorizontal(sideTexture, endTexture));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} for a rotatable pillar block using default texture locations.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *         <li>{@link TextureSlot#END} -> {@code RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_top")}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the owner {@link Block} to be used for
+     *                   automatic texture and model location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with both vertical and horizontal pillar models.
+     *
+     * @see #rotatedPillar(Supplier, ResourceLocation, ResourceLocation)
+     * @see #rotatedPillarBlockState(Supplier)
+     */
+    public static BlockModelDefinition rotatedPillar(Supplier<Block> targetBlock) {
+        return rotatedPillar(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock), RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_top"));
+    }
+
+    /**
+     * Creates a {@link BlockStateDefinition} for a rotatable pillar block with different models for different axes.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link Direction.Axis#Y} -> {@code baseModel}</li>
+     *         <li>{@link Direction.Axis#Z} -> {@code horizontalModel} with 90° X rotation</li>
+     *         <li>{@link Direction.Axis#X} -> {@code horizontalModel} with 90° X and Y rotation</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the pillar {@link Block}.
+     * @param baseModel The {@link ResourceLocation} of the model to use for vertical (Y-axis) orientation.
+     * @param horizontalModel The {@link ResourceLocation} of the model to use for horizontal (X/Z-axis) orientation.
+     *
+     * @return A {@link BlockStateDefinition} with axis-based model variants.
+     *
+     * @see #rotatedPillarBlockState(Supplier)
+     * @see #rotatedPillar(Supplier, ResourceLocation, ResourceLocation)
+     */
+    public static BlockStateDefinition rotatedPillarBlockState(Supplier<Block> targetBlock, ResourceLocation baseModel, ResourceLocation horizontalModel) {
+        return new BlockStateDefinition(targetBlock)
+                .withBlockStateSupplier(MultiVariantGenerator.multiVariant(targetBlock.get())
+                        .with(PropertyDispatch.property(BlockStateProperties.AXIS)
+                                .select(Direction.Axis.Y, Variant.variant()
+                                        .with(VariantProperties.MODEL, baseModel))
+                                .select(Direction.Axis.Z, Variant.variant()
+                                        .with(VariantProperties.MODEL, horizontalModel)
+                                        .with(VariantProperties.X_ROT, VariantProperties.Rotation.R90))
+                                .select(Direction.Axis.X, Variant.variant()
+                                        .with(VariantProperties.MODEL, horizontalModel)
+                                        .with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))));
+    }
+
+    /**
+     * Creates a {@link BlockStateDefinition} for a rotated pillar block with different models for different axes using
+     * default model locations.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link Direction.Axis#Y} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get())}</li>
+     *         <li>{@link Direction.Axis#Z} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_horizontal")}</li>
+     *         <li>{@link Direction.Axis#X} -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_horizontal")}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the pillar {@link Block}.
+     *
+     * @return A {@link BlockStateDefinition} with axis-based model variants.
+     *
+     * @see #rotatedPillarBlockState(Supplier, ResourceLocation, ResourceLocation)
+     * @see #rotatedPillar(Supplier)
+     */
+    public static BlockStateDefinition rotatedPillarBlockState(Supplier<Block> targetBlock) {
+        return rotatedPillarBlockState(targetBlock, ModelLocationUtils.getModelLocation(targetBlock.get()), ModelLocationUtils.getModelLocation(targetBlock.get(), "_horizontal"));
+    }
+
+    /**
+     * Creates a {@link BlockStateDefinition}, using {@link MultiVariantGenerator} to update the supplied
+     * {@linkplain Block Block's} model based on its rotation across all 3 axis.
+     * <p>
+     * <h3>Variants / Properties</h3>
+     * <ul>
+     *  <li>{@link VariantProperties#MODEL} -> {@code baseModel}</li>
+     *  <li>{@link BlockStateProperties#AXIS} -> <ul>
+     *      <li>{@link Direction.Axis#X} -> <ul>
+     *          <li>{@link VariantProperties#X_ROT} -> {@link VariantProperties.Rotation#R90}</li>
+     *          <li>{@link VariantProperties#Y_ROT} -> {@link VariantProperties.Rotation#R90}</li>
+     *      </ul></li>
+     *      <li>{@link Direction.Axis#Y} -> <ul>
+     *      </ul></li>
+     *      <li>{@link Direction.Axis#Z} -> <ul>
+     *          <li>{@link VariantProperties#X_ROT} -> {@link VariantProperties.Rotation#R90}</li>
+     *      </ul></li>
+     *  </ul></li>
+     * </ul>
+     *
+     * @param targetBlock The {@linkplain Block Block} to use as the base for the {@link BlockStateDefinition}.
+     *
+     * @return A {@link BlockStateDefinition}, using {@link MultiVariantGenerator} to update the supplied
+     * {@linkplain Block Block's} model based on its rotation across all 3 axis.
+     */
+    public static BlockStateDefinition axisAlignedBlock(Supplier<Block> targetBlock, ResourceLocation baseModel) {
+        return new BlockStateDefinition(targetBlock)
+                .withBlockStateSupplier(MultiVariantGenerator.multiVariant(targetBlock.get(), Variant.variant().with(VariantProperties.MODEL, baseModel))
+                        .with(PropertyDispatch
+                                .property(BlockStateProperties.AXIS)
+                                .select(Direction.Axis.Y, Variant.variant())
+                                .select(Direction.Axis.Z, Variant.variant()
+                                        .with(VariantProperties.X_ROT, VariantProperties.Rotation.R90))
+                                .select(Direction.Axis.X, Variant.variant()
+                                        .with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))));
+    }
+
+    /**
+     * Overloaded variant of {@link #axisAlignedBlock(Supplier, ResourceLocation)}. Creates a {@link BlockStateDefinition},
+     * using {@link MultiVariantGenerator} to update the supplied {@linkplain Block Block's} model based on its rotation
+     * across all 3 axis. Defaults to the supplied {@linkplain Block Block's} default model location.
+     * <p>
+     * <h3>Variants / Properties</h3>
+     * <ul>
+     *  <li>{@link BlockStateProperties#AXIS} -> <ul>
+     *      <li>{@link Direction.Axis#X} -> <ul>
+     *          <li>{@link VariantProperties#MODEL} -> {@code horizontalModel}</li>
+     *          <li>{@link VariantProperties#X_ROT} -> {@link VariantProperties.Rotation#R90}</li>
+     *          <li>{@link VariantProperties#Y_ROT} -> {@link VariantProperties.Rotation#R90}</li>
+     *      </ul></li>
+     *      <li>{@link Direction.Axis#Y} -> <ul>
+     *          <li>{@link VariantProperties#MODEL} -> {@code baseModel}</li>
+     *      </ul></li>
+     *      <li>{@link Direction.Axis#Z} -> <ul>
+     *          <li>{@link VariantProperties#MODEL} -> {@code horizontalModel}</li>
+     *          <li>{@link VariantProperties#X_ROT} -> {@link VariantProperties.Rotation#R90}</li>
+     *      </ul></li>
+     *  </ul></li>
+     * </ul>
+     *
+     * @param targetBlock The {@linkplain Block Block} to use as the base for the {@link BlockStateDefinition}.
+     *
+     * @return A {@link BlockStateDefinition}, using {@link MultiVariantGenerator} to update the supplied
+     * {@linkplain Block Block's} model based on its rotation across all 3 axis, with the target model defaulting to
+     * {@link ModelLocationUtils#getModelLocation(Block)}.
+     */
+    public static BlockStateDefinition axisAlignedBlock(Supplier<Block> targetBlock) {
+        return axisAlignedBlock(targetBlock, ModelLocationUtils.getModelLocation(targetBlock.get()));
+    }
+
+    /**
      * Creates two {@link BlockModelDefinition}s for a double plant block, with separate top and bottom {@link ModelTemplates#CROSS}
      * models using {@link #CUTOUT_RENDER_TYPE}. Generates a single item model from the bottom model.
      * <p>
@@ -495,8 +835,6 @@ public final class ModelUtil {
      *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.pickBlockPrefix(bottomTexture)}</li>
      *     </ul>
      *
-     * @param targetBlock The {@code Supplier<Block>} representing the double plant {@link Block} to be used for
-     *                    automatic model location resolution.
      * @param topTexture The {@link ResourceLocation} representing the texture of the upper half.
      * @param bottomTexture The {@link ResourceLocation} representing the texture of the lower half.
      *
@@ -505,14 +843,14 @@ public final class ModelUtil {
      * @see #doublePlant(Supplier)
      * @see #doublePlantBlockState(Supplier, ResourceLocation, ResourceLocation)
      */
-    public static BlockModelDefinition doublePlant(Supplier<Block> targetBlock, ResourceLocation topTexture, ResourceLocation bottomTexture) {
-        return crossCutout(targetBlock, topTexture)
-                .withOrdinalModelDefinition(crossCutout(targetBlock, bottomTexture)
+    public static BlockModelDefinition doublePlant(ResourceLocation topTexture, ResourceLocation bottomTexture) {
+        return crossCutout(topTexture)
+                .withOrdinalModelDefinition(crossCutout(bottomTexture)
                         .setOrdinalModelDefinitions(ObjectArrayList.of())); // Ensure generation of 1 item model, not 2
     }
 
     /**
-     * Overloaded variant of {@link #doublePlant(Supplier, ResourceLocation, ResourceLocation)}. Creates two
+     * Overloaded variant of {@link #doublePlant(ResourceLocation, ResourceLocation)}. Creates two
      * {@link BlockModelDefinition}s for a double plant block using automatic texture resolution with {@code _top} and
      * {@code _bottom} suffixes.
      * <p>
@@ -530,11 +868,11 @@ public final class ModelUtil {
      *
      * @return A {@link BlockModelDefinition} with nested top and bottom {@link ModelTemplates#CROSS} models.
      *
-     * @see #doublePlant(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doublePlant(ResourceLocation, ResourceLocation)
      * @see #doublePlantBlockState(Supplier)
      */
     public static BlockModelDefinition doublePlant(Supplier<Block> targetBlock) {
-        return doublePlant(targetBlock, RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_top"), RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_bottom"));
+        return doublePlant(RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_top"), RegistryUtil.getTextureLocationOrDefaultWithSuffix(targetBlock, "_bottom"));
     }
 
     /**
@@ -559,7 +897,7 @@ public final class ModelUtil {
      * @return A {@link BlockModelDefinition} with nested top and bottom {@link ModelTemplates#TINTED_CROSS} models.
      *
      * @see #tintedDoublePlant(Supplier)
-     * @see #doublePlant(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doublePlant(ResourceLocation, ResourceLocation)
      */
     public static BlockModelDefinition tintedDoublePlant(Supplier<Block> targetBlock, ResourceLocation topTexture, ResourceLocation bottomTexture) {
         return tintedCrossCutout(targetBlock, topTexture)
@@ -611,7 +949,7 @@ public final class ModelUtil {
      * @return A {@link BlockStateDefinition} with {@link BlockStateProperties#DOUBLE_BLOCK_HALF} property dispatch.
      *
      * @see #doublePlantBlockState(Supplier)
-     * @see #doublePlant(Supplier, ResourceLocation, ResourceLocation)
+     * @see #doublePlant(ResourceLocation, ResourceLocation)
      */
     public static BlockStateDefinition doublePlantBlockState(Supplier<Block> targetBlock, ResourceLocation topModel, ResourceLocation bottomModel) {
         return new BlockStateDefinition(targetBlock)

@@ -43,6 +43,11 @@ public final class ItemPropertyWrapperTemplates {
             .copyFrom(BASIC_GENERATED)
             .withRecipe(RecipeUtil::materialFrom)
             .build();
+    public static final ItemPropertyWrapper<Item> MATERIAL_PIECE = new ItemPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_GENERATED)
+            .withRecipe(RecipeUtil::materialPieceFrom)
+            .build();
 
     private ItemPropertyWrapperTemplates() {
         throw new IllegalAccessError("Attempted to construct instance of template utility class! (ItemPropertyWrapperTemplates)");

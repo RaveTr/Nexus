@@ -144,7 +144,7 @@ public final class FabricVanillaCompat {
             }
         });
         targetBPW.getBlockStrippingMapper().ifPresent(strippedBlockMapper -> {
-            BlockState strippedParentState = strippedBlockMapper.apply(parentBlockSup);
+            BlockState strippedParentState = strippedBlockMapper.apply(parentBlock.defaultBlockState()); // This and flattening are handled appropriately via Fabric's event delegates or whatever
 
             if (strippedParentState != null) StrippableBlockRegistry.register(parentBlock, strippedParentState.getBlock());
         });
@@ -161,7 +161,7 @@ public final class FabricVanillaCompat {
             }
         });
         targetBPW.getBlockFlatteningMapper().ifPresent(flatteningMapper -> {
-            BlockState flattenedState = flatteningMapper.apply(parentBlockSup);
+            BlockState flattenedState = flatteningMapper.apply(parentBlock.defaultBlockState());
 
             if (flattenedState != null) FlattenableBlockRegistry.register(parentBlock, flattenedState);
         });
