@@ -13,8 +13,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Objects;
-
 /**
  * Mixin {@code class} that adds a small additional hook to allow for deterministic behaviour of blocks mapped to
  * {@linkplain BlockPropertyWrapper BlockPropertyWrappers} to specify custom mining levels. This is lower in priority
@@ -39,10 +37,8 @@ public abstract class DiggerItemMixin {
     @Expression("i = this.getTier().getLevel()")
     @Inject(method = "isCorrectToolForDrops", at = @At(value = "MIXINEXTRAS:EXPRESSION", shift = At.Shift.AFTER), cancellable = true)
     private void nexus$determineCorrectMiningLevelForDrops(BlockState targetState, CallbackInfoReturnable<Boolean> cir, @Local int curMiningLevel) {
-        PropertyWrapper.getMappedPropertyWrappers().entrySet().stream()
-                .filter(entry -> Objects.equals(entry.getKey().get(), targetState.getBlock()))
-                .findFirst()
-                .map(entry -> (BlockPropertyWrapper<Block>) entry.getValue())
+        PropertyWrapper.PropertyWrappersContainer.getWrapperFor(targetState.getBlock())
+                .map(curPW -> (BlockPropertyWrapper<Block>) curPW)
                 .ifPresent(mappedBPW -> {
                     int minMiningLevel = mappedBPW.getMinMiningLevel();
 

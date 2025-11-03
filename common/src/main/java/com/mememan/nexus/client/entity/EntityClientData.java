@@ -32,7 +32,7 @@ import java.util.function.Supplier;
  *              public static final Supplier<EntityType<YourEntity>> YOUR_ENTITY = new EntityTypePropertyWrapper<>(EntityTypePropertyWrapperTemplates.registerEntityType(new ResourceLocation("your_mod_id", "your_entity"), () -> ...), "your_mod_id")
  *                      .builder()
  *                      .withAttributes(YourEntity::createAttributeMethodReference)
- *                      .withClientData(() -> SomeClientOnlyClass.YOUR_ENTITY_DATA) // This works, because lambda expressions don't create direct class references in bytecode
+ *                      .withClientData(() -> SomeClientOnlyClass.YOUR_ENTITY_DATA) // This works, because lambda expressions don't create direct class references in bytecode. You can also wrap the original field in a Supplier.
  *                      .buildAndGet();
  *          }
  *     }
@@ -42,14 +42,14 @@ import java.util.function.Supplier;
  * stuff behind suppliers and such?
  * <br></br>
  * Well, the short answer is that side-stripping checks are done during classloading time, not initialization/linking,
- * so even import statements are unsafe due to the fact that they create unresolvable references inside your class's
- * constant pool when the JVM attempts to resolve them from the classloader's cache.
+ * so even import statements that point to side-stripped classes are unsafe due to the fact that they create unresolvable
+ * references inside your class's constant pool when the JVM attempts to resolve them from the classloader's cache.
  *
  * @param entityRendererMapper A mapping {@link Function} whose input is the current
  *                             {@linkplain EntityRendererProvider.Context render context}, and whose output is a
- *                             {@link EntityRenderer} whose generic type is the same as {@code E}.
+ *                             {@link EntityRenderer} whose generic type is the same as {@link E}.
  * @param mappedModelLayerDefinition A {@link Supplier} of a {@link Pair} containing a {@link ModelLayerLocation} and a
- *                                   {@link LayerDefinition}, often paired with the provided {@code entityRendererMapper}
+ *                                   {@link LayerDefinition}, often paired with the provided {@code blockEntityRendererMapper}
  *                                   to define the entity's model data.
  *                                   <br></br>
  *                                   Not required in all cases, but should at least return a {@link Supplier} whose

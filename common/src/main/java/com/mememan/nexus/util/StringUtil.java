@@ -135,7 +135,7 @@ public final class StringUtil {
      * @param suffix The suffix to find within the array.
      *
      * @return {@code true} if the {@code suffix} is found in the {@code suffixes} array, otherwise {@code false}.
-     *         Returns {@code false} if either parameter is {@code null}.
+     * Returns {@code false} if either parameter is {@code null}.
      */
     public static boolean containsSuffix(String[] suffixes, String suffix) {
         if (suffixes == null || suffix == null) return false;
@@ -150,12 +150,43 @@ public final class StringUtil {
      * @param path The input string to process, typically a registry path or similar identifier.
      *
      * @return The substring after the last underscore in {@code path}, or the entire string if no
-     *         underscore is present. Returns the input string if it is {@code null} or empty.
+     * underscore is present. Returns the input string if it is {@code null} or empty.
      */
     public static String lastToken(String path) {
         if (path == null || path.isEmpty()) return path;
         int targetIdx = path.lastIndexOf('_');
 
         return targetIdx == -1 ? path : path.substring(targetIdx + 1);
+    }
+
+    /**
+     * Extracts the first token from a path-like string, where tokens are separated by underscores.
+     *
+     * @param path The input string to process, typically a registry path or similar identifier.
+     *
+     * @return The substring before the first underscore in {@code path}, or the entire string if no
+     * underscore is present. Returns the input string if it is {@code null} or empty.
+     */
+    public static String firstToken(String path) {
+        if (path == null || path.isEmpty()) return path;
+        int targetIdx = path.indexOf('_');
+
+        return targetIdx == -1 ? path : path.substring(0, targetIdx);
+    }
+
+    /**
+     * Extracts the substring of a path-like string, where tokens are separated by underscores, up to but not including
+     * the last token.
+     *
+     * @param path The input string to process, typically a registry path or similar identifier.
+     *
+     * @return The substring before the last underscore in {@code path}, or the entire string if no
+     * underscore is present. Returns the input string if it is {@code null} or empty.
+     */
+    public static String subLastToken(String path) {
+        if (path == null || path.isEmpty()) return path;
+        int targetIdx = path.lastIndexOf('_');
+
+        return targetIdx == -1 ? path : path.substring(0, targetIdx);
     }
 }

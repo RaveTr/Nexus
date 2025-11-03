@@ -13,7 +13,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -43,10 +42,8 @@ public abstract class DiggerItemMixin {
     private boolean nexus$determineCorrectMiningLevelForDrops(boolean original, ItemStack targetStack, BlockState targetState) {
         AtomicReference<Optional<Boolean>> modifiedResult = new AtomicReference<>(Optional.empty());
 
-        PropertyWrapper.getMappedPropertyWrappers().entrySet().stream()
-                .filter(entry -> Objects.equals(entry.getKey().get(), targetState.getBlock()))
-                .findFirst()
-                .map(entry -> (BlockPropertyWrapper<Block>) entry.getValue())
+        PropertyWrapper.PropertyWrappersContainer.getWrapperFor(targetState.getBlock())
+                .map(curPW -> (BlockPropertyWrapper<Block>) curPW)
                 .ifPresent(mappedBPW -> {
                     int minMiningLevel = mappedBPW.getMinMiningLevel();
 

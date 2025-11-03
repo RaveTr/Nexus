@@ -1,5 +1,7 @@
 package com.mememan.nexus;
 
+import com.mememan.nexus.client.block_entity.BlockEntityClientData;
+import com.mememan.nexus.client.block_entity.BlockEntitySheetData;
 import com.mememan.nexus.client.entity.EntityClientData;
 import com.mememan.nexus.internal.services.FabricNetworkManager;
 import com.mememan.nexus.network.BasePacket;
@@ -8,6 +10,7 @@ import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.specialised.model.ModelBasedPropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.specialised.vanilla.VanillaBasedPropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapper;
+import com.mememan.nexus.property_wrapper.def.block_entity.BlockEntityTypePropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.entity.EntityTypePropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.item.ItemPropertyWrapper;
 import com.mememan.nexus.util.ClientUtil;
@@ -25,14 +28,23 @@ import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BannerPattern;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.material.Fluid;
 
 import java.util.function.Function;
@@ -99,6 +111,7 @@ public class NexusClientFabric implements ClientModInitializer {
         registerColorProviders();
         registerItemModelPredicates();
 
+        registerBlockEntityRenderersAndSheetData();
         registerEntityRenderersAndModelLayerDefinitions();
 
         registerRenderTypes();
@@ -156,6 +169,39 @@ public class NexusClientFabric implements ClientModInitializer {
                 .map(curPW -> (ItemPropertyWrapper<I>) curPW)
                 .filter(curPW -> !curPW.getItemModelPredicates().isEmpty())
                 .forEach(curPW -> curPW.getItemModelPredicates().forEach((predicateId, curItemPropertyFunc) -> ItemProperties.register(curPW.getParentObject().get(), predicateId, ClientUtil.toClampedItemPropertyFunction(curItemPropertyFunc))));
+    }
+
+    private static <BE extends BlockEntity> void registerBlockEntityRenderersAndSheetData() {
+        PropertyWrapper.PropertyWrappersContainer.getInferrableWrappersOfType(BlockEntityTypePropertyWrapper.class).stream()
+                .map(curPW -> (BlockEntityTypePropertyWrapper<BE>) curPW)
+                .filter(curPW -> curPW.getBlockEntityClientData().filter(curClientData -> curClientData.get() != null).isPresent())
+                .forEach(curPW -> {
+                    curPW.getBlockEntityClientData().ifPresent(curClientData -> {
+                        BlockEntityClientData<BE> clientData = curClientData.get();
+
+                        if (clientData != null) {
+                            Supplier<BlockEntityType<BE>> parentObj = curPW.getParentObject();
+                            Function<BlockEntityRendererProvider.Context, BlockEntityRenderer<BE>> blockEntityRendererMapper = clientData.blockEntityRendererMapper();
+                            Function<Supplier<BlockEntityType<BE>>, BlockEntitySheetData> blockEntitySheetDataMapper = clientData.blockEntitySheetDataMapper();
+
+                            if (blockEntityRendererMapper != null) BlockEntityRenderers.register(parentObj.get(), blockEntityRendererMapper::apply);
+                            if (blockEntitySheetDataMapper != null) {
+                                BlockEntitySheetData mappedSheetData = blockEntitySheetDataMapper.apply(parentObj);
+                                WoodType signWoodType = mappedSheetData.signWoodType();
+                                WoodType hangingSignWoodType = mappedSheetData.hangingSignWoodType();
+                                ResourceKey<BannerPattern> bannerPatternKey = mappedSheetData.bannerPatternKey();
+                                ResourceKey<BannerPattern> shieldPatternKey = mappedSheetData.shieldPatternKey();
+                                ResourceKey<String> decoratedPotMaterialName = mappedSheetData.decoratedPotMaterialName();
+
+                                if (signWoodType != null) Sheets.SIGN_MATERIALS.put(signWoodType, ClientUtil.createSignMaterial(signWoodType));
+                                if (hangingSignWoodType != null) Sheets.HANGING_SIGN_MATERIALS.put(hangingSignWoodType, ClientUtil.createHangingSignMaterial(hangingSignWoodType));
+                                if (bannerPatternKey != null) Sheets.BANNER_MATERIALS.put(bannerPatternKey, ClientUtil.createBannerMaterial(bannerPatternKey));
+                                if (shieldPatternKey != null) Sheets.SHIELD_MATERIALS.put(shieldPatternKey, ClientUtil.createShieldMaterial(shieldPatternKey));
+                                if (decoratedPotMaterialName != null) Sheets.DECORATED_POT_MATERIALS.put(decoratedPotMaterialName, ClientUtil.createDecoratedPotMaterial(decoratedPotMaterialName));
+                            }
+                        }
+                    });
+                });
     }
 
     private static <E extends Entity> void registerEntityRenderersAndModelLayerDefinitions() {

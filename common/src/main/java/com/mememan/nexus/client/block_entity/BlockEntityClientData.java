@@ -1,0 +1,75 @@
+package com.mememan.nexus.client.block_entity;
+
+import com.mememan.nexus.property_wrapper.def.block_entity.BlockEntityTypePropertyWrapper;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+/**
+ * Pseudo-side-safe holder {@code record} designed to store basic block entity renderer data.
+ * <br></br>
+ * <b>Important</b>: While it's safe to reference {@code static} instances of this {@code record} behind a lambda expression,
+ * directly constructing one in common code will likely lead to runtime exceptions being thrown due to client-side-only
+ * classes being stripped from the physical server JAR at classloading time.
+ * <br></br>
+ * For instance:
+ * <pre>
+ *     {@code
+ *          public class SomeClientOnlyClass {
+ *              public static final BlockEntityClientData<YourBlockEntity> YOUR_BLOCK_ENTITY_DATA = new BlockEntityClientData<>(YourBlockEntityRenderer::new); // Functionally takes one BlockEntityRendererProvider.Context and returns a BlockEntityRenderer<BE> instance
+ *          }
+ *
+ *          @RegistrarEntry
+ *          public class YourSideSafeEntityTypeRegistrar {
+ *
+ *              public static final Supplier<BlockEntityType<YourBlockEntity>> YOUR_BLOCK_ENTITY = new BlockEntityTypePropertyWrapper<>(EntityTypePropertyWrapperTemplates.registerEntityType(new ResourceLocation("your_mod_id", "your_block_entity"), () -> ...), "your_mod_id")
+ *                      .builder()
+ *                      .withClientData(() -> SomeClientOnlyClass.YOUR_BLOCK_ENTITY_DATA) // This works, because lambda expressions don't create direct class references in bytecode. You can also wrap the original field in a Supplier.
+ *                      .buildAndGet();
+ *          }
+ *     }
+ * </pre>
+ *
+ * Now, you may be wondering: Why not just allow for direct construction of this {@code record} and hide all the unsafe
+ * stuff behind suppliers and such?
+ * <br></br>
+ * Well, the short answer is that side-stripping checks are done during classloading time, not initialization/linking,
+ * so even import statements that point to side-stripped classes are unsafe due to the fact that they create unresolvable
+ * references inside your class's constant pool when the JVM attempts to resolve them from the classloader's cache.
+ *
+ * @param blockEntityRendererMapper A mapping {@link Function} whose input is the current
+ *                                  {@linkplain BlockEntityRendererProvider.Context render context}, and whose output is
+ *                                  a {@link BlockEntityRenderer} whose generic type is {@link BE}.
+ * @param blockEntitySheetDataMapper An optional mapping {@link Function}, whose input is typically some
+ *                                   {@code Supplier<BlockEntityType<BE>>} mapped to this BECD instance through
+ *                                   {@link BlockEntityTypePropertyWrapper}, used to  define  different data mapped in
+ *                                   {@link Sheets}. Primarily useful in cases such as signs, where sign textures have
+ *                                   to be stitched in their respective atlas in order to be displayed properly in-game.
+ *
+ * @param <BE> Any {@link BlockEntity} type.
+ *
+ * @see <a href="https://blogs.oracle.com/javamagazine/post/java-class-file-constant-pool">Oracle Blog: Java Class File Constant Pool</a>
+ * @see <a href="https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.11">JLS 17: The Class File Format</a>
+ * @see <a href="https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-5.html">JLS 17: Loading, Linking, and Initializing</a>
+ */
+public record BlockEntityClientData<BE extends BlockEntity>(Function<BlockEntityRendererProvider.Context, BlockEntityRenderer<BE>> blockEntityRendererMapper, @Nullable Function<Supplier<BlockEntityType<BE>>, BlockEntitySheetData> blockEntitySheetDataMapper) {
+
+    /**
+     * Overloaded constructor whose {@code blockEntitySheetDataMapper} is set to {@code null}.
+     *
+     * @param blockEntityRendererMapper A mapping {@link Function} whose input is the current
+     *                                  {@linkplain BlockEntityRendererProvider.Context render context}, and whose output
+     *                                  is a {@link BlockEntityRenderer} whose generic type is {@link BE}.
+     *
+     * @see BlockEntityClientData
+     */
+    public BlockEntityClientData(Function<BlockEntityRendererProvider.Context, BlockEntityRenderer<BE>> blockEntityRendererMapper) {
+        this(blockEntityRendererMapper, null);
+    }
+}

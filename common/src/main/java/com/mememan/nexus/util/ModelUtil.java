@@ -458,6 +458,64 @@ public final class ModelUtil {
     }
 
     /**
+     * Creates a {@link BlockModelDefinition} for a sign block with the specified textures.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PARTICLE} -> {@code RegistryUtil.pickBlockPrefix(signParticleTexture)}</li>
+     *     </ul>
+     *
+     * @param signParticleTexture The {@link ResourceLocation} of the sign's breaking particle texture.
+     * @param signItemTexture The {@link ResourceLocation} of the sign's item texture.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link #EMPTY_MODEL_TEMPLATE} template.
+     */
+    public static BlockModelDefinition sign(ResourceLocation signParticleTexture, ResourceLocation signItemTexture) {
+        return new BlockModelDefinition(EMPTY_MODEL_TEMPLATE)
+                .withTextureMapping(TextureMapping.particle(RegistryUtil.pickBlockPrefix(signParticleTexture)))
+                .withOrdinalModelDefinition(basicGenerated(signItemTexture));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} for a sign block using the default textures from the target block.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PARTICLE} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the sign block to use for texture resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link #EMPTY_MODEL_TEMPLATE} template.
+     *
+     * @see #sign(ResourceLocation, ResourceLocation)
+     */
+    public static BlockModelDefinition sign(Supplier<Block> targetBlock) {
+        return sign(RegistryUtil.pickBlockTexture(targetBlock), RegistryUtil.getTextureLocationOrDefault(targetBlock));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} for a hanging sign block using textures derived from the target block.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PARTICLE} -> Stripped log texture from {@code targetBlock}'s registry ID</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the hanging sign block to use for texture resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link #EMPTY_MODEL_TEMPLATE} template.
+     *
+     * @see #sign(ResourceLocation, ResourceLocation)
+     */
+    public static BlockModelDefinition hangingSign(Supplier<Block> targetBlock) {
+        return sign(
+                RegistryUtil.getTextureLocationOrDefault(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get()).withPrefix("stripped_").withPath(curPath -> curPath.replace("_hanging_sign", "_log"))),
+                RegistryUtil.getTextureLocationOrDefault(targetBlock)
+        );
+    }
+
+     /**
      * Creates a {@link BlockStateDefinition}, using {@link MultiVariantGenerator} with the {@link VariantProperties#MODEL}
      * property set to the supplied {@linkplain Block Block's} default model location.
      * <p>

@@ -12,7 +12,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.jetbrains.annotations.Nullable;
 
@@ -356,6 +356,39 @@ public final class BlockPropertyWrapperTemplates {
             .withRecipe(RecipeUtil::woodRecipeFrom)
             .withBlockStripping(VanillaUtil::standardWoodLogStrippingState)
             .withFlammability(VanillaUtil::standardFlammability)
+            .build();
+
+    public static final BlockPropertyWrapper<Block> WOODEN_STANDING_SIGN = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_AXE)
+            .withModelDefinition(ModelUtil::sign)
+            .withTag(() -> BlockTags.STANDING_SIGNS)
+            .withAdditionalTag(() -> ItemTags.SIGNS)
+            .withRecipe(RecipeUtil::woodenSignRecipeFrom)
+            .build();
+    public static final BlockPropertyWrapper<Block> WOODEN_WALL_SIGN = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(WOODEN_STANDING_SIGN)
+            .withModelDefinition(null)
+            .withBlockStateDefinition(null)
+            .setTags(ObjectArrayList.of(() -> BlockTags.WALL_SIGNS))
+            .withRecipe(null)
+            .build();
+    public static final BlockPropertyWrapper<Block> WOODEN_CEILING_HANGING_SIGN = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_AXE)
+            .withModelDefinition(ModelUtil::hangingSign)
+            .withTag(() -> BlockTags.CEILING_HANGING_SIGNS)
+            .withAdditionalTag(() -> ItemTags.HANGING_SIGNS)
+            .withRecipe(RecipeUtil::woodenHangingSignRecipeFrom)
+            .build();
+    public static final BlockPropertyWrapper<Block> WOODEN_WALL_HANGING_SIGN = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(WOODEN_CEILING_HANGING_SIGN)
+            .withModelDefinition(null)
+            .withBlockStateDefinition(null)
+            .setTags(ObjectArrayList.of(() -> BlockTags.WALL_HANGING_SIGNS))
+            .withRecipe(null)
             .build();
 
     public static final BlockPropertyWrapper<Block> CARPET = new BlockPropertyWrapper<>()

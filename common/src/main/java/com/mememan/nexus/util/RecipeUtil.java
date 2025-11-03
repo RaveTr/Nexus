@@ -1,7 +1,10 @@
 package com.mememan.nexus.util;
 
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
+import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
+import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapper;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -63,7 +66,7 @@ public final class RecipeUtil { //TODO Refactor tf out of this
                         .requires(componentItemLike)
                         .group("planks")
                         .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
-                        .save(finishedRecipe, baseRecipeId);
+                        .save(finishedRecipe, baseRecipeId + "_from_" + componentItemLikeId.getPath());
             }
         };
     }
@@ -94,9 +97,26 @@ public final class RecipeUtil { //TODO Refactor tf out of this
 
     public static <B extends Block> Consumer<Supplier<B>> woodenPlanksRecipeFromComponents(Consumer<FinishedRecipe> finishedRecipe) { // Default to this unless the end-developer specifies a particular tag for their wood types via #woodenPlanksRecipeFromTag(...) (as such recipes should be)
         return parentItemLikeSup -> {
-            woodenPlanksRecipeFromLog(finishedRecipe).accept((Supplier<Block>) parentItemLikeSup);
-            woodenPlanksRecipeFromStrippedLog(finishedRecipe).accept((Supplier<Block>) parentItemLikeSup);
-            woodenPlanksRecipeFromWood(finishedRecipe).accept((Supplier<Block>) parentItemLikeSup);
+            Runnable componentRecipeGenerator = () -> {
+                woodenPlanksRecipeFromLog(finishedRecipe).accept((Supplier<Block>) parentItemLikeSup);
+                //        woodenPlanksRecipeFromStrippedLog(finishedRecipe).accept((Supplier<Block>) parentItemLikeSup);
+                woodenPlanksRecipeFromWood(finishedRecipe).accept((Supplier<Block>) parentItemLikeSup);
+            };
+
+            PropertyWrapper.PropertyWrappersContainer.getWrapperFor(RegistryUtil.getSuppliedObjectFrom(parentItemLikeSup, parentItemLikeId -> parentItemLikeId.withPath(parentItemLikeId.getPath().replace("_planks", "_log"))).orElse(null))
+                    .map(curPW -> (BlockPropertyWrapper<B>) curPW)
+                    .ifPresentOrElse(curPW -> {
+                        curPW.getAdditionalTags().stream()
+                                .filter(curTagKey -> curTagKey.get().isFor(Registries.ITEM))
+                                .map(curTagKey -> (TagKey<Item>) curTagKey.get())
+                                .filter(curTagKey -> {
+                                    String objRegName = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLikeSup.get()).getPath();
+
+                                    return curTagKey.location().getPath().equals(objRegName.substring(0, objRegName.lastIndexOf('_')).concat("_logs"));
+                                })
+                                .findFirst()
+                                .ifPresentOrElse(curTagKey -> woodenPlanksRecipeFromTag(finishedRecipe, curTagKey).accept((Supplier<Block>) parentItemLikeSup), componentRecipeGenerator);
+                    }, componentRecipeGenerator);
         };
     }
 
@@ -581,6 +601,70 @@ public final class RecipeUtil { //TODO Refactor tf out of this
 
     public static <B extends Block> Consumer<Supplier<B>> woodenPressurePlateRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
         return woodenPressurePlateRecipeFrom(finishedRecipe, Function.identity());
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodenSignRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<B, B> woodenSignComponentMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return parentItemLikeSup -> {
+            B parentItemLike = parentItemLikeSup.get();
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+
+            B componentItemLike = woodenSignComponentMapper.apply(parentItemLike);
+
+            if (componentItemLike != null) {
+                ResourceLocation componentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(componentItemLike);
+                ResourceLocation baseRecipeId = recipeIdMapper.apply(parentItemLikeId);
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.MISC, parentItemLike, 3)
+                        .define('#', componentItemLike)
+                        .define('S', Items.STICK)
+                        .pattern("###")
+                        .pattern("###")
+                        .pattern(" S ")
+                        .group("wooden_sign")
+                        .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
+                        .save(finishedRecipe, baseRecipeId);
+            }
+        };
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodenSignRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return woodenSignRecipeFrom(finishedRecipe, parentWoodenSign -> RegistryUtil.getObjectFrom(parentWoodenSign, parentWoodenSignId -> RegistryUtil.pickBlockId(() -> parentWoodenSign)).orElse(null), recipeIdMapper);
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodenSignRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return woodenSignRecipeFrom(finishedRecipe, Function.identity());
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodenHangingSignRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<B, B> woodenHangingSignComponentMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return parentItemLikeSup -> {
+            B parentItemLike = parentItemLikeSup.get();
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+
+            B componentItemLike = woodenHangingSignComponentMapper.apply(parentItemLike);
+
+            if (componentItemLike != null) {
+                ResourceLocation componentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(componentItemLike);
+                ResourceLocation baseRecipeId = recipeIdMapper.apply(parentItemLikeId);
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.MISC, parentItemLike, 6)
+                        .define('#', componentItemLike)
+                        .define('C', Items.CHAIN)
+                        .pattern("C C")
+                        .pattern("###")
+                        .pattern("###")
+                        .group("hanging_sign")
+                        .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
+                        .save(finishedRecipe, baseRecipeId);
+            }
+        };
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodenHangingSignRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return woodenHangingSignRecipeFrom(finishedRecipe, parentHangingWoodenSign -> RegistryUtil.getObjectFrom(parentHangingWoodenSign, parentWoodenHangingSignId -> RegistryUtil.pickBlockId(() -> parentHangingWoodenSign)).orElse(null), recipeIdMapper);
+    }
+
+    public static <B extends Block> Consumer<Supplier<B>> woodenHangingSignRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return woodenHangingSignRecipeFrom(finishedRecipe, Function.identity());
     }
 
     public static <B extends Block> Consumer<Supplier<B>> woolCarpetRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<B, B> woolCarpetComponentMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {

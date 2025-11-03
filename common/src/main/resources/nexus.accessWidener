@@ -148,3 +148,6 @@ accessible field net/minecraft/core/RegistrySynchronization NETWORKABLE_REGISTRI
 
 # FoodOnAStickItem
 accessible field net/minecraft/world/item/FoodOnAStickItem consumeItemDamage I
+
+# BlockEntitySupplier
+accessible class net/minecraft/world/level/block/entity/BlockEntityType$BlockEntitySupplier

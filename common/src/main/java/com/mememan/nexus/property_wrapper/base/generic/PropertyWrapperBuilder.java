@@ -60,14 +60,14 @@ public interface PropertyWrapperBuilder<T, SELF extends PropertyWrapperBuilder<T
 
     /**
      * Overloaded variant of {@link #copyFrom(PropertyWrapper)} that copies data from the {@link PropertyWrapper}
-     * mapped to the provided {@link Supplier} (retrieved through {@link PropertyWrapper#getMappedPropertyWrappers()}).
+     * mapped to the provided {@link Supplier} (retrieved through {@link PropertyWrapper.PropertyWrappersContainer#getWrapperFor(Supplier)}).
      *
      * @param associatedPWObject The parent object mapped to another PW.
      *
      * @return {@link #copyFrom(PropertyWrapper)}.
      */
     default SELF copyFrom(Supplier<T> associatedPWObject) {
-        return copyFrom((PW) PropertyWrapper.getMappedPropertyWrappers().get(associatedPWObject));
+        return copyFrom((PW) PropertyWrapper.PropertyWrappersContainer.getWrapperFor(associatedPWObject).orElse(null));
     }
 
     /**

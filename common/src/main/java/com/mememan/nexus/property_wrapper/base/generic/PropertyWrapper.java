@@ -1,5 +1,9 @@
 package com.mememan.nexus.property_wrapper.base.generic;
 
+import com.mememan.nexus.NexusConstants;
+import com.mememan.nexus.platform.NexusServices;
+import it.unimi.dsi.fastutil.Hash;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.world.item.Item;
@@ -8,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -113,13 +118,23 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
     boolean isTemplate();
 
     /**
-     * Gets a copied view (via {@link Object2ObjectOpenHashMap}) of {@link PropertyWrappersContainer#MAPPED_PROPERTY_WRAPPERS},
+     * Gets a copied view (via {@link Object2ObjectOpenCustomHashMap}) of {@link PropertyWrappersContainer#MAPPED_PROPERTY_WRAPPERS},
      * primarily to allow for O(1) lookups while preventing modifications from being made to the original map.
      *
      * @return An immutable copy of {@link PropertyWrappersContainer#MAPPED_PROPERTY_WRAPPERS}.
      */
-    static Object2ObjectOpenHashMap<Supplier<?>, PropertyWrapper<?, ? extends PropertyWrapper<?, ?, ?>, ? extends PropertyWrapperBuilder<?, ?, ?>>> getMappedPropertyWrappers() {
-        return new Object2ObjectOpenHashMap<>(PropertyWrappersContainer.MAPPED_PROPERTY_WRAPPERS);
+    static Object2ObjectOpenCustomHashMap<Supplier<?>, PropertyWrapper<?, ? extends PropertyWrapper<?, ?, ?>, ? extends PropertyWrapperBuilder<?, ?, ?>>> getMappedPropertyWrappers() {
+        return new Object2ObjectOpenCustomHashMap<>(PropertyWrappersContainer.MAPPED_PROPERTY_WRAPPERS, new Hash.Strategy<>() {
+            @Override
+            public int hashCode(Supplier<?> o) {
+                return o.get().hashCode();
+            }
+
+            @Override
+            public boolean equals(Supplier<?> a, Supplier<?> b) {
+                return a != null && b != null && Objects.equals(a.get(), b.get());
+            }
+        });
     }
 
     /**
@@ -128,7 +143,30 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
      * as performing efficient lookups based on type and/or mod ID.
      */
     class PropertyWrappersContainer {
-        private static final Object2ObjectOpenHashMap<Supplier<?>, PropertyWrapper<?, ? extends PropertyWrapper<?, ?, ?>, ? extends PropertyWrapperBuilder<?, ?, ?>>> MAPPED_PROPERTY_WRAPPERS = new Object2ObjectOpenHashMap<>();
+        private static final Object2ObjectOpenCustomHashMap<Supplier<?>, PropertyWrapper<?, ? extends PropertyWrapper<?, ?, ?>, ? extends PropertyWrapperBuilder<?, ?, ?>>> MAPPED_PROPERTY_WRAPPERS = new Object2ObjectOpenCustomHashMap<>(new Hash.Strategy<>() {
+            @Override
+            public int hashCode(Supplier<?> o) {
+                try {
+                    return o.get() == null ? 0 : o.get().hashCode();
+                } catch (NullPointerException npe) {
+                    if (NexusServices.PLATFORM_MANAGER.isDevelopmentEnvironment()) NexusConstants.LOGGER.debug("Exception trying to hash Supplier value - In this case, it's most likely Forge's RegistryObject acting up due to PropertyWrappersContainer being initialized before deferred registration. You can ignore this warning; the custom Hash.Strategy comparisons for mapped objects (blocks, items, etc.) will still work as intended later beyond this point during runtime.", npe);
+                    return o == null ? 0 : o.hashCode();
+                }
+            }
+
+            @Override
+            public boolean equals(Supplier<?> a, Supplier<?> b) {
+                if (a == b) return true;
+                if (a == null || b == null) return false;
+
+                try {
+                    return Objects.equals(a.get(), b.get());
+                } catch (NullPointerException npe) {
+                    if (NexusServices.PLATFORM_MANAGER.isDevelopmentEnvironment()) NexusConstants.LOGGER.debug("Exception trying to compare Supplier values - In this case, it's most likely Forge's RegistryObjects acting up due to PropertyWrappersContainer being initialized before deferred registration. You can ignore this warning; the custom Hash.Strategy comparisons for mapped objects (blocks, items, etc.) will still work as intended later beyond this point during runtime.", npe);
+                    return Objects.equals(a, b);
+                }
+            }
+        });
         private static final Object2ObjectOpenHashMap<Class<?>, Map<String, List<PropertyWrapper<?, ? extends PropertyWrapper<?, ?, ?>, ? extends PropertyWrapperBuilder<?, ?, ?>>>>> CACHED_WRAPPER_LOOKUP = new Object2ObjectOpenHashMap<>();
 
         private PropertyWrappersContainer() {
@@ -387,6 +425,40 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
                     .filter(propertyWrapper -> pwClazz.isInstance(propertyWrapper) && propertyWrapper instanceof DataGenPropertyWrapper<?, ?, ?> dgpw && !dgpw.isExcludedFromDataGen())
                     .map(propertyWrapper -> (PW) propertyWrapper)
                     .collect(Collectors.toCollection(ObjectArrayList::new));
+        }
+
+        /**
+         * Shortcut getter method that allows for the retrieval of the {@link PropertyWrapper} mapped to the provided
+         * {@code parentObjSup}.
+         *
+         * @param parentObjSup The {@link Supplier} representing the object potentially mapped to a {@link PropertyWrapper}.
+         *
+         * @return An {@link Optional} containing the {@link PropertyWrapper} mapped to the provided {@code parentObjSup},
+         * or an empty {@link Optional} if no such mapping exists.
+         *
+         * @param <PW> The {@link PropertyWrapper} type.
+         *
+         * @see #getWrapperFor(Object)
+         */
+        public static <PW extends PropertyWrapper<?, ? extends PropertyWrapper<?, ?, ?>, ? extends PropertyWrapperBuilder<?, ?, ?>>> Optional<PW> getWrapperFor(Supplier<?> parentObjSup) {
+            return Optional.ofNullable((PW) MAPPED_PROPERTY_WRAPPERS.get(parentObjSup));
+        }
+
+        /**
+         * Overloaded variant of {@link #getWrapperFor(Supplier)}. Attempts to retrieve the {@link PropertyWrapper} mapped
+         * to the provided {@code parentObj}, if present.
+         *
+         * @param parentObj The object potentially mapped to a {@link PropertyWrapper}.
+         *
+         * @return An {@link Optional} containing the {@link PropertyWrapper} mapped to the provided {@code parentObj},
+         * or an empty {@link Optional} if no such mapping exists.
+         *
+         * @param <PW> The {@link PropertyWrapper} type.
+         *
+         * @see #getWrapperFor(Supplier)
+         */
+        public static <PW extends PropertyWrapper<?, ? extends PropertyWrapper<?, ?, ?>, ? extends PropertyWrapperBuilder<?, ?, ?>>> Optional<PW> getWrapperFor(Object parentObj) {
+            return getWrapperFor(() -> parentObj);
         }
     }
 }
