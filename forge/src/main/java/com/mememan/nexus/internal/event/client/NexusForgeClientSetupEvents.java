@@ -39,7 +39,9 @@ import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -95,6 +97,11 @@ public class NexusForgeClientSetupEvents {
                 .map(curPW -> (EntityTypePropertyWrapper<?>) curPW)
                 .filter(curPW -> curPW.getEntityClientData().filter(curClientData -> curClientData.get() != null).isPresent())
                 .forEach(curPW -> registerEntityModelLayerDefinitions(curPW, event));
+
+        PropertyWrapper.PropertyWrappersContainer.getInferrableWrappersOfType(BlockEntityTypePropertyWrapper.class).stream()
+                .map(curPW -> (BlockEntityTypePropertyWrapper<?>) curPW)
+                .filter(curPW -> curPW.getBlockEntityClientData().filter(curClientData -> curClientData.get() != null).isPresent())
+                .forEach(curPW -> registerBlockEntityModelLayerDefinitions(curPW, event));
     }
 
     @SubscribeEvent
@@ -187,21 +194,24 @@ public class NexusForgeClientSetupEvents {
 
             if (clientData != null) {
                 Supplier<BlockEntityType<BE>> parentObj = targetBEPW.getParentObject();
-                Function<Supplier<BlockEntityType<BE>>, BlockEntitySheetData> blockEntitySheetDataMapper = clientData.blockEntitySheetDataMapper();
+                @Nullable Function<Supplier<BlockEntityType<BE>>, Collection<BlockEntitySheetData>> blockEntitySheetDataMapper = clientData.blockEntitySheetDataMapper();
 
                 if (blockEntitySheetDataMapper != null) {
-                    BlockEntitySheetData mappedSheetData = blockEntitySheetDataMapper.apply(parentObj);
-                    WoodType signWoodType = mappedSheetData.signWoodType();
-                    WoodType hangingSignWoodType = mappedSheetData.hangingSignWoodType();
-                    ResourceKey<BannerPattern> bannerPatternKey = mappedSheetData.bannerPatternKey();
-                    ResourceKey<BannerPattern> shieldPatternKey = mappedSheetData.shieldPatternKey();
-                    ResourceKey<String> decoratedPotMaterialName = mappedSheetData.decoratedPotMaterialName();
+                    Collection<BlockEntitySheetData> collectedMappedSheetData = blockEntitySheetDataMapper.apply(parentObj);
 
-                    if (signWoodType != null) Sheets.SIGN_MATERIALS.put(signWoodType, ClientUtil.createSignMaterial(signWoodType));
-                    if (hangingSignWoodType != null) Sheets.HANGING_SIGN_MATERIALS.put(hangingSignWoodType, ClientUtil.createHangingSignMaterial(hangingSignWoodType));
-                    if (bannerPatternKey != null) Sheets.BANNER_MATERIALS.put(bannerPatternKey, ClientUtil.createBannerMaterial(bannerPatternKey));
-                    if (shieldPatternKey != null) Sheets.SHIELD_MATERIALS.put(shieldPatternKey, ClientUtil.createShieldMaterial(shieldPatternKey));
-                    if (decoratedPotMaterialName != null) Sheets.DECORATED_POT_MATERIALS.put(decoratedPotMaterialName, ClientUtil.createDecoratedPotMaterial(decoratedPotMaterialName));
+                    collectedMappedSheetData.forEach(mappedSheetData -> {
+                        WoodType signWoodType = mappedSheetData.signWoodType();
+                        WoodType hangingSignWoodType = mappedSheetData.hangingSignWoodType();
+                        ResourceKey<BannerPattern> bannerPatternKey = mappedSheetData.bannerPatternKey();
+                        ResourceKey<BannerPattern> shieldPatternKey = mappedSheetData.shieldPatternKey();
+                        ResourceKey<String> decoratedPotMaterialName = mappedSheetData.decoratedPotMaterialName();
+
+                        if (signWoodType != null) Sheets.SIGN_MATERIALS.put(signWoodType, ClientUtil.createSignMaterial(signWoodType));
+                        if (hangingSignWoodType != null) Sheets.HANGING_SIGN_MATERIALS.put(hangingSignWoodType, ClientUtil.createHangingSignMaterial(hangingSignWoodType));
+                        if (bannerPatternKey != null) Sheets.BANNER_MATERIALS.put(bannerPatternKey, ClientUtil.createBannerMaterial(bannerPatternKey));
+                        if (shieldPatternKey != null) Sheets.SHIELD_MATERIALS.put(shieldPatternKey, ClientUtil.createShieldMaterial(shieldPatternKey));
+                        if (decoratedPotMaterialName != null) Sheets.DECORATED_POT_MATERIALS.put(decoratedPotMaterialName, ClientUtil.createDecoratedPotMaterial(decoratedPotMaterialName));
+                    });
                 }
             }
         });
@@ -220,6 +230,26 @@ public class NexusForgeClientSetupEvents {
                     LayerDefinition layerDef = mappedModelLayerDef.right();
 
                     if (layerLoc != null && layerDef != null) event.registerLayerDefinition(layerLoc, () -> layerDef);
+                }
+            }
+        });
+    }
+
+    private static <BE extends BlockEntity> void registerBlockEntityModelLayerDefinitions(BlockEntityTypePropertyWrapper<BE> targetBETPW, EntityRenderersEvent.RegisterLayerDefinitions event) {
+        targetBETPW.getBlockEntityClientData().ifPresent(curClientData -> {
+            BlockEntityClientData<BE> clientData = curClientData.get();
+
+            if (clientData != null) {
+                Supplier<Pair<Collection<ModelLayerLocation>, LayerDefinition>> mappedLayerDefSup = clientData.mappedModelLayerDefinitions();
+
+                if (mappedLayerDefSup != null && mappedLayerDefSup.get() != null) {
+                    Pair<Collection<ModelLayerLocation>, LayerDefinition> mappedModelLayerDef = mappedLayerDefSup.get();
+                    Collection<ModelLayerLocation> layerLocs = mappedModelLayerDef.left();
+                    LayerDefinition layerDef = mappedModelLayerDef.right();
+
+                    if (layerLocs != null && layerDef != null && !layerLocs.isEmpty()) {
+                        layerLocs.forEach(layerLoc -> event.registerLayerDefinition(layerLoc, () -> layerDef));
+                    }
                 }
             }
         });

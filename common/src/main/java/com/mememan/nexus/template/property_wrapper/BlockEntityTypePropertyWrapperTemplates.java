@@ -21,7 +21,11 @@ import java.util.function.Supplier;
 public final class BlockEntityTypePropertyWrapperTemplates {
     public static final BlockEntityTypePropertyWrapper<SignBlockEntity> SIGN = new BlockEntityTypePropertyWrapper<SignBlockEntity>()
             .builder()
-            .withClientData(ClientDataEntryTemplates.SIGN_CLIENT_DATA)
+            .withClientData(() -> ClientDataEntryTemplates.SIGN_CLIENT_DATA)
+            .build();
+    public static final BlockEntityTypePropertyWrapper<SignBlockEntity> HANGING_SIGN = new BlockEntityTypePropertyWrapper<SignBlockEntity>()
+            .builder()
+            .withClientData(() -> ClientDataEntryTemplates.HANGING_SIGN_CLIENT_DATA)
             .build();
 
     private BlockEntityTypePropertyWrapperTemplates() {
@@ -40,10 +44,10 @@ public final class BlockEntityTypePropertyWrapperTemplates {
      *
      * @param <BE> Any {@link BlockEntity} type.
      */
-    public static <BE extends BlockEntity> Supplier<BlockEntityType<BE>> registerBlockEntityType(ResourceLocation blockEntityId, Supplier<BlockEntityType<BE>> blockEntityTypeSup, Collection<Supplier<BlockEntityType<BE>>> blockEntityTypeSupCol) {
+    public static <BE extends BlockEntity> Supplier<BlockEntityType<BE>> registerBlockEntityType(ResourceLocation blockEntityId, Supplier<BlockEntityType<BE>> blockEntityTypeSup, Collection<Supplier<BlockEntityType<BlockEntity>>> blockEntityTypeSupCol) {
         Supplier<BlockEntityType<BE>> registeredBlockEntityType = NexusServices.REGISTRAR.registerObject(blockEntityId, blockEntityTypeSup, BuiltInRegistries.BLOCK_ENTITY_TYPE);
 
-        if (blockEntityTypeSupCol != null) blockEntityTypeSupCol.add(registeredBlockEntityType);
+        if (blockEntityTypeSupCol != null) blockEntityTypeSupCol.add(() -> (BlockEntityType<BlockEntity>) registeredBlockEntityType.get());
 
         return registeredBlockEntityType;
     }
@@ -79,7 +83,7 @@ public final class BlockEntityTypePropertyWrapperTemplates {
      *
      * @param <BE> Any {@link BlockEntity} type.
      */
-    public static <BE extends BlockEntity> Supplier<BlockEntityType<BE>> registerBlockEntityTypeFromTemplate(ResourceLocation blockEntityId, Supplier<BlockEntityType<BE>> blockEntityTypeSup, BlockEntityTypePropertyWrapper<? super BE> templateBEPW, @Nullable Collection<Supplier<BlockEntityType<BE>>> blockEntityTypeSupCol) {
+    public static <BE extends BlockEntity> Supplier<BlockEntityType<BE>> registerBlockEntityTypeFromTemplate(ResourceLocation blockEntityId, Supplier<BlockEntityType<BE>> blockEntityTypeSup, BlockEntityTypePropertyWrapper<? super BE> templateBEPW, @Nullable Collection<Supplier<BlockEntityType<BlockEntity>>> blockEntityTypeSupCol) {
         Supplier<BlockEntityType<BE>> registeredBlockEntityType = registerBlockEntityType(blockEntityId, blockEntityTypeSup, blockEntityTypeSupCol);
 
         return new BlockEntityTypePropertyWrapper<>(registeredBlockEntityType, blockEntityId.getNamespace())
@@ -121,7 +125,7 @@ public final class BlockEntityTypePropertyWrapperTemplates {
      *
      * @param <BE> Any {@link BlockEntity} type.
      */
-    public static <BE extends BlockEntity> BlockEntityTypePropertyWrapperBuilder<BE> registerAndChain(ResourceLocation blockEntityId, Supplier<BlockEntityType<BE>> blockEntityTypeSup, BlockEntityTypePropertyWrapper<? super BE> templateBEPW, @Nullable Collection<Supplier<BlockEntityType<BE>>> blockEntityTypeSupCol) {
+    public static <BE extends BlockEntity> BlockEntityTypePropertyWrapperBuilder<BE> registerAndChain(ResourceLocation blockEntityId, Supplier<BlockEntityType<BE>> blockEntityTypeSup, BlockEntityTypePropertyWrapper<? super BE> templateBEPW, @Nullable Collection<Supplier<BlockEntityType<BlockEntity>>> blockEntityTypeSupCol) {
         Supplier<BlockEntityType<BE>> registeredBlockEntityType = registerBlockEntityType(blockEntityId, blockEntityTypeSup, blockEntityTypeSupCol);
 
         return new BlockEntityTypePropertyWrapper<>(registeredBlockEntityType, blockEntityId.getNamespace())
@@ -161,7 +165,7 @@ public final class BlockEntityTypePropertyWrapperTemplates {
      *
      * @param <BE> Any {@link BlockEntity} type.
      */
-    public static <BE extends BlockEntity> BlockEntityTypePropertyWrapperBuilder<BE> registerAndChain(ResourceLocation blockEntityId, Supplier<BlockEntityType<BE>> blockEntityTypeSup, @Nullable Collection<Supplier<BlockEntityType<BE>>> blockEntityTypeSupCol) {
+    public static <BE extends BlockEntity> BlockEntityTypePropertyWrapperBuilder<BE> registerAndChain(ResourceLocation blockEntityId, Supplier<BlockEntityType<BE>> blockEntityTypeSup, @Nullable Collection<Supplier<BlockEntityType<BlockEntity>>> blockEntityTypeSupCol) {
         Supplier<BlockEntityType<BE>> registeredBlockEntityType = registerBlockEntityType(blockEntityId, blockEntityTypeSup, blockEntityTypeSupCol);
 
         return new BlockEntityTypePropertyWrapper<>(registeredBlockEntityType, blockEntityId.getNamespace())
@@ -180,6 +184,6 @@ public final class BlockEntityTypePropertyWrapperTemplates {
      * @param <BE> Any {@link BlockEntity} type.
      */
     public static <BE extends BlockEntity> BlockEntityTypePropertyWrapperBuilder<BE> registerAndChain(ResourceLocation blockEntityId, Supplier<BlockEntityType<BE>> blockEntityTypeSup) {
-        return registerAndChain(blockEntityId, blockEntityTypeSup, (Collection<Supplier<BlockEntityType<BE>>>) null);
+        return registerAndChain(blockEntityId, blockEntityTypeSup, (Collection<Supplier<BlockEntityType<BlockEntity>>>) null);
     }
 }

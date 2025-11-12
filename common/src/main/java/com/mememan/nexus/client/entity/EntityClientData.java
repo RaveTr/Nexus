@@ -32,7 +32,7 @@ import java.util.function.Supplier;
  *              public static final Supplier<EntityType<YourEntity>> YOUR_ENTITY = new EntityTypePropertyWrapper<>(EntityTypePropertyWrapperTemplates.registerEntityType(new ResourceLocation("your_mod_id", "your_entity"), () -> ...), "your_mod_id")
  *                      .builder()
  *                      .withAttributes(YourEntity::createAttributeMethodReference)
- *                      .withClientData(() -> SomeClientOnlyClass.YOUR_ENTITY_DATA) // This works, because lambda expressions don't create direct class references in bytecode. You can also wrap the original field in a Supplier.
+ *                      .withClientData(() -> SomeClientOnlyClass.YOUR_ENTITY_DATA) // This works, because lambda expressions don't create direct class references in bytecode
  *                      .buildAndGet();
  *          }
  *     }
@@ -49,7 +49,7 @@ import java.util.function.Supplier;
  *                             {@linkplain EntityRendererProvider.Context render context}, and whose output is a
  *                             {@link EntityRenderer} whose generic type is the same as {@link E}.
  * @param mappedModelLayerDefinition A {@link Supplier} of a {@link Pair} containing a {@link ModelLayerLocation} and a
- *                                   {@link LayerDefinition}, often paired with the provided {@code blockEntityRendererMapper}
+ *                                   {@link LayerDefinition}, often paired with the provided {@code entityRendererMapper}
  *                                   to define the entity's model data.
  *                                   <br></br>
  *                                   Not required in all cases, but should at least return a {@link Supplier} whose

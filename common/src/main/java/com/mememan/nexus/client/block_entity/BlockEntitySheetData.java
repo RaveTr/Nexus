@@ -79,6 +79,30 @@ public record BlockEntitySheetData(@Nullable WoodType signWoodType, @Nullable Wo
     }
 
     /**
+     * Creates a new {@link BlockEntitySheetData} instance with the specified {@link WoodType} for a given sign.
+     *
+     * @param signWoodType The {@link WoodType} of the sign.
+     *
+     * @return A new {@link BlockEntitySheetData} instance with the specified {@link WoodType} for some given sign.
+     */
+    public static BlockEntitySheetData forSoleSign(WoodType signWoodType) {
+        return forSign(signWoodType, null);
+    }
+
+    /**
+     * Creates a new {@link BlockEntitySheetData} instance with the specified {@link WoodType} shared for a given
+     * hanging sign.
+     *
+     * @param hangingSignWoodType The {@link WoodType} of the hanging sign.
+     *
+     * @return A new {@link BlockEntitySheetData} instance with the specified {@link WoodType} for some given hanging
+     * sign.
+     */
+    public static BlockEntitySheetData forHangingSign(WoodType hangingSignWoodType) {
+        return forSign(null, hangingSignWoodType);
+    }
+
+    /**
      * Creates a new {@link BlockEntitySheetData} instance with the specified {@link ResourceKey}s for some given banner
      * and shield patterns.
      *

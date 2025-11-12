@@ -18,7 +18,7 @@ public class DefaultableSignBlockEntity extends SignBlockEntity {
     }
 
     public DefaultableSignBlockEntity(Supplier<BlockEntityType<?>> wrappedType, BlockPos pos, BlockState blockState) {
-        super(BlockEntityType.SIGN, pos, blockState);
+        super(wrappedType.get(), pos, blockState);
 
         this.wrappedType = wrappedType;
     }

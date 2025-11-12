@@ -372,6 +372,7 @@ public final class BlockPropertyWrapperTemplates {
             .withModelDefinition(null)
             .withBlockStateDefinition(null)
             .setTags(ObjectArrayList.of(() -> BlockTags.WALL_SIGNS))
+            .setAdditionalTags(ObjectArrayList.of())
             .withRecipe(null)
             .build();
     public static final BlockPropertyWrapper<Block> WOODEN_CEILING_HANGING_SIGN = new BlockPropertyWrapper<>()
@@ -388,6 +389,7 @@ public final class BlockPropertyWrapperTemplates {
             .withModelDefinition(null)
             .withBlockStateDefinition(null)
             .setTags(ObjectArrayList.of(() -> BlockTags.WALL_HANGING_SIGNS))
+            .setAdditionalTags(ObjectArrayList.of())
             .withRecipe(null)
             .build();
 

@@ -124,7 +124,7 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
      * @return An immutable copy of {@link PropertyWrappersContainer#MAPPED_PROPERTY_WRAPPERS}.
      */
     static Object2ObjectOpenCustomHashMap<Supplier<?>, PropertyWrapper<?, ? extends PropertyWrapper<?, ?, ?>, ? extends PropertyWrapperBuilder<?, ?, ?>>> getMappedPropertyWrappers() {
-        return new Object2ObjectOpenCustomHashMap<>(PropertyWrappersContainer.MAPPED_PROPERTY_WRAPPERS, new Hash.Strategy<>() {
+        return new Object2ObjectOpenCustomHashMap<>(PropertyWrappersContainer.MAPPED_PROPERTY_WRAPPERS, new Hash.Strategy<>() { // At this point, we can go back to writing normal HashStrategy impl
             @Override
             public int hashCode(Supplier<?> o) {
                 return o.get().hashCode();

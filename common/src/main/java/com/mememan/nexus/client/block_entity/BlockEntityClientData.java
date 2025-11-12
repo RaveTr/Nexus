@@ -1,13 +1,21 @@
 package com.mememan.nexus.client.block_entity;
 
+import com.google.common.base.Suppliers;
+import com.mememan.nexus.client.entity.EntityClientData;
 import com.mememan.nexus.property_wrapper.def.block_entity.BlockEntityTypePropertyWrapper;
+import it.unimi.dsi.fastutil.Pair;
+import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.ZombieRenderer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -30,7 +38,7 @@ import java.util.function.Supplier;
  *
  *              public static final Supplier<BlockEntityType<YourBlockEntity>> YOUR_BLOCK_ENTITY = new BlockEntityTypePropertyWrapper<>(EntityTypePropertyWrapperTemplates.registerEntityType(new ResourceLocation("your_mod_id", "your_block_entity"), () -> ...), "your_mod_id")
  *                      .builder()
- *                      .withClientData(() -> SomeClientOnlyClass.YOUR_BLOCK_ENTITY_DATA) // This works, because lambda expressions don't create direct class references in bytecode. You can also wrap the original field in a Supplier.
+ *                      .withClientData(() -> SomeClientOnlyClass.YOUR_BLOCK_ENTITY_DATA) // This works, because lambda expressions don't create direct class references in bytecode
  *                      .buildAndGet();
  *          }
  *     }
@@ -51,6 +59,21 @@ import java.util.function.Supplier;
  *                                   {@link BlockEntityTypePropertyWrapper}, used to  define  different data mapped in
  *                                   {@link Sheets}. Primarily useful in cases such as signs, where sign textures have
  *                                   to be stitched in their respective atlas in order to be displayed properly in-game.
+ * @param mappedModelLayerDefinitions A {@link Supplier} of a {@link Pair} containing a collection of
+ *                                    {@linkplain ModelLayerLocation ModelLayerLocations} and a {@link LayerDefinition},
+ *                                    often paired with the provided {@code blockEntityRendererMapper} to define the
+ *                                    block entity's model data. The reason you can map multiple layer locations to a
+ *                                    singular {@link LayerDefinition}, unlike in {@link EntityClientData}, is due to the
+ *                                    fact that assigning multiple different textures to a single block entity based on
+ *                                    some given data is quite unconventional/not typically possible otherwise.
+ *                                    <br></br>
+ *                                    Not required in all cases, but should at least return a {@link Supplier} whose
+ *                                    output is {@code null} if another model layer definition is present (Example of
+ *                                    such an edge case can be seen in
+ *                                    {@link ZombieRenderer#ZombieRenderer(EntityRendererProvider.Context)}), so leaving
+ *                                    this empty may be necessary if working with a block entity type whose layers are
+ *                                    already registered elsewhere. It should also be noted that of course, depending
+ *                                    on the implementation, you may not even need a layer definition at all.
  *
  * @param <BE> Any {@link BlockEntity} type.
  *
@@ -58,7 +81,7 @@ import java.util.function.Supplier;
  * @see <a href="https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.11">JLS 17: The Class File Format</a>
  * @see <a href="https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-5.html">JLS 17: Loading, Linking, and Initializing</a>
  */
-public record BlockEntityClientData<BE extends BlockEntity>(Function<BlockEntityRendererProvider.Context, BlockEntityRenderer<BE>> blockEntityRendererMapper, @Nullable Function<Supplier<BlockEntityType<BE>>, BlockEntitySheetData> blockEntitySheetDataMapper) {
+public record BlockEntityClientData<BE extends BlockEntity>(Function<BlockEntityRendererProvider.Context, BlockEntityRenderer<BE>> blockEntityRendererMapper, @Nullable Function<Supplier<BlockEntityType<BE>>, Collection<BlockEntitySheetData>> blockEntitySheetDataMapper, @Nullable Supplier<Pair<Collection<ModelLayerLocation>, LayerDefinition>> mappedModelLayerDefinitions) {
 
     /**
      * Overloaded constructor whose {@code blockEntitySheetDataMapper} is set to {@code null}.
@@ -70,6 +93,14 @@ public record BlockEntityClientData<BE extends BlockEntity>(Function<BlockEntity
      * @see BlockEntityClientData
      */
     public BlockEntityClientData(Function<BlockEntityRendererProvider.Context, BlockEntityRenderer<BE>> blockEntityRendererMapper) {
-        this(blockEntityRendererMapper, null);
+        this(blockEntityRendererMapper, null, Suppliers.ofInstance(null));
+    }
+
+    public BlockEntityClientData(Function<BlockEntityRendererProvider.Context, BlockEntityRenderer<BE>> blockEntityRendererMapper, @Nullable Function<Supplier<BlockEntityType<BE>>, Collection<BlockEntitySheetData>> blockEntitySheetDataMapper) {
+        this(blockEntityRendererMapper, blockEntitySheetDataMapper, Suppliers.ofInstance(null));
+    }
+
+    public BlockEntityClientData(Function<BlockEntityRendererProvider.Context, BlockEntityRenderer<BE>> blockEntityRendererMapper, @Nullable Supplier<Pair<Collection<ModelLayerLocation>, LayerDefinition>> mappedModelLayerDefinitions) {
+        this(blockEntityRendererMapper, null, mappedModelLayerDefinitions);
     }
 }
