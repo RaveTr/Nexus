@@ -53,7 +53,7 @@ public class DefaultableChestBoat extends ChestBoat {
                 .map(BoatType::getSerializedName)
                 .filter(curTypeName -> Objects.equals(curTypeName.substring(0, curTypeName.contains("-") ? curTypeName.indexOf('-') : curTypeName.length()), StringUtil.subLastToken(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(getType()).getNamespace())))
                 .findFirst()
-                .orElse(WoodType.OAK.name()));
+                .orElse(Type.OAK.getSerializedName()));
     }
 
     protected String getBoatTypeId() {

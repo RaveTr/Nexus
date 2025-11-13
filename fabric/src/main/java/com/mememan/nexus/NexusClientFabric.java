@@ -20,8 +20,9 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.fabricmc.fabric.impl.client.rendering.EntityModelLayerImpl;
+import net.fabricmc.fabric.mixin.client.rendering.EntityModelLayersAccessor;
 import net.minecraft.Util;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.item.ItemColor;
@@ -211,7 +212,10 @@ public class NexusClientFabric implements ClientModInitializer {
                                 LayerDefinition layerDef = mappedModelLayerDef.right();
 
                                 if (layerLocs != null && layerDef != null && !layerLocs.isEmpty()) {
-                                    layerLocs.forEach(layerLoc -> EntityModelLayerRegistry.registerModelLayer(layerLoc, () -> layerDef));
+                                    layerLocs.forEach(layerLoc -> {
+                                        EntityModelLayerImpl.PROVIDERS.putIfAbsent(layerLoc, () -> layerDef);
+                                        EntityModelLayersAccessor.getLayers().add(layerLoc);
+                                    });
                                 }
                             }
                         }
@@ -239,7 +243,10 @@ public class NexusClientFabric implements ClientModInitializer {
                                 LayerDefinition layerDef = mappedModelLayerDefs.right();
 
                                 if (layerLocs != null && layerDef != null && !layerLocs.isEmpty()) {
-                                    layerLocs.forEach(layerLoc -> EntityModelLayerRegistry.registerModelLayer(layerLoc, () -> layerDef));
+                                    layerLocs.forEach(layerLoc -> {
+                                        EntityModelLayerImpl.PROVIDERS.putIfAbsent(layerLoc, () -> layerDef);
+                                        EntityModelLayersAccessor.getLayers().add(layerLoc);
+                                    });
                                 }
                             }
                         }

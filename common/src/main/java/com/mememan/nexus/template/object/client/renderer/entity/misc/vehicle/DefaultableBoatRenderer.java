@@ -46,8 +46,9 @@ public class DefaultableBoatRenderer extends EntityRenderer<Boat> {
             BoatType.getKnownBoatTypes().forEach(knownBoatType -> {
                 existingBoatResources.put(knownBoatType,
                         Pair.of(
-                                RegistryUtil.pickPrefix(RegistryUtil.getTextureLocation(knownBoatType.getResourceFriendlyId(), "entity")
-                                        .orElse(knownBoatType.getResourceFriendlyId()), "textures/"),
+                                RegistryUtil.pickPrefix(RegistryUtil.getTextureLocation(knownBoatType.getResourceFriendlyId(), "entity/boat")
+                                                .or(() -> RegistryUtil.getTextureLocation(knownBoatType.getResourceFriendlyId().withSuffix("_boat"), "entity/boat"))
+                                        .orElse(knownBoatType.getResourceFriendlyId()), "textures/").withSuffix(".png"),
                                 createBoatModel(context, knownBoatType, chestBoat)
                         ));
             });
@@ -82,7 +83,8 @@ public class DefaultableBoatRenderer extends EntityRenderer<Boat> {
         else return chestBoat ? new ChestBoatModel(bakedRootModelPart) : new BoatModel(bakedRootModelPart);
     }
 
-    private ListModel<Boat> createVanillaBoatModel(EntityRendererProvider.Context context, Boat.Type type, boolean chestBoat) {
+    @NotNull
+    protected ListModel<Boat> createVanillaBoatModel(EntityRendererProvider.Context context, Boat.Type type, boolean chestBoat) {
         ModelLayerLocation vanillaBoatLayerLoc = chestBoat ? ModelLayers.createChestBoatModelName(type) : ModelLayers.createBoatModelName(type);
         ModelPart rootBoatModelPart = context.bakeLayer(vanillaBoatLayerLoc);
 
@@ -144,6 +146,10 @@ public class DefaultableBoatRenderer extends EntityRenderer<Boat> {
         if (entity instanceof DefaultableBoat defaultableBoat) boatTypeId = defaultableBoat.getBoatType().orElseThrow(() -> new IllegalArgumentException("Tried to get texture location for DefaultableBoat without specified BoatType!")).getResourceFriendlyId();
         if (entity instanceof DefaultableChestBoat defaultableChestBoat) boatTypeId = defaultableChestBoat.getBoatType().orElseThrow(() -> new IllegalArgumentException("Tried to get texture location for DefaultableChestBoat without specified BoatType!")).getResourceFriendlyId();
 
-        return RegistryUtil.pickPrefix(RegistryUtil.getTextureLocation(boatTypeId, "entity").orElse(boatTypeId), "textures/");
+        ResourceLocation finalBoatTypeId = boatTypeId;
+
+        return RegistryUtil.pickPrefix(RegistryUtil.getTextureLocation(boatTypeId, "entity/boat")
+                        .or(() -> RegistryUtil.getTextureLocation(finalBoatTypeId.withSuffix("_boat"), "entity/boat"))
+                .orElse(boatTypeId), "textures/").withSuffix(".png");
     }
 }

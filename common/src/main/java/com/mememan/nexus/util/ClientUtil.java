@@ -130,28 +130,98 @@ public class ClientUtil {
         return onClient() && targetItemColor != null ? targetItemColor::getColor : null;
     }
 
+    /**
+     * Side-safe object conversion method that attempts to convert a {@link WoodType} to a {@link Material}
+     * only if on the client. Formats the contained texture location by first looking for it under {@code entity/signs/}
+     * and then prefixing it with {@code entity/signs/} if not found via file name (both with and without the
+     * {@code "_sign"} suffix). May be {@code null}.
+     *
+     * @param signWoodType The sign's associated {@link WoodType}.
+     *
+     * @return The formatted {@link Material} if on the client. May be {@code null}.
+     */
     @Nullable
     public static Material createSignMaterial(WoodType signWoodType) {
-        return onClient() && signWoodType != null ? new Material(Sheets.SIGN_SHEET, RegistryUtil.pickPrefix(new ResourceLocation(signWoodType.name()), "entity/signs/")) : null;
+        return onClient() && signWoodType != null ? new Material(Sheets.SIGN_SHEET, RegistryUtil.pickPrefix(
+                RegistryUtil.getTextureLocation(new ResourceLocation(signWoodType.name()), "entity/signs")
+                        .or(() -> RegistryUtil.getTextureLocation(new ResourceLocation(signWoodType.name()).withSuffix("_sign"), "entity/signs"))
+                        .orElse(new ResourceLocation(signWoodType.name())), "entity/signs/")
+        ) : null;
     }
 
+    /**
+     * Side-safe object conversion method that attempts to convert a {@link WoodType} to a {@link Material}
+     * only if on the client. Formats the contained texture location by first looking for it under {@code entity/signs/hanging/}
+     * and then prefixing it with {@code entity/signs/hanging/} if not found via file name (both with and without the
+     * {@code "_hanging_sign"} suffix). May be {@code null}.
+     *
+     * @param hangingSignWoodType The hanging sign's associated {@link WoodType}.
+     *
+     * @return The formatted {@link Material} if on the client. May be {@code null}.
+     */
     @Nullable
     public static Material createHangingSignMaterial(WoodType hangingSignWoodType) {
-        return onClient() && hangingSignWoodType != null ? new Material(Sheets.SIGN_SHEET, RegistryUtil.pickPrefix(new ResourceLocation(hangingSignWoodType.name()), "entity/signs/hanging/")) : null;
+        return onClient() && hangingSignWoodType != null ? new Material(Sheets.SIGN_SHEET, RegistryUtil.pickPrefix(
+                RegistryUtil.getTextureLocation(new ResourceLocation(hangingSignWoodType.name()), "entity/signs/hanging")
+                        .or(() -> RegistryUtil.getTextureLocation(new ResourceLocation(hangingSignWoodType.name()).withSuffix("_hanging_sign"), "entity/signs/hanging"))
+                        .orElse(new ResourceLocation(hangingSignWoodType.name())), "entity/signs/hanging/")
+        ) : null;
     }
 
+    /**
+     * Side-safe object conversion method that attempts to convert a {@link ResourceKey<BannerPattern>} to a {@link Material}
+     * only if on the client. Formats the contained texture location by first looking for it under {@code entity/banner/}
+     * and then prefixing it with {@code entity/banner/} if not found via file name (both with and without the
+     * {@code "_banner"} suffix). May be {@code null}.
+     *
+     * @param bannerPatternKey The banner's associated {@link ResourceKey<BannerPattern>}.
+     *
+     * @return The formatted {@link Material} if on the client. May be {@code null}.
+     */
     @Nullable
     public static Material createBannerMaterial(ResourceKey<BannerPattern> bannerPatternKey) {
-        return onClient() && bannerPatternKey != null ? new Material(Sheets.BANNER_SHEET, RegistryUtil.pickPrefix(BannerPattern.location(bannerPatternKey, true), "entity/banner/")) : null;
+        return onClient() && bannerPatternKey != null ? new Material(Sheets.BANNER_SHEET, RegistryUtil.pickPrefix(
+                RegistryUtil.getTextureLocation(bannerPatternKey.location(), "entity/banner")
+                        .or(() -> RegistryUtil.getTextureLocation(bannerPatternKey.location().withSuffix("_banner"), "entity/banner"))
+                        .orElse(BannerPattern.location(bannerPatternKey, true)), "entity/banner/")
+        ) : null;
     }
 
+    /**
+     * Side-safe object conversion method that attempts to convert a {@link ResourceKey<BannerPattern>} to a {@link Material}
+     * only if on the client. Formats the contained texture location by first looking for it under {@code entity/shield/}
+     * and then prefixing it with {@code entity/shield/} if not found via file name (both with and without the
+     * {@code "_shield"} suffix). May be {@code null}.
+     *
+     * @param shieldPatternKey The shield's associated {@link ResourceKey<BannerPattern>}.
+     *
+     * @return The formatted {@link Material} if on the client. May be {@code null}.
+     */
     @Nullable
     public static Material createShieldMaterial(ResourceKey<BannerPattern> shieldPatternKey) {
-        return onClient() && shieldPatternKey != null ? new Material(Sheets.SHIELD_SHEET, RegistryUtil.pickPrefix(BannerPattern.location(shieldPatternKey, false), "entity/shield/")) : null;
+        return onClient() && shieldPatternKey != null ? new Material(Sheets.SHIELD_SHEET, RegistryUtil.pickPrefix(
+                RegistryUtil.getTextureLocation(shieldPatternKey.location(), "entity/shield")
+                        .or(() -> RegistryUtil.getTextureLocation(shieldPatternKey.location().withSuffix("_shield"), "entity/shield"))
+                        .orElse(BannerPattern.location(shieldPatternKey, false)), "entity/shield/")
+        ) : null;
     }
 
+    /**
+     * Side-safe object conversion method that attempts to convert a {@link ResourceKey<String>} to a {@link Material}
+     * only if on the client. Formats the contained texture location by first looking for it under {@code entity/decorated_pot/}
+     * and then prefixing it with {@code entity/decorated_pot/} if not found via file name (both with and without the
+     * {@code "_decorated_pot"} suffix). May be {@code null}.
+     *
+     * @param decoratedPotMaterialName The decorated pot's associated {@link ResourceKey<String>}.
+     *
+     * @return The formatted {@link Material} if on the client. May be {@code null}.
+     */
     @Nullable
     public static Material createDecoratedPotMaterial(ResourceKey<String> decoratedPotMaterialName) {
-        return onClient() && decoratedPotMaterialName != null ? new Material(Sheets.DECORATED_POT_SHEET, RegistryUtil.pickPrefix(DecoratedPotPatterns.location(decoratedPotMaterialName), "entity/decorated_pot/")) : null;
+        return onClient() && decoratedPotMaterialName != null ? new Material(Sheets.DECORATED_POT_SHEET, RegistryUtil.pickPrefix(
+                RegistryUtil.getTextureLocation(decoratedPotMaterialName.location(), "entity/decorated_pot")
+                        .or(() -> RegistryUtil.getTextureLocation(decoratedPotMaterialName.location().withSuffix("_decorated_pot"), "entity/decorated_pot"))
+                        .orElse(DecoratedPotPatterns.location(decoratedPotMaterialName)), "entity/decorated_pot/")
+        ) : null;
     }
 }

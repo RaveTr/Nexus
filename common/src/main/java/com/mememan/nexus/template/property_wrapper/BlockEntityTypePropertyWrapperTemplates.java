@@ -38,7 +38,7 @@ public final class BlockEntityTypePropertyWrapperTemplates {
      * @param blockEntityId The target {@linkplain BlockEntityType BlockEntityType's} {@linkplain ResourceLocation registry ID}.
      * @param blockEntityTypeSup The {@link BlockEntityType} object to register.
      * @param blockEntityTypeSupCol An optional {@link Collection} to track the registered {@link BlockEntityType}. Primarily
-     *                             useful if you want a shorthand method of tracking your own registered block entity types.
+     *                              useful if you want a shorthand method of tracking your own registered block entity types.
      *
      * @return The {@link Supplier} of the registered {@link BlockEntityType}.
      *
