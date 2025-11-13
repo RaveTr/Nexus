@@ -28,6 +28,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BannerPattern;
@@ -222,14 +223,16 @@ public class NexusForgeClientSetupEvents {
             EntityClientData<E> clientData = curClientData.get();
 
             if (clientData != null) {
-                Supplier<Pair<ModelLayerLocation, LayerDefinition>> mappedLayerDefSup = clientData.mappedModelLayerDefinition();
+                Function<Supplier<EntityType<E>>, Pair<Collection<ModelLayerLocation>, LayerDefinition>> mappedLayerDefSup = clientData.modelLayerDefinitionMapper();
 
-                if (mappedLayerDefSup != null && mappedLayerDefSup.get() != null) {
-                    Pair<ModelLayerLocation, LayerDefinition> mappedModelLayerDef = mappedLayerDefSup.get();
-                    ModelLayerLocation layerLoc = mappedModelLayerDef.left();
+                if (mappedLayerDefSup != null) {
+                    Pair<Collection<ModelLayerLocation>, LayerDefinition> mappedModelLayerDef = mappedLayerDefSup.apply(targetETPW.getParentObject());
+                    Collection<ModelLayerLocation> layerLocs = mappedModelLayerDef.left();
                     LayerDefinition layerDef = mappedModelLayerDef.right();
 
-                    if (layerLoc != null && layerDef != null) event.registerLayerDefinition(layerLoc, () -> layerDef);
+                    if (layerLocs != null && layerDef != null && !layerLocs.isEmpty()){
+                        layerLocs.forEach(layerLoc -> event.registerLayerDefinition(layerLoc, () -> layerDef));
+                    }
                 }
             }
         });

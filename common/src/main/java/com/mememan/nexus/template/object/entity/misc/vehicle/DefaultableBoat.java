@@ -50,12 +50,12 @@ public class DefaultableBoat extends Boat {
 
         this.entityData.define(BOAT_TYPE_ID, BoatType.getKnownBoatTypes().stream()
                 .map(BoatType::getSerializedName)
-                .filter(curTypeName -> Objects.equals(curTypeName, StringUtil.subLastToken(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(getType()).toString())))
+                .filter(curTypeName -> Objects.equals(curTypeName.substring(0, curTypeName.contains("-") ? curTypeName.indexOf('-') : curTypeName.length()), StringUtil.subLastToken(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(getType()).getNamespace())))
                 .findFirst()
                 .orElse(WoodType.OAK.name()));
     }
 
-    public String getBoatTypeId() {
+    protected String getBoatTypeId() {
         return this.entityData.get(BOAT_TYPE_ID);
     }
 
@@ -65,7 +65,7 @@ public class DefaultableBoat extends Boat {
                 .findFirst();
     }
 
-    public void setBoatTypeId(String id) {
+    protected void setBoatTypeId(String id) {
         this.entityData.set(BOAT_TYPE_ID, id);
     }
 
@@ -127,13 +127,13 @@ public class DefaultableBoat extends Boat {
     public @NotNull Item getDropItem() {
         return BuiltInRegistries.ITEM.getOptional(
                 DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(getType())
-                        .withPrefix(new ResourceLocation(getBoatTypeId()).getPath().concat("_"))
+                        .withPrefix(new ResourceLocation(getBoatType().map(BoatType::getResourceFriendlyId).orElse(new ResourceLocation(getBoatTypeId())).toString()).getPath().concat("_"))
                 ).orElse(super.getDropItem());
     }
 
     public Supplier<Block> getPlanks() {
         return () -> BuiltInRegistries.BLOCK.getOptional(RegistryUtil.pickSuffix(
-                Optional.ofNullable(ResourceLocation.tryParse(getBoatTypeId())).orElse(new ResourceLocation(WoodType.OAK.name())),
+                Optional.ofNullable(ResourceLocation.tryParse(getBoatType().map(BoatType::getResourceFriendlyId).orElse(new ResourceLocation(getBoatTypeId())).toString())).orElse(new ResourceLocation(WoodType.OAK.name())),
                 "_planks"
         )).orElse(getVariant().getPlanks());
     }

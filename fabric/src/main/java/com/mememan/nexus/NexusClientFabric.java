@@ -38,6 +38,7 @@ import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -228,16 +229,18 @@ public class NexusClientFabric implements ClientModInitializer {
 
                         if (clientData != null) {
                             Function<EntityRendererProvider.Context, EntityRenderer<E>> entityRendererMapper = clientData.entityRendererMapper();
-                            Supplier<Pair<ModelLayerLocation, LayerDefinition>> mappedLayerDefSup = clientData.mappedModelLayerDefinition();
+                            Function<Supplier<EntityType<E>>, Pair<Collection<ModelLayerLocation>, LayerDefinition>> layerDefMapper = clientData.modelLayerDefinitionMapper();
 
                             if (entityRendererMapper != null) EntityRendererRegistry.register(curPW.getParentObject().get(), entityRendererMapper::apply);
 
-                            if (mappedLayerDefSup != null && mappedLayerDefSup.get() != null) {
-                                Pair<ModelLayerLocation, LayerDefinition> mappedModelLayerDef = mappedLayerDefSup.get();
-                                ModelLayerLocation layerLoc = mappedModelLayerDef.left();
-                                LayerDefinition layerDef = mappedModelLayerDef.right();
+                            if (layerDefMapper != null) {
+                                Pair<Collection<ModelLayerLocation>, LayerDefinition> mappedModelLayerDefs = layerDefMapper.apply(curPW.getParentObject());
+                                Collection<ModelLayerLocation> layerLocs = mappedModelLayerDefs.left();
+                                LayerDefinition layerDef = mappedModelLayerDefs.right();
 
-                                if (layerLoc != null && layerDef != null) EntityModelLayerRegistry.registerModelLayer(layerLoc, () -> layerDef);
+                                if (layerLocs != null && layerDef != null && !layerLocs.isEmpty()) {
+                                    layerLocs.forEach(layerLoc -> EntityModelLayerRegistry.registerModelLayer(layerLoc, () -> layerDef));
+                                }
                             }
                         }
                     });

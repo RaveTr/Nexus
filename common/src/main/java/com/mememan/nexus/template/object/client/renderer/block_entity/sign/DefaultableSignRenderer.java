@@ -1,5 +1,6 @@
 package com.mememan.nexus.template.object.client.renderer.block_entity.sign;
 
+import com.mememan.nexus.util.RegistryUtil;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -27,7 +28,7 @@ public class DefaultableSignRenderer extends SignRenderer {
                 .collect(Collectors.toMap(
                         Function.identity(),
                         curWoodType -> new SignModel(context.bakeLayer(new ModelLayerLocation(
-                                new ResourceLocation(curWoodType.name()).withPrefix("sign/"),
+                                RegistryUtil.pickPrefix(new ResourceLocation(curWoodType.name()), "sign/"),
                                 "main"
                         ))),
                         (a, b) -> a,

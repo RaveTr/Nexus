@@ -1,6 +1,5 @@
 package com.mememan.nexus.client.entity;
 
-import com.google.common.base.Suppliers;
 import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
@@ -8,7 +7,9 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.ZombieRenderer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 
+import java.util.Collection;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -48,9 +49,10 @@ import java.util.function.Supplier;
  * @param entityRendererMapper A mapping {@link Function} whose input is the current
  *                             {@linkplain EntityRendererProvider.Context render context}, and whose output is a
  *                             {@link EntityRenderer} whose generic type is the same as {@link E}.
- * @param mappedModelLayerDefinition A {@link Supplier} of a {@link Pair} containing a {@link ModelLayerLocation} and a
+ * @param modelLayerDefinitionMapper A {@link Function} that outputs a {@link Pair} containing a {@link ModelLayerLocation} and a
  *                                   {@link LayerDefinition}, often paired with the provided {@code entityRendererMapper}
- *                                   to define the entity's model data.
+ *                                   to define the entity's model data. The input is a {@link Supplier} of the
+ *                                   entity type to which this client data object is mapped to.
  *                                   <br></br>
  *                                   Not required in all cases, but should at least return a {@link Supplier} whose
  *                                   output is {@code null} if another model layer definition is present (Example of
@@ -65,7 +67,7 @@ import java.util.function.Supplier;
  * @see <a href="https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.11">JLS 17: The Class File Format</a>
  * @see <a href="https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-5.html">JLS 17: Loading, Linking, and Initializing</a>
  */
-public record EntityClientData<E extends Entity>(Function<EntityRendererProvider.Context, EntityRenderer<E>> entityRendererMapper, Supplier<Pair<ModelLayerLocation, LayerDefinition>> mappedModelLayerDefinition) {
+public record EntityClientData<E extends Entity>(Function<EntityRendererProvider.Context, EntityRenderer<E>> entityRendererMapper, Function<Supplier<EntityType<E>>, Pair<Collection<ModelLayerLocation>, LayerDefinition>> modelLayerDefinitionMapper) {
 
     /**
      * Overloaded constructor for when the entity renderer mapper is the only thing needed (see {@link EntityClientData}
@@ -76,6 +78,6 @@ public record EntityClientData<E extends Entity>(Function<EntityRendererProvider
      *                             {@link EntityRenderer} whose generic type is the same as {@code E}.
      */
     public EntityClientData(Function<EntityRendererProvider.Context, EntityRenderer<E>> entityRendererMapper) {
-        this(entityRendererMapper, Suppliers.ofInstance(null));
+        this(entityRendererMapper, dummy -> null);
     }
 }

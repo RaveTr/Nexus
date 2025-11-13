@@ -28,6 +28,15 @@ public final class EntityTypePropertyWrapperTemplates {
             .withClientData(() -> ClientDataEntryTemplates.CHEST_BOAT_CLIENT_DATA)
             .build();
 
+    public static final EntityTypePropertyWrapper<Boat> RAFT = new EntityTypePropertyWrapper<Boat>()
+            .builder()
+            .withClientData(() -> ClientDataEntryTemplates.RAFT_CLIENT_DATA)
+            .build();
+    public static final EntityTypePropertyWrapper<Boat> CHEST_RAFT = new EntityTypePropertyWrapper<Boat>()
+            .builder()
+            .withClientData(() -> ClientDataEntryTemplates.CHEST_RAFT_CLIENT_DATA)
+            .build();
+
     private EntityTypePropertyWrapperTemplates() {
         throw new IllegalAccessError("Attempted to construct instance of template utility class! (EntityTypePropertyWrapperTemplates)");
     }

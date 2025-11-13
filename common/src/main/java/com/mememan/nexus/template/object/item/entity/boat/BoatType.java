@@ -2,6 +2,7 @@ package com.mememan.nexus.template.object.item.entity.boat;
 
 import com.google.common.collect.ImmutableSet;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +13,13 @@ public interface BoatType extends StringRepresentable { //TODO Abstract into a s
 
     Supplier<Block> getPlanks();
 
-    static BoatType register(String typeName, Supplier<Block> associatedPlanks) {
+    boolean isRaft();
+
+    default ResourceLocation getResourceFriendlyId() {
+        return new ResourceLocation(getSerializedName().contains("-") ? getSerializedName().replace('-', ':') : getSerializedName());
+    }
+
+    static BoatType register(String typeName, Supplier<Block> associatedPlanks, boolean isRaft) {
         return BoatTypesContainer.trackBoatType(new BoatType() {
 
             @Override
@@ -24,7 +31,16 @@ public interface BoatType extends StringRepresentable { //TODO Abstract into a s
             public Supplier<Block> getPlanks() {
                 return associatedPlanks;
             }
+
+            @Override
+            public boolean isRaft() {
+                return isRaft;
+            }
         });
+    }
+
+    static BoatType register(String typeName, Supplier<Block> associatedPlanks) {
+        return register(typeName, associatedPlanks, false);
     }
 
     static ImmutableSet<BoatType> getKnownBoatTypes() {

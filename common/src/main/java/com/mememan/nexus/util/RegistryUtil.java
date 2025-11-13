@@ -879,8 +879,8 @@ public final class RegistryUtil {
             Supplier<SignItem> woodenSignItem = ItemPropertyWrapperTemplates.registerItem(standardSignId, () -> new SignItem(new Item.Properties().stacksTo(16), woodenStandingSign.get(), woodenWallSign.get()), itemSupCol);
             Supplier<HangingSignItem> woodenHangingSignItem = ItemPropertyWrapperTemplates.registerItem(standardHangingSignId, () -> new HangingSignItem(woodenCeilingHangingSign.get(), woodenWallHangingSign.get(), new Item.Properties().stacksTo(16)), itemSupCol);
 
-            Supplier<Item> woodenBoatItem = ItemPropertyWrapperTemplates.registerBasicItem(familyId.withSuffix("_boat"), () -> new DefaultableBoatItem(false, BoatType.register(familyId.toString(), woodenPlanks), new Item.Properties().stacksTo(1)), itemSupCol);
-            Supplier<Item> woodenChestBoatItem = ItemPropertyWrapperTemplates.registerBasicItem(familyId.withSuffix("_chest_boat"), () -> new DefaultableBoatItem(true, BoatType.register(familyId.toString(), woodenPlanks), new Item.Properties().stacksTo(1)), itemSupCol);
+            Supplier<Item> woodenBoatItem = ItemPropertyWrapperTemplates.registerBasicItem(familyId.withSuffix("_boat"), () -> new DefaultableBoatItem(false, BoatType.register(familyId.toString().replace(':', '-'), woodenPlanks), new Item.Properties().stacksTo(1)), itemSupCol);
+            Supplier<Item> woodenChestBoatItem = ItemPropertyWrapperTemplates.registerBasicItem(familyId.withSuffix("_chest_boat"), () -> new DefaultableBoatItem(true, BoatType.register(familyId.toString().replace(':', '-'), woodenPlanks), new Item.Properties().stacksTo(1)), itemSupCol);
 
             BuiltInRegistries.BLOCK_ENTITY_TYPE.getOptional(familyId.withPath("sign"))
                     .map(alreadyRegisteredBaseSignBlockEntity -> {
