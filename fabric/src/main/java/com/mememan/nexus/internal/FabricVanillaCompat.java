@@ -25,6 +25,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
@@ -63,6 +64,9 @@ public final class FabricVanillaCompat {
                     curPW.getFuelMapper()
                             .filter(fuelMapper -> fuelMapper.apply(parentItemLikeSup) != null && !parentItemLike.asItem().getDefaultInstance().isEmpty())
                             .ifPresent(fuelMapper -> FuelRegistry.INSTANCE.add(parentItemLike, Math.abs(fuelMapper.apply(parentItemLikeSup))));
+                    curPW.getDispenseBehaviourMapper()
+                            .filter(dispenseBehaviourMapper -> dispenseBehaviourMapper.apply(parentItemLikeSup) != null)
+                            .ifPresent(dispenseBehaviourMapper -> DispenserBlock.registerBehavior(parentItemLike.asItem(), dispenseBehaviourMapper.apply(parentItemLikeSup)));
 
                     List<Supplier<CreativeModeTab>> parentTabs = curPW.getParentCreativeModeTabs();
 

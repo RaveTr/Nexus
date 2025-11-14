@@ -39,6 +39,9 @@ public final class ForgeVanillaCompat {
                     curPW.getCompostMapper()
                             .filter(compostMapper -> compostMapper.apply(parentItemLikeSup) != null && !parentItemLike.asItem().getDefaultInstance().isEmpty())
                             .ifPresent(compostMapper -> ComposterBlock.COMPOSTABLES.put(parentItemLike.asItem(), Math.abs(compostMapper.apply(parentItemLikeSup))));
+                    curPW.getDispenseBehaviourMapper()
+                            .filter(dispenseBehaviourMapper -> dispenseBehaviourMapper.apply(parentItemLikeSup) != null)
+                            .ifPresent(dispenseBehaviourMapper -> DispenserBlock.registerBehavior(parentItemLike.asItem(), dispenseBehaviourMapper.apply(parentItemLikeSup)));
 
                     if (curPW instanceof BlockPropertyWrapper<?> curBPW) registerBlockVanillaIntegration(curBPW);
                 });
