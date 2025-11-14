@@ -3,8 +3,10 @@ package com.mememan.nexus.property_wrapper.base.specialised.vanilla;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
+import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.block.DispenserBlock;
 
 import java.util.Collection;
 import java.util.List;
@@ -43,6 +45,16 @@ public interface VanillaBasedPropertyWrapper<IL extends ItemLike, SELF extends P
      * @see VanillaBasedPropertyWrapperBuilder#asFuel(Function)
      */
     Optional<Function<Supplier<IL>, Integer>> getFuelMapper();
+
+    /**
+     * Gets the dispense behaviour mapping {@link Function}, if present, representing the behaviour of a {@link DispenserBlock}
+     * dispensing the parent {@linkplain #getParentObject() ItemLike}.
+     *
+     * @return The dispense behaviour mapping {@link Function}. May be empty.
+     *
+     * @see VanillaBasedPropertyWrapperBuilder#asDispensable(Function)
+     */
+    Optional<Function<Supplier<IL>, DispenseItemBehavior>> getDispenseBehaviourMapper();
 
     /**
      * Gets a {@link List} of tabs the parent {@linkplain #getParentObject() ItemLike} should be listed/show up in.

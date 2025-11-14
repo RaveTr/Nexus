@@ -38,7 +38,7 @@ import java.util.function.Supplier;
  *
  *              public static final Supplier<BlockEntityType<YourBlockEntity>> YOUR_BLOCK_ENTITY = new BlockEntityTypePropertyWrapper<>(EntityTypePropertyWrapperTemplates.registerEntityType(new ResourceLocation("your_mod_id", "your_block_entity"), () -> ...), "your_mod_id")
  *                      .builder()
- *                      .withClientData(() -> SomeClientOnlyClass.YOUR_BLOCK_ENTITY_DATA) // This works, because lambda expressions don't create direct class references in bytecode
+ *                      .withClientData(() -> SomeClientOnlyClass.YOUR_BLOCK_ENTITY_DATA) // This works, because lambda expressions don't create direct class references in bytecode. You can also wrap the original field in a Supplier, and it will functionally work, but be aware that doing so may cause weird stacktraces to pop up (particularly in the case of Fabric datagen) and is thus not recommended.
  *                      .buildAndGet();
  *          }
  *     }

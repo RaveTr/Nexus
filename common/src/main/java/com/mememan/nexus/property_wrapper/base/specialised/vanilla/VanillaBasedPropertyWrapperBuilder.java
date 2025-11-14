@@ -4,8 +4,10 @@ import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.block.DispenserBlock;
 
 import java.util.Collection;
 import java.util.List;
@@ -42,6 +44,17 @@ public interface VanillaBasedPropertyWrapperBuilder<IL extends ItemLike, SELF ex
      * @return {@link #self()} (builder method).
      */
     SELF asFuel(Function<Supplier<IL>, Integer> fuelTimeMapper);
+
+    /**
+     * Defines a mapping {@link Function} that assigns a {@link DispenseItemBehavior} using the parent {@link ItemLike}
+     * as input.
+     *
+     * @param dispenseBehaviourMapper The {@link DispenseItemBehavior} mapping {@link Function} that specifies the
+     *                                behaviour of a {@link DispenserBlock} when dispensing the parent {@link ItemLike}.
+     *
+     * @return {@link #self()} (builder method).
+     */
+    SELF asDispensable(Function<Supplier<IL>, DispenseItemBehavior> dispenseBehaviourMapper);
 
     /**
      * Defines a parent {@link CreativeModeTab} in which the parent {@link ItemLike} should show up.

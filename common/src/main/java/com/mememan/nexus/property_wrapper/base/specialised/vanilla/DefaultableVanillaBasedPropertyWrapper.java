@@ -2,6 +2,7 @@ package com.mememan.nexus.property_wrapper.base.specialised.vanilla;
 
 import com.mememan.nexus.property_wrapper.impl.specialised.vanilla.SpecializedVanillaPropertyWrapper;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.ItemLike;
 
@@ -33,6 +34,11 @@ public interface DefaultableVanillaBasedPropertyWrapper<IL extends ItemLike, SEL
     @Override
     default Optional<Function<Supplier<IL>, Integer>> getFuelMapper() {
         return getSpecializedVanillaWrapper().flatMap(SpecializedVanillaPropertyWrapper::getFuelMapper);
+    }
+
+    @Override
+    default Optional<Function<Supplier<IL>, DispenseItemBehavior>> getDispenseBehaviourMapper() {
+        return getSpecializedVanillaWrapper().flatMap(SpecializedVanillaPropertyWrapper::getDispenseBehaviourMapper);
     }
 
     @Override

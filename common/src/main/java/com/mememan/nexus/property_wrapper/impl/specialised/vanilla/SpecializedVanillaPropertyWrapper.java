@@ -3,6 +3,7 @@ package com.mememan.nexus.property_wrapper.impl.specialised.vanilla;
 import com.mememan.nexus.property_wrapper.base.specialised.vanilla.VanillaBasedPropertyWrapper;
 import com.mememan.nexus.property_wrapper.impl.generic.BasePropertyWrapper;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.NotNull;
@@ -34,6 +35,11 @@ public class SpecializedVanillaPropertyWrapper<IL extends ItemLike, SELF extends
     @Override
     public Optional<Function<Supplier<IL>, Integer>> getFuelMapper() {
         return rawBuilder().flatMap(builder -> builder.fuelMapperFunc);
+    }
+
+    @Override
+    public Optional<Function<Supplier<IL>, DispenseItemBehavior>> getDispenseBehaviourMapper() {
+        return rawBuilder().flatMap(builder -> builder.dispenseBehaviourMapperFunc);
     }
 
     @Override
