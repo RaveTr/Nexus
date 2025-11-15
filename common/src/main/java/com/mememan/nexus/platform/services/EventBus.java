@@ -8,6 +8,6 @@ package com.mememan.nexus.platform.services;
  */
 public interface EventBus {
 
-    // TODO Get to work impl. different event "busses" (segregated by side with variable timing, etc.)
+    
     
 }

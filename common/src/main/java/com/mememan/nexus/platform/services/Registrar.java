@@ -167,7 +167,8 @@ public interface Registrar {
      *
      * @return The {@link ResourceKey} of the object that was registered.
      *
-     * @param <T> The object type to register, doubles as the registry's generic type.
+     * @param <V> The parent object type of {@code <T>}.
+     * @param <T> The object type to register.
      *
      * @apiNote The output of {@code objSupMappingFunc} isn't returned since registration fields should store references
      * to the registered {@link ResourceKey<Registry<T>>} for later access utilising {@link RegistryAccess} (commonly
@@ -176,7 +177,7 @@ public interface Registrar {
      * @see Registries
      * @see Level#registryAccess()
      */
-    <T> Supplier<ResourceKey<T>> registerDatapackObject(final ResourceLocation objId, Function<BootstapContext<T>, Supplier<T>> objSupMappingFunc, final ResourceKey<Registry<T>> targetDatapackRegistry);
+    <V, T extends V> Supplier<ResourceKey<T>> registerDatapackObject(final ResourceLocation objId, Function<BootstapContext<T>, Supplier<T>> objSupMappingFunc, final ResourceKey<Registry<V>> targetDatapackRegistry);
 
     /**
      * Attempts to register a standard {@link Registry} using the {@code registryBuilder} passed in, leveraging additional
