@@ -17,10 +17,10 @@ import java.util.function.Supplier;
  * Template utility {@code class} containing common {@link CreativeModeTabPropertyWrapper} templates, as well as some helper
  * shortcut utility methods for registration.
  */
-public final class CreativeModePropertyWrapperTemplates {
+public final class CreativeModeTabPropertyWrapperTemplates {
 
-    private CreativeModePropertyWrapperTemplates() {
-        throw new IllegalAccessError("Attempted to construct instance of template utility class! (CreativeModePropertyWrapperTemplates)");
+    private CreativeModeTabPropertyWrapperTemplates() {
+        throw new IllegalAccessError("Attempted to construct instance of template utility class! (CreativeModeTabPropertyWrapperTemplates)");
     }
 
     /**
