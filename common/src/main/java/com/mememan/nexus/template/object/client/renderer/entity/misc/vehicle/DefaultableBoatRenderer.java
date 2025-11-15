@@ -45,9 +45,9 @@ public class DefaultableBoatRenderer extends EntityRenderer<Boat> {
             BoatType.getKnownBoatTypes().forEach(knownBoatType -> {
                 existingBoatResources.put(knownBoatType,
                         Pair.of(
-                                RegistryUtil.pickPrefix(RegistryUtil.getTextureLocation(knownBoatType.getResourceFriendlyId(), "entity/boat")
-                                                .or(() -> RegistryUtil.getTextureLocation(knownBoatType.getResourceFriendlyId().withSuffix("_boat"), "entity/boat"))
-                                        .orElse(knownBoatType.getResourceFriendlyId().withPrefix("entity/boat/")), "textures/").withSuffix(".png"),
+                                RegistryUtil.pickPrefix(RegistryUtil.getTextureLocation(knownBoatType.getResourceFriendlyId(), chestBoat ? "entity/chest_boat" : "entity/boat")
+                                                .or(() -> RegistryUtil.getTextureLocation(knownBoatType.getResourceFriendlyId().withSuffix("_boat"), chestBoat ? "entity/chest_boat" : "entity/boat"))
+                                        .orElse(knownBoatType.getResourceFriendlyId().withPrefix(chestBoat ? "entity/chest_boat/" : "entity/boat/")), "textures/").withSuffix(".png"),
                                 createBoatModel(context, knownBoatType, chestBoat)
                         ));
             });
