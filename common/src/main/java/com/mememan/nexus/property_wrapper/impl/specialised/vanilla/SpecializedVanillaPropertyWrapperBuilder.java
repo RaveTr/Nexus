@@ -26,12 +26,12 @@ public class SpecializedVanillaPropertyWrapperBuilder<IL extends ItemLike, SELF 
     }
 
     @Override
-    public SELF copyFrom(Supplier<IL> associatedPWObject) {
-        return super.copyFrom(associatedPWObject)
-                .asCompostable(ownerWrapper.getCompostMapper().orElse(null))
-                .asFuel(ownerWrapper.getFuelMapper().orElse(null))
-                .asDispensable(ownerWrapper.getDispenseBehaviourMapper().orElse(null))
-                .setParentTabs(ownerWrapper.getParentCreativeModeTabs());
+    public SELF copyFrom(VBPW propertyWrapper) {
+        return super.copyFrom(propertyWrapper)
+                .asCompostable(propertyWrapper.getCompostMapper().orElse(null))
+                .asFuel(propertyWrapper.getFuelMapper().orElse(null))
+                .asDispensable(propertyWrapper.getDispenseBehaviourMapper().orElse(null))
+                .setParentTabs(new ObjectArrayList<>(propertyWrapper.getParentCreativeModeTabs()));
     }
 
     @Override

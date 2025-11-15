@@ -963,4 +963,63 @@ public final class RecipeUtil { //TODO Refactor tf out of this
             cookedFoodFromCampfireCooking(finishedRecipe).accept((Supplier<Item>) parentItemLikeSup);
         };
     }
+
+    public static <I extends Item> Consumer<Supplier<I>> woodenBoatFrom(Consumer<FinishedRecipe> finishedRecipe, Function<I, I> woodenBoatComponentMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return parentItemLikeSup -> {
+            I parentItemLike = parentItemLikeSup.get();
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+
+            I componentItemLike = woodenBoatComponentMapper.apply(parentItemLike);
+
+            if (componentItemLike != null) {
+                ResourceLocation componentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(componentItemLike);
+                ResourceLocation baseRecipeId = recipeIdMapper.apply(parentItemLikeId);
+
+                ShapedRecipeBuilder.shaped(RecipeCategory.MISC, parentItemLike)
+                        .define('#', componentItemLike)
+                        .pattern("# #")
+                        .pattern("###")
+                        .group("boat")
+                        .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
+                        .save(finishedRecipe, baseRecipeId.withPath(baseRecipeId.getPath() + "_from_" + componentItemLikeId.getPath()));
+            }
+        };
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> woodenBoatFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return woodenBoatFrom(finishedRecipe, parentWoodenBoat -> RegistryUtil.getObjectFrom(parentWoodenBoat, parentWoodenBoatId -> parentWoodenBoatId.withPath(curPath -> StringUtil.subLastToken(curPath).concat("_planks"))).orElse(null), recipeIdMapper);
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> woodenBoatFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return woodenBoatFrom(finishedRecipe, Function.identity());
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> woodenChestBoatFrom(Consumer<FinishedRecipe> finishedRecipe, Function<I, I> woodenChestBoatComponentMapper, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return parentItemLikeSup -> {
+            I parentItemLike = parentItemLikeSup.get();
+            ResourceLocation parentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLike);
+
+            I componentItemLike = woodenChestBoatComponentMapper.apply(parentItemLike);
+
+            if (componentItemLike != null) {
+                ResourceLocation componentItemLikeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(componentItemLike);
+                ResourceLocation baseRecipeId = recipeIdMapper.apply(parentItemLikeId);
+
+                ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, parentItemLike)
+                        .requires(componentItemLike)
+                        .requires(Items.CHEST)
+                        .group("chest_boat")
+                        .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
+                        .save(finishedRecipe, baseRecipeId.withPath(baseRecipeId.getPath() + "_from_" + componentItemLikeId.getPath()));
+            }
+        };
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> woodenChestBoatFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
+        return woodenChestBoatFrom(finishedRecipe, parentWoodenChestBoat -> RegistryUtil.getObjectFrom(parentWoodenChestBoat, parentWoodenBoatId -> parentWoodenBoatId.withPath(curPath -> curPath.replace("_chest_boat", "_boat"))).orElse(null), recipeIdMapper);
+    }
+
+    public static <I extends Item> Consumer<Supplier<I>> woodenChestBoatFrom(Consumer<FinishedRecipe> finishedRecipe) {
+        return woodenChestBoatFrom(finishedRecipe, Function.identity());
+    }
 }

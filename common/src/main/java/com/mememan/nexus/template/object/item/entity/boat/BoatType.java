@@ -5,11 +5,20 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
-public interface BoatType extends StringRepresentable { //TODO Abstract into a special registrar type once support for that's added
+public interface BoatType extends StringRepresentable {
+    BoatType OAK = register("oak", () -> Blocks.OAK_PLANKS, false);
+    BoatType SPRUCE = register("spruce", () -> Blocks.SPRUCE_PLANKS, false);
+    BoatType BIRCH = register("birch", () -> Blocks.BIRCH_PLANKS, false);
+    BoatType JUNGLE = register("jungle", () -> Blocks.JUNGLE_PLANKS, false);
+    BoatType ACACIA = register("acacia", () -> Blocks.ACACIA_PLANKS, false);
+    BoatType CHERRY = register("cherry", () -> Blocks.CHERRY_PLANKS, false);
+    BoatType DARK_OAK = register("dark_oak", () -> Blocks.DARK_OAK_PLANKS, false);
+    BoatType MANGROVE = register("mangrove", () -> Blocks.MANGROVE_PLANKS, false);
 
     Supplier<Block> getPlanks();
 

@@ -1,11 +1,13 @@
 package com.mememan.nexus.template.property_wrapper;
 
 import com.mememan.nexus.platform.NexusServices;
+import com.mememan.nexus.platform.services.Registrar;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapperBuilder;
 import com.mememan.nexus.util.*;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
@@ -873,5 +875,363 @@ public final class BlockPropertyWrapperTemplates {
      */
     public static Supplier<Block> registerBasicBlock(ResourceLocation blockId) {
         return registerBasicBlock(blockId, () -> new Block(BlockBehaviour.Properties.of()));
+    }
+
+    /**
+     * Registers and returns the provided {@link Block}.
+     * <br></br>
+     * Uses {@link Registrar#registerObjectAndReflect(ResourceLocation, Supplier, Registry)} instead of
+     * {@link Registrar#registerObject(ResourceLocation, Supplier, Registry)}.
+     *
+     * @param blockId The target {@linkplain Block Block's} {@linkplain ResourceLocation registry ID}.
+     * @param blockSup The {@link Block} object to register.
+     * @param blockSupCol An optional {@link Collection} to track the registered {@link Block}. Primarily useful if you
+     *                    want a shorthand method of tracking your own registered blocks.
+     *
+     * @return The {@link Supplier} of the registered {@link Block}.
+     *
+     * @param <B> Any {@link Block} type.
+     */
+    public static <B extends Block> Supplier<B> registerBlockAndReflect(ResourceLocation blockId, Supplier<B> blockSup, @Nullable Collection<Supplier<Block>> blockSupCol) {
+        Supplier<B> registeredBlock = NexusServices.REGISTRAR.registerObjectAndReflect(blockId, blockSup, BuiltInRegistries.BLOCK);
+
+        if (blockSupCol != null) blockSupCol.add((Supplier<Block>) registeredBlock);
+
+        return registeredBlock;
+    }
+
+    /**
+     * Overloaded variant of {@link #registerBlockAndReflect(ResourceLocation, Supplier, Collection)} that does not track the
+     * registered {@link Block} to any custom {@link Collection}.
+     *
+     * @param blockId The target {@linkplain Block Block's} {@linkplain ResourceLocation registry ID}.
+     * @param blockSup The {@link Block} object to register.
+     *
+     * @return The {@link Supplier} of the registered {@link Block}.
+     *
+     * @param <B> Any {@link Block} type.
+     */
+    public static <B extends Block> Supplier<B> registerBlockAndReflect(ResourceLocation blockId, Supplier<B> blockSup) {
+        return registerBlockAndReflect(blockId, blockSup, null);
+    }
+
+    /**
+     * Registers and returns the provided {@link Block}.
+     * <br></br>
+     * Uses {@link Registrar#registerObjectAndReflect(ResourceLocation, Supplier, Registry)} instead of
+     * {@link Registrar#registerObject(ResourceLocation, Supplier, Registry)}.
+     *
+     * @param blockId The target {@linkplain Block Block's} {@linkplain ResourceLocation registry ID}.
+     * @param blockSup The {@link Block} object to register.
+     * @param blockSupCol An optional {@link Collection} to track the registered {@link Block}. Primarily useful if you
+     *                    want a shorthand method of tracking your own registered blocks.
+     * @param blockItemSupCol An optional {@link Collection} to track the registered {@link BlockItem}. Primarily useful if you
+     *                        want a shorthand method of tracking your own registered block items.
+     *
+     * @return The {@link Supplier} of the registered {@link Block}.
+     *
+     * @param <B> Any {@link Block} type.
+     */
+    public static <B extends Block> Supplier<B> registerBlockWithItemAndReflect(ResourceLocation blockId, Supplier<B> blockSup, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> blockItemSupCol) {
+        Supplier<B> registeredBlock = NexusServices.REGISTRAR.registerObjectAndReflect(blockId, blockSup, BuiltInRegistries.BLOCK);
+
+        if (blockSupCol != null) blockSupCol.add((Supplier<Block>) registeredBlock);
+
+        return registeredBlock;
+    }
+
+    /**
+     * Overloaded variant of {@link #registerBlockWithItemAndReflect(ResourceLocation, Supplier, Collection, Collection)} that
+     * does not track the registered {@link Block} to any custom {@link Collection}.
+     *
+     * @param blockId The target {@linkplain Block Block's} {@linkplain ResourceLocation registry ID}.
+     * @param blockSup The {@link Block} object to register.
+     *
+     * @return The {@link Supplier} of the registered {@link Block}.
+     *
+     * @param <B> Any {@link Block} type.
+     */
+    public static <B extends Block> Supplier<B> registerBlockWithItemAndReflect(ResourceLocation blockId, Supplier<B> blockSup) {
+        return registerBlockWithItemAndReflect(blockId, blockSup, null, null);
+    }
+
+    /**
+     * Registers and returns the provided {@link Block}, mapping it to a new {@link BlockPropertyWrapper} inheriting
+     * from the provided {@link BlockPropertyWrapper} template. Optionally tracks the registered {@link Block} to a
+     * custom {@link Collection}.
+     * <br></br>
+     * Uses {@link Registrar#registerObjectAndReflect(ResourceLocation, Supplier, Registry)} instead of
+     * {@link Registrar#registerObject(ResourceLocation, Supplier, Registry)}.
+     *
+     * @param blockId The target {@linkplain Block Block's} {@linkplain ResourceLocation registry ID}.
+     * @param blockSup The {@link Block} object to register.
+     * @param templateBPW The {@link BlockPropertyWrapper} template to inherit from.
+     * @param blockSupCol An optional {@link Collection} to track the registered {@link Block}. Primarily useful if you
+     *                    want a shorthand method of tracking your own registered blocks.
+     *
+     * @return The {@link Supplier} of the registered {@link Block}, mapped to its own {@link BlockPropertyWrapper}
+     * inheriting from the provided {@code templateBPW}.
+     *
+     * @param <B> Any {@link Block} type.
+     */
+    public static <B extends Block> Supplier<B> registerBlockFromTemplateAndReflect(ResourceLocation blockId, Supplier<B> blockSup, BlockPropertyWrapper<Block> templateBPW, @Nullable Collection<Supplier<Block>> blockSupCol) {
+        Supplier<B> registeredBlock = registerBlockAndReflect(blockId, blockSup, blockSupCol);
+
+        return new BlockPropertyWrapper<>(registeredBlock, blockId.getNamespace())
+                .builder()
+                .copyFromType(templateBPW)
+                .buildAndGet();
+    }
+
+    /**
+     * Overloaded variant of {@link #registerBlockFromTemplateAndReflect(ResourceLocation, Supplier, BlockPropertyWrapper, Collection)} that does not track the
+     * registered {@link Block} to any custom {@link Collection}.
+     *
+     * @param blockId The target {@linkplain Block Block's} {@linkplain ResourceLocation registry ID}.
+     * @param blockSup The {@link Block} object to register.
+     * @param templateBPW The {@link BlockPropertyWrapper} template to inherit from.
+     *
+     * @return The {@link Supplier} of the registered {@link Block}, mapped to its own {@link BlockPropertyWrapper}
+     * inheriting from the provided {@code templateBPW}.
+     *
+     * @param <B> Any {@link Block} type.
+     */
+    public static <B extends Block> Supplier<B> registerBlockFromTemplateAndReflect(ResourceLocation blockId, Supplier<B> blockSup, BlockPropertyWrapper<Block> templateBPW) {
+        return registerBlockFromTemplateAndReflect(blockId, blockSup, templateBPW, null);
+    }
+
+    /**
+     * Registers and returns the provided {@link Block}, mapping it to a new {@link BlockPropertyWrapper} inheriting
+     * from the provided {@link BlockPropertyWrapper} template, and automatically creates a {@link BlockItem} for it.
+     * Optionally tracks both the registered {@link Block} and its corresponding {@link BlockItem} to custom
+     * {@link Collection}s.
+     * <br></br>
+     * Uses {@link Registrar#registerObjectAndReflect(ResourceLocation, Supplier, Registry)} instead of
+     * {@link Registrar#registerObject(ResourceLocation, Supplier, Registry)}.
+     *
+     * @param blockId The target {@linkplain Block Block's} {@linkplain ResourceLocation registry ID}.
+     * @param blockSup The {@link Block} object to register.
+     * @param templateBPW The {@link BlockPropertyWrapper} template to inherit from.
+     * @param blockSupCol An optional {@link Collection} to track the registered {@link Block}. Primarily useful if you
+     *                    want a shorthand method of tracking your own registered blocks.
+     * @param blockItemSupCol An optional {@link Collection} to track the registered {@link BlockItem}. Primarily useful if you
+     *                        want a shorthand method of tracking your own registered block items.
+     *
+     * @return The {@link Supplier} of the registered {@link Block}, mapped to its own {@link BlockPropertyWrapper}
+     * inheriting from the provided {@code templateBPW}.
+     *
+     * @param <B> Any {@link Block} type.
+     */
+    public static <B extends Block> Supplier<B> registerBlockWithItemFromTemplateAndReflect(ResourceLocation blockId, Supplier<B> blockSup, BlockPropertyWrapper<Block> templateBPW, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> blockItemSupCol) {
+        Supplier<B> registeredBlock = registerBlockFromTemplateAndReflect(blockId, blockSup, templateBPW, blockSupCol);
+
+        ItemPropertyWrapperTemplates.registerItemAndReflect(blockId, () -> new BlockItem(registeredBlock.get(), new Item.Properties()), blockItemSupCol);
+
+        return new BlockPropertyWrapper<>(registeredBlock, blockId.getNamespace())
+                .builder()
+                .copyFromType(templateBPW)
+                .buildAndGet();
+    }
+
+    /**
+     * Overloaded variant of {@link #registerBlockWithItemFromTemplateAndReflect(ResourceLocation, Supplier, BlockPropertyWrapper, Collection, Collection)} that does not track the
+     * registered {@link Block} or its corresponding {@link BlockItem} to any custom {@link Collection}.
+     *
+     * @param blockId The target {@linkplain Block Block's} {@linkplain ResourceLocation registry ID}.
+     * @param blockSup The {@link Block} object to register.
+     * @param templateBPW The {@link BlockPropertyWrapper} template to inherit from.
+     *
+     * @return The {@link Supplier} of the registered {@link Block}, mapped to its own {@link BlockPropertyWrapper}
+     * inheriting from the provided {@code templateBPW}.
+     *
+     * @param <B> Any {@link Block} type.
+     */
+    public static <B extends Block> Supplier<B> registerBlockWithItemFromTemplateAndReflect(ResourceLocation blockId, Supplier<B> blockSup, BlockPropertyWrapper<Block> templateBPW) {
+        return registerBlockWithItemFromTemplateAndReflect(blockId, blockSup, templateBPW, null, null);
+    }
+
+    /**
+     * Registers the provided {@link Block} and returns its {@link BlockPropertyWrapperBuilder} inheriting from the
+     * provided {@link BlockPropertyWrapper} template. Optionally tracks the registered {@link Block} to a custom
+     * {@link Collection}.
+     * <br></br>
+     * Uses {@link Registrar#registerObjectAndReflect(ResourceLocation, Supplier, Registry)} instead of
+     * {@link Registrar#registerObject(ResourceLocation, Supplier, Registry)}.
+     *
+     * @param blockId The target {@linkplain Block Block's} {@linkplain ResourceLocation registry ID}.
+     * @param blockSup The {@link Block} object to register.
+     * @param templateBPW The {@link BlockPropertyWrapper} template to inherit from.
+     * @param blockSupCol An optional {@link Collection} to track the registered {@link Block}. Primarily useful if you
+     *                    want a shorthand method of tracking your own registered blocks.
+     *
+     * @return The {@link BlockPropertyWrapperBuilder} of the registered {@link Block}, inheriting from the provided
+     * {@code templateBPW}.
+     *
+     * @param <B> Any {@link Block} type.
+     */
+    public static <B extends Block> BlockPropertyWrapperBuilder<B> registerAndReflectAndChain(ResourceLocation blockId, Supplier<B> blockSup, BlockPropertyWrapper<Block> templateBPW, @Nullable Collection<Supplier<Block>> blockSupCol) {
+        Supplier<B> registeredBlock = registerBlockAndReflect(blockId, blockSup, blockSupCol);
+
+        return new BlockPropertyWrapper<>(registeredBlock, blockId.getNamespace())
+                .builder()
+                .copyFromType(templateBPW);
+    }
+
+    /**
+     * Overloaded variant of {@link #registerAndReflectAndChain(ResourceLocation, Supplier, BlockPropertyWrapper, Collection)} that does not track the
+     * registered {@link Block} to any custom {@link Collection}.
+     *
+     * @param blockId The target {@linkplain Block Block's} {@linkplain ResourceLocation registry ID}.
+     * @param blockSup The {@link Block} object to register.
+     * @param templateBPW The {@link BlockPropertyWrapper} template to inherit from.
+     *
+     * @return The {@link BlockPropertyWrapperBuilder} of the registered {@link Block}, inheriting from the provided
+     * {@code templateBPW}.
+     *
+     * @param <B> Any {@link Block} type.
+     */
+    public static <B extends Block> BlockPropertyWrapperBuilder<B> registerAndReflectAndChain(ResourceLocation blockId, Supplier<B> blockSup, BlockPropertyWrapper<Block> templateBPW) {
+        return registerAndReflectAndChain(blockId, blockSup, templateBPW, null);
+    }
+
+    /**
+     * Registers the provided {@link Block} and returns its {@link BlockPropertyWrapperBuilder}. Optionally tracks the
+     * registered {@link Block} to a custom {@link Collection}.
+     * <br></br>
+     * Uses {@link Registrar#registerObjectAndReflect(ResourceLocation, Supplier, Registry)} instead of
+     * {@link Registrar#registerObject(ResourceLocation, Supplier, Registry)}.
+     *
+     * @param blockId The target {@linkplain Block Block's} {@linkplain ResourceLocation registry ID}.
+     * @param blockSup The {@link Block} object to register.
+     * @param blockSupCol An optional {@link Collection} to track the registered {@link Block}. Primarily useful if you
+     *                    want a shorthand method of tracking your own registered blocks.
+     *
+     * @return The {@link BlockPropertyWrapperBuilder} of the registered {@link Block}.
+     *
+     * @param <B> Any {@link Block} type.
+     */
+    public static <B extends Block> BlockPropertyWrapperBuilder<B> registerAndReflectAndChain(ResourceLocation blockId, Supplier<B> blockSup, @Nullable Collection<Supplier<Block>> blockSupCol) {
+        Supplier<B> registeredBlock = registerBlockAndReflect(blockId, blockSup, blockSupCol);
+
+        return new BlockPropertyWrapper<>(registeredBlock, blockId.getNamespace())
+                .builder();
+    }
+
+    /**
+     * Overloaded variant of {@link #registerAndReflectAndChain(ResourceLocation, Supplier, Collection)} that does not track the
+     * registered {@link Block}.
+     *
+     * @param blockId The target {@linkplain Block Block's} {@linkplain ResourceLocation registry ID}.
+     * @param blockSup The {@link Block} object to register.
+     *
+     * @return The {@link BlockPropertyWrapperBuilder} of the registered {@link Block}.
+     *
+     * @param <B> Any {@link Block} type.
+     */
+    public static <B extends Block> BlockPropertyWrapperBuilder<B> registerAndReflectAndChain(ResourceLocation blockId, Supplier<B> blockSup) {
+        return registerAndReflectAndChain(blockId, blockSup, (Collection<Supplier<Block>>) null);
+    }
+
+    /**
+     * Registers the provided {@link Block}, automatically creates a {@link BlockItem} for it, and returns its
+     * {@link BlockPropertyWrapperBuilder} inheriting from the provided {@link BlockPropertyWrapper} template.
+     * Optionally tracks both the registered {@link Block} and its corresponding {@link BlockItem} to custom
+     * {@link Collection}s.
+     * <br></br>
+     * Uses {@link Registrar#registerObjectAndReflect(ResourceLocation, Supplier, Registry)} instead of
+     * {@link Registrar#registerObject(ResourceLocation, Supplier, Registry)}.
+     *
+     * @param blockId The target {@linkplain Block Block's} {@linkplain ResourceLocation registry ID}.
+     * @param blockSup The {@link Block} object to register.
+     * @param templateBPW The {@link BlockPropertyWrapper} template to inherit from.
+     * @param blockSupCol An optional {@link Collection} to track the registered {@link Block}. Primarily useful if you
+     *                    want a shorthand method of tracking your own registered blocks.
+     * @param blockItemSupCol An optional {@link Collection} to track the registered {@link BlockItem}. Primarily useful if you
+     *                        want a shorthand method of tracking your own registered block items.
+     *
+     * @return The {@link BlockPropertyWrapperBuilder} of the registered {@link Block}, inheriting from the provided
+     * {@code templateBPW}.
+     *
+     * @param <B> Any {@link Block} type.
+     */
+    public static <B extends Block> BlockPropertyWrapperBuilder<B> registerWithItemAndReflectAndChain(ResourceLocation blockId, Supplier<B> blockSup, BlockPropertyWrapper<Block> templateBPW, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> blockItemSupCol) {
+        Supplier<B> registeredBlock = registerBlockAndReflect(blockId, blockSup, blockSupCol);
+
+        ItemPropertyWrapperTemplates.registerItemAndReflect(blockId, () -> new BlockItem(registeredBlock.get(), new Item.Properties()), blockItemSupCol);
+
+        return new BlockPropertyWrapper<>(registeredBlock, blockId.getNamespace())
+                .builder()
+                .copyFromType(templateBPW);
+    }
+
+    /**
+     * Overloaded variant of {@link #registerWithItemAndReflectAndChain(ResourceLocation, Supplier, BlockPropertyWrapper, Collection, Collection)} that does not track the
+     * registered {@link Block} or its corresponding {@link BlockItem} to any custom {@link Collection}.
+     *
+     * @param blockId The target {@linkplain Block Block's} {@linkplain ResourceLocation registry ID}.
+     * @param blockSup The {@link Block} object to register.
+     * @param templateBPW The {@link BlockPropertyWrapper} template to inherit from.
+     *
+     * @return The {@link BlockPropertyWrapperBuilder} of the registered {@link Block}, inheriting from the provided
+     * {@code templateBPW}.
+     *
+     * @param <B> Any {@link Block} type.
+     */
+    public static <B extends Block> BlockPropertyWrapperBuilder<B> registerWithItemAndReflectAndChain(ResourceLocation blockId, Supplier<B> blockSup, BlockPropertyWrapper<Block> templateBPW) {
+        return registerWithItemAndReflectAndChain(blockId, blockSup, templateBPW, null, null);
+    }
+
+    /**
+     * Registers and returns the provided {@link Block}, mapped to a new {@link BlockPropertyWrapper} inheriting
+     * from the {@link #BASIC} template. Optionally tracks the registered {@link Block} to a custom
+     * {@link Collection}.
+     * <br></br>
+     * Uses {@link Registrar#registerObjectAndReflect(ResourceLocation, Supplier, Registry)} instead of
+     * {@link Registrar#registerObject(ResourceLocation, Supplier, Registry)}.
+     *
+     * @param blockId The target {@linkplain Block Block's} {@linkplain ResourceLocation registry ID}.
+     * @param blockSup The {@link Block} object to register.
+     * @param blockSupCol An optional {@link Collection} to track the registered {@link Block}. Primarily useful if you
+     *                    want a shorthand method of tracking your own registered blocks.
+     *
+     * @return The {@link Supplier} of the registered {@link Block}, mapped to its own {@link BlockPropertyWrapper}
+     * inheriting from the {@code BASIC} template.
+     *
+     * @param <B> Any {@link Block} type.
+     */
+    public static <B extends Block> Supplier<B> registerBasicBlockAndReflect(ResourceLocation blockId, Supplier<B> blockSup, @Nullable Collection<Supplier<Block>> blockSupCol) {
+        return registerBlockFromTemplateAndReflect(blockId, blockSup, BASIC, blockSupCol);
+    }
+
+    /**
+     * Overloaded variant of {@link #registerBasicBlockAndReflect(ResourceLocation, Supplier, Collection)} that does not track the
+     * registered {@link Block} to any custom {@link Collection}.
+     *
+     * @param blockId The target {@linkplain Block Block's} {@linkplain ResourceLocation registry ID}.
+     * @param blockSup The {@link Block} object to register.
+     *
+     * @return The {@link Supplier} of the registered {@link Block}, mapped to its own {@link BlockPropertyWrapper}
+     * inheriting from the {@code BASIC} template.
+     *
+     * @param <B> Any {@link Block} type.
+     */
+    public static <B extends Block> Supplier<B> registerBasicBlockAndReflect(ResourceLocation blockId, Supplier<B> blockSup) {
+        return registerBasicBlockAndReflect(blockId, blockSup, null);
+    }
+
+    /**
+     * Registers a new basic {@link Block} with default properties and returns it, mapped to a new
+     * {@link BlockPropertyWrapper} inheriting from the {@link #BASIC} template.
+     * <br></br>
+     * Uses {@link Registrar#registerObjectAndReflect(ResourceLocation, Supplier, Registry)} instead of
+     * {@link Registrar#registerObject(ResourceLocation, Supplier, Registry)}.
+     *
+     * @param blockId The target {@linkplain Block Block's} {@linkplain ResourceLocation registry ID}.
+     *
+     * @return The {@link Supplier} of the registered {@link Block}, mapped to its own {@link BlockPropertyWrapper}
+     * inheriting from the {@code BASIC} template.
+     */
+    public static Supplier<Block> registerBasicBlockAndReflect(ResourceLocation blockId) {
+        return registerBasicBlockAndReflect(blockId, () -> new Block(BlockBehaviour.Properties.of()));
     }
 }

@@ -2,6 +2,7 @@ package com.mememan.nexus.template.object.item.entity.boat;
 
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import com.mememan.nexus.template.object.entity.misc.vehicle.DefaultableBoat;
+import com.mememan.nexus.template.object.entity.misc.vehicle.DefaultableBoatType;
 import com.mememan.nexus.template.object.entity.misc.vehicle.DefaultableChestBoat;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.stats.Stats;
@@ -36,10 +37,9 @@ public class DefaultableBoatItem extends BoatItem {
         BlockHitResult hitResult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.ANY);
 
         if (Objects.equals(hitResult.getType(), HitResult.Type.BLOCK)) {
-            Boat validBoat = getBoat(level, hitResult); // TODO Abstract into a common interface or smth, this is amateur af
+            Boat validBoat = getBoat(level, hitResult);
 
-            if (validBoat instanceof DefaultableBoat validDefaultableBoat) validDefaultableBoat.setBoatType(defaultableBoatType);
-            if (validBoat instanceof DefaultableChestBoat validDefaultableChestBoat) validDefaultableChestBoat.setBoatType(defaultableBoatType);
+            if (validBoat instanceof DefaultableBoatType validDefaultableBoat) validDefaultableBoat.setBoatType(defaultableBoatType);
 
             validBoat.setYRot(player.getYRot());
 
@@ -63,5 +63,9 @@ public class DefaultableBoatItem extends BoatItem {
         return hasChest
                 ? new DefaultableChestBoat(() -> (EntityType<? extends Boat>) BuiltInRegistries.ENTITY_TYPE.getOptional(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(this).withPath("chest_boat")).orElseThrow(), level, hitResult.getLocation().x(), hitResult.getLocation().y(), hitResult.getLocation().z())
                 : new DefaultableBoat(() -> (EntityType<? extends Boat>) BuiltInRegistries.ENTITY_TYPE.getOptional(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(this).withPath("boat")).orElseThrow(), level, hitResult.getLocation().x(), hitResult.getLocation().y(), hitResult.getLocation().z());
+    }
+
+    public BoatType getBoatType() {
+        return defaultableBoatType;
     }
 }

@@ -1,13 +1,18 @@
 package com.mememan.nexus.util;
 
 import com.mememan.nexus.client.block.WrappedBlockColor;
+import com.mememan.nexus.template.object.item.dispense_item_behaviour.DefaultableBoatDispenseItemBehaviour;
+import com.mememan.nexus.template.object.item.entity.boat.BoatType;
+import com.mememan.nexus.template.object.item.entity.boat.DefaultableBoatItem;
 import com.mememan.nexus.template.property_wrapper.BlockPropertyWrapperTemplates;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.IntIntMutablePair;
 import net.minecraft.client.renderer.BiomeColors;
+import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GrassColor;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
@@ -202,5 +207,13 @@ public final class VanillaUtil {
         return (targetState, tintGetter, targetPos, tint) -> tintGetter != null && targetPos != null
                 ? BiomeColors.getAverageGrassColor(tintGetter, targetPos)
                 : GrassColor.get(0.5D, 1.0D);
+    }
+
+    public static <IL extends ItemLike> DispenseItemBehavior standardBoatDispenseBehavior(Supplier<IL> targetItemLike) {
+        return new DefaultableBoatDispenseItemBehaviour(targetItemLike.get() instanceof DefaultableBoatItem defBoatItem ? defBoatItem.getBoatType() : BoatType.OAK);
+    }
+
+    public static <IL extends ItemLike> DispenseItemBehavior standardChestBoatDispenseBehavior(Supplier<IL> targetItemLike) {
+        return new DefaultableBoatDispenseItemBehaviour(targetItemLike.get() instanceof DefaultableBoatItem defBoatItem ? defBoatItem.getBoatType() : BoatType.OAK, true);
     }
 }

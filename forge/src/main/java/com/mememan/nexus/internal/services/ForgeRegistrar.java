@@ -2,6 +2,7 @@ package com.mememan.nexus.internal.services;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.asm.ClassFinder;
@@ -44,6 +45,7 @@ public class ForgeRegistrar implements Registrar {
     private static final Object2ObjectLinkedOpenHashMap<String, Object2ObjectOpenHashMap<ResourceKey<?>, DeferredRegister<?>>> CACHED_REGISTRIES = new Object2ObjectLinkedOpenHashMap<>();
     private static final Multimap<ResourceKey<? extends Registry<?>>, ObjectObjectMutablePair<ResourceKey<?>, Function<? extends BootstapContext<?>, ? extends Supplier<?>>>> CACHED_DATAPACK_OBJECT_ENTRIES = ArrayListMultimap.create(); // Slower put() than HashMultiMap, but we need to allow duplicates for leniency
     private static final Map<ResourceLocation, Pair<? extends PreparableReloadListener, Optional<ResourceReloadListenerConfig<? extends PreparableReloadListener>>>> CACHED_RESOURCE_RELOAD_LISTENERS = new Object2ObjectOpenHashMap<>();
+    private static final Multimap<ResourceKey<? extends Registry<?>>, ResourceLocation> EARLY_REFLECTED_ENTRIES = ArrayListMultimap.create();
     private static RegistrySetBuilder DATAPACK_REGISTRY_SET_BUILDER;
 
     @Override
@@ -101,7 +103,17 @@ public class ForgeRegistrar implements Registrar {
                     cachedDefReg.register(modBus);
                     return cachedDefReg;
                 });
+
         return existingDefReg.register(objId.getPath(), objSup);
+    }
+
+    @Override
+    public <V, T extends V> RegistryObject<T> registerObjectAndReflect(ResourceLocation objId, Supplier<T> objSup, Registry<V> targetRegistry) {
+        RegistryObject<T> deferredRegObj = registerObject(objId, () -> Registry.register(targetRegistry, objId, objSup.get()), targetRegistry);
+
+        EARLY_REFLECTED_ENTRIES.put(targetRegistry.key(), objId);
+
+        return deferredRegObj;
     }
 
     @Override
@@ -186,6 +198,14 @@ public class ForgeRegistrar implements Registrar {
 
     public static ImmutableMap<String, Object2ObjectOpenHashMap<ResourceKey<?>, DeferredRegister<?>>> getCachedRegistries() {
         return ImmutableMap.copyOf(CACHED_REGISTRIES);
+    }
+
+    public static ImmutableMultimap<ResourceKey<? extends Registry<?>>, ObjectObjectMutablePair<ResourceKey<?>, Function<? extends BootstapContext<?>, ? extends Supplier<?>>>> getCachedDatapackObjectEntries() {
+        return ImmutableMultimap.copyOf(CACHED_DATAPACK_OBJECT_ENTRIES);
+    }
+
+    public static ImmutableMultimap<ResourceKey<? extends Registry<?>>, ResourceLocation> getEarlyReflectedRegistryEntries() {
+        return ImmutableMultimap.copyOf(EARLY_REFLECTED_ENTRIES);
     }
 
     public static <PRL extends PreparableReloadListener> ImmutableMap<ResourceLocation, Pair<PRL, Optional<ResourceReloadListenerConfig<PRL>>>> getCachedResourceReloadListeners() {

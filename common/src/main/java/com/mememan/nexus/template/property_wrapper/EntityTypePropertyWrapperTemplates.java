@@ -1,9 +1,11 @@
 package com.mememan.nexus.template.property_wrapper;
 
 import com.mememan.nexus.platform.NexusServices;
+import com.mememan.nexus.platform.services.Registrar;
 import com.mememan.nexus.property_wrapper.def.entity.EntityTypePropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.entity.EntityTypePropertyWrapperBuilder;
 import com.mememan.nexus.template.object.client.ClientDataEntryTemplates;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -193,5 +195,170 @@ public final class EntityTypePropertyWrapperTemplates {
      */
     public static <E extends Entity> EntityTypePropertyWrapperBuilder<E> registerAndChain(ResourceLocation entityId, Supplier<EntityType<E>> entityTypeSup) {
         return registerAndChain(entityId, entityTypeSup, (Collection<Supplier<EntityType<Entity>>>) null);
+    }
+
+    /**
+     * Registers and returns the provided {@link EntityType}.
+     * <br></br>
+     * Uses {@link Registrar#registerObjectAndReflect(ResourceLocation, Supplier, Registry)} instead of
+     * {@link Registrar#registerObject(ResourceLocation, Supplier, Registry)}.
+     *
+     * @param entityId The target {@linkplain EntityType EntityType's} {@linkplain ResourceLocation registry ID}.
+     * @param entityTypeSup The {@link EntityType} object to register.
+     * @param entityTypeSupCol An optional {@link Collection} to track the registered {@link EntityType}. Primarily
+     *                         useful if you want a shorthand method of tracking your own registered entity types.
+     *
+     * @return The {@link Supplier} of the registered {@link EntityType}.
+     *
+     * @param <E> Any {@link Entity} type.
+     */
+    public static <E extends Entity> Supplier<EntityType<E>> registerEntityTypeAndReflect(ResourceLocation entityId, Supplier<EntityType<E>> entityTypeSup, @Nullable Collection<Supplier<EntityType<Entity>>> entityTypeSupCol) {
+        Supplier<EntityType<E>> registeredEntityType = NexusServices.REGISTRAR.registerObjectAndReflect(entityId, entityTypeSup, BuiltInRegistries.ENTITY_TYPE);
+
+        if (entityTypeSupCol != null) entityTypeSupCol.add(() -> (EntityType<Entity>) registeredEntityType.get());
+
+        return registeredEntityType;
+    }
+
+    /**
+     * Overloaded variant of {@link #registerEntityTypeAndReflect(ResourceLocation, Supplier, Collection)} that does not track the
+     * registered {@link EntityType} to any custom {@link Collection}.
+     *
+     * @param entityId The target {@linkplain EntityType EntityType's} {@linkplain ResourceLocation registry ID}.
+     * @param entityTypeSup The {@link EntityType} object to register.
+     *
+     * @return The {@link Supplier} of the registered {@link EntityType}.
+     *
+     * @param <E> Any {@link Entity} type.
+     */
+    public static <E extends Entity> Supplier<EntityType<E>> registerEntityTypeAndReflect(ResourceLocation entityId, Supplier<EntityType<E>> entityTypeSup) {
+        return registerEntityTypeAndReflect(entityId, entityTypeSup, null);
+    }
+
+    /**
+     * Registers and returns the provided {@link EntityType}, mapping it to a new {@link EntityTypePropertyWrapper} inheriting
+     * from the provided {@link EntityTypePropertyWrapper} template. Optionally tracks the registered {@link EntityType} to a
+     * custom {@link Collection}.
+     * <br></br>
+     * Uses {@link Registrar#registerObjectAndReflect(ResourceLocation, Supplier, Registry)} instead of
+     * {@link Registrar#registerObject(ResourceLocation, Supplier, Registry)}.
+     *
+     * @param entityId The target {@linkplain EntityType EntityType's} {@linkplain ResourceLocation registry ID}.
+     * @param entityTypeSup The {@link EntityType} object to register.
+     * @param templateBPW The {@link EntityTypePropertyWrapper} template to inherit from.
+     * @param entityTypeSupCol An optional {@link Collection} to track the registered {@link EntityType}. Primarily
+     *                         useful if you want a shorthand method of tracking your own registered entity types.
+     *
+     * @return The {@link Supplier} of the registered {@link EntityType}, mapped to its own {@link EntityTypePropertyWrapper}
+     * inheriting from the provided {@code templateBPW}.
+     *
+     * @param <E> Any {@link Entity} type.
+     */
+    public static <E extends Entity> Supplier<EntityType<E>> registerEntityTypeFromTemplateAndReflect(ResourceLocation entityId, Supplier<EntityType<E>> entityTypeSup, EntityTypePropertyWrapper<? super E> templateBPW, @Nullable Collection<Supplier<EntityType<Entity>>> entityTypeSupCol) {
+        Supplier<EntityType<E>> registeredEntityType = registerEntityTypeAndReflect(entityId, entityTypeSup, entityTypeSupCol);
+
+        return new EntityTypePropertyWrapper<>(registeredEntityType, entityId.getNamespace())
+                .builder()
+                .copyFrom((EntityTypePropertyWrapper<E>) templateBPW)
+                .buildAndGet();
+    }
+
+    /**
+     * Overloaded variant of {@link #registerEntityTypeFromTemplateAndReflect(ResourceLocation, Supplier, EntityTypePropertyWrapper, Collection)}
+     * that does not track the registered {@link EntityType} to any custom {@link Collection}.
+     *
+     * @param entityId The target {@linkplain EntityType EntityType's} {@linkplain ResourceLocation registry ID}.
+     * @param entityTypeSup The {@link EntityType} object to register.
+     * @param templateBPW The {@link EntityTypePropertyWrapper} template to inherit from.
+     *
+     * @return The {@link Supplier} of the registered {@link EntityType}, mapped to its own {@link EntityTypePropertyWrapper}
+     * inheriting from the provided {@code templateBPW}.
+     *
+     * @param <E> Any {@link Entity} type.
+     */
+    public static <E extends Entity> Supplier<EntityType<E>> registerEntityTypeFromTemplateAndReflect(ResourceLocation entityId, Supplier<EntityType<E>> entityTypeSup, EntityTypePropertyWrapper<? super E> templateBPW) {
+        return registerEntityTypeFromTemplateAndReflect(entityId, entityTypeSup, templateBPW, null);
+    }
+
+    /**
+     * Registers the provided {@link EntityType} and returns its {@link EntityTypePropertyWrapperBuilder} inheriting from the
+     * provided {@link EntityTypePropertyWrapper} template. Optionally tracks the registered {@link EntityType} to a custom
+     * {@link Collection}.
+     * <br></br>
+     * Uses {@link Registrar#registerObjectAndReflect(ResourceLocation, Supplier, Registry)} instead of
+     * {@link Registrar#registerObject(ResourceLocation, Supplier, Registry)}.
+     *
+     * @param entityId The target {@linkplain EntityType EntityType's} {@linkplain ResourceLocation registry ID}.
+     * @param entityTypeSup The {@link EntityType} object to register.
+     * @param templateBPW The {@link EntityTypePropertyWrapper} template to inherit from.
+     * @param entityTypeSupCol An optional {@link Collection} to track the registered {@link EntityType}. Primarily
+     *                         useful if you want a shorthand method of tracking your own registered entity types.
+     *
+     * @return The {@link EntityTypePropertyWrapperBuilder} of the registered {@link EntityType}, inheriting from the provided
+     * {@code templateBPW}.
+     *
+     * @param <E> Any {@link Entity} type.
+     */
+    public static <E extends Entity> EntityTypePropertyWrapperBuilder<E> registerAndReflectAndChain(ResourceLocation entityId, Supplier<EntityType<E>> entityTypeSup, EntityTypePropertyWrapper<E> templateBPW, @Nullable Collection<Supplier<EntityType<Entity>>> entityTypeSupCol) {
+        Supplier<EntityType<E>> registeredEntityType = registerEntityTypeAndReflect(entityId, entityTypeSup, entityTypeSupCol);
+
+        return new EntityTypePropertyWrapper<>(registeredEntityType, entityId.getNamespace())
+                .builder()
+                .copyFromType(templateBPW);
+    }
+
+    /**
+     * Overloaded variant of {@link #registerAndReflectAndChain(ResourceLocation, Supplier, EntityTypePropertyWrapper, Collection)} that does not track the
+     * registered {@link EntityType} to any custom {@link Collection}.
+     *
+     * @param entityId The target {@linkplain EntityType EntityType's} {@linkplain ResourceLocation registry ID}.
+     * @param entityTypeSup The {@link EntityType} object to register.
+     * @param templateBPW The {@link EntityTypePropertyWrapper} template to inherit from.
+     *
+     * @return The {@link EntityTypePropertyWrapperBuilder} of the registered {@link EntityType}, inheriting from the provided
+     * {@code templateBPW}.
+     *
+     * @param <E> Any {@link Entity} type.
+     */
+    public static <E extends Entity> EntityTypePropertyWrapperBuilder<E> registerAndReflectAndChain(ResourceLocation entityId, Supplier<EntityType<E>> entityTypeSup, EntityTypePropertyWrapper<E> templateBPW) {
+        return registerAndReflectAndChain(entityId, entityTypeSup, templateBPW, null);
+    }
+
+    /**
+     * Registers the provided {@link EntityType} and returns its {@link EntityTypePropertyWrapperBuilder}. Optionally tracks the
+     * registered {@link EntityType} to a custom {@link Collection}.
+     * <br></br>
+     * Uses {@link Registrar#registerObjectAndReflect(ResourceLocation, Supplier, Registry)} instead of
+     * {@link Registrar#registerObject(ResourceLocation, Supplier, Registry)}.
+     *
+     * @param entityId The target {@linkplain EntityType EntityType's} {@linkplain ResourceLocation registry ID}.
+     * @param entityTypeSup The {@link EntityType} object to register.
+     * @param entityTypeSupCol An optional {@link Collection} to track the registered {@link EntityType}. Primarily useful if you
+     *                     want a shorthand method of tracking your own registered entity types.
+     *
+     * @return The {@link EntityTypePropertyWrapperBuilder} of the registered {@link EntityType}.
+     *
+     * @param <E> Any {@link Entity} type.
+     */
+    public static <E extends Entity> EntityTypePropertyWrapperBuilder<E> registerAndReflectAndChain(ResourceLocation entityId, Supplier<EntityType<E>> entityTypeSup, @Nullable Collection<Supplier<EntityType<Entity>>> entityTypeSupCol) {
+        Supplier<EntityType<E>> registeredEntityType = registerEntityTypeAndReflect(entityId, entityTypeSup, entityTypeSupCol);
+
+        return new EntityTypePropertyWrapper<>(registeredEntityType, entityId.getNamespace())
+                .builder();
+    }
+
+    /**
+     * Overloaded variant of {@link #registerAndReflectAndChain(ResourceLocation, Supplier, Collection)} that does not track the
+     * registered {@link EntityType}.
+     *
+     * @param entityId The target {@linkplain EntityType EntityType's} {@linkplain ResourceLocation registry ID}.
+     * @param entityTypeSup The {@link EntityType} object to register.
+     *
+     * @return The {@link EntityTypePropertyWrapperBuilder} of the registered {@link EntityType}.
+     *
+     * @param <E> Any {@link Entity} type.
+     */
+    public static <E extends Entity> EntityTypePropertyWrapperBuilder<E> registerAndReflectAndChain(ResourceLocation entityId, Supplier<EntityType<E>> entityTypeSup) {
+        return registerAndReflectAndChain(entityId, entityTypeSup, (Collection<Supplier<EntityType<Entity>>>) null);
     }
 }

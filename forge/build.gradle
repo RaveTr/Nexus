@@ -37,7 +37,8 @@ legacyForge {
             jvmArguments = ["-Xms12G", "-Xmx16G", "-XX:+UseG1GC", "-XX:+UnlockExperimentalVMOptions",
                             "-XX:MaxGCPauseMillis=100", "-XX:+DisableExplicitGC", "-XX:TargetSurvivorRatio=90",
                             "-XX:G1NewSizePercent=35", "-XX:G1MaxNewSizePercent=60",
-                            "-XX:G1MixedGCLiveThresholdPercent=50", "-XX:+AlwaysPreTouch", "-Dterminal.ansi=true"]
+                            "-XX:G1MixedGCLiveThresholdPercent=50", "-XX:+AlwaysPreTouch", "-Dterminal.ansi=true",
+                            "-Dmixin.debug.export=true"]
 
             systemProperty("forge.logging.console.level", "debug")
         }

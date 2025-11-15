@@ -2,8 +2,7 @@ package com.mememan.nexus.template.object.client.renderer.entity.misc.vehicle;
 
 import com.google.common.collect.ImmutableMap;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
-import com.mememan.nexus.template.object.entity.misc.vehicle.DefaultableBoat;
-import com.mememan.nexus.template.object.entity.misc.vehicle.DefaultableChestBoat;
+import com.mememan.nexus.template.object.entity.misc.vehicle.DefaultableBoatType;
 import com.mememan.nexus.template.object.item.entity.boat.BoatType;
 import com.mememan.nexus.util.RegistryUtil;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -48,7 +47,7 @@ public class DefaultableBoatRenderer extends EntityRenderer<Boat> {
                         Pair.of(
                                 RegistryUtil.pickPrefix(RegistryUtil.getTextureLocation(knownBoatType.getResourceFriendlyId(), "entity/boat")
                                                 .or(() -> RegistryUtil.getTextureLocation(knownBoatType.getResourceFriendlyId().withSuffix("_boat"), "entity/boat"))
-                                        .orElse(knownBoatType.getResourceFriendlyId()), "textures/").withSuffix(".png"),
+                                        .orElse(knownBoatType.getResourceFriendlyId().withPrefix("entity/boat/")), "textures/").withSuffix(".png"),
                                 createBoatModel(context, knownBoatType, chestBoat)
                         ));
             });
@@ -109,10 +108,8 @@ public class DefaultableBoatRenderer extends EntityRenderer<Boat> {
 
         if (!Mth.equal(adjustedBubbleAngle, 0.0F)) poseStack.mulPose((new Quaternionf()).setAngleAxis(entity.getBubbleAngle(partialTicks) * ((float) Math.PI / 180.0F), 1.0F, 0.0F, 1.0F));
 
-        Pair<ResourceLocation, ListModel<Boat>> mappedModelPair = entity instanceof DefaultableBoat defaultableBoat
-                ? this.mappedBoatTypes.get(defaultableBoat.getBoatType().orElseThrow(() -> new IllegalArgumentException("Tried to render DefaultableBoat without specified BoatType!")))
-                : entity instanceof DefaultableChestBoat defaultableChestBoat
-                ? this.mappedBoatTypes.get(defaultableChestBoat.getBoatType().orElseThrow(() -> new IllegalArgumentException("Tried to render DefaultableChestBoat without specified BoatType!")))
+        Pair<ResourceLocation, ListModel<Boat>> mappedModelPair = entity instanceof DefaultableBoatType defaultableBoat
+                ? this.mappedBoatTypes.get(defaultableBoat.getBoatType().orElseThrow(() -> new IllegalArgumentException("Tried to render DefaultableBoatType with invalid BoatType!")))
                 : this.vanillaBoatResources.get(entity.getVariant());
         ResourceLocation modelTextureLoc = mappedModelPair.getFirst();
         ListModel<Boat> actualBoatModel = mappedModelPair.getSecond();
@@ -143,13 +140,12 @@ public class DefaultableBoatRenderer extends EntityRenderer<Boat> {
     public @NotNull ResourceLocation getTextureLocation(Boat entity) {
         ResourceLocation boatTypeId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(entity.getType());
 
-        if (entity instanceof DefaultableBoat defaultableBoat) boatTypeId = defaultableBoat.getBoatType().orElseThrow(() -> new IllegalArgumentException("Tried to get texture location for DefaultableBoat without specified BoatType!")).getResourceFriendlyId();
-        if (entity instanceof DefaultableChestBoat defaultableChestBoat) boatTypeId = defaultableChestBoat.getBoatType().orElseThrow(() -> new IllegalArgumentException("Tried to get texture location for DefaultableChestBoat without specified BoatType!")).getResourceFriendlyId();
+        if (entity instanceof DefaultableBoatType defaultableBoat) boatTypeId = defaultableBoat.getBoatType().orElseThrow(() -> new IllegalArgumentException("Tried to get texture location for DefaultableBoatType with invalid BoatType!")).getResourceFriendlyId();
 
         ResourceLocation finalBoatTypeId = boatTypeId;
 
-        return RegistryUtil.pickPrefix(RegistryUtil.getTextureLocation(boatTypeId, "entity/boat")
-                        .or(() -> RegistryUtil.getTextureLocation(finalBoatTypeId.withSuffix("_boat"), "entity/boat"))
+        return RegistryUtil.pickPrefix(RegistryUtil.getTextureLocation(boatTypeId, chestBoat ? "entity/chest_boat" : "entity/boat")
+                        .or(() -> RegistryUtil.getTextureLocation(finalBoatTypeId.withSuffix("_boat"), chestBoat ? "entity/chest_boat" : "entity/boat"))
                 .orElse(boatTypeId), "textures/").withSuffix(".png");
     }
 }

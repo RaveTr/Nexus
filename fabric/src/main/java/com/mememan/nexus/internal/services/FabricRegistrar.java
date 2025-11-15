@@ -93,6 +93,11 @@ public class FabricRegistrar implements Registrar {
     }
 
     @Override
+    public <V, T extends V> Supplier<T> registerObjectAndReflect(ResourceLocation objId, Supplier<T> objSup, Registry<V> targetRegistry) {
+        return registerObject(objId, objSup, targetRegistry);
+    }
+
+    @Override
     public <T> Supplier<ResourceKey<T>> registerDatapackObject(ResourceLocation objId, Function<BootstapContext<T>, Supplier<T>> objSupMappingFunc, ResourceKey<Registry<T>> targetDatapackRegistry) {
         ResourceKey<T> targetObject = ResourceKey.create(targetDatapackRegistry, objId);
 

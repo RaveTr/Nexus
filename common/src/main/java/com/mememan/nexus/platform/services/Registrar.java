@@ -113,6 +113,39 @@ public interface Registrar {
     <V, T extends V> Supplier<T> registerObject(final ResourceLocation objId, final Supplier<T> objSup, Registry<V> targetRegistry);
 
     /**
+     * Alternate variant of {@link #registerObject(ResourceLocation, Supplier, Registry)} that employs
+     * {@link Registry#register(Registry, ResourceLocation, Object)} directly instead of delegating registration to
+     * loader-specific APIs.
+     * <br></br>
+     * This primarily only affects Neo/Forge, and is only useful in cases where registered objects are checked against
+     * during registration, such that deferred registration may cause logical issues since entries aren't immediately
+     * reflected on the {@code targetRegistry}. The standard {@link #registerObject(ResourceLocation, Supplier, Registry)}
+     * method is otherwise the preferred standard for most use-cases.
+     *
+     * @param objId The id of the object to register, following Minecraft's regex naming conventions/constraints
+     *              (<code>[a-z0-9_.-]</code>). Duplicate exceptions and other edge-cases are handled accordingly
+     *              within the target mod-loader's registry implementation.
+     * @param objSup The object to register. Has to be valid (e.g. non-{@code null}, matching the target registry's
+     *               type, etc.) for the target registry.
+     * @param targetRegistry The target {@link Registry} to register the specified object to.
+     *
+     * @return The <code>objSup</code> that was registered.
+     *
+     * @param <V> The parent object type of {@code <T>} (So if {@code targetRegistry} is {@link BuiltInRegistries#ITEM},
+     *           {@code <V>} would be of type {@link Item}, which makes {@code <T>} any object type extending
+     *           {@link Item}).
+     * @param <T> The object type to register (e.g. ({@code extends}) {@link Item} or {@link Attribute}).
+     *
+     * @implNote Neo/Forge will still track the provided {@code objSup} to its appropriate {@code DeferredRegister} in order
+     * to avoid referencing issues later on, similar to {@link #registerObject(ResourceLocation, Supplier, Registry)},
+     * with the main difference being that since the object is already registered, any accidentally-instantiated
+     * duplicates will be gracefully skipped during deferred registration.
+     *
+     * @see #registerObject(ResourceLocation, Supplier, Registry)
+     */
+    <V, T extends V> Supplier<T> registerObjectAndReflect(final ResourceLocation objId, final Supplier<T> objSup, Registry<V> targetRegistry);
+
+    /**
      * Attempts to register a datapack object to the specified {@linkplain ResourceKey<Registry<T>> targetRegistry}.
      * <br></br>
      * Generally, any datapack registries available in the {@link Registries} class can be used for this method. This

@@ -28,7 +28,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public class DefaultableChestBoat extends ChestBoat {
+public class DefaultableChestBoat extends ChestBoat implements DefaultableBoatType {
     private static final EntityDataAccessor<String> BOAT_TYPE_ID = SynchedEntityData.defineId(DefaultableChestBoat.class, EntityDataSerializers.STRING);
 
     public DefaultableChestBoat(EntityType<? extends Boat> entityType, Level level) {
@@ -53,23 +53,25 @@ public class DefaultableChestBoat extends ChestBoat {
                 .map(BoatType::getSerializedName)
                 .filter(curTypeName -> Objects.equals(curTypeName.substring(0, curTypeName.contains("-") ? curTypeName.indexOf('-') : curTypeName.length()), StringUtil.subLastToken(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(getType()).getNamespace())))
                 .findFirst()
-                .orElse(Type.OAK.getSerializedName()));
+                .orElse(BoatType.OAK.getSerializedName()));
     }
 
     protected String getBoatTypeId() {
         return this.entityData.get(BOAT_TYPE_ID);
     }
 
+    protected void setBoatTypeId(String id) {
+        this.entityData.set(BOAT_TYPE_ID, id);
+    }
+
+    @Override
     public Optional<BoatType> getBoatType() {
         return BoatType.getKnownBoatTypes().stream()
                 .filter(curBoatType -> Objects.equals(curBoatType.getSerializedName(), getBoatTypeId()))
                 .findFirst();
     }
 
-    protected void setBoatTypeId(String id) {
-        this.entityData.set(BOAT_TYPE_ID, id);
-    }
-
+    @Override
     public void setBoatType(BoatType targetBoatType) {
         setBoatTypeId(targetBoatType.getSerializedName());
     }

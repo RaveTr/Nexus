@@ -1,8 +1,10 @@
 package com.mememan.nexus.template.property_wrapper;
 
 import com.mememan.nexus.platform.NexusServices;
+import com.mememan.nexus.platform.services.Registrar;
 import com.mememan.nexus.property_wrapper.def.creative_mode_tab.CreativeModeTabPropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.creative_mode_tab.CreativeModeTabPropertyWrapperBuilder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
@@ -174,5 +176,172 @@ public final class CreativeModePropertyWrapperTemplates {
      */
     public static <CMT extends CreativeModeTab> CreativeModeTabPropertyWrapperBuilder<CMT> registerAndChain(ResourceLocation tabId, Supplier<CMT> tabSup) {
         return registerAndChain(tabId, tabSup, (Collection<Supplier<CreativeModeTab>>) null);
+    }
+
+    /**
+     * Registers and returns the provided {@link CreativeModeTab}.
+     * <br></br>
+     * Uses {@link Registrar#registerObjectAndReflect(ResourceLocation, Supplier, Registry)} instead of
+     * {@link Registrar#registerObject(ResourceLocation, Supplier, Registry)}.
+     *
+     * @param tabId The target {@linkplain CreativeModeTab CreativeModeTab's} {@linkplain ResourceLocation registry ID}.
+     * @param tabSup The {@link CreativeModeTab} object to register.
+     * @param tabSupCol An optional {@link Collection} to track the registered {@link CreativeModeTab}. Primarily useful
+     *                  if you want a shorthand method of tracking your own registered creative mode tabs.
+     *
+     * @return The {@link Supplier} of the registered {@link CreativeModeTab}.
+     *
+     * @param <CMT> Any {@link CreativeModeTab} type.
+     */
+    public static <CMT extends CreativeModeTab> Supplier<CMT> registerCreativeModeTabAndReflect(ResourceLocation tabId, Supplier<CMT> tabSup, @Nullable Collection<Supplier<CreativeModeTab>> tabSupCol) {
+        Supplier<CMT> registeredTab = NexusServices.REGISTRAR.registerObjectAndReflect(tabId, tabSup, BuiltInRegistries.CREATIVE_MODE_TAB);
+
+        if (tabSupCol != null) tabSupCol.add((Supplier<CreativeModeTab>) registeredTab);
+
+        return registeredTab;
+    }
+
+    /**
+     * Overloaded variant of {@link #registerCreativeModeTabAndReflect(ResourceLocation, Supplier, Collection)} that does not track
+     * the registered {@link CreativeModeTab} to any custom {@link Collection}.
+     *
+     * @param tabId The target {@linkplain CreativeModeTab CreativeModeTab's} {@linkplain ResourceLocation registry ID}.
+     * @param tabSup The {@link CreativeModeTab} object to register.
+     *
+     * @return The {@link Supplier} of the registered {@link CreativeModeTab}.
+     *
+     * @param <CMT> Any {@link CreativeModeTab} type.
+     */
+    public static <CMT extends CreativeModeTab> Supplier<CMT> registerCreativeModeTabAndReflect(ResourceLocation tabId, Supplier<CMT> tabSup) {
+        return registerCreativeModeTabAndReflect(tabId, tabSup, null);
+    }
+
+    /**
+     * Registers and returns the provided {@link CreativeModeTab}, mapping it to a new {@link CreativeModeTabPropertyWrapper} inheriting
+     * from the provided {@link CreativeModeTabPropertyWrapper} template. Optionally tracks the registered {@link CreativeModeTab} to a
+     * custom {@link Collection}.
+     * <br></br>
+     * Uses {@link Registrar#registerObjectAndReflect(ResourceLocation, Supplier, Registry)} instead of
+     * {@link Registrar#registerObject(ResourceLocation, Supplier, Registry)}.
+     *
+     * @param tabId The target {@linkplain CreativeModeTab CreativeModeTab's} {@linkplain ResourceLocation registry ID}.
+     * @param tabSup The {@link CreativeModeTab} object to register.
+     * @param templateBPW The {@link CreativeModeTabPropertyWrapper} template to inherit from.
+     * @param tabSupCol An optional {@link Collection} to track the registered {@link CreativeModeTab}. Primarily useful if you
+     *                  want a shorthand method of tracking your own registered creative mode tabs.
+     *
+     * @return The {@link Supplier} of the registered {@link CreativeModeTab}, mapped to its own {@link CreativeModeTabPropertyWrapper}
+     * inheriting from the provided {@code templateBPW}.
+     *
+     * @param <CMT> Any {@link CreativeModeTab} type.
+     */
+    public static <CMT extends CreativeModeTab> Supplier<CMT> registerCreativeModeTabFromTemplateAndReflect(ResourceLocation tabId, Supplier<CMT> tabSup, CreativeModeTabPropertyWrapper<CreativeModeTab> templateBPW, @Nullable Collection<Supplier<CreativeModeTab>> tabSupCol) {
+        Supplier<CMT> registeredTab = registerCreativeModeTabAndReflect(tabId, tabSup, tabSupCol);
+
+        return new CreativeModeTabPropertyWrapper<>(registeredTab, tabId.getNamespace())
+                .builder()
+                .copyFromType(templateBPW)
+                .buildAndGet();
+    }
+
+    /**
+     * Overloaded variant of {@link #registerCreativeModeTabFromTemplateAndReflect(ResourceLocation, Supplier, CreativeModeTabPropertyWrapper, Collection)} that does not track the
+     * registered {@link CreativeModeTab} to any custom {@link Collection}.
+     *
+     * @param tabId The target {@linkplain CreativeModeTab CreativeModeTab's} {@linkplain ResourceLocation registry ID}.
+     * @param tabSup The {@link CreativeModeTab} object to register.
+     * @param templateBPW The {@link CreativeModeTabPropertyWrapper} template to inherit from.
+     *
+     * @return The {@link Supplier} of the registered {@link CreativeModeTab}, mapped to its own {@link CreativeModeTabPropertyWrapper}
+     * inheriting from the provided {@code templateBPW}.
+     *
+     * @param <CMT> Any {@link CreativeModeTab} type.
+     */
+    public static <CMT extends CreativeModeTab> Supplier<CMT> registerCreativeModeTabFromTemplateAndReflect(ResourceLocation tabId, Supplier<CMT> tabSup, CreativeModeTabPropertyWrapper<CreativeModeTab> templateBPW) {
+        return registerCreativeModeTabFromTemplateAndReflect(tabId, tabSup, templateBPW, null);
+    }
+
+    /**
+     * Registers the provided {@link CreativeModeTab} and returns its {@link CreativeModeTabPropertyWrapperBuilder} inheriting from the
+     * provided {@link CreativeModeTabPropertyWrapper} template. Optionally tracks the registered {@link CreativeModeTab} to a custom
+     * {@link Collection}.
+     * <br></br>
+     * Uses {@link Registrar#registerObjectAndReflect(ResourceLocation, Supplier, Registry)} instead of
+     * {@link Registrar#registerObject(ResourceLocation, Supplier, Registry)}.
+     *
+     * @param tabId The target {@linkplain CreativeModeTab CreativeModeTab's} {@linkplain ResourceLocation registry ID}.
+     * @param tabSup The {@link CreativeModeTab} object to register.
+     * @param templateBPW The {@link CreativeModeTabPropertyWrapper} template to inherit from.
+     * @param tabSupCol An optional {@link Collection} to track the registered {@link CreativeModeTab}. Primarily useful if you
+     *                  want a shorthand method of tracking your own registered creative mode tabs.
+     *
+     * @return The {@link CreativeModeTabPropertyWrapperBuilder} of the registered {@link CreativeModeTab}, inheriting from the provided
+     * {@code templateBPW}.
+     *
+     * @param <CMT> Any {@link CreativeModeTab} type.
+     */
+    public static <CMT extends CreativeModeTab> CreativeModeTabPropertyWrapperBuilder<CMT> registerAndReflectAndChain(ResourceLocation tabId, Supplier<CMT> tabSup, CreativeModeTabPropertyWrapper<CreativeModeTab> templateBPW, @Nullable Collection<Supplier<CreativeModeTab>> tabSupCol) {
+        Supplier<CMT> registeredTab = registerCreativeModeTabAndReflect(tabId, tabSup, tabSupCol);
+
+        return new CreativeModeTabPropertyWrapper<>(registeredTab, tabId.getNamespace())
+                .builder()
+                .copyFromType(templateBPW);
+    }
+
+    /**
+     * Overloaded variant of {@link #registerAndReflectAndChain(ResourceLocation, Supplier, CreativeModeTabPropertyWrapper, Collection)} that does not track the
+     * registered {@link CreativeModeTab} to any custom {@link Collection}.
+     *
+     * @param tabId The target {@linkplain CreativeModeTab CreativeModeTab's} {@linkplain ResourceLocation registry ID}.
+     * @param tabSup The {@link CreativeModeTab} object to register.
+     * @param templateBPW The {@link CreativeModeTabPropertyWrapper} template to inherit from.
+     *
+     * @return The {@link CreativeModeTabPropertyWrapperBuilder} of the registered {@link CreativeModeTab}, inheriting
+     * from the provided {@code templateBPW}.
+     *
+     * @param <CMT> Any {@link CreativeModeTab} type.
+     */
+    public static <CMT extends CreativeModeTab> CreativeModeTabPropertyWrapperBuilder<CMT> registerAndReflectAndChain(ResourceLocation tabId, Supplier<CMT> tabSup, CreativeModeTabPropertyWrapper<CreativeModeTab> templateBPW) {
+        return registerAndReflectAndChain(tabId, tabSup, templateBPW, null);
+    }
+
+    /**
+     * Registers the provided {@link CreativeModeTab} and returns its {@link CreativeModeTabPropertyWrapperBuilder}.
+     * Optionally tracks the registered {@link CreativeModeTab} to a custom {@link Collection}.
+     * <br></br>
+     * Uses {@link Registrar#registerObjectAndReflect(ResourceLocation, Supplier, Registry)} instead of
+     * {@link Registrar#registerObject(ResourceLocation, Supplier, Registry)}.
+     *
+     * @param tabId The target {@linkplain CreativeModeTab CreativeModeTab's} {@linkplain ResourceLocation registry ID}.
+     * @param tabSup The {@link CreativeModeTab} object to register.
+     * @param tabSupCol An optional {@link Collection} to track the registered {@link CreativeModeTab}. Primarily
+     *                  useful if you want a shorthand method of tracking your own registered creative mode tabs.
+     *
+     * @return The {@link CreativeModeTabPropertyWrapperBuilder} of the registered {@link CreativeModeTab}, chaining from its own
+     * {@link CreativeModeTabPropertyWrapperBuilder}.
+     *
+     * @param <CMT> Any {@link CreativeModeTab} type.
+     */
+    public static <CMT extends CreativeModeTab> CreativeModeTabPropertyWrapperBuilder<CMT> registerAndReflectAndChain(ResourceLocation tabId, Supplier<CMT> tabSup, @Nullable Collection<Supplier<CreativeModeTab>> tabSupCol) {
+        Supplier<CMT> registeredTab = registerCreativeModeTabAndReflect(tabId, tabSup, tabSupCol);
+
+        return new CreativeModeTabPropertyWrapper<>(registeredTab, tabId.getNamespace())
+                .builder();
+    }
+
+    /**
+     * Overloaded variant of {@link #registerAndReflectAndChain(ResourceLocation, Supplier, Collection)} that does not track the
+     * registered {@link CreativeModeTab} to any custom {@link Collection}.
+     *
+     * @param tabId The target {@linkplain CreativeModeTab CreativeModeTab's} {@linkplain ResourceLocation registry ID}.
+     * @param tabSup The {@link CreativeModeTab} object to register.
+     *
+     * @return The {@link CreativeModeTabPropertyWrapperBuilder} of the registered {@link CreativeModeTab}, chaining from its own
+     * {@link CreativeModeTabPropertyWrapperBuilder}.
+     *
+     * @param <CMT> Any {@link CreativeModeTab} type.
+     */
+    public static <CMT extends CreativeModeTab> CreativeModeTabPropertyWrapperBuilder<CMT> registerAndReflectAndChain(ResourceLocation tabId, Supplier<CMT> tabSup) {
+        return registerAndReflectAndChain(tabId, tabSup, (Collection<Supplier<CreativeModeTab>>) null);
     }
 }

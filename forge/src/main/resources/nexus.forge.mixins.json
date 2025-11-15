@@ -8,6 +8,7 @@
     "block.FireBlockMixin",
     "forge.datagen.DatagenModLoaderMixin",
     "forge.registries.DataPackRegistriesHooksAccessor",
+    "forge.registries.DeferredRegisterMixin",
     "item.DiggerItemMixin",
     "item.HoeItemMixin"
   ],
