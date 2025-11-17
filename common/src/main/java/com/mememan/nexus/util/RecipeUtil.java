@@ -80,7 +80,7 @@ public final class RecipeUtil { //TODO Refactor tf out of this
     }
 
     public static <B extends Block> Consumer<Supplier<B>> woodenPlanksRecipeFromStrippedLog(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
-        return woodenPlanksRecipeFromComponent(finishedRecipe, parentPlanks -> RegistryUtil.getObjectFrom(parentPlanks, parentPlanksId -> parentPlanksId.withPrefix("stripped_").withPath(parentPlanksId.getPath().replace("_planks", "_log"))).orElse(null), recipeIdMapper);
+        return woodenPlanksRecipeFromComponent(finishedRecipe, parentPlanks -> RegistryUtil.getObjectFrom(parentPlanks, parentPlanksId -> parentPlanksId.withPath(parentPlanksId.getPath().replace("_planks", "_log")).withPrefix("stripped_")).orElse(null), recipeIdMapper);
     }
 
     public static <B extends Block> Consumer<Supplier<B>> woodenPlanksRecipeFromStrippedLog(Consumer<FinishedRecipe> finishedRecipe) {
@@ -99,7 +99,7 @@ public final class RecipeUtil { //TODO Refactor tf out of this
         return parentItemLikeSup -> {
             Runnable componentRecipeGenerator = () -> {
                 woodenPlanksRecipeFromLog(finishedRecipe).accept((Supplier<Block>) parentItemLikeSup);
-                //        woodenPlanksRecipeFromStrippedLog(finishedRecipe).accept((Supplier<Block>) parentItemLikeSup);
+                woodenPlanksRecipeFromStrippedLog(finishedRecipe).accept((Supplier<Block>) parentItemLikeSup);
                 woodenPlanksRecipeFromWood(finishedRecipe).accept((Supplier<Block>) parentItemLikeSup);
             };
 

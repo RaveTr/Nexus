@@ -861,7 +861,7 @@ public final class RegistryUtil {
             ResourceLocation standardSignId = familyId.withSuffix("_sign");
             ResourceLocation standardHangingSignId = familyId.withSuffix("_hanging_sign");
 
-            Supplier<RotatedPillarBlock> woodenLog = BlockPropertyWrapperTemplates.registerWithItemAndChain(familyId.withSuffix("_log"), () -> new RotatedPillarBlock(BlockBehaviour.Properties.copy(Blocks.OAK_LOG)), BlockPropertyWrapperTemplates.WOODEN_LOG, blockSupCol, itemSupCol)
+            Supplier<RotatedPillarBlock> woodenLog = BlockPropertyWrapperTemplates.registerWithItemAndReflectAndChain(familyId.withSuffix("_log"), () -> new RotatedPillarBlock(BlockBehaviour.Properties.copy(Blocks.OAK_LOG)), BlockPropertyWrapperTemplates.WOODEN_LOG, blockSupCol, itemSupCol)
                     .withAdditionalTag(logTag::get)
                     .buildAndGet();
             Supplier<RotatedPillarBlock> woodBlock = BlockPropertyWrapperTemplates.registerWithItemAndChain(familyId.withSuffix("_wood"), () -> new RotatedPillarBlock(BlockBehaviour.Properties.copy(Blocks.OAK_WOOD)), BlockPropertyWrapperTemplates.WOOD, blockSupCol, itemSupCol)
