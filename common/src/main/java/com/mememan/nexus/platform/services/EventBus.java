@@ -2,11 +2,6 @@ package com.mememan.nexus.platform.services;
 
 import com.mememan.nexus.event.base.EventBlueprint;
 import com.mememan.nexus.loader.ModSide;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 
 import java.util.function.Function;
 
@@ -37,17 +32,6 @@ public interface EventBus {
         onEvent(eventInterface, listener, 0);
     }
 
-    default void test() {
-        onEvent((Test) (a, b, c, d) -> {
-            return null;
-        });
-    }
-
-    interface Test {
-
-        InteractionResult onUse(ItemStack stack, Level world, Player player, InteractionHand hand);
-    }
-
     default <T> void onEvent(T listener, ModSide listenerExecutionSide) {
         onEvent(listener, listenerExecutionSide, 0);
     }
@@ -60,7 +44,7 @@ public interface EventBus {
         onEvent(listener, 0);
     }
 
-    <T> void fireEventHook(Class<T> eventInterface, Function<T[], T> eventReturnValueMapper, ModSide eventSide); // TODO (with siding and whatnot)
+    <T> void fireEventHook(Class<T> eventInterface, Function<T[], T> eventReturnValueMapper, ModSide eventSide);
 
     default <T> void fireEventHook(EventBlueprint<T> eventBlueprint) {
         fireEventHook(eventBlueprint.getEventInterface(), eventBlueprint::mergeListeners, eventBlueprint.getEventSide());
