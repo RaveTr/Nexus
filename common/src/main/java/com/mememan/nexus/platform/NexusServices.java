@@ -1,10 +1,7 @@
 package com.mememan.nexus.platform;
 
 import com.mememan.nexus.NexusConstants;
-import com.mememan.nexus.platform.services.DataGenerator;
-import com.mememan.nexus.platform.services.NetworkManager;
-import com.mememan.nexus.platform.services.PlatformManager;
-import com.mememan.nexus.platform.services.Registrar;
+import com.mememan.nexus.platform.services.*;
 
 import java.util.ServiceLoader;
 
@@ -35,6 +32,12 @@ public class NexusServices {
      * @see <a href="https://github.com/RaveTr/Nexus/wiki/Data-Generation">Nexus Wiki: Data Generation</a>
      */
     public static final DataGenerator DATA_GENERATOR = loadService(DataGenerator.class);
+    /**
+     * The service responsible for handling all event hooks for dependant mods.
+     *
+     * @see <a href="https://github.com/RaveTr/Nexus/wiki/events">Nexus Wiki: Events</a>
+     */
+    public static final EventBus EVENT_BUS = loadService(EventBus.class);
 
     /**
      * Internal service loader method for loading platform-agnostic services.

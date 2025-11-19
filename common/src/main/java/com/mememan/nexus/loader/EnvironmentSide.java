@@ -46,4 +46,17 @@ public enum EnvironmentSide {
     public boolean isDedicatedServer() {
         return this == DEDICATED_SERVER;
     }
+
+    /**
+     * Whether this side properly pertains to the provided logical equivalent {@code targetSide}.
+     *
+     * @param targetSide The logical {@link ModSide} to check against.
+     *
+     * @return Whether this side properly pertains to the provided logical equivalent {@code targetSide}.
+     */
+    public boolean pertainsTo(ModSide targetSide) {
+        return targetSide == ModSide.COMMON
+                || (targetSide == ModSide.CLIENT && isClient())
+                || (targetSide == ModSide.SERVER && isDedicatedServer());
+    }
 }
