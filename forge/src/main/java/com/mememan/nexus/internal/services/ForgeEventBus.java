@@ -3,6 +3,7 @@ package com.mememan.nexus.internal.services;
 import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.internal.event.custom.ForgeEventWrapper;
 import com.mememan.nexus.loader.ModSide;
+import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.platform.services.EventBus;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -78,6 +79,11 @@ public class ForgeEventBus implements EventBus {
 
         if (mappedEvent == null) {
             NexusConstants.LOGGER.warn("Event of type {} is not mapped to ModSide: {}, skipping event invocation/posting/firing until state changes...", eventInterface.getName(), eventSide.getSideName());
+            return null;
+        }
+
+        if (!NexusServices.PLATFORM_MANAGER.getEnvironmentSide().pertainsTo(eventSide)) {
+            NexusConstants.LOGGER.warn("Attempted to invoke listeners for event of type {} on EnvironmentSide {} (physical side), but provided ModSide was {} (logical side). Skipping listener invocation on current side...", eventInterface.getName(), NexusServices.PLATFORM_MANAGER.getEnvironmentSide().getSideName(), eventSide.getSideName());
             return null;
         }
 

@@ -42,7 +42,7 @@ public interface EventBus {
 
     /**
      * Registers an event hook for the provided event {@code interface}, using the provided {@code eventListenerMerger}.
-     * Should generally be called in your mod initializer.
+     * Should generally be called in your mod initializer (or your event blueprint's constructor, see {@link EventBlueprint}).
      *
      * @param eventInterface The event {@code interface} to register the hook for. Must be a functional {@code interface}.
      * @param eventListenerMerger The merging function to use for merging event listeners' results.
@@ -62,6 +62,8 @@ public interface EventBus {
      * @param eventBlueprint The {@link EventBlueprint} to register the hook for.
      *
      * @param <T> The event {@code interface} type.
+     *
+     * @throws IllegalArgumentException If the provided {@code eventInterface} is not a functional {@code interface}.
      */
     default <T> void registerEventHook(EventBlueprint<T> eventBlueprint) {
         registerEventHook(eventBlueprint.getEventInterface(), eventBlueprint::mergeListeners, eventBlueprint.getEventSide());
