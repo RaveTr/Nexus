@@ -43,14 +43,14 @@ public class FabricEventBus implements EventBus {
         Object2ObjectOpenHashMap<Class<?>, Event<?>> eventByType = MAPPED_EVENTS.get(listenerExecutionSide);
 
         if (eventByType == null || eventByType.isEmpty()) {
-            NexusConstants.LOGGER.debug("ModSide {} has no mapped events, skipping listener execution until state changes...", listenerExecutionSide.getSideName());
+            NexusConstants.LOGGER.debug("ModSide {} has no mapped events, skipping listener registration until state changes...", listenerExecutionSide.getSideName());
             return;
         }
 
         Event<T> mappedEvent = eventByType.get(eventInterface) == null ? null : (Event<T>) eventByType.get(eventInterface);
 
         if (mappedEvent == null) {
-            NexusConstants.LOGGER.warn("Event of type {} is not mapped to ModSide: {}, skipping listener execution until state changes...", eventInterface.getName(), listenerExecutionSide.getSideName());
+            NexusConstants.LOGGER.warn("Event of type {} is not mapped to ModSide: {}, skipping listener registration until state changes...", eventInterface.getName(), listenerExecutionSide.getSideName());
             return;
         }
 
