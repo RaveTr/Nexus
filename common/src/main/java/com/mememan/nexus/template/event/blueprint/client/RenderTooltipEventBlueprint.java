@@ -35,9 +35,13 @@ public class RenderTooltipEventBlueprint {
         @Override
         public @Nullable PreRenderTooltipEvent mergeListeners(PreRenderTooltipEvent[] existingListeners) {
             return (targetStack, graphics, mouseX, mouseY, curTooltipFont, tooltipComponents, tooltipPositioner) -> {
+                boolean finalizedResult = false;
+
                 for (PreRenderTooltipEvent listener : existingListeners) {
-                    listener.preRenderToolTip(targetStack, graphics, mouseX, mouseY, curTooltipFont, tooltipComponents, tooltipPositioner);
+                    finalizedResult |= listener.preRenderToolTip(targetStack, graphics, mouseX, mouseY, curTooltipFont, tooltipComponents, tooltipPositioner);
                 }
+
+                return finalizedResult;
             };
         }
 
@@ -49,7 +53,7 @@ public class RenderTooltipEventBlueprint {
         @FunctionalInterface
         public interface PreRenderTooltipEvent {
 
-            void preRenderToolTip(@NotNull ItemStack targetStack, GuiGraphics graphics, int mouseX, int mouseY, @NotNull Font curTooltipFont, @NotNull List<ClientTooltipComponent> tooltipComponents, ClientTooltipPositioner tooltipPositioner);
+            boolean preRenderToolTip(@NotNull ItemStack targetStack, GuiGraphics graphics, int mouseX, int mouseY, @NotNull Font curTooltipFont, @NotNull List<ClientTooltipComponent> tooltipComponents, ClientTooltipPositioner tooltipPositioner);
         }
     }
 }

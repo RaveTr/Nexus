@@ -1,6 +1,7 @@
 package com.mememan.nexus.platform.services;
 
 import com.mememan.nexus.event.base.EventBlueprint;
+import com.mememan.nexus.event.base.WrappedEventBlueprint;
 import com.mememan.nexus.loader.ModSide;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,7 +17,9 @@ import java.util.function.Function;
  * <br></br>
  * More closely follows Fabric's functional event declaration system, with a number of tweaks to make it more
  * convenient to use (such as the inclusion of overloads that use more strongly-defined blueprint event interfaces added
- * by Nexus API, priority-based listener registration, etc.).
+ * by Nexus API, priority-based listener registration, etc.). However, API classes and helpers exist that define blueprints
+ * to enforce conventions, similar to Forge but with much more freedom, if the end-developer prefers working that way
+ * (which is usually recommended for mods depending on Nexus API, see references below for more info).
  * <br></br>
  * This exists as a service in order to allow for proper interfacing with each modloader's event system/API, or to allow
  * for writing around each modloader's event system/API if said systems are designed way too differently to warrant a
@@ -37,6 +40,9 @@ import java.util.function.Function;
  * That being said, Nexus API keeps track of event types and their listeners almost identically across loader implementations,
  * which means that there shouldn't be any issues querying Nexus API whenever needed for event information, regardless
  * of project setup (single-loader or multi-loader).
+ *
+ * @see EventBlueprint
+ * @see WrappedEventBlueprint
  */
 public interface EventBus {
 
