@@ -38,6 +38,10 @@ public record EventResult<R>(R actualResult, boolean cancelled, boolean shortCir
         return new EventResult<>(actualResult, false);
     }
 
+    public static <R> EventResult<R> pass() {
+        return new EventResult<>(null, false);
+    }
+
     public void ifCancelled(Consumer<R> actionOnCancellation) {
         if (cancelled) actionOnCancellation.accept(actualResult);
     }

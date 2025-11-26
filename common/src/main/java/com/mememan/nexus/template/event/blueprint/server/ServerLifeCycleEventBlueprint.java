@@ -10,8 +10,8 @@ public abstract class ServerLifeCycleEventBlueprint<SLCE extends ServerLifeCycle
     public static final ServerStoppingEventBlueprint SERVER_STOPPING = new ServerStoppingEventBlueprint();
     public static final ServerStoppedEventBlueprint SERVER_STOPPED = new ServerStoppedEventBlueprint();
 
-    protected ServerLifeCycleEventBlueprint(Class<SLCE> eventInterface, SLCE defaultResult, ModSide eventSide) {
-        super(eventInterface, defaultResult, false, eventSide);
+    protected ServerLifeCycleEventBlueprint(Class<SLCE> eventInterface, SLCE defaultResult, boolean isCancellable, ModSide eventSide) {
+        super(eventInterface, defaultResult, isCancellable, eventSide);
     }
 
     @Override
@@ -22,28 +22,28 @@ public abstract class ServerLifeCycleEventBlueprint<SLCE extends ServerLifeCycle
     public static class ServerStartingEventBlueprint extends ServerLifeCycleEventBlueprint<ServerLifeCycleEvent.ServerStartingEvent>  {
 
         protected ServerStartingEventBlueprint() {
-            super(ServerLifeCycleEvent.ServerStartingEvent.class, null, ModSide.COMMON);
+            super(ServerLifeCycleEvent.ServerStartingEvent.class, null, true, ModSide.COMMON);
         }
     }
 
     public static class ServerStartedEventBlueprint extends ServerLifeCycleEventBlueprint<ServerLifeCycleEvent.ServerStartedEvent>  {
 
         protected ServerStartedEventBlueprint() {
-            super(ServerLifeCycleEvent.ServerStartedEvent.class, null, ModSide.COMMON);
+            super(ServerLifeCycleEvent.ServerStartedEvent.class, null, false, ModSide.COMMON);
         }
     }
 
     public static class ServerStoppingEventBlueprint extends ServerLifeCycleEventBlueprint<ServerLifeCycleEvent.ServerStoppingEvent>  {
 
         protected ServerStoppingEventBlueprint() {
-            super(ServerLifeCycleEvent.ServerStoppingEvent.class, null, ModSide.COMMON);
+            super(ServerLifeCycleEvent.ServerStoppingEvent.class, null, false, ModSide.COMMON);
         }
     }
 
     public static class ServerStoppedEventBlueprint extends ServerLifeCycleEventBlueprint<ServerLifeCycleEvent.ServerStoppedEvent>  {
 
         protected ServerStoppedEventBlueprint() {
-            super(ServerLifeCycleEvent.ServerStoppedEvent.class, null, ModSide.COMMON);
+            super(ServerLifeCycleEvent.ServerStoppedEvent.class, null, false, ModSide.COMMON);
         }
     }
 }

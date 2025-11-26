@@ -29,6 +29,11 @@ public abstract class WrappedEventBlueprint<T, R> implements EventBlueprint<Even
     }
 
     @Override
+    public Class<T> getActualEventType() {
+        return eventInterface;
+    }
+
+    @Override
     public @Nullable EventListener<T, R> mergeListeners(EventListener<T, R>[] existingListeners) {
         return listener -> {
             R curResult = defaultResult;
@@ -58,7 +63,8 @@ public abstract class WrappedEventBlueprint<T, R> implements EventBlueprint<Even
 
     @Override
     public <U> U fireEvent(Function<EventListener<T, R>, U> eventMapper) {
-        return EventBlueprint.super.fireEvent(eventMapper);
+        U eventResult = EventBlueprint.super.fireEvent(eventMapper);
+        return eventResult == null ? (U) EventResult.pass() : eventResult;
     }
 
     public boolean isCancellable() {

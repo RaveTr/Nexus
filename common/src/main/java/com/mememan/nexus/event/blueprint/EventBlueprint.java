@@ -13,17 +13,21 @@ public interface EventBlueprint<T> {
 
     Class<T> getEventInterface();
 
+    default Class<?> getActualEventType() {
+        return getEventInterface();
+    }
+
     @Nullable
     T mergeListeners(T[] existingListeners);
 
     ModSide getEventSide();
 
     default <R> R fireEvent(Function<T, R> eventMapper) {
-        return NexusServices.EVENT_BUS.fireEventHook(getEventInterface(), eventMapper, getEventSide());
+        return NexusServices.EVENT_BUS.fireEventHook(getEventInterface(), eventMapper, getEventSide(), getActualEventType());
     }
 
     default void onEvent(T listener, int listenerPriority) {
-        NexusServices.EVENT_BUS.onEvent(getEventInterface(), listener, getEventSide(), listenerPriority);
+        NexusServices.EVENT_BUS.onEvent(getEventInterface(), listener, getEventSide(), listenerPriority, getActualEventType());
     }
 
     default void onEvent(T listener) {
@@ -31,7 +35,7 @@ public interface EventBlueprint<T> {
     }
 
     default Map<Integer, List<T>> getListeners() {
-        return NexusServices.EVENT_BUS.getListenersFor(getEventInterface());
+        return NexusServices.EVENT_BUS.getListenersFor(getEventInterface(), getActualEventType());
     }
 
     default List<T> getListeners(int priority) {

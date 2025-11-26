@@ -30,15 +30,15 @@ public class TickEventBlueprint<TE extends BaseEvent> extends ConcretePropagatin
         }
     }
 
-    public static class Client extends ConcreteEventBlueprint<TickEvent.ClientTickEvent> {
+    public static class Client extends ConcreteEventBlueprint<TickEvent.CommonTickEvent> {
         public static final Client CLIENT = new Client();
 
         protected Client() {
-            super(TickEvent.ClientTickEvent.class, null, false, ModSide.CLIENT);
+            super(TickEvent.CommonTickEvent.class, null, false, ModSide.CLIENT);
         }
 
         @Override
-        protected TickEvent.ClientTickEvent mergeListenerResults(TickEvent.ClientTickEvent curResult, TickEvent.ClientTickEvent newResult) {
+        protected TickEvent.CommonTickEvent mergeListenerResults(TickEvent.CommonTickEvent curResult, TickEvent.CommonTickEvent newResult) {
             return newResult;
         }
     }

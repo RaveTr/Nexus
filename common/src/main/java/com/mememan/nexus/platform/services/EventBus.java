@@ -1,12 +1,18 @@
 package com.mememan.nexus.platform.services;
 
+import com.google.common.collect.ImmutableList;
 import com.mememan.nexus.event.blueprint.EventBlueprint;
 import com.mememan.nexus.event.blueprint.WrappedEventBlueprint;
 import com.mememan.nexus.loader.ModSide;
+import com.mememan.nexus.util.ReflectionUtil;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -47,8 +53,24 @@ import java.util.function.Function;
 public interface EventBus {
 
     /**
-     * Registers an event hook for the provided event {@code interface}, using the provided {@code eventListenerMerger}.
+     * Registers an event hook mapped to the provided {@code eventKey}, using the provided {@code eventListenerMerger}.
      * Should generally be called in your mod initializer (or your event blueprint's constructor, see {@link EventBlueprint}).
+     *
+     * @param eventKey The identifier {@link EventKey} to register the hook for. Must wrap around a functional {@code interface}.
+     * @param eventListenerMerger The merging function to use for merging event listeners' results.
+     * @param eventSide The side on which the event should be registered. Determines the side on which listeners pertaining
+     *                  to the provided {@code eventInterface} will run.
+     *
+     * @param <T> The event {@code interface} type.
+     *
+     * @throws IllegalArgumentException If the provided {@code eventInterface} is not a functional {@code interface}.
+     */
+    <T> void registerEventHook(EventKey<T> eventKey, Function<T[], T> eventListenerMerger, ModSide eventSide);
+
+    /**
+     * Overloaded variant of {@link #registerEventHook(EventKey, Function, ModSide)}. Registers an event hook for the
+     * provided event {@code interface}, using the provided {@code eventListenerMerger}. Should generally be called in
+     * your mod initializer (or your event blueprint's constructor, see {@link EventBlueprint}).
      *
      * @param eventInterface The event {@code interface} to register the hook for. Must be a functional {@code interface}.
      * @param eventListenerMerger The merging function to use for merging event listeners' results.
@@ -58,11 +80,16 @@ public interface EventBus {
      * @param <T> The event {@code interface} type.
      *
      * @throws IllegalArgumentException If the provided {@code eventInterface} is not a functional {@code interface}.
+     *
+     * @see #registerEventHook(EventKey, Function, ModSide)
+     * @see #registerEventHook(EventBlueprint)
      */
-    <T> void registerEventHook(Class<T> eventInterface, Function<T[], T> eventListenerMerger, ModSide eventSide);
+    default <T> void registerEventHook(Class<T> eventInterface, Function<T[], T> eventListenerMerger, ModSide eventSide) {
+        registerEventHook(new EventKey<>(eventInterface), eventListenerMerger, eventSide);
+    }
 
     /**
-     * Overloaded variant of {@link #registerEventHook(Class, Function, ModSide)}. Registers an event hook using the
+     * Overloaded variant of {@link #registerEventHook(EventKey, Function, ModSide)}. Registers an event hook using the
      * provided {@link EventBlueprint}.
      *
      * @param eventBlueprint The {@link EventBlueprint} to register the hook for.
@@ -72,7 +99,7 @@ public interface EventBus {
      * @throws IllegalArgumentException If the provided {@code eventInterface} is not a functional {@code interface}.
      */
     default <T> void registerEventHook(EventBlueprint<T> eventBlueprint) {
-        registerEventHook(eventBlueprint.getEventInterface(), eventBlueprint::mergeListeners, eventBlueprint.getEventSide());
+        registerEventHook(new EventKey<>(eventBlueprint.getEventInterface(), eventBlueprint.getActualEventType()), eventBlueprint::mergeListeners, eventBlueprint.getEventSide());
     }
 
     /**
@@ -82,123 +109,150 @@ public interface EventBus {
      * @param listener The listener instance to register.
      * @param listenerExecutionSide The side on which the listener should run.
      * @param listenerPriority The priority of the listener. Lower priority values are executed first.
+     * @param associatedEventTypes An optional array of types to associate the {@code eventInterface} with, for lookup.
+     *                             Primarily useful in cases where unresolvable generic types are present in the event
+     *                             {@code interface}.
      *
      * @param <T> The event {@code interface} type.
      */
-    <T> void onEvent(Class<T> eventInterface, T listener, ModSide listenerExecutionSide, int listenerPriority);
+    <T> void onEvent(Class<T> eventInterface, T listener, ModSide listenerExecutionSide, int listenerPriority, Class<?>... associatedEventTypes);
 
     /**
-     * Overloaded variant of {@link #onEvent(Class, T, ModSide, int)}. Registers an event listener for the provided
+     * Overloaded variant of {@link #onEvent(Class, T, ModSide, int, Class[])}. Registers an event listener for the provided
      * event {@code interface} with the provided listener priority on {@link ModSide#COMMON}.
      *
      * @param eventInterface The event {@code interface} to register the listener for. Must be a functional {@code interface}.
      * @param listener The listener instance to register.
      * @param listenerPriority The priority of the listener. Lower priority values are executed first.
+     * @param associatedEventTypes An optional array of types to associate the {@code eventInterface} with, for lookup.
+     *                             Primarily useful in cases where unresolvable generic types are present in the event
+     *                             {@code interface}.
      *
      * @param <T> The event {@code interface} type.
      */
-    default <T> void onEvent(Class<T> eventInterface, T listener, int listenerPriority) {
-        onEvent(eventInterface, listener, ModSide.COMMON, listenerPriority);
+    default <T> void onEvent(Class<T> eventInterface, T listener, int listenerPriority, Class<?>... associatedEventTypes) {
+        onEvent(eventInterface, listener, ModSide.COMMON, listenerPriority, associatedEventTypes);
     }
 
     /**
-     * Overloaded variant of {@link #onEvent(Class, T, ModSide, int)}. Registers an event listener for the provided
+     * Overloaded variant of {@link #onEvent(Class, T, ModSide, int, Class[])}. Registers an event listener for the provided
      * event {@code interface} with the provided listener priority on the provided {@code listenerExecutionSide}. Infers
-     * the event {@code interface} from the provided listener using {@link #getFunctionalInterfaceClass(T)}.
+     * the event {@code interface} from the provided listener using {@link ReflectionUtil#getFunctionalInterfaceClass(Object)}.
      *
      * @param listener The listener instance to register.
      * @param listenerPriority The priority of the listener. Lower priority values are executed first.
+     * @param associatedEventTypes An optional array of types to associate the {@code eventInterface} with, for lookup.
+     *                             Primarily useful in cases where unresolvable generic types are present in the event
+     *                             {@code interface}.
      *
      * @param <T> The event {@code interface} type.
      */
-    default <T> void onEvent(T listener, ModSide listenerExecutionSide, int listenerPriority) {
-        onEvent(getFunctionalInterfaceClass(listener), listener, listenerExecutionSide, listenerPriority);
+    default <T> void onEvent(T listener, ModSide listenerExecutionSide, int listenerPriority, Class<?>... associatedEventTypes) {
+        onEvent(ReflectionUtil.getFunctionalInterfaceClass(listener), listener, listenerExecutionSide, listenerPriority, associatedEventTypes);
     }
 
     /**
-     * Overloaded variant of {@link #onEvent(Class, T, ModSide, int)}. Registers an event listener for the provided
+     * Overloaded variant of {@link #onEvent(Class, T, ModSide, int, Class[])}. Registers an event listener for the provided
      * event {@code interface} with the default priority of 0 on {@link ModSide#COMMON}. Infers the event
-     * {@code interface} from the provided listener using {@link #getFunctionalInterfaceClass(T)}.
+     * {@code interface} from the provided listener using {@link ReflectionUtil#getFunctionalInterfaceClass(Object)}.
      *
      * @param listener The listener instance to register.
+     * @param associatedEventTypes An optional array of types to associate the {@code eventInterface} with, for lookup.
+     *                             Primarily useful in cases where unresolvable generic types are present in the event
+     *                             {@code interface}.
      *
      * @param <T> The event {@code interface} type.
      */
-    default <T> void onEvent(Class<T> eventInterface, T listener) {
-        onEvent(eventInterface, listener, 0);
+    default <T> void onEvent(Class<T> eventInterface, T listener, Class<?>... associatedEventTypes) {
+        onEvent(eventInterface, listener, 0, associatedEventTypes);
     }
 
     /**
-     * Overloaded variant of {@link #onEvent(Class, T, ModSide, int)}. Registers an event listener for the provided
+     * Overloaded variant of {@link #onEvent(Class, T, ModSide, int, Class[])}. Registers an event listener for the provided
      * event {@code interface} with the default priority of 0. Infers the event
-     * {@code interface} from the provided listener using {@link #getFunctionalInterfaceClass(T)}.
+     * {@code interface} from the provided listener using {@link ReflectionUtil#getFunctionalInterfaceClass(Object)}.
      *
      * @param listener The listener instance to register.
+     * @param associatedEventTypes An optional array of types to associate the {@code eventInterface} with, for lookup.
+     *                             Primarily useful in cases where unresolvable generic types are present in the event
+     *                             {@code interface}.
      *
      * @param <T> The event {@code interface} type.
      */
-    default <T> void onEvent(T listener, ModSide listenerExecutionSide) {
-        onEvent(listener, listenerExecutionSide, 0);
+    default <T> void onEvent(T listener, ModSide listenerExecutionSide, Class<?>... associatedEventTypes) {
+        onEvent(listener, listenerExecutionSide, 0, associatedEventTypes);
     }
 
     /**
-     * Overloaded variant of {@link #onEvent(Class, T, ModSide, int)}. Registers an event listener for the provided
+     * Overloaded variant of {@link #onEvent(Class, T, ModSide, int, Class[])}. Registers an event listener for the provided
      * event {@code interface} with the provided listener priority on {@link ModSide#COMMON}. Infers the event
-     * {@code interface} from the provided listener using {@link #getFunctionalInterfaceClass(T)}.
+     * {@code interface} from the provided listener using {@link ReflectionUtil#getFunctionalInterfaceClass(Object)}.
      *
      * @param listener The listener instance to register.
+     * @param associatedEventTypes An optional array of types to associate the {@code eventInterface} with, for lookup.
+     *                             Primarily useful in cases where unresolvable generic types are present in the event
+     *                             {@code interface}.
      *
      * @param <T> The event {@code interface} type.
      */
-    default <T> void onEvent(T listener, int listenerPriority) {
-        onEvent(listener, ModSide.COMMON, listenerPriority);
+    default <T> void onEvent(T listener, int listenerPriority, Class<?>... associatedEventTypes) {
+        onEvent(listener, ModSide.COMMON, listenerPriority, associatedEventTypes);
     }
 
     /**
-     * Overloaded variant of {@link #onEvent(Class, T, ModSide, int)}. Registers an event listener for the provided
+     * Overloaded variant of {@link #onEvent(Class, T, ModSide, int, Class[])}. Registers an event listener for the provided
      * event {@code interface} with the default priority of 0. Infers the event {@code interface} from the provided
-     * listener using {@link #getFunctionalInterfaceClass(T)}.
+     * listener using {@link ReflectionUtil#getFunctionalInterfaceClass(Object)}.
      *
      * @param listener The listener instance to register.
+     * @param associatedEventTypes An optional array of types to associate the {@code eventInterface} with, for lookup.
+     *                             Primarily useful in cases where unresolvable generic types are present in the event
+     *                             {@code interface}.
      *
      * @param <T> The event {@code interface} type.
      */
-    default <T> void onEvent(T listener) {
-        onEvent(listener, 0);
+    default <T> void onEvent(T listener, Class<?>... associatedEventTypes) {
+        onEvent(listener, 0, associatedEventTypes);
     }
 
     /**
      * Fires an event for the provided event {@code interface} on the provided {@code eventSide}. Infers the event
-     * {@code interface} from the provided listener using {@link #getFunctionalInterfaceClass(T)}.
+     * {@code interface} from the provided listener using {@link ReflectionUtil#getFunctionalInterfaceClass(Object)}.
      *
      * @param eventInterface The event {@code interface} to fire.
      * @param eventListenerInvokerMapper The invoker mapper to use for firing the event. Used to be able to query results
      *                                   from the finalized listener invoker when it's run.
      * @param eventSide The side on which the event should be fired.
+     * @param associatedEventTypes An optional array of types to associate the {@code eventInterface} with, for lookup.
+     *                             Primarily useful in cases where unresolvable generic types are present in the event
+     *                             {@code interface}.
      *
      * @param <T> The event {@code interface} type.
      *
      * @return The result of the event listener invoker mapper. May be {@code null}.
      */
     @Nullable
-    <T, R> R fireEventHook(Class<T> eventInterface, Function<T, R> eventListenerInvokerMapper, ModSide eventSide);
+    <T, R> R fireEventHook(Class<T> eventInterface, Function<T, R> eventListenerInvokerMapper, ModSide eventSide, Class<?>... associatedEventTypes);
 
     /**
-     * Overloaded variant of {@link #fireEventHook(Class, Function, ModSide)}. Fires an event for the provided event
+     * Overloaded variant of {@link #fireEventHook(Class, Function, ModSide, Class[])}. Fires an event for the provided event
      * {@code interface} on {@link ModSide#COMMON}, if possible. Infers the event {@code interface} from the provided
-     * listener using {@link #getFunctionalInterfaceClass(T)}.
+     * listener using {@link ReflectionUtil#getFunctionalInterfaceClass(Object)}.
      *
      * @param eventInterface The event {@code interface} to fire.
      * @param eventListenerInvokerMapper The invoker mapper to use for firing the event. Used to be able to query results
      *                                   from the finalized listener invoker when it's run.
+     * @param associatedEventTypes An optional array of types to associate the {@code eventInterface} with, for lookup.
+     *                             Primarily useful in cases where unresolvable generic types are present in the event
+     *                             {@code interface}.
      *
      * @param <T> The event {@code interface} type.
      *
      * @return The result of the event listener invoker mapper. May be {@code null}.
      */
     @Nullable
-    default <T, R> R fireEventHook(Class<T> eventInterface, Function<T, R> eventListenerInvokerMapper) {
-        return fireEventHook(eventInterface, eventListenerInvokerMapper, ModSide.COMMON);
+    default <T, R> R fireEventHook(Class<T> eventInterface, Function<T, R> eventListenerInvokerMapper, Class<?>... associatedEventTypes) {
+        return fireEventHook(eventInterface, eventListenerInvokerMapper, ModSide.COMMON, associatedEventTypes);
     }
 
     /**
@@ -206,40 +260,67 @@ public interface EventBus {
      * is sorted by priority in ascending order.
      *
      * @param eventInterface The event {@code interface} to get listeners for.
+     * @param associatedEventTypes An optional array of types to associate the {@code eventInterface} with, for lookup.
+     *                             Primarily useful in cases where unresolvable generic types are present in the event
+     *                             {@code interface}.
      *
      * @param <T> The event {@code interface} type.
      *
      * @return A map of listeners for the provided event {@code interface}, sorted by priority in ascending order
      */
-    <T> Map<Integer, List<T>> getListenersFor(Class<T> eventInterface);
+    <T> Map<Integer, List<T>> getListenersFor(Class<T> eventInterface, Class<?>... associatedEventTypes);
 
     /**
-     * Attempts to evaluate the functional {@code interface} class that a lambda implements. For internal use only.
+     * Identifier data-holding {@code class} used for event type lookup in loader-specific implementations of {@link EventBus}.
+     * Used instead of direct {@link Class} objects in order to account for generic types or similar that may need to be
+     * associated with a given event {@code interface}.
      *
-     * @param lambda The lambda or method reference to evaluate the functional {@code interface} of.
-     *
-     * @return The functional {@code interface} pertaining to the provided {@code lambda}.
-     *
-     * @throws IllegalArgumentException If the lambda's functional {@code interface} cannot be determined (usually only
-     * really odd edge cases, should never hit under normal circumstances due to preliminary checks in
-     * {@link #registerEventHook(Class, Function, ModSide)} implementations and overloads).
+     * @param <T> The event {@code interface} type. Must be functional.
      */
-    private static <T> Class<T> getFunctionalInterfaceClass(T lambda) {
-        if (lambda == null) throw new NullPointerException("Attempted to evaluate functional interface for null lambda!");
-        if (lambda instanceof Class) return (Class<T>) lambda; // For direct implementations
+    class EventKey<T> {
+        protected final Class<T> eventInterface;
+        protected final List<Class<?>> associatedTypes = new ObjectArrayList<>();
 
-        Class<?>[] pertainingImplementedInterfaces = lambda.getClass().getInterfaces();
+        public EventKey(Class<T> eventInterface, Class<?>... associatedTypes) {
+            if (!eventInterface.isInterface() || Arrays.stream(eventInterface.getMethods()).filter(curMethod -> Modifier.isAbstract(curMethod.getModifiers()) && !Modifier.isStatic(curMethod.getModifiers())).count() != 1) {
+                throw new IllegalArgumentException(String.format("Attempted to declare event of type %s, but it isn't a functional interface!", eventInterface.getName()));
+            }
 
-        if (pertainingImplementedInterfaces.length == 1) return (Class<T>) pertainingImplementedInterfaces[0]; // For lambdas and method references
-
-        Class<?> superclass = lambda.getClass().getSuperclass();
-
-        if (superclass != null && superclass != Object.class) {
-            pertainingImplementedInterfaces = superclass.getInterfaces();
-
-            if (pertainingImplementedInterfaces.length == 1) return (Class<T>) pertainingImplementedInterfaces[0]; // For method references on classes
+            this.eventInterface = eventInterface;
+            this.associatedTypes.addAll(List.of(associatedTypes));
         }
 
-        throw new IllegalArgumentException(String.format("Could not determine functional interface for lambda function: %s", lambda));
+        /**
+         * Gets the wrapped functional event {@code interface}.
+         *
+         * @return The event {@code interface}.
+         */
+        public Class<T> getEventInterface() {
+            return eventInterface;
+        }
+
+        /**
+         * Retrieves an immutable copy of all associated types.
+         *
+         * @return An immutable copy of all associated types.
+         */
+        public List<Class<?>> getAssociatedTypes() {
+            return ImmutableList.copyOf(associatedTypes);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            EventKey<T> eventKey = (EventKey<T>) o;
+
+            return Objects.equals(eventInterface, eventKey.eventInterface) && Objects.equals(associatedTypes, eventKey.associatedTypes);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(eventInterface, associatedTypes);
+        }
     }
 }

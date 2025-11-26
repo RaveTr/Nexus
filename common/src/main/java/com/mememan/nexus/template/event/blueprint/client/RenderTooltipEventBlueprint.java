@@ -33,6 +33,11 @@ public class RenderTooltipEventBlueprint {
         }
 
         @Override
+        public @Nullable Class<?> getActualEventType() {
+            return PreRenderTooltipEvent.class;
+        }
+
+        @Override
         public @Nullable PreRenderTooltipEvent mergeListeners(PreRenderTooltipEvent[] existingListeners) {
             return (targetStack, graphics, mouseX, mouseY, curTooltipFont, tooltipComponents, tooltipPositioner) -> {
                 boolean finalizedResult = false;

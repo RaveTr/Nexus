@@ -22,6 +22,7 @@ legacyForge {
 dependencies {
     // Base
     compileOnly group: "org.spongepowered", name: "mixin", version: mixin_version
+    compileOnly group: "io.github.llamalad7", name: "mixinextras-common", version: mixinextras_version
 }
 
 configurations {
