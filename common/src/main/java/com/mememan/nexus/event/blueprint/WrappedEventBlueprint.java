@@ -1,4 +1,4 @@
-package com.mememan.nexus.event.base;
+package com.mememan.nexus.event.blueprint;
 
 import com.mememan.nexus.event.listener.EventListener;
 import com.mememan.nexus.event.result.EventResult;

@@ -1,4 +1,4 @@
-package com.mememan.nexus.event.base;
+package com.mememan.nexus.event.blueprint;
 
 import com.mememan.nexus.loader.ModSide;
 import com.mememan.nexus.platform.NexusServices;

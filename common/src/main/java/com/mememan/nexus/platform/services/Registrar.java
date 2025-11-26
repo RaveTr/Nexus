@@ -117,7 +117,7 @@ public interface Registrar {
      * {@link Registry#register(Registry, ResourceLocation, Object)} directly instead of delegating registration to
      * loader-specific APIs.
      * <br></br>
-     * This primarily only affects Neo/Forge, and is only useful in cases where registered objects are checked against
+     * This primarily affects Neo/Forge, and is only useful in cases where registered objects are checked against
      * during registration, such that deferred registration may cause logical issues since entries aren't immediately
      * reflected on the {@code targetRegistry}. The standard {@link #registerObject(ResourceLocation, Supplier, Registry)}
      * method is otherwise the preferred standard for most use-cases.

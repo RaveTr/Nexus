@@ -1,7 +1,7 @@
 package com.mememan.nexus.platform.services;
 
-import com.mememan.nexus.event.base.EventBlueprint;
-import com.mememan.nexus.event.base.WrappedEventBlueprint;
+import com.mememan.nexus.event.blueprint.EventBlueprint;
+import com.mememan.nexus.event.blueprint.WrappedEventBlueprint;
 import com.mememan.nexus.loader.ModSide;
 import org.jetbrains.annotations.Nullable;
 

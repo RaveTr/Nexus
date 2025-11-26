@@ -1,6 +1,6 @@
 package com.mememan.nexus.template.event.blueprint.client;
 
-import com.mememan.nexus.event.base.EventBlueprint;
+import com.mememan.nexus.event.blueprint.EventBlueprint;
 import com.mememan.nexus.loader.ModSide;
 import com.mememan.nexus.platform.NexusServices;
 import net.minecraft.client.gui.Font;

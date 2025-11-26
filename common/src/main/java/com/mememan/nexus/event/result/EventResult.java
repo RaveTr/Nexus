@@ -1,13 +1,24 @@
 package com.mememan.nexus.event.result;
 
+import com.mememan.nexus.event.blueprint.EventBlueprint;
+import com.mememan.nexus.event.blueprint.WrappedEventBlueprint;
+import com.mememan.nexus.event.object.BaseEvent;
+
 import java.util.function.Consumer;
 
 /**
+ * {@code record} representing a result of some given event (typically wrapped and used in {@link WrappedEventBlueprint}).
  *
- * @param actualResult
- * @param cancelled
- * @param shortCircuit
- * @param <R>
+ * @param actualResult The actual object stored within this result.
+ * @param cancelled Whether this result should be marked as cancelled.
+ * @param shortCircuit Whether this result should short-circuit/halt listener execution if any listener happens to return
+ *                     it.
+ *
+ * @param <R> The actual object type of this result.
+ *
+ * @see EventBlueprint
+ * @see WrappedEventBlueprint
+ * @see BaseEvent
  */
 public record EventResult<R>(R actualResult, boolean cancelled, boolean shortCircuit) {
 
