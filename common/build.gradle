@@ -23,6 +23,7 @@ dependencies {
     // Base
     compileOnly group: "org.spongepowered", name: "mixin", version: mixin_version
     compileOnly group: "io.github.llamalad7", name: "mixinextras-common", version: mixinextras_version
+    compileOnly group: "org.ow2.asm", name: "asm-tree", version: 9.6
 }
 
 configurations {

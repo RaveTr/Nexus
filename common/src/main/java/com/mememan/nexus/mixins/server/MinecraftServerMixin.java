@@ -4,7 +4,9 @@ import com.llamalad7.mixinextras.expression.Definition;
 import com.llamalad7.mixinextras.expression.Expression;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mememan.nexus.event.result.EventResult;
+import com.mememan.nexus.template.event.blueprint.common.TickEventBlueprint;
 import com.mememan.nexus.template.event.blueprint.server.ServerLifeCycleEventBlueprint;
+import com.mememan.nexus.template.event.def.common.TickEvent;
 import com.mememan.nexus.template.event.def.server.ServerLifeCycleEvent;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,12 +14,16 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.function.BooleanSupplier;
+
 /**
  * Mixin {@code class} that fires server-related event hooks with as little intrusion as possible. Handles both server
- * lifecycle and server ticking/misc. events.
+ * lifecycle and server ticking events.
  *
  * @see ServerLifeCycleEventBlueprint
  * @see ServerLifeCycleEvent
+ * @see TickEventBlueprint.ServerTickEventBlueprint
+ * @see TickEvent.ServerTickEvent
  */
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin {
@@ -52,5 +58,19 @@ public abstract class MinecraftServerMixin {
     private void nexus$handleServerStopEventHook(CallbackInfo ci) {
         ServerLifeCycleEvent.ServerStoppedEvent serverStoppedEventHook = new ServerLifeCycleEvent.ServerStoppedEvent((MinecraftServer) (Object) this);
         ServerLifeCycleEventBlueprint.SERVER_STOPPED.fireEvent(serverStoppedEventHook);
+    }
+
+    @Inject(method = "tickServer", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/Util;getNanos()J", ordinal = 0), cancellable = true)
+    private void nexus$handlePreServerTickEventHook(BooleanSupplier hasTimeLeft, CallbackInfo ci) {
+        TickEvent.ServerTickEvent serverTickEventHook = new TickEvent.ServerTickEvent(TickEvent.Phase.START, (MinecraftServer) (Object) this, hasTimeLeft);
+        EventResult<TickEvent.ServerTickEvent> serverTickEventEventResult = TickEventBlueprint.SERVER_TICK.fireEvent(serverTickEventHook);
+
+        if (serverTickEventEventResult.cancelled()) ci.cancel();
+    }
+
+    @Inject(method = "tickServer", at = @At("TAIL"))
+    private void nexus$handlePostServerTickEventHook(BooleanSupplier hasTimeLeft, CallbackInfo ci) {
+        TickEvent.ServerTickEvent serverTickEventHook = new TickEvent.ServerTickEvent(TickEvent.Phase.END, (MinecraftServer) (Object) this, hasTimeLeft);
+        TickEventBlueprint.SERVER_TICK.fireEvent(serverTickEventHook);
     }
 }

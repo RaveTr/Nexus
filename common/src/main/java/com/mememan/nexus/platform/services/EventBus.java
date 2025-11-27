@@ -107,7 +107,7 @@ public interface EventBus {
      *
      * @param eventInterface The event {@code interface} to register the listener for. Must be a functional {@code interface}.
      * @param listener The listener instance to register.
-     * @param listenerExecutionSide The side on which the listener should run.
+     * @param listenerTypeSide The side on which the listener's type should be looked up.
      * @param listenerPriority The priority of the listener. Lower priority values are executed first.
      * @param associatedEventTypes An optional array of types to associate the {@code eventInterface} with, for lookup.
      *                             Primarily useful in cases where unresolvable generic types are present in the event
@@ -115,7 +115,7 @@ public interface EventBus {
      *
      * @param <T> The event {@code interface} type.
      */
-    <T> void onEvent(Class<T> eventInterface, T listener, ModSide listenerExecutionSide, int listenerPriority, Class<?>... associatedEventTypes);
+    <T> void onEvent(Class<T> eventInterface, T listener, ModSide listenerTypeSide, int listenerPriority, Class<?>... associatedEventTypes);
 
     /**
      * Overloaded variant of {@link #onEvent(Class, T, ModSide, int, Class[])}. Registers an event listener for the provided
@@ -140,6 +140,7 @@ public interface EventBus {
      * the event {@code interface} from the provided listener using {@link ReflectionUtil#getFunctionalInterfaceClass(Object)}.
      *
      * @param listener The listener instance to register.
+     * @param listenerExecutionSide The side on which the listener's type should be looked up.
      * @param listenerPriority The priority of the listener. Lower priority values are executed first.
      * @param associatedEventTypes An optional array of types to associate the {@code eventInterface} with, for lookup.
      *                             Primarily useful in cases where unresolvable generic types are present in the event
@@ -156,6 +157,8 @@ public interface EventBus {
      * event {@code interface} with the default priority of 0 on {@link ModSide#COMMON}. Infers the event
      * {@code interface} from the provided listener using {@link ReflectionUtil#getFunctionalInterfaceClass(Object)}.
      *
+     * @param eventInterface The event {@code interface} to register the listener for. Must be a functional
+     *                       {@code interface}.
      * @param listener The listener instance to register.
      * @param associatedEventTypes An optional array of types to associate the {@code eventInterface} with, for lookup.
      *                             Primarily useful in cases where unresolvable generic types are present in the event
@@ -173,6 +176,7 @@ public interface EventBus {
      * {@code interface} from the provided listener using {@link ReflectionUtil#getFunctionalInterfaceClass(Object)}.
      *
      * @param listener The listener instance to register.
+     * @param listenerExecutionSide The side on which the listener's type should be looked up.
      * @param associatedEventTypes An optional array of types to associate the {@code eventInterface} with, for lookup.
      *                             Primarily useful in cases where unresolvable generic types are present in the event
      *                             {@code interface}.
@@ -189,6 +193,7 @@ public interface EventBus {
      * {@code interface} from the provided listener using {@link ReflectionUtil#getFunctionalInterfaceClass(Object)}.
      *
      * @param listener The listener instance to register.
+     * @param listenerPriority The priority of the listener. Lower priority values are executed first.
      * @param associatedEventTypes An optional array of types to associate the {@code eventInterface} with, for lookup.
      *                             Primarily useful in cases where unresolvable generic types are present in the event
      *                             {@code interface}.
@@ -222,7 +227,9 @@ public interface EventBus {
      * @param eventInterface The event {@code interface} to fire.
      * @param eventListenerInvokerMapper The invoker mapper to use for firing the event. Used to be able to query results
      *                                   from the finalized listener invoker when it's run.
-     * @param eventSide The side on which the event should be fired.
+     * @param eventSide The side on which the event should be fired. Note that blueprints that have listeners capable
+     *                  of firing on more than 1 side should be registered on {@link ModSide#COMMON} for proper
+     *                  resolution.
      * @param associatedEventTypes An optional array of types to associate the {@code eventInterface} with, for lookup.
      *                             Primarily useful in cases where unresolvable generic types are present in the event
      *                             {@code interface}.

@@ -2,21 +2,33 @@ package com.mememan.nexus.template.event.def.common;
 
 import com.mememan.nexus.event.object.BaseEvent;
 import com.mememan.nexus.loader.ModSide;
+import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 import java.util.function.BooleanSupplier;
 
 public abstract class TickEvent extends BaseEvent {
+    protected final TickEventType eventType;
     protected final ModSide logicalSide;
     protected final Phase tickPhase;
 
-    public TickEvent(ModSide logicalSide, Phase tickPhase) {
+    public TickEvent(TickEventType eventType, ModSide logicalSide, Phase tickPhase) {
+        super(logicalSide);
+        this.eventType = eventType;
         this.logicalSide = logicalSide;
         this.tickPhase = tickPhase;
     }
 
-    public ModSide getLogicalSide() {
+    public TickEventType getTickEventType() {
+        return eventType;
+    }
+
+    @Override
+    public ModSide getEventSide() {
         return logicalSide;
     }
 
@@ -27,7 +39,7 @@ public abstract class TickEvent extends BaseEvent {
     public static class CommonTickEvent extends TickEvent {
 
         public CommonTickEvent(ModSide logicalSide, Phase tickPhase) {
-            super(logicalSide, tickPhase);
+            super(TickEventType.STANDARD, logicalSide, tickPhase);
         }
     }
 
@@ -43,7 +55,8 @@ public abstract class TickEvent extends BaseEvent {
         protected final BooleanSupplier hasTime;
 
         public ServerTickEvent(Phase tickPhase, MinecraftServer curServer, BooleanSupplier hasTime) {
-            super(ModSide.SERVER, tickPhase);
+            super(curServer instanceof IntegratedServer ? ModSide.COMMON : ModSide.SERVER, tickPhase);
+
             this.curServer = curServer;
             this.hasTime = hasTime;
         }
@@ -62,7 +75,13 @@ public abstract class TickEvent extends BaseEvent {
 
         public LevelTickEvent(ModSide logicalSide, Phase tickPhase, Level targetLevel) {
             super(logicalSide, tickPhase);
+
             this.targetLevel = targetLevel;
+        }
+
+        @Override
+        public TickEventType getTickEventType() {
+            return TickEventType.LEVEL;
         }
 
         public Level getLevel() {
@@ -78,14 +97,102 @@ public abstract class TickEvent extends BaseEvent {
     }
 
     public static class ServerLevelTickEvent extends LevelTickEvent {
+        protected final BooleanSupplier hasTime;
 
-        public ServerLevelTickEvent(Phase tickPhase, Level targetLevel) {
-            super(ModSide.SERVER, tickPhase, targetLevel);
+        public ServerLevelTickEvent(Phase tickPhase, ServerLevel targetLevel, BooleanSupplier hasTime) {
+            super(targetLevel.getServer() instanceof IntegratedServer ? ModSide.COMMON : ModSide.SERVER, tickPhase, targetLevel);
+            this.hasTime = hasTime;
+        }
+
+        @Override
+        public ServerLevel getLevel() {
+            return (ServerLevel) super.getLevel();
+        }
+
+        public BooleanSupplier hasTime() {
+            return hasTime;
+        }
+    }
+
+    public static class RenderTickEvent extends ClientTickEvent {
+        protected final float partialTick;
+
+        public RenderTickEvent(Phase tickPhase, float partialTick) {
+            super(tickPhase);
+
+            this.partialTick = partialTick;
+        }
+
+        @Override
+        public TickEventType getTickEventType() {
+            return TickEventType.RENDER;
+        }
+
+        public float getPartialTick() {
+            return partialTick;
+        }
+    }
+
+    public static class EntityTickEvent extends CommonTickEvent {
+        protected final Entity targetEntity;
+
+        public EntityTickEvent(Phase tickPhase, Entity targetEntity) {
+            super(ModSide.COMMON, tickPhase);
+
+            this.targetEntity = targetEntity;
+        }
+
+        @Override
+        public TickEventType getTickEventType() {
+            return TickEventType.ENTITY;
+        }
+
+        public Entity getEntity() {
+            return targetEntity;
+        }
+    }
+
+    public static class PlayerTickEvent extends EntityTickEvent {
+
+        public PlayerTickEvent(Phase tickPhase, Player targetPlayer) {
+            super(tickPhase, targetPlayer);
+        }
+
+        @Override
+        public Player getEntity() {
+            return (Player) super.getEntity();
         }
     }
 
     public enum Phase {
         START,
         END;
+    }
+
+    public enum TickEventType {
+        STANDARD,
+        LEVEL,
+        RENDER,
+        ENTITY;
+
+        TickEventType() {
+
+        }
+
+        public boolean isStandard() {
+            return this == STANDARD;
+        }
+
+        public boolean isLevel() {
+            return this == LEVEL;
+        }
+
+        public boolean isRender() {
+            return this == RENDER;
+        }
+
+        public boolean isEntity() {
+            return this == ENTITY;
+        }
     }
 }

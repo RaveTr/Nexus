@@ -1,45 +1,84 @@
 package com.mememan.nexus.template.event.blueprint.common;
 
-import com.mememan.nexus.event.blueprint.ConcreteEventBlueprint;
 import com.mememan.nexus.event.blueprint.ConcretePropagatingEventBlueprint;
-import com.mememan.nexus.event.object.BaseEvent;
 import com.mememan.nexus.loader.ModSide;
 import com.mememan.nexus.template.event.def.common.TickEvent;
 
-public class TickEventBlueprint<TE extends BaseEvent> extends ConcretePropagatingEventBlueprint<TE> {
+public class TickEventBlueprint<TE extends TickEvent> extends ConcretePropagatingEventBlueprint<TE> {
+    public static final CommonTickEventBlueprint COMMON_TICK = new CommonTickEventBlueprint();
+    public static final ClientTickEventBlueprint CLIENT_TICK = new ClientTickEventBlueprint();
+    public static final ServerTickEventBlueprint SERVER_TICK = new ServerTickEventBlueprint();
+    public static final LevelTickEventBlueprint LEVEL_TICK = new LevelTickEventBlueprint();
+    public static final ClientLevelTickEventBlueprint CLIENT_LEVEL_TICK = new ClientLevelTickEventBlueprint();
+    public static final ServerLevelTickEventBlueprint SERVER_LEVEL_TICK = new ServerLevelTickEventBlueprint();
+    public static final RenderTickEventBlueprint RENDER_TICK = new RenderTickEventBlueprint();
+    public static final EntityTickEventBlueprint ENTITY_TICK = new EntityTickEventBlueprint();
+    public static final PlayerTickEventBlueprint PLAYER_TICK = new PlayerTickEventBlueprint();
 
     protected TickEventBlueprint(Class<TE> eventInterface, TE defaultResult, boolean isCancellable, ModSide eventSide) {
         super(eventInterface, defaultResult, isCancellable, eventSide);
     }
 
-    @Override
-    protected TE mergeListenerResults(TE curResult, TE newResult) {
-        return newResult;
-    }
+    public static class CommonTickEventBlueprint extends TickEventBlueprint<TickEvent.CommonTickEvent> {
 
-    public static class Common extends ConcreteEventBlueprint<TickEvent> {
-        public static final Common COMMON = new Common();
-
-        protected Common() {
-            super(TickEvent.class, null, false, ModSide.COMMON);
-        }
-
-        @Override
-        protected TickEvent mergeListenerResults(TickEvent curResult, TickEvent newResult) {
-            return newResult;
+        protected CommonTickEventBlueprint() {
+            super(TickEvent.CommonTickEvent.class, null, true, ModSide.COMMON);
         }
     }
 
-    public static class Client extends ConcreteEventBlueprint<TickEvent.CommonTickEvent> {
-        public static final Client CLIENT = new Client();
+    public static class ClientTickEventBlueprint extends TickEventBlueprint<TickEvent.ClientTickEvent> {
 
-        protected Client() {
-            super(TickEvent.CommonTickEvent.class, null, false, ModSide.CLIENT);
+        protected ClientTickEventBlueprint() {
+            super(TickEvent.ClientTickEvent.class, null, true, ModSide.CLIENT);
         }
+    }
 
-        @Override
-        protected TickEvent.CommonTickEvent mergeListenerResults(TickEvent.CommonTickEvent curResult, TickEvent.CommonTickEvent newResult) {
-            return newResult;
+    public static class ServerTickEventBlueprint extends TickEventBlueprint<TickEvent.ServerTickEvent> {
+
+        protected ServerTickEventBlueprint() {
+            super(TickEvent.ServerTickEvent.class, null, true, ModSide.COMMON);
+        }
+    }
+
+    public static class LevelTickEventBlueprint extends TickEventBlueprint<TickEvent.LevelTickEvent> {
+
+        protected LevelTickEventBlueprint() {
+            super(TickEvent.LevelTickEvent.class, null, true, ModSide.COMMON);
+        }
+    }
+
+    public static class ClientLevelTickEventBlueprint extends TickEventBlueprint<TickEvent.ClientLevelTickEvent> {
+
+        protected ClientLevelTickEventBlueprint() {
+            super(TickEvent.ClientLevelTickEvent.class, null, true, ModSide.CLIENT);
+        }
+    }
+
+    public static class ServerLevelTickEventBlueprint extends TickEventBlueprint<TickEvent.ServerLevelTickEvent> {
+
+        protected ServerLevelTickEventBlueprint() {
+            super(TickEvent.ServerLevelTickEvent.class, null, true, ModSide.COMMON);
+        }
+    }
+
+    public static class RenderTickEventBlueprint extends TickEventBlueprint<TickEvent.RenderTickEvent> {
+
+        protected RenderTickEventBlueprint() {
+            super(TickEvent.RenderTickEvent.class, null, true, ModSide.CLIENT);
+        }
+    }
+
+    public static class EntityTickEventBlueprint extends TickEventBlueprint<TickEvent.EntityTickEvent> {
+
+        protected EntityTickEventBlueprint() {
+            super(TickEvent.EntityTickEvent.class, null, true, ModSide.COMMON);
+        }
+    }
+
+    public static class PlayerTickEventBlueprint extends TickEventBlueprint<TickEvent.PlayerTickEvent> {
+
+        protected PlayerTickEventBlueprint() {
+            super(TickEvent.PlayerTickEvent.class, null, true, ModSide.COMMON);
         }
     }
 }

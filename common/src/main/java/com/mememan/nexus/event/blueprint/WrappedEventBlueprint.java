@@ -63,7 +63,12 @@ public abstract class WrappedEventBlueprint<T, R> implements EventBlueprint<Even
 
     @Override
     public <U> U fireEvent(Function<EventListener<T, R>, U> eventMapper) {
-        U eventResult = EventBlueprint.super.fireEvent(eventMapper);
+        return EventBlueprint.super.fireEvent(eventMapper);
+    }
+
+    @Override
+    public <U> U fireEvent(Function<EventListener<T, R>, U> eventMapper, ModSide firingSide) {
+        U eventResult = EventBlueprint.super.fireEvent(eventMapper, firingSide);
         return eventResult == null ? (U) EventResult.pass() : eventResult;
     }
 

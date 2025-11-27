@@ -1,12 +1,14 @@
 package com.mememan.nexus.template.event.def.server;
 
 import com.mememan.nexus.event.object.BaseEvent;
+import com.mememan.nexus.loader.ModSide;
 import net.minecraft.server.MinecraftServer;
 
 public abstract class ServerLifeCycleEvent extends BaseEvent {
     protected final MinecraftServer targetServer;
 
     public ServerLifeCycleEvent(MinecraftServer targetServer) {
+        super(ModSide.COMMON);
         this.targetServer = targetServer;
     }
 

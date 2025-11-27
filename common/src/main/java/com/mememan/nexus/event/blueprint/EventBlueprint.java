@@ -22,8 +22,12 @@ public interface EventBlueprint<T> {
 
     ModSide getEventSide();
 
+    default <R> R fireEvent(Function<T, R> eventMapper, ModSide firingSide) {
+        return NexusServices.EVENT_BUS.fireEventHook(getEventInterface(), eventMapper, firingSide, getActualEventType());
+    }
+
     default <R> R fireEvent(Function<T, R> eventMapper) {
-        return NexusServices.EVENT_BUS.fireEventHook(getEventInterface(), eventMapper, getEventSide(), getActualEventType());
+        return fireEvent(eventMapper, getEventSide());
     }
 
     default void onEvent(T listener, int listenerPriority) {

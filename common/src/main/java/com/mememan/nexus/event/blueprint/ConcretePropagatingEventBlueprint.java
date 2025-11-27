@@ -8,4 +8,9 @@ public abstract class ConcretePropagatingEventBlueprint<BE extends BaseEvent> ex
     protected ConcretePropagatingEventBlueprint(Class<BE> eventInterface, BE defaultResult, boolean isCancellable, ModSide eventSide) {
         super(eventInterface, defaultResult, isCancellable, eventSide);
     }
+
+    @Override
+    protected BE mergeListenerResults(BE curResult, BE newResult) {
+        return newResult == null ? curResult : newResult;
+    }
 }

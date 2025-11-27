@@ -45,11 +45,11 @@ public class FabricEventBus implements EventBus {
     }
 
     @Override
-    public <T> void onEvent(Class<T> eventInterface, T listener, ModSide listenerExecutionSide, int listenerPriority, Class<?>... associatedEventTypes) {
-        Object2ObjectOpenHashMap<EventKey<?>, Event<?>> eventByType = MAPPED_EVENTS.get(listenerExecutionSide);
+    public <T> void onEvent(Class<T> eventInterface, T listener, ModSide listenerTypeSide, int listenerPriority, Class<?>... associatedEventTypes) {
+        Object2ObjectOpenHashMap<EventKey<?>, Event<?>> eventByType = MAPPED_EVENTS.get(listenerTypeSide);
 
         if (eventByType == null || eventByType.isEmpty()) {
-            NexusConstants.LOGGER.debug("ModSide {} has no mapped events, skipping listener registration until state changes...", listenerExecutionSide.getSideName());
+            NexusConstants.LOGGER.debug("ModSide {} has no mapped events, skipping listener registration until state changes...", listenerTypeSide.getSideName());
             return;
         }
 
@@ -63,13 +63,13 @@ public class FabricEventBus implements EventBus {
                             : "[" + eventKey.getAssociatedTypes().stream()
                             .map(Class::getName)
                             .collect(Collectors.joining(", ")) + "]",
-                    listenerExecutionSide.getSideName());
+                    listenerTypeSide.getSideName());
             return;
         }
 
         synchronized (sideBasedThreadLock) {
             ObjectArrayList<T> listenersByPriority = (ObjectArrayList<T>) LISTENERS_BY_PRIORITY
-                    .computeIfAbsent(new EventKey<>(eventInterface), eventInterfaceClazz -> new Int2ObjectOpenHashMap<>())
+                    .computeIfAbsent(new EventKey<>(eventInterface, associatedEventTypes), eventInterfaceClazz -> new Int2ObjectOpenHashMap<>())
                     .computeIfAbsent(listenerPriority, priority -> {
                         mappedEvent.addPhaseOrdering(NexusConstants.prefix("event_priority_" + listenerPriority), NexusConstants.prefix("event_priority_" + (listenerPriority + 1)));
                         return new ObjectArrayList<T>();
@@ -94,6 +94,10 @@ public class FabricEventBus implements EventBus {
 
         EventKey<T> eventKey = new EventKey<>(eventInterface, associatedEventTypes);
         Event<T> mappedEvent = eventByType.get(eventKey) == null ? null : (Event<T>) eventByType.get(eventKey);
+
+        if (mappedEvent == null && eventSide != ModSide.COMMON) {
+            mappedEvent = (Event<T>) MAPPED_EVENTS.getOrDefault(ModSide.COMMON, new Object2ObjectOpenHashMap<>()).get(eventKey);
+        }
 
         if (mappedEvent == null) {
             NexusConstants.LOGGER.warn("Event of type {}{} is not mapped to ModSide: {}, skipping event invocation/posting/firing until state changes...",

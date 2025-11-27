@@ -1,8 +1,11 @@
 package com.mememan.nexus.util;
 
+import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.loader.ModSide;
 import com.mememan.nexus.platform.services.EventBus;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.function.Function;
 
 /**
@@ -43,5 +46,29 @@ public final class ReflectionUtil {
         }
 
         throw new IllegalArgumentException(String.format("Could not determine functional interface for lambda function: %s", lambda));
+    }
+
+    public static boolean compareGenericInterfaceType(Class<?> baseInterface, Class<?> targetGenericType) {
+        if (!baseInterface.isInterface()) return false;
+
+        try {
+            Type[] genericInterfaces = baseInterface.getGenericInterfaces();
+
+            for (Type genericInterface : genericInterfaces) {
+                if (genericInterface instanceof ParameterizedType paramType) {
+                    if (paramType.getRawType() == baseInterface) {
+                        Type typeArg = paramType.getActualTypeArguments()[0];
+
+                        if (typeArg instanceof Class) return typeArg == targetGenericType;
+                        else if (typeArg instanceof ParameterizedType paramTypeArg) return paramTypeArg.getRawType() == targetGenericType;
+                    }
+                }
+            }
+
+            return false;
+        } catch (Exception e) {
+            NexusConstants.LOGGER.warn("Failed to find generic type for interface '{}' (generic type being compared against: {}). Skipping...", baseInterface.getName(), targetGenericType.getName(), e);
+            return false;
+        }
     }
 }
