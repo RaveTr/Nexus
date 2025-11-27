@@ -13,6 +13,7 @@ public class TickEventBlueprint<TE extends TickEvent> extends ConcretePropagatin
     public static final ServerLevelTickEventBlueprint SERVER_LEVEL_TICK = new ServerLevelTickEventBlueprint();
     public static final RenderTickEventBlueprint RENDER_TICK = new RenderTickEventBlueprint();
     public static final EntityTickEventBlueprint ENTITY_TICK = new EntityTickEventBlueprint();
+    public static final LivingEntityTickEventBlueprint LIVING_ENTITY_TICK = new LivingEntityTickEventBlueprint();
     public static final PlayerTickEventBlueprint PLAYER_TICK = new PlayerTickEventBlueprint();
 
     protected TickEventBlueprint(Class<TE> eventInterface, TE defaultResult, boolean isCancellable, ModSide eventSide) {
@@ -72,6 +73,13 @@ public class TickEventBlueprint<TE extends TickEvent> extends ConcretePropagatin
 
         protected EntityTickEventBlueprint() {
             super(TickEvent.EntityTickEvent.class, null, true, ModSide.COMMON);
+        }
+    }
+
+    public static class LivingEntityTickEventBlueprint extends TickEventBlueprint<TickEvent.LivingEntityTickEvent> {
+
+        protected LivingEntityTickEventBlueprint() {
+            super(TickEvent.LivingEntityTickEvent.class, null, true, ModSide.COMMON);
         }
     }
 

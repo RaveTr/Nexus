@@ -6,6 +6,7 @@ import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
@@ -18,6 +19,7 @@ public abstract class TickEvent extends BaseEvent {
 
     public TickEvent(TickEventType eventType, ModSide logicalSide, Phase tickPhase) {
         super(logicalSide);
+
         this.eventType = eventType;
         this.logicalSide = logicalSide;
         this.tickPhase = tickPhase;
@@ -115,17 +117,23 @@ public abstract class TickEvent extends BaseEvent {
     }
 
     public static class RenderTickEvent extends ClientTickEvent {
+        protected final boolean shouldRenderLevel;
         protected final float partialTick;
 
-        public RenderTickEvent(Phase tickPhase, float partialTick) {
+        public RenderTickEvent(Phase tickPhase, boolean shouldRenderLevel, float partialTick) {
             super(tickPhase);
 
+            this.shouldRenderLevel = shouldRenderLevel;
             this.partialTick = partialTick;
         }
 
         @Override
         public TickEventType getTickEventType() {
             return TickEventType.RENDER;
+        }
+
+        public boolean shouldRenderLevel() {
+            return shouldRenderLevel;
         }
 
         public float getPartialTick() {
@@ -149,6 +157,18 @@ public abstract class TickEvent extends BaseEvent {
 
         public Entity getEntity() {
             return targetEntity;
+        }
+    }
+
+    public static class LivingEntityTickEvent extends EntityTickEvent {
+
+        public LivingEntityTickEvent(Phase tickPhase, LivingEntity targetLivingEntity) {
+            super(tickPhase, targetLivingEntity);
+        }
+
+        @Override
+        public LivingEntity getEntity() {
+            return (LivingEntity) super.getEntity();
         }
     }
 
