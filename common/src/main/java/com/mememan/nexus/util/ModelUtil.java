@@ -491,7 +491,7 @@ public final class ModelUtil {
      * @see #sign(ResourceLocation, ResourceLocation)
      */
     public static BlockModelDefinition sign(Supplier<Block> targetBlock) {
-        return sign(RegistryUtil.pickBlockTexture(targetBlock), RegistryUtil.getTextureLocationOrDefault(targetBlock, "item"));
+        return sign(RegistryUtil.pickBlockTexture(targetBlock), RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"));
     }
 
     /**
@@ -511,7 +511,7 @@ public final class ModelUtil {
     public static BlockModelDefinition hangingSign(Supplier<Block> targetBlock) {
         return sign(
                 RegistryUtil.getTextureLocationOrDefault(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get()).withPrefix("stripped_").withPath(curPath -> curPath.replace("_hanging_sign", "_log"))),
-                RegistryUtil.getTextureLocationOrDefault(targetBlock, "item")
+                RegistryUtil.getTextureLocationOrDefault(targetBlock, "block")
         );
     }
 
