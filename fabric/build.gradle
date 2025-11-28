@@ -108,8 +108,12 @@ publishMods {
         projectSlug = "nexus-api"
         accessToken = providers.environmentVariable("CURSEFORGE_API_KEY")
         announcementTitle = "New ${mod_name} CurseForge Release (Fabric) - v${mod_version} for MC ${minecraft_version}"
+        clientRequired = true
+        serverRequired = true
 
         getMinecraftVersions().add(minecraft_version)
+        getJavaVersions().add(JavaVersion.VERSION_17)
+        requires("fabric-api")
     }
 
     modrinth {
@@ -118,6 +122,7 @@ publishMods {
         announcementTitle = "New ${mod_name} Modrinth Release (Fabric) - v${mod_version} for MC ${minecraft_version}"
 
         getMinecraftVersions().add(minecraft_version)
+        requires("fabric-api")
     }
 }
 

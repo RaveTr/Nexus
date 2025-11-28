@@ -113,8 +113,11 @@ publishMods {
         projectSlug = "nexus-api"
         accessToken = providers.environmentVariable("CURSEFORGE_API_KEY")
         announcementTitle = "New ${mod_name} [Neo/Forge] CurseForge Release - v${mod_version} for MC ${minecraft_version}"
+        clientRequired = true
+        serverRequired = true
 
         getMinecraftVersions().add(minecraft_version)
+        getJavaVersions().add(JavaVersion.VERSION_17)
     }
 
     modrinth {
