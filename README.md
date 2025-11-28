@@ -17,14 +17,19 @@ repositories { // Specific repo block depends on the platform you're building yo
 
 dependencies { // Choose based on the platform you're developing for
     // Forge (ForgeGradle)
+    implementation fg.deobf("com.mememan.nexus:nexus-forge-${minecraft_version}:${nexus_version}")
     
     // Fabric (Loom)
+    modImplementation("com.mememan.nexus:nexus-fabric-${minecraft_version}:${nexus_version}")
     
-    // NeoForge (ModDevGradle)
+    // NeoForge (LegacyForge/ModDevGradle)
+    modImplementation("com.mememan.nexus:nexus-forge-${minecraft_version}:${nexus_version}")
     
-    // MultiLoader (VanillaGradle)
+    // MultiLoader (VanillaGradle/LegacyForge - Common)
+    implementation("com.mememan.nexus:nexus-common-${minecraft_version}:${nexus_version}")
     
-    // Architectury (ArchLoom)
+    // Architectury (ArchLoom - Common)
+    modImplementation("com.mememan.nexus:nexus-common-${minecraft_version}:${nexus_version}")
 }
 ```
 
