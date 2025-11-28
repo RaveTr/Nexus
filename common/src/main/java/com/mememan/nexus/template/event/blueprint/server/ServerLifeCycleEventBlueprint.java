@@ -18,7 +18,7 @@ public abstract class ServerLifeCycleEventBlueprint<SLCE extends ServerLifeCycle
     protected SLCE mergeListenerResults(SLCE curResult, SLCE newResult) {
         return newResult;
     }
-
+    
     public static class ServerStartingEventBlueprint extends ServerLifeCycleEventBlueprint<ServerLifeCycleEvent.ServerStartingEvent>  {
 
         protected ServerStartingEventBlueprint() {

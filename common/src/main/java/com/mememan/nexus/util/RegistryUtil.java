@@ -155,9 +155,35 @@ public final class RegistryUtil {
     }
 
     /**
+     * Overloaded variant of {@link #getTextureLocation(ResourceLocation, String)}. Attempts to
+     * retrieve the {@link ResourceLocation} of the texture with the given {@code textureName} within any directories
+     * containing the provided {@code dirPrefix} from {@link #CACHED_TEXTURE_LOOKUP}, returning the provided
+     * {@code defaultTextureLocation} if no matching texture is found.
+     *
+     * @param textureName The texture's {@link ResourceLocation}. Matched through namespace, where the path must only
+     *                    be the name of the texture file to look for (excluding the file extension).
+     * @param dirPrefix The directory prefix to look for the texture in (e.g. {@code "item"}, {@code "block/special_dir"}).
+     * @param defaultTextureLocation The default {@link ResourceLocation} to return if no matching texture is found.
+     *
+     * @return The {@link ResourceLocation} of the texture with the given {@code textureName}, or the provided
+     * {@code defaultTextureLocation} if no match is found.
+     *
+     * @see #getTextureLocation(ResourceLocation)
+     */
+    @NotNull
+    public static ResourceLocation getTextureLocationOrDefault(ResourceLocation textureName, String dirPrefix, @NotNull ResourceLocation defaultTextureLocation) {
+        return getTextureLocation(textureName, dirPrefix).orElseGet(() -> {
+            NexusConstants.LOGGER.warn("Attempted to locate non-existent texture '{}' (under directory containing '{}'), falling back to provided default texture '{}'", textureName, dirPrefix, defaultTextureLocation);
+
+            return defaultTextureLocation;
+        });
+    }
+
+    /**
      * Overloaded variant of {@link #getTextureLocationOrDefault(ResourceLocation, ResourceLocation)}. Attempts to
-     * retrieve the {@link ResourceLocation} of the texture with the given {@code textureName} from
-     * {@link #CACHED_TEXTURE_LOOKUP}, returning the {@code textureName} itself if no matching texture is found.
+     * retrieve the {@link ResourceLocation} of the texture with the given {@code textureName} within any directories
+     * containing the provided {@code dirPrefix} from {@link #CACHED_TEXTURE_LOOKUP}, returning the {@code textureName}
+     * itself if no matching texture is found.
      *
      * @param textureName The texture's {@link ResourceLocation}. Matched through namespace, where the path must only
      *                    be the name of the texture file to look for (excluding the file extension).
@@ -170,6 +196,26 @@ public final class RegistryUtil {
     @NotNull
     public static ResourceLocation getTextureLocationOrDefault(ResourceLocation textureName) {
         return getTextureLocationOrDefault(textureName, textureName);
+    }
+
+    /**
+     * Overloaded variant of {@link #getTextureLocationOrDefault(ResourceLocation, String, ResourceLocation)}.
+     * Attempts to retrieve the {@link ResourceLocation} of the texture with the given {@code textureName} within any
+     * directories containing the provided {@code dirPrefix} from {@link #CACHED_TEXTURE_LOOKUP}, returning the
+     * {@code textureName} itself if no matching texture is found.
+     *
+     * @param textureName The texture's {@link ResourceLocation}. Matched through namespace, where the path must only
+     *                    be the name of the texture file to look for (excluding the file extension).
+     * @param dirPrefix The directory prefix to look for the texture in (e.g. {@code "item"}, {@code "block/special_dir"}).
+     *
+     * @return The {@link ResourceLocation} of the texture with the given {@code textureName}, or the
+     * {@code textureName} itself if no match is found.
+     *
+     * @see #getTextureLocationOrDefault(ResourceLocation, String, ResourceLocation)
+     */
+    @NotNull
+    public static ResourceLocation getTextureLocationOrDefault(ResourceLocation textureName, String dirPrefix) {
+        return getTextureLocationOrDefault(textureName, dirPrefix, textureName);
     }
 
     /**
@@ -187,6 +233,25 @@ public final class RegistryUtil {
      */
     public static <T> Optional<ResourceLocation> getTextureLocation(Supplier<T> targetObj) {
         return getTextureLocation(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetObj.get()));
+    }
+
+    /**
+     * Overloaded variant of {@link #getTextureLocation(ResourceLocation, String)}. Attempts to retrieve the
+     * {@link ResourceLocation} of the texture for the given {@code targetObj} within any directories containing the
+     * provided {@code dirPrefix} from {@link #CACHED_TEXTURE_LOOKUP}.
+     *
+     * @param targetObj The {@link Supplier} of the target object to find the texture for.
+     * @param dirPrefix The directory prefix to look for the texture in (e.g. {@code "item"}, {@code "block/special_dir"}).
+     *
+     * @param <T> The type of the target object.
+     *
+     * @return An {@link Optional} containing the {@link ResourceLocation} of the texture for the given
+     * {@code targetObj}. May be empty.
+     *
+     * @see #getTextureLocation(Supplier)
+     */
+    public static <T> Optional<ResourceLocation> getTextureLocation(Supplier<T> targetObj, String dirPrefix) {
+        return getTextureLocation(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetObj.get()), dirPrefix);
     }
 
     /**
@@ -214,6 +279,32 @@ public final class RegistryUtil {
     }
 
     /**
+     * Overloaded variant of {@link #getTextureLocationOrDefault(Supplier, String)}. Attempts to
+     * retrieve the {@link ResourceLocation} of the texture for the given {@code targetObj} within any directories
+     * containing the provided {@code dirPrefix} from {@link #CACHED_TEXTURE_LOOKUP}, returning the provided
+     * {@code defaultTextureLocation} if no matching texture is found.
+     *
+     * @param targetObj The {@link Supplier} of the target object to find the texture for.
+     * @param dirPrefix The directory prefix to look for the texture in (e.g. {@code "item"}, {@code "block/special_dir"}).
+     * @param defaultTextureLocation The default {@link ResourceLocation} to return if no matching texture is found.
+     *
+     * @param <T> The type of the target object.
+     *
+     * @return The {@link ResourceLocation} of the texture for the given {@code targetObj}, or the provided
+     * {@code defaultTextureLocation} if no match is found.
+     *
+     * @see #getTextureLocationOrDefault(Supplier, String)
+     */
+    @NotNull
+    public static <T> ResourceLocation getTextureLocationOrDefault(Supplier<T> targetObj, String dirPrefix, @NotNull ResourceLocation defaultTextureLocation) {
+        return getTextureLocation(targetObj, dirPrefix).orElseGet(() -> {
+            NexusConstants.LOGGER.warn("Attempted to locate non-existent texture for {} '{}' (under directory containing '{}'), falling back to provided default texture '{}'", targetObj.get().getClass().getSimpleName(), DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetObj.get()), dirPrefix, defaultTextureLocation);
+
+            return defaultTextureLocation;
+        });
+    }
+
+    /**
      * Overloaded variant of {@link #getTextureLocationOrDefault(Supplier, ResourceLocation)}. Attempts to retrieve the
      * {@link ResourceLocation} of the texture for the given {@code targetObj} from {@link #CACHED_TEXTURE_LOOKUP},
      * returning a default {@link ResourceLocation} with the namespace "invalid" if no matching texture is found.
@@ -230,6 +321,27 @@ public final class RegistryUtil {
     @NotNull
     public static <T> ResourceLocation getTextureLocationOrDefault(Supplier<T> targetObj) {
         return getTextureLocationOrDefault(targetObj, new ResourceLocation("invalid"));
+    }
+
+    /**
+     * Overloaded variant of {@link #getTextureLocationOrDefault(Supplier, String, ResourceLocation)}. Attempts to
+     * retrieve the {@link ResourceLocation} of the texture for the given {@code targetObj} within any directories
+     * containing the provided {@code dirPrefix} from {@link #CACHED_TEXTURE_LOOKUP}, returning the provided
+     * {@code defaultTextureLocation} if no matching texture is found.
+     *
+     * @param targetObj The {@link Supplier} of the target object to find the texture for.
+     * @param dirPrefix The directory prefix to look for the texture in (e.g. {@code "item"}, {@code "block/special_dir"}).
+     *
+     * @param <T> The type of the target object.
+     *
+     * @return The {@link ResourceLocation} of the texture for the given {@code targetObj}, or the provided
+     * {@code defaultTextureLocation} if no match is found.
+     *
+     * @see #getTextureLocationOrDefault(Supplier, String, ResourceLocation)
+     */
+    @NotNull
+    public static <T> ResourceLocation getTextureLocationOrDefault(Supplier<T> targetObj, String dirPrefix) {
+        return getTextureLocationOrDefault(targetObj, dirPrefix, new ResourceLocation("invalid"));
     }
 
     /**
@@ -939,11 +1051,11 @@ public final class RegistryUtil {
                     .ifPresentOrElse(alreadyRegisteredBaseBoatEntity -> {
                         woodEntityTypeFamilySet.add(() -> alreadyRegisteredBaseBoatEntity);
                     }, () -> {
-                        Supplier<EntityType<DefaultableBoat>> woodenBoatEntityType = EntityTypePropertyWrapperTemplates.registerEntityTypeFromTemplateAndReflect(NexusConstants.prefix("boat"),
+                        Supplier<EntityType<DefaultableBoat>> woodenBoatEntityType = EntityTypePropertyWrapperTemplates.registerEntityTypeFromTemplateAndReflect(familyId.withPath("boat"),
                                 () -> EntityType.Builder.<DefaultableBoat>of(DefaultableBoat::new, MobCategory.MISC)
                                         .sized(1.375F, 0.5625F)
                                         .clientTrackingRange(10)
-                                        .build(NexusConstants.prefix("boat").toString()), EntityTypePropertyWrapperTemplates.BOAT, entityTypeSupCol);
+                                        .build(familyId.withPath("boat").toString()), EntityTypePropertyWrapperTemplates.BOAT, entityTypeSupCol);
 
                         woodEntityTypeFamilySet.add(woodenBoatEntityType);
                     });
@@ -951,11 +1063,11 @@ public final class RegistryUtil {
                     .ifPresentOrElse(alreadyRegisteredBaseChestBoatEntity -> {
                         woodEntityTypeFamilySet.add(() -> alreadyRegisteredBaseChestBoatEntity);
                     }, () -> {
-                        Supplier<EntityType<DefaultableChestBoat>> woodenChestBoatEntityType = EntityTypePropertyWrapperTemplates.registerEntityTypeFromTemplateAndReflect(NexusConstants.prefix("chest_boat"),
+                        Supplier<EntityType<DefaultableChestBoat>> woodenChestBoatEntityType = EntityTypePropertyWrapperTemplates.registerEntityTypeFromTemplateAndReflect(familyId.withPath("chest_boat"),
                                 () -> EntityType.Builder.<DefaultableChestBoat>of(DefaultableChestBoat::new, MobCategory.MISC)
                                         .sized(1.375F, 0.5625F)
                                         .clientTrackingRange(10)
-                                        .build(NexusConstants.prefix("chest_boat").toString()), EntityTypePropertyWrapperTemplates.CHEST_BOAT, entityTypeSupCol);
+                                        .build(familyId.withPath("chest_boat").toString()), EntityTypePropertyWrapperTemplates.CHEST_BOAT, entityTypeSupCol);
 
                         woodEntityTypeFamilySet.add(woodenChestBoatEntityType);
                     });

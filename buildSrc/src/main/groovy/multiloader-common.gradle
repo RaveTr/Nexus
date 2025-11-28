@@ -157,13 +157,15 @@ tasks.withType(Javadoc).configureEach {
 }
 
 publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifactId = base.archivesName.get()
-            version = mod_version
-            group = mod_group
+    repositories {
+        maven {
+            name = "meme-man-mods"
+            url = "https://maven.cloudsmith.io/meme-man-mods/nexus/"
 
-            from components.java
+            credentials {
+                username = System.getenv("CLOUDSMITH_USERNAME")
+                password = System.getenv("CLOUDSMITH_API_KEY")
+            }
         }
     }
 }

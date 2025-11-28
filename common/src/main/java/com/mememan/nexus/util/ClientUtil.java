@@ -153,7 +153,7 @@ public class ClientUtil {
      * Side-safe object conversion method that attempts to convert a {@link WoodType} to a {@link Material}
      * only if on the client. Formats the contained texture location by first looking for it under {@code entity/signs/hanging/}
      * and then prefixing it with {@code entity/signs/hanging/} if not found via file name (both with and without the
-     * {@code "_hanging_sign"} suffix). May be {@code null}.
+     * {@code "_hanging_sign"} suffix). Attempts to look singular directory variants up as well. May be {@code null}.
      *
      * @param hangingSignWoodType The hanging sign's associated {@link WoodType}.
      *
@@ -163,7 +163,13 @@ public class ClientUtil {
     public static Material createHangingSignMaterial(WoodType hangingSignWoodType) {
         return onClient() && hangingSignWoodType != null ? new Material(Sheets.SIGN_SHEET, RegistryUtil.pickPrefix(
                 RegistryUtil.getTextureLocation(new ResourceLocation(hangingSignWoodType.name()), "entity/signs/hanging")
+                        .or(() -> RegistryUtil.getTextureLocation(new ResourceLocation(hangingSignWoodType.name()), "entity/hanging_signs"))
                         .or(() -> RegistryUtil.getTextureLocation(new ResourceLocation(hangingSignWoodType.name()).withSuffix("_hanging_sign"), "entity/signs/hanging"))
+                        .or(() -> RegistryUtil.getTextureLocation(new ResourceLocation(hangingSignWoodType.name()).withSuffix("_hanging_sign"), "entity/hanging_signs"))
+                        .or(() -> RegistryUtil.getTextureLocation(new ResourceLocation(hangingSignWoodType.name()), "entity/sign/hanging"))
+                        .or(() -> RegistryUtil.getTextureLocation(new ResourceLocation(hangingSignWoodType.name()), "entity/hanging_sign"))
+                        .or(() -> RegistryUtil.getTextureLocation(new ResourceLocation(hangingSignWoodType.name()).withSuffix("_hanging_sign"), "entity/sign/hanging"))
+                        .or(() -> RegistryUtil.getTextureLocation(new ResourceLocation(hangingSignWoodType.name()).withSuffix("_hanging_sign"), "entity/hanging_sign"))
                         .orElse(new ResourceLocation(hangingSignWoodType.name())), "entity/signs/hanging/")
         ) : null;
     }

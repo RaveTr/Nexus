@@ -4809,7 +4809,7 @@ public final class ModelUtil {
      * @see #basicGenerated(ResourceLocation)
      */
     public static ItemModelDefinition basicGenerated(Supplier<Item> targetItem) {
-        return basicGenerated(RegistryUtil.getTextureLocationOrDefault(targetItem));
+        return basicGenerated(RegistryUtil.getTextureLocationOrDefault(targetItem, "item"));
     }
 
     /**
@@ -4889,7 +4889,7 @@ public final class ModelUtil {
      * @see #basicGenerated(ResourceLocation)
      */
     public static ItemModelDefinition basicHandheld(Supplier<Item> targetItem) {
-        return basicHandheld(RegistryUtil.getTextureLocationOrDefault(targetItem));
+        return basicHandheld(RegistryUtil.getTextureLocationOrDefault(targetItem, "item"));
     }
 
     /**
@@ -4929,6 +4929,6 @@ public final class ModelUtil {
      * @see RegistryUtil#getTextureLocationOrDefault(Supplier)
      */
     public static ItemModelDefinition handheldRod(Supplier<Item> targetItem) {
-        return handheldRod(RegistryUtil.getTextureLocationOrDefault(targetItem));
+        return handheldRod(RegistryUtil.getTextureLocationOrDefault(targetItem, "item"));
     }
 }

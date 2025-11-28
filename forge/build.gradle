@@ -125,3 +125,15 @@ publishMods {
         getMinecraftVersions().add(minecraft_version)
     }
 }
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = base.archivesName.get()
+            version = mod_version
+            group = mod_group
+
+            from components.java
+        }
+    }
+}
