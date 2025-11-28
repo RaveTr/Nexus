@@ -471,7 +471,7 @@ public final class ModelUtil {
      * @return A {@link BlockModelDefinition} with the {@link #EMPTY_MODEL_TEMPLATE} template.
      */
     public static BlockModelDefinition sign(ResourceLocation signParticleTexture, ResourceLocation signItemTexture) {
-        return new BlockModelDefinition(EMPTY_MODEL_TEMPLATE)
+        return new BlockModelDefinition(ModelTemplates.PARTICLE_ONLY)
                 .withTextureMapping(TextureMapping.particle(RegistryUtil.pickBlockPrefix(signParticleTexture)))
                 .withOrdinalModelDefinition(basicGenerated(signItemTexture));
     }
@@ -491,7 +491,7 @@ public final class ModelUtil {
      * @see #sign(ResourceLocation, ResourceLocation)
      */
     public static BlockModelDefinition sign(Supplier<Block> targetBlock) {
-        return sign(RegistryUtil.pickBlockTexture(targetBlock), RegistryUtil.getTextureLocationOrDefault(targetBlock));
+        return sign(RegistryUtil.pickBlockTexture(targetBlock), RegistryUtil.getTextureLocationOrDefault(targetBlock, "item"));
     }
 
     /**
@@ -511,7 +511,7 @@ public final class ModelUtil {
     public static BlockModelDefinition hangingSign(Supplier<Block> targetBlock) {
         return sign(
                 RegistryUtil.getTextureLocationOrDefault(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get()).withPrefix("stripped_").withPath(curPath -> curPath.replace("_hanging_sign", "_log"))),
-                RegistryUtil.getTextureLocationOrDefault(targetBlock)
+                RegistryUtil.getTextureLocationOrDefault(targetBlock, "item")
         );
     }
 

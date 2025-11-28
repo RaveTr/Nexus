@@ -145,6 +145,8 @@ public class ClientUtil {
         return onClient() && signWoodType != null ? new Material(Sheets.SIGN_SHEET, RegistryUtil.pickPrefix(
                 RegistryUtil.getTextureLocation(new ResourceLocation(signWoodType.name()), "entity/signs")
                         .or(() -> RegistryUtil.getTextureLocation(new ResourceLocation(signWoodType.name()).withSuffix("_sign"), "entity/signs"))
+                        .or(() -> RegistryUtil.getTextureLocation(new ResourceLocation(signWoodType.name()), "entity/sign"))
+                        .or(() -> RegistryUtil.getTextureLocation(new ResourceLocation(signWoodType.name()).withSuffix("_sign"), "entity/sign"))
                         .orElse(new ResourceLocation(signWoodType.name())), "entity/signs/")
         ) : null;
     }

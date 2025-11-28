@@ -112,7 +112,7 @@ public final class RecipeUtil { //TODO Refactor tf out of this
                                 .filter(curTagKey -> {
                                     String objRegName = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentItemLikeSup.get()).getPath();
 
-                                    return curTagKey.location().getPath().equals(objRegName.substring(0, objRegName.lastIndexOf('_')).concat("_logs"));
+                                    return curTagKey.location().getPath().endsWith(objRegName.substring(0, objRegName.lastIndexOf('_')).concat("_logs"));
                                 })
                                 .findFirst()
                                 .ifPresentOrElse(curTagKey -> woodenPlanksRecipeFromTag(finishedRecipe, curTagKey).accept((Supplier<Block>) parentItemLikeSup), componentRecipeGenerator);

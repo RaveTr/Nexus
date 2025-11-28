@@ -14,6 +14,8 @@ public class BlockEntityTypePropertyWrapperBuilder<BE extends BlockEntity> exten
 
     public BlockEntityTypePropertyWrapperBuilder(@NotNull BlockEntityTypePropertyWrapper<BE> ownerWrapper) {
         super(ownerWrapper);
+
+        bypassDefaultTranslation(true); // Prevents the generation of locale entries for the block entity type cuz blocks handle that
     }
 
     @Override
