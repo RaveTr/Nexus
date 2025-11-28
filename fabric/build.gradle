@@ -97,7 +97,7 @@ loom {
 publishMods {
     file = remapJar.archiveFile
     changelog = file("CHANGELOG.md").getText()
-    version = "${minecraft_version}-${mod_version}"
+    version = mod_version
     displayName = "${mod_name} v${minecraft_version}-${mod_version} [Fabric]"
     type = STABLE
 
