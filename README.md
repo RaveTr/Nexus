@@ -41,6 +41,7 @@ Nexus API also has a [Github Wiki](https://github.com/RaveTr/Nexus/wiki).
 - Platform-agnostic loader-specific operations (see the [wiki](https://github.com/RaveTr/Nexus/wiki) for more info)
 - Platform-agnostic networking (see the [wiki](https://github.com/RaveTr/Nexus/wiki) for more info)
 - Platform-agnostic datagen (see the [wiki](https://github.com/RaveTr/Nexus/wiki) for more info)
+- Platform-agnostic event system (see the [wiki](https://github.com/RaveTr/Nexus/wiki) for more info)
 - Natively-provided utilities (see the [wiki](https://github.com/RaveTr/Nexus/wiki) for more info)
 - Property Wrapper system (see the [wiki](https://github.com/RaveTr/Nexus/wiki) for more info)
 
