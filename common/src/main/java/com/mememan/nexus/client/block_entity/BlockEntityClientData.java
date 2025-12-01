@@ -1,6 +1,5 @@
 package com.mememan.nexus.client.block_entity;
 
-import com.google.common.base.Suppliers;
 import com.mememan.nexus.client.entity.EntityClientData;
 import com.mememan.nexus.property_wrapper.def.block_entity.BlockEntityTypePropertyWrapper;
 import it.unimi.dsi.fastutil.Pair;
@@ -59,7 +58,7 @@ import java.util.function.Supplier;
  *                                   {@link BlockEntityTypePropertyWrapper}, used to  define  different data mapped in
  *                                   {@link Sheets}. Primarily useful in cases such as signs, where sign textures have
  *                                   to be stitched in their respective atlas in order to be displayed properly in-game.
- * @param mappedModelLayerDefinitions A {@link Supplier} of a {@link Pair} containing a collection of
+ * @param mappedModelLayerDefinitions A {@link Function} outputting a {@link Pair} containing a collection of
  *                                    {@linkplain ModelLayerLocation ModelLayerLocations} and a {@link LayerDefinition},
  *                                    often paired with the provided {@code blockEntityRendererMapper} to define the
  *                                    block entity's model data. The reason you can map multiple layer locations to a
@@ -81,7 +80,7 @@ import java.util.function.Supplier;
  * @see <a href="https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-4.html#jvms-4.11">JLS 17: The Class File Format</a>
  * @see <a href="https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-5.html">JLS 17: Loading, Linking, and Initializing</a>
  */
-public record BlockEntityClientData<BE extends BlockEntity>(Function<BlockEntityRendererProvider.Context, BlockEntityRenderer<BE>> blockEntityRendererMapper, @Nullable Function<Supplier<BlockEntityType<BE>>, Collection<BlockEntitySheetData>> blockEntitySheetDataMapper, @Nullable Supplier<Pair<Collection<ModelLayerLocation>, LayerDefinition>> mappedModelLayerDefinitions) {
+public record BlockEntityClientData<BE extends BlockEntity>(Function<BlockEntityRendererProvider.Context, BlockEntityRenderer<BE>> blockEntityRendererMapper, @Nullable Function<Supplier<BlockEntityType<BE>>, Collection<BlockEntitySheetData>> blockEntitySheetDataMapper, @Nullable Function<Supplier<BlockEntityType<BE>>, Pair<Collection<ModelLayerLocation>, LayerDefinition>> mappedModelLayerDefinitions) {
 
     /**
      * Overloaded constructor whose {@code blockEntitySheetDataMapper} is set to {@code null}.
@@ -93,14 +92,10 @@ public record BlockEntityClientData<BE extends BlockEntity>(Function<BlockEntity
      * @see BlockEntityClientData
      */
     public BlockEntityClientData(Function<BlockEntityRendererProvider.Context, BlockEntityRenderer<BE>> blockEntityRendererMapper) {
-        this(blockEntityRendererMapper, null, Suppliers.ofInstance(null));
+        this(blockEntityRendererMapper, null, null);
     }
 
-    public BlockEntityClientData(Function<BlockEntityRendererProvider.Context, BlockEntityRenderer<BE>> blockEntityRendererMapper, @Nullable Function<Supplier<BlockEntityType<BE>>, Collection<BlockEntitySheetData>> blockEntitySheetDataMapper) {
-        this(blockEntityRendererMapper, blockEntitySheetDataMapper, Suppliers.ofInstance(null));
-    }
-
-    public BlockEntityClientData(Function<BlockEntityRendererProvider.Context, BlockEntityRenderer<BE>> blockEntityRendererMapper, @Nullable Supplier<Pair<Collection<ModelLayerLocation>, LayerDefinition>> mappedModelLayerDefinitions) {
+    public BlockEntityClientData(Function<BlockEntityRendererProvider.Context, BlockEntityRenderer<BE>> blockEntityRendererMapper, @Nullable Function<Supplier<BlockEntityType<BE>>, Pair<Collection<ModelLayerLocation>, LayerDefinition>> mappedModelLayerDefinitions) {
         this(blockEntityRendererMapper, null, mappedModelLayerDefinitions);
     }
 }

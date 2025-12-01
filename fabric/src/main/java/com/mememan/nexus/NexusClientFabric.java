@@ -186,7 +186,7 @@ public class NexusClientFabric implements ClientModInitializer {
                             Supplier<BlockEntityType<BE>> parentObj = curPW.getParentObject();
                             Function<BlockEntityRendererProvider.Context, BlockEntityRenderer<BE>> blockEntityRendererMapper = clientData.blockEntityRendererMapper();
                             Function<Supplier<BlockEntityType<BE>>, Collection<BlockEntitySheetData>> blockEntitySheetDataMapper = clientData.blockEntitySheetDataMapper();
-                            Supplier<Pair<Collection<ModelLayerLocation>, LayerDefinition>> mappedLayerDefSup = clientData.mappedModelLayerDefinitions();
+                            Function<Supplier<BlockEntityType<BE>>, Pair<Collection<ModelLayerLocation>, LayerDefinition>> layerDefMapper = clientData.mappedModelLayerDefinitions();
 
                             if (blockEntityRendererMapper != null) BlockEntityRenderers.register(parentObj.get(), blockEntityRendererMapper::apply);
                             if (blockEntitySheetDataMapper != null) {
@@ -206,8 +206,8 @@ public class NexusClientFabric implements ClientModInitializer {
                                     if (decoratedPotMaterialName != null) Sheets.DECORATED_POT_MATERIALS.put(decoratedPotMaterialName, ClientUtil.createDecoratedPotMaterial(decoratedPotMaterialName));
                                 });
                             }
-                            if (mappedLayerDefSup != null && mappedLayerDefSup.get() != null) {
-                                Pair<Collection<ModelLayerLocation>, LayerDefinition> mappedModelLayerDef = mappedLayerDefSup.get();
+                            if (layerDefMapper != null) {
+                                Pair<Collection<ModelLayerLocation>, LayerDefinition> mappedModelLayerDef = layerDefMapper.apply(parentObj);
                                 Collection<ModelLayerLocation> layerLocs = mappedModelLayerDef.left();
                                 LayerDefinition layerDef = mappedModelLayerDef.right();
 

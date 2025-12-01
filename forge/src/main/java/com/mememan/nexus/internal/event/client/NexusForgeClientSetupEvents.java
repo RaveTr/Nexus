@@ -243,10 +243,10 @@ public class NexusForgeClientSetupEvents {
             BlockEntityClientData<BE> clientData = curClientData.get();
 
             if (clientData != null) {
-                Supplier<Pair<Collection<ModelLayerLocation>, LayerDefinition>> mappedLayerDefSup = clientData.mappedModelLayerDefinitions();
+                Function<Supplier<BlockEntityType<BE>>, Pair<Collection<ModelLayerLocation>, LayerDefinition>> layerDefMapper = clientData.mappedModelLayerDefinitions();
 
-                if (mappedLayerDefSup != null && mappedLayerDefSup.get() != null) {
-                    Pair<Collection<ModelLayerLocation>, LayerDefinition> mappedModelLayerDef = mappedLayerDefSup.get();
+                if (layerDefMapper != null) {
+                    Pair<Collection<ModelLayerLocation>, LayerDefinition> mappedModelLayerDef = layerDefMapper.apply(targetBETPW.getParentObject());
                     Collection<ModelLayerLocation> layerLocs = mappedModelLayerDef.left();
                     LayerDefinition layerDef = mappedModelLayerDef.right();
 

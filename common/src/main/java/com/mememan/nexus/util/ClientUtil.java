@@ -142,12 +142,12 @@ public class ClientUtil {
      */
     @Nullable
     public static Material createSignMaterial(WoodType signWoodType) {
-        return onClient() && signWoodType != null ? new Material(Sheets.SIGN_SHEET, RegistryUtil.pickPrefix(
+        return onClient() && signWoodType != null ? new Material(Sheets.SIGN_SHEET,
                 RegistryUtil.getTextureLocation(new ResourceLocation(signWoodType.name()), "entity/signs")
                         .or(() -> RegistryUtil.getTextureLocation(new ResourceLocation(signWoodType.name()).withSuffix("_sign"), "entity/signs"))
                         .or(() -> RegistryUtil.getTextureLocation(new ResourceLocation(signWoodType.name()), "entity/sign"))
                         .or(() -> RegistryUtil.getTextureLocation(new ResourceLocation(signWoodType.name()).withSuffix("_sign"), "entity/sign"))
-                        .orElse(new ResourceLocation(signWoodType.name())), "entity/signs/")
+                        .orElse(RegistryUtil.pickPrefix(new ResourceLocation(signWoodType.name()), "entity/signs/"))
         ) : null;
     }
 
@@ -163,7 +163,7 @@ public class ClientUtil {
      */
     @Nullable
     public static Material createHangingSignMaterial(WoodType hangingSignWoodType) {
-        return onClient() && hangingSignWoodType != null ? new Material(Sheets.SIGN_SHEET, RegistryUtil.pickPrefix(
+        return onClient() && hangingSignWoodType != null ? new Material(Sheets.SIGN_SHEET,
                 RegistryUtil.getTextureLocation(new ResourceLocation(hangingSignWoodType.name()), "entity/signs/hanging")
                         .or(() -> RegistryUtil.getTextureLocation(new ResourceLocation(hangingSignWoodType.name()), "entity/hanging_signs"))
                         .or(() -> RegistryUtil.getTextureLocation(new ResourceLocation(hangingSignWoodType.name()).withSuffix("_hanging_sign"), "entity/signs/hanging"))
@@ -172,7 +172,7 @@ public class ClientUtil {
                         .or(() -> RegistryUtil.getTextureLocation(new ResourceLocation(hangingSignWoodType.name()), "entity/hanging_sign"))
                         .or(() -> RegistryUtil.getTextureLocation(new ResourceLocation(hangingSignWoodType.name()).withSuffix("_hanging_sign"), "entity/sign/hanging"))
                         .or(() -> RegistryUtil.getTextureLocation(new ResourceLocation(hangingSignWoodType.name()).withSuffix("_hanging_sign"), "entity/hanging_sign"))
-                        .orElse(new ResourceLocation(hangingSignWoodType.name())), "entity/signs/hanging/")
+                        .orElse(RegistryUtil.pickPrefix(new ResourceLocation(hangingSignWoodType.name()), "entity/signs/hanging/"))
         ) : null;
     }
 
@@ -188,10 +188,10 @@ public class ClientUtil {
      */
     @Nullable
     public static Material createBannerMaterial(ResourceKey<BannerPattern> bannerPatternKey) {
-        return onClient() && bannerPatternKey != null ? new Material(Sheets.BANNER_SHEET, RegistryUtil.pickPrefix(
+        return onClient() && bannerPatternKey != null ? new Material(Sheets.BANNER_SHEET,
                 RegistryUtil.getTextureLocation(bannerPatternKey.location(), "entity/banner")
                         .or(() -> RegistryUtil.getTextureLocation(bannerPatternKey.location().withSuffix("_banner"), "entity/banner"))
-                        .orElse(BannerPattern.location(bannerPatternKey, true)), "entity/banner/")
+                        .orElse(RegistryUtil.pickPrefix(BannerPattern.location(bannerPatternKey, true), "entity/banner/"))
         ) : null;
     }
 
@@ -207,10 +207,10 @@ public class ClientUtil {
      */
     @Nullable
     public static Material createShieldMaterial(ResourceKey<BannerPattern> shieldPatternKey) {
-        return onClient() && shieldPatternKey != null ? new Material(Sheets.SHIELD_SHEET, RegistryUtil.pickPrefix(
+        return onClient() && shieldPatternKey != null ? new Material(Sheets.SHIELD_SHEET,
                 RegistryUtil.getTextureLocation(shieldPatternKey.location(), "entity/shield")
                         .or(() -> RegistryUtil.getTextureLocation(shieldPatternKey.location().withSuffix("_shield"), "entity/shield"))
-                        .orElse(BannerPattern.location(shieldPatternKey, false)), "entity/shield/")
+                        .orElse(RegistryUtil.pickPrefix(BannerPattern.location(shieldPatternKey, false), "entity/shield/"))
         ) : null;
     }
 
@@ -226,10 +226,10 @@ public class ClientUtil {
      */
     @Nullable
     public static Material createDecoratedPotMaterial(ResourceKey<String> decoratedPotMaterialName) {
-        return onClient() && decoratedPotMaterialName != null ? new Material(Sheets.DECORATED_POT_SHEET, RegistryUtil.pickPrefix(
+        return onClient() && decoratedPotMaterialName != null ? new Material(Sheets.DECORATED_POT_SHEET,
                 RegistryUtil.getTextureLocation(decoratedPotMaterialName.location(), "entity/decorated_pot")
                         .or(() -> RegistryUtil.getTextureLocation(decoratedPotMaterialName.location().withSuffix("_decorated_pot"), "entity/decorated_pot"))
-                        .orElse(DecoratedPotPatterns.location(decoratedPotMaterialName)), "entity/decorated_pot/")
+                        .orElse(RegistryUtil.pickPrefix(DecoratedPotPatterns.location(decoratedPotMaterialName), "entity/decorated_pot/"))
         ) : null;
     }
 }
