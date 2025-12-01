@@ -15,8 +15,6 @@ import net.minecraft.client.model.ChestBoatModel;
 import net.minecraft.client.model.ChestRaftModel;
 import net.minecraft.client.model.RaftModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
-import net.minecraft.client.renderer.blockentity.HangingSignRenderer;
-import net.minecraft.client.renderer.blockentity.SignRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
@@ -36,21 +34,13 @@ public final class ClientDataEntryTemplates {
             WoodType.values()
                     .filter(curWoodType -> Objects.equals(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(sign.get()).getNamespace(), new ResourceLocation(curWoodType.name()).getNamespace()))
                     .map(BlockEntitySheetData::forSoleSign)
-                    .collect(Collectors.toCollection(ObjectArrayList::new)),
-            sign -> Pair.of(WoodType.values()
-                    .filter(curWoodType -> Objects.equals(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(sign.get()).getNamespace(), new ResourceLocation(curWoodType.name()).getNamespace()))
-                    .map(curWoodType -> new ModelLayerLocation(new ResourceLocation(curWoodType.name()).withPrefix("sign/"), "main"))
-                    .collect(Collectors.toCollection(ObjectArrayList::new)), SignRenderer.createSignLayer())
+                    .collect(Collectors.toCollection(ObjectArrayList::new))
     );
     public static final BlockEntityClientData<SignBlockEntity> HANGING_SIGN_CLIENT_DATA = new BlockEntityClientData<>(DefaultableHangingSignRenderer::new, sign ->
             WoodType.values()
                     .filter(curWoodType -> Objects.equals(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(sign.get()).getNamespace(), new ResourceLocation(curWoodType.name()).getNamespace()))
                     .map(BlockEntitySheetData::forHangingSign)
-                    .collect(Collectors.toCollection(ObjectArrayList::new)),
-            sign -> Pair.of(WoodType.values()
-                    .filter(curWoodType -> Objects.equals(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(sign.get()).getNamespace(), new ResourceLocation(curWoodType.name()).getNamespace()))
-                    .map(curWoodType -> new ModelLayerLocation(new ResourceLocation(curWoodType.name()).withPrefix("hanging_sign/"), "main"))
-                    .collect(Collectors.toCollection(ObjectArrayList::new)), HangingSignRenderer.createHangingSignLayer())
+                    .collect(Collectors.toCollection(ObjectArrayList::new))
     );
 
     public static final EntityClientData<Boat> BOAT_CLIENT_DATA = new EntityClientData<>(renderCtx -> new DefaultableBoatRenderer(renderCtx, false), boat -> Pair.of(

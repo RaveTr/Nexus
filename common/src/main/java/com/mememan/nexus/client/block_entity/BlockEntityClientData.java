@@ -95,7 +95,7 @@ public record BlockEntityClientData<BE extends BlockEntity>(Function<BlockEntity
         this(blockEntityRendererMapper, null, null);
     }
 
-    public BlockEntityClientData(Function<BlockEntityRendererProvider.Context, BlockEntityRenderer<BE>> blockEntityRendererMapper, @Nullable Function<Supplier<BlockEntityType<BE>>, Pair<Collection<ModelLayerLocation>, LayerDefinition>> mappedModelLayerDefinitions) {
-        this(blockEntityRendererMapper, null, mappedModelLayerDefinitions);
+    public BlockEntityClientData(Function<BlockEntityRendererProvider.Context, BlockEntityRenderer<BE>> blockEntityRendererMapper, @Nullable Function<Supplier<BlockEntityType<BE>>, Collection<BlockEntitySheetData>> blockEntitySheetDataMapper) {
+        this(blockEntityRendererMapper, blockEntitySheetDataMapper, null);
     }
 }
