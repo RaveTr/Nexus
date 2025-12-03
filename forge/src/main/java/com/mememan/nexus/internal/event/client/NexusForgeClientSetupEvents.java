@@ -227,11 +227,14 @@ public class NexusForgeClientSetupEvents {
 
                 if (mappedLayerDefSup != null) {
                     Pair<Collection<ModelLayerLocation>, LayerDefinition> mappedModelLayerDef = mappedLayerDefSup.apply(targetETPW.getParentObject());
-                    Collection<ModelLayerLocation> layerLocs = mappedModelLayerDef.left();
-                    LayerDefinition layerDef = mappedModelLayerDef.right();
 
-                    if (layerLocs != null && layerDef != null && !layerLocs.isEmpty()){
-                        layerLocs.forEach(layerLoc -> event.registerLayerDefinition(layerLoc, () -> layerDef));
+                    if (mappedModelLayerDef != null) {
+                        Collection<ModelLayerLocation> layerLocs = mappedModelLayerDef.left();
+                        LayerDefinition layerDef = mappedModelLayerDef.right();
+
+                        if (layerLocs != null && layerDef != null && !layerLocs.isEmpty()){
+                            layerLocs.forEach(layerLoc -> event.registerLayerDefinition(layerLoc, () -> layerDef));
+                        }
                     }
                 }
             }
@@ -247,11 +250,14 @@ public class NexusForgeClientSetupEvents {
 
                 if (layerDefMapper != null) {
                     Pair<Collection<ModelLayerLocation>, LayerDefinition> mappedModelLayerDef = layerDefMapper.apply(targetBETPW.getParentObject());
-                    Collection<ModelLayerLocation> layerLocs = mappedModelLayerDef.left();
-                    LayerDefinition layerDef = mappedModelLayerDef.right();
 
-                    if (layerLocs != null && layerDef != null && !layerLocs.isEmpty()) {
-                        layerLocs.forEach(layerLoc -> event.registerLayerDefinition(layerLoc, () -> layerDef));
+                    if (mappedModelLayerDef != null) {
+                        Collection<ModelLayerLocation> layerLocs = mappedModelLayerDef.left();
+                        LayerDefinition layerDef = mappedModelLayerDef.right();
+
+                        if (layerLocs != null && layerDef != null && !layerLocs.isEmpty()) {
+                            layerLocs.forEach(layerLoc -> event.registerLayerDefinition(layerLoc, () -> layerDef));
+                        }
                     }
                 }
             }

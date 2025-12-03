@@ -208,14 +208,17 @@ public class NexusClientFabric implements ClientModInitializer {
                             }
                             if (layerDefMapper != null) {
                                 Pair<Collection<ModelLayerLocation>, LayerDefinition> mappedModelLayerDef = layerDefMapper.apply(parentObj);
-                                Collection<ModelLayerLocation> layerLocs = mappedModelLayerDef.left();
-                                LayerDefinition layerDef = mappedModelLayerDef.right();
 
-                                if (layerLocs != null && layerDef != null && !layerLocs.isEmpty()) {
-                                    layerLocs.forEach(layerLoc -> {
-                                        EntityModelLayerImpl.PROVIDERS.putIfAbsent(layerLoc, () -> layerDef);
-                                        EntityModelLayersAccessor.getLayers().add(layerLoc);
-                                    });
+                                if (mappedModelLayerDef != null) {
+                                    Collection<ModelLayerLocation> layerLocs = mappedModelLayerDef.left();
+                                    LayerDefinition layerDef = mappedModelLayerDef.right();
+
+                                    if (layerLocs != null && layerDef != null && !layerLocs.isEmpty()) {
+                                        layerLocs.forEach(layerLoc -> {
+                                            EntityModelLayerImpl.PROVIDERS.putIfAbsent(layerLoc, () -> layerDef);
+                                            EntityModelLayersAccessor.getLayers().add(layerLoc);
+                                        });
+                                    }
                                 }
                             }
                         }
@@ -239,14 +242,17 @@ public class NexusClientFabric implements ClientModInitializer {
 
                             if (layerDefMapper != null) {
                                 Pair<Collection<ModelLayerLocation>, LayerDefinition> mappedModelLayerDefs = layerDefMapper.apply(curPW.getParentObject());
-                                Collection<ModelLayerLocation> layerLocs = mappedModelLayerDefs.left();
-                                LayerDefinition layerDef = mappedModelLayerDefs.right();
 
-                                if (layerLocs != null && layerDef != null && !layerLocs.isEmpty()) {
-                                    layerLocs.forEach(layerLoc -> {
-                                        EntityModelLayerImpl.PROVIDERS.putIfAbsent(layerLoc, () -> layerDef);
-                                        EntityModelLayersAccessor.getLayers().add(layerLoc);
-                                    });
+                                if (mappedModelLayerDefs != null) {
+                                    Collection<ModelLayerLocation> layerLocs = mappedModelLayerDefs.left();
+                                    LayerDefinition layerDef = mappedModelLayerDefs.right();
+
+                                    if (layerLocs != null && layerDef != null && !layerLocs.isEmpty()) {
+                                        layerLocs.forEach(layerLoc -> {
+                                            EntityModelLayerImpl.PROVIDERS.putIfAbsent(layerLoc, () -> layerDef);
+                                            EntityModelLayersAccessor.getLayers().add(layerLoc);
+                                        });
+                                    }
                                 }
                             }
                         }
