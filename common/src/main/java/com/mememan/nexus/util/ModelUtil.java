@@ -481,7 +481,7 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#PARTICLE} -> {@code RegistryUtil.pickBlockTexture(targetBlock)}</li>
+     *         <li>{@link TextureSlot#PARTICLE} -> Log texture from {@code targetBlock}'s registry ID</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the sign block to use for texture resolution.
@@ -491,7 +491,10 @@ public final class ModelUtil {
      * @see #sign(ResourceLocation, ResourceLocation)
      */
     public static BlockModelDefinition sign(Supplier<Block> targetBlock) {
-        return sign(RegistryUtil.pickBlockTexture(targetBlock), RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"));
+        return sign(
+                RegistryUtil.getTextureLocationOrDefault(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get()).withPath(curPath -> curPath.replace("_sign", "_log")), "block"),
+                RegistryUtil.getTextureLocationOrDefault(targetBlock, "item")
+        );
     }
 
     /**
@@ -510,8 +513,8 @@ public final class ModelUtil {
      */
     public static BlockModelDefinition hangingSign(Supplier<Block> targetBlock) {
         return sign(
-                RegistryUtil.getTextureLocationOrDefault(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get()).withPrefix("stripped_").withPath(curPath -> curPath.replace("_hanging_sign", "_log"))),
-                RegistryUtil.getTextureLocationOrDefault(targetBlock, "block")
+                RegistryUtil.getTextureLocationOrDefault(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get()).withPrefix("stripped_").withPath(curPath -> curPath.replace("_hanging_sign", "_log")), "block"),
+                RegistryUtil.getTextureLocationOrDefault(targetBlock, "item")
         );
     }
 
