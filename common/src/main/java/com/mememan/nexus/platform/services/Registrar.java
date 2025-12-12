@@ -139,9 +139,12 @@ public interface Registrar {
      * @implNote Neo/Forge will still track the provided {@code objSup} to its appropriate {@code DeferredRegister} in order
      * to avoid referencing issues later on, similar to {@link #registerObject(ResourceLocation, Supplier, Registry)},
      * with the main difference being that since the object is already registered, any accidentally-instantiated
-     * duplicates will be gracefully skipped during deferred registration.
+     * duplicates will be gracefully skipped during deferred registration. This effectively allows for proper wrapping
+     * of registered objects.
      *
      * @see #registerObject(ResourceLocation, Supplier, Registry)
+     * @see com.mememan.nexus.mixins.forge.registries.NamespacedWrapperMixin
+     * @see com.mememan.nexus.mixins.forge.registries.DeferredRegisterMixin
      */
     <V, T extends V> Supplier<T> registerObjectAndReflect(final ResourceLocation objId, final Supplier<T> objSup, Registry<V> targetRegistry);
 

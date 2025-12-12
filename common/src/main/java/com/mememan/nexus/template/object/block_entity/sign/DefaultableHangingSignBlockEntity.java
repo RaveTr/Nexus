@@ -19,6 +19,6 @@ public class DefaultableHangingSignBlockEntity extends HangingSignBlockEntity {
 
     @Override
     public @NotNull BlockEntityType<?> getType() {
-        return wrappedType.get();
+        return wrappedType == null ? BlockEntityType.HANGING_SIGN : wrappedType.get();
     }
 }

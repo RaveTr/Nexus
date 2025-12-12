@@ -9,6 +9,7 @@
     "forge.datagen.DatagenModLoaderMixin",
     "forge.registries.DataPackRegistriesHooksAccessor",
     "forge.registries.DeferredRegisterMixin",
+    "forge.registries.NamespacedWrapperMixin",
     "item.DiggerItemMixin",
     "item.HoeItemMixin"
   ],

@@ -18,9 +18,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import it.unimi.dsi.fastutil.objects.ObjectObjectMutablePair;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistrySetBuilder;
-import net.minecraft.core.RegistrySynchronization;
+import net.minecraft.core.*;
 import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.resources.RegistryDataLoader;
 import net.minecraft.resources.ResourceKey;
@@ -109,9 +107,12 @@ public class ForgeRegistrar implements Registrar {
 
     @Override
     public <V, T extends V> RegistryObject<T> registerObjectAndReflect(ResourceLocation objId, Supplier<T> objSup, Registry<V> targetRegistry) {
-        RegistryObject<T> deferredRegObj = registerObject(objId, () -> Registry.register(targetRegistry, objId, objSup.get()), targetRegistry);
+        if (targetRegistry instanceof MappedRegistry<V> targetMappedRegistry) targetMappedRegistry.unfreeze(); // Filthy hack to bypass registry freeze, but this'll do since registries are appropriately frozen once again later on by Forge
 
         EARLY_REFLECTED_ENTRIES.put(targetRegistry.key(), objId);
+
+        T registeredObj = Registry.register(targetRegistry, objId, objSup.get());
+        RegistryObject<T> deferredRegObj = registerObject(objId, () -> registeredObj, targetRegistry);
 
         return deferredRegObj;
     }
