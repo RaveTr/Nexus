@@ -492,7 +492,7 @@ public final class ModelUtil {
      */
     public static BlockModelDefinition sign(Supplier<Block> targetBlock) {
         return sign(
-                RegistryUtil.getTextureLocationOrDefault(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get()).withPath(curPath -> curPath.replace("_sign", "_log")), "block"),
+                RegistryUtil.getTextureLocationOrDefault(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get()).withPath(curPath -> curPath.replace("_sign", "_planks")), "block"),
                 RegistryUtil.getTextureLocationOrDefault(targetBlock, "item")
         );
     }
@@ -518,7 +518,7 @@ public final class ModelUtil {
         );
     }
 
-     /**
+    /**
      * Creates a {@link BlockStateDefinition}, using {@link MultiVariantGenerator} with the {@link VariantProperties#MODEL}
      * property set to the supplied {@linkplain Block Block's} default model location.
      * <p>
@@ -537,6 +537,27 @@ public final class ModelUtil {
         return new BlockStateDefinition(targetBlock)
                 .withBlockStateSupplier(MultiVariantGenerator.multiVariant(targetBlock.get(), Variant.variant()
                         .with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(targetBlock.get()))));
+    }
+
+    /**
+     * Creates a {@link BlockStateDefinition} with a {@code simpleBlock} template using the specified model location.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>{@link VariantProperties#MODEL} -> {@code modelLocation}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the block to create the blockstate for.
+     * @param modelLocation The {@link ResourceLocation} of the model to use for the blockstate.
+     *
+     * @return A new {@link BlockStateDefinition} with a {@code simpleBlock} template using the specified model location.
+     *
+     * @see #simpleBlockState(Supplier)
+     */
+    public static BlockStateDefinition simpleBlockState(Supplier<Block> targetBlock, ResourceLocation modelLocation) {
+        return new BlockStateDefinition(targetBlock)
+                .withBlockStateSupplier(MultiVariantGenerator.multiVariant(targetBlock.get(), Variant.variant()
+                        .with(VariantProperties.MODEL, modelLocation)));
     }
 
     /**

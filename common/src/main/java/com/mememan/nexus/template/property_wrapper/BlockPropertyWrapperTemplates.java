@@ -14,7 +14,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.jetbrains.annotations.Nullable;
 
@@ -372,7 +372,7 @@ public final class BlockPropertyWrapperTemplates {
             .builder()
             .copyFrom(WOODEN_STANDING_SIGN)
             .withModelDefinition(null)
-            .withBlockStateDefinition(null)
+            .withBlockStateDefinition(parentBlock -> ModelUtil.simpleBlockState(parentBlock, RegistryUtil.pickBlockPrefix(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentBlock.get()).withPath(curPath -> curPath.replace("_wall_sign", "_sign")))))
             .setTags(ObjectArrayList.of(() -> BlockTags.WALL_SIGNS))
             .setAdditionalTags(ObjectArrayList.of())
             .withRecipe(null)
@@ -389,7 +389,7 @@ public final class BlockPropertyWrapperTemplates {
             .builder()
             .copyFrom(WOODEN_CEILING_HANGING_SIGN)
             .withModelDefinition(null)
-            .withBlockStateDefinition(null)
+            .withBlockStateDefinition(parentBlock -> ModelUtil.simpleBlockState(parentBlock, RegistryUtil.pickBlockPrefix(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentBlock.get()).withPath(curPath -> curPath.replace("_wall_hanging_sign", "_hanging_sign")))))
             .setTags(ObjectArrayList.of(() -> BlockTags.WALL_HANGING_SIGNS))
             .setAdditionalTags(ObjectArrayList.of())
             .withRecipe(null)
