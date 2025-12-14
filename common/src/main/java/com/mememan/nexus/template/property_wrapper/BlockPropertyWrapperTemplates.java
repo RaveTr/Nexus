@@ -338,7 +338,7 @@ public final class BlockPropertyWrapperTemplates {
             .build();
     public static final BlockPropertyWrapper<Block> WOODEN_PLANKS = new BlockPropertyWrapper<>()
             .builder()
-            .copyFrom(BASIC_PICKAXE)
+            .copyFrom(BASIC_AXE)
             .withTag(() -> BlockTags.PLANKS)
             .withAdditionalTag(() -> ItemTags.PLANKS)
             .withRecipe(RecipeUtil::woodenPlanksRecipeFromComponents)

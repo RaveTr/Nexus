@@ -1,0 +1,24 @@
+{
+  "sources": [
+    {
+      "type": "directory",
+      "source": "entity/signs",
+      "prefix": "entity/signs/"
+    },
+    {
+      "type": "directory",
+      "source": "entity/sign",
+      "prefix": "entity/sign/"
+    },
+    {
+      "type": "directory",
+      "source": "entity/hanging_signs",
+      "prefix": "entity/hanging_signs/"
+    },
+    {
+      "type": "directory",
+      "source": "entity/hanging_sign",
+      "prefix": "entity/hanging_sign/"
+    }
+  ]
+}
