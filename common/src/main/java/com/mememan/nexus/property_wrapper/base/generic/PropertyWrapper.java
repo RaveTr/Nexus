@@ -127,12 +127,25 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
         return new Object2ObjectOpenCustomHashMap<>(PropertyWrappersContainer.MAPPED_PROPERTY_WRAPPERS, new Hash.Strategy<>() { // At this point, we can go back to writing normal HashStrategy impl
             @Override
             public int hashCode(Supplier<?> o) {
-                return o.get().hashCode();
+                try {
+                    return o.get() == null ? 0 : o.get().hashCode();
+                } catch (NullPointerException npe) {
+                    if (NexusServices.PLATFORM_MANAGER.isDevelopmentEnvironment()) NexusConstants.LOGGER.debug("Exception trying to hash Supplier value - In this case, it's most likely Forge's RegistryObject acting up due to PropertyWrappersContainer being initialized before deferred registration. You can ignore this warning; the custom Hash.Strategy comparisons for mapped objects (blocks, items, etc.) will still work as intended later beyond this point during runtime.", npe);
+                    return o == null ? 0 : o.hashCode();
+                }
             }
 
             @Override
             public boolean equals(Supplier<?> a, Supplier<?> b) {
-                return a != null && b != null && Objects.equals(a.get(), b.get());
+                if (a == b) return true;
+                if (a == null || b == null) return false;
+
+                try {
+                    return Objects.equals(a, b) || Objects.equals(a.get(), b.get());
+                } catch (NullPointerException npe) {
+                    if (NexusServices.PLATFORM_MANAGER.isDevelopmentEnvironment()) NexusConstants.LOGGER.debug("Exception trying to compare Supplier values - In this case, it's most likely Forge's RegistryObjects acting up due to PropertyWrappersContainer being initialized before deferred registration. You can ignore this warning; the custom Hash.Strategy comparisons for mapped objects (blocks, items, etc.) will still work as intended later beyond this point during runtime.", npe);
+                    return Objects.equals(a, b);
+                }
             }
         });
     }
@@ -160,7 +173,7 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
                 if (a == null || b == null) return false;
 
                 try {
-                    return Objects.equals(a.get(), b.get());
+                    return Objects.equals(a, b) || Objects.equals(a.get(), b.get());
                 } catch (NullPointerException npe) {
                     if (NexusServices.PLATFORM_MANAGER.isDevelopmentEnvironment()) NexusConstants.LOGGER.debug("Exception trying to compare Supplier values - In this case, it's most likely Forge's RegistryObjects acting up due to PropertyWrappersContainer being initialized before deferred registration. You can ignore this warning; the custom Hash.Strategy comparisons for mapped objects (blocks, items, etc.) will still work as intended later beyond this point during runtime.", npe);
                     return Objects.equals(a, b);
