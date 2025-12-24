@@ -9,6 +9,7 @@
 - Fixed FabricModData#filterDuplicates logic pruning paths that shouldn't be pruned (e.g., when a path wasn't a subdirectory of another path, so "block_texture.png.mcmeta" would wrongly filter out "block_texture.png" due to the basic substring check that was done).
 - Updated PropertyWrapperContainer#MAPPED_PROPERTY_WRAPPERS to additionally compare wrapper/supplier values in its equality check.
 - Updated PropertyWrapper#getMappedPropertyWrappers() HashStrategy implementation to match PropertyWrapperContainer#MAPPED_PROPERTY_WRAPPERS.
+- Updated PropertyWrappersContainer#getWrapperFor(Supplier) to query a copy of the original map if the base lookup returns an empty Optional (see javadoc for further details).
 
 ## New Features
 

@@ -452,9 +452,21 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
          * @param <PW> The {@link PropertyWrapper} type.
          *
          * @see #getWrapperFor(Object)
+         *
+         * @apiNote Queries {@link #getMappedPropertyWrappers()} if the mapping is not found in the base map. This is primarily
+         * a workaround for Neo/Forge to allow for re-hashing to take place when map entries are copied, since original
+         * map entries (when put in the original map) are hashed based on their {@link Supplier} references, which may
+         * not be up to date when objects are eventually resolved later at runtime.
+         * <br></br>
+         * Since hashmaps look entries up based on the bucket they're stored in, it'd effectively mean that performing lookups
+         * on objects by their wrapping suppliers (e.g. using {@link #getWrapperFor(Object)}) by creating new lambdas to
+         * wrap around the target object and passing them as arguments would result in a miss, since their identities
+         * would differ, thus causing non-existent buckets to be looked up and, by extension, never run the equality check
+         * for the object later during runtime.
          */
         public static <PW extends PropertyWrapper<?, ? extends PropertyWrapper<?, ?, ?>, ? extends PropertyWrapperBuilder<?, ?, ?>>> Optional<PW> getWrapperFor(Supplier<?> parentObjSup) {
-            return Optional.ofNullable((PW) MAPPED_PROPERTY_WRAPPERS.get(parentObjSup));
+            return Optional.ofNullable((PW) MAPPED_PROPERTY_WRAPPERS.get(parentObjSup))
+                    .or(() -> Optional.ofNullable((PW) getMappedPropertyWrappers().get(parentObjSup)));
         }
 
         /**
