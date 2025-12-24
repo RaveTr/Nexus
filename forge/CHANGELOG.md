@@ -5,7 +5,7 @@
 ## Bug Fixes
 
 - (Not really a bug) Corrected naming of parameters in ItemPropertyWrapperTemplates.
-- Updated PropertyWrapperContainer#MAPPED_PROPERTY_WRAPPERS to properly compare wrapper/supplier values in its equality check.
+- Updated PropertyWrapperContainer#MAPPED_PROPERTY_WRAPPERS to additionally compare wrapper/supplier values in its equality check. Primarily fixes object-based lookups on Forge.
 - Updated PropertyWrapper#getMappedPropertyWrappers() HashStrategy implementation to match PropertyWrapperContainer#MAPPED_PROPERTY_WRAPPERS.
 
 ## New Features
