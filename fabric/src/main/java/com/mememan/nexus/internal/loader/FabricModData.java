@@ -114,9 +114,10 @@ public class FabricModData implements ModData {
      * Path-mapping method capable of handling both standard and nested mods within scanned JAR files. Additionally,
      * handles caching annotation data.
      * <br></br>
-     * Has an overall O(m * (n + p)) time complexity (where {@code m} is the number of root paths (usually 1) in the given
+     * Has an overall O(m * (n * log(n) + n^2 * k + p * a)) time complexity (where {@code m} is the number of root paths (usually 1) in the given
      * {@code targetModContainer}, {@code n} is the number of files/paths per root path, and {@code p} is the number
-     * of {@code class} files scanned (for annotation parsing)).
+     * of {@code class} files scanned (for annotation parsing), and {@code a} is the average processing time of each
+     * {@code class} file).
      *
      * @param targetModContainer The {@link ModContainer} to index the paths of. Typically defaults to the owning JAR
      *                           file of this instance's {@link #ownerModContainer}.
@@ -174,8 +175,10 @@ public class FabricModData implements ModData {
      * <br></br>
      * Handles edge cases, formats files, and caches annotation data. Additionally, deduplicates paths (which for some
      * reason happen to be on Fabric - where paths are recursively added with 1 package pruned from the left) with
-     * roughly O(n * log(n) + n * k) time complexity (where {@code n} is the number of files/paths, including
-     * subdirectories, and {@code k} is the average length of all file paths).
+     * roughly O(n * log(n) + n^2 * k + p * a) time complexity (where {@code n} is the number of files/paths, including
+     * subdirectories, {@code k} is the average length of all file paths, {@code p} is the number of
+     * {@code class} files scanned (for annotation parsing), and {@code a} is the average processing time of each
+     * {@code class} file).
      *
      * @param rootDir The mod's root directory (usually {@code "build/"}, but anything goes).
      * @param allFilePathsLocal The {@link ObjectArrayList} to store all formatted paths found within the mod's JAR file.
@@ -223,9 +226,9 @@ public class FabricModData implements ModData {
      * <br></br>
      * Handles edge cases, formats files, and caches annotation data. Unlike
      * {@link #processDirectory(Path, ObjectArrayList, ModContainer)}, this doesn't have to deal with Fabric's odd recursive
-     * path duplication, and it thus has a time complexity of roughly O(n * k), where {@code n} is the number of
-     * files/paths within the target JAR, and {@code k} is the average processing time of each JAR file (if any nested
-     * JARs are present).
+     * path duplication, and it thus has a time complexity of roughly O(n + p * a), where {@code n} is the number of
+     * files/paths within the target JAR, {@code p} is the number of {@code class} files scanned (for annotation parsing),
+     * and {@code a} is the average processing time of each {@code class} file.
      *
      * @param jarPath The {@link Path} to the root JAR file.
      * @param allFilePathsLocal The {@link ObjectArrayList} to store all formatted paths found within the mod's JAR file.
@@ -262,7 +265,9 @@ public class FabricModData implements ModData {
     /**
      * Directly processes a {@code class} file's annotations using {@link ClassReader} and {@link ClassVisitor}.
      * <br></br>
-     * Prunes all {@code class} byte code metadata to only retain the name and annotations for maximum O(n) performance.
+     * Prunes all {@code class} byte code metadata to only retain the name and annotations for maximum O(b + a) performance
+     * (where {@code b} is the size of the {@code class} file's byte code, and {@code a} is the average processing time of
+     * each {@code class} file).
      *
      * @param className The name of the target {@code class} file.
      * @param classInputStream The converted {@code class} file's byte code.
@@ -289,7 +294,8 @@ public class FabricModData implements ModData {
     /**
      * De-duplicates paths found within the provided {@code potentialPaths} (typically from a mod's JAR file).
      * <br></br>
-     * Averages approximately O(n * log(n)) time complexity, where {@code n} is the total number of paths.
+     * Averages approximately O(n^2 * k) time complexity, where {@code n} is the total number of paths, and {@code k} is the
+     * average length of all file paths.
      *
      * @param potentialPaths The overall path {@link ObjectArrayList}.
      *
@@ -314,7 +320,7 @@ public class FabricModData implements ModData {
             boolean isContained = false;
 
             for (String acceptedPath : acceptedPaths) {
-                if (acceptedPath.contains(currentPath)) {
+                if (acceptedPath.endsWith("/" + currentPath) || currentPath.endsWith("/" + acceptedPath)) {
                     isContained = true;
                     break;
                 }
