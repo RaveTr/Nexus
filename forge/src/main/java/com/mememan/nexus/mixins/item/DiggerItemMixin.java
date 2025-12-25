@@ -50,7 +50,7 @@ public abstract class DiggerItemMixin {
                     if (Math.abs(minMiningLevel) > 0) {
                         int curMiningLevel = ((DiggerItem) (Object) this).getTier().getLevel();
 
-                        modifiedResult.set(Optional.of(curMiningLevel > minMiningLevel));
+                        modifiedResult.set(Optional.of(curMiningLevel >= minMiningLevel));
                     }
                 });
 
