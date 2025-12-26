@@ -465,6 +465,16 @@ public final class BlockPropertyWrapperTemplates {
             .withBlockColor(null)
             .build();
 
+    public static final BlockPropertyWrapper<Block> LEAVES = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC)
+            .withTag(() -> BlockTags.LEAVES)
+            .withAdditionalTag(() -> ItemTags.LEAVES)
+            .withModelDefinition(ModelUtil::leaves)
+            .withLootTable(LootUtil::dropLeaves)
+            .withFlammability(VanillaUtil::standardFlammability)
+            .build();
+
     public static final BlockPropertyWrapper<Block> FLOWER = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(PLANT)
