@@ -14,6 +14,7 @@ import com.mememan.nexus.util.DataGenUtil;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.data.CachedOutput;
@@ -248,7 +249,12 @@ public class StandardTagProvider extends TagsProvider<Object> implements ModData
 
                                 if (shouldCrash) throw new IllegalArgumentException(String.format(Locale.ROOT, "Couldn't define tag %s as it is missing following references: %s (required by mod of ID %s). Please ensure that these tags are registered and/or that their JSON files are generated beforehand (they don't have to be physically present, this primarily refers to generation order).", tagLoc, missingSerializedTags.stream().map(Objects::toString).collect(Collectors.joining(",")), modId));
                                 else {
-                                    if (!missingSerializedTags.isEmpty()) serializedTagEntries.removeAll(missingSerializedTags);
+                                    if (!missingSerializedTags.isEmpty()) {
+                                        List<TagEntry> prunedSerializedTagEntries = new ObjectArrayList<>(serializedTagEntries);
+
+                                        prunedSerializedTagEntries.removeAll(missingSerializedTags);
+                                        serializedTagEntries = prunedSerializedTagEntries;
+                                    }
 
                                     DataResult<JsonElement> serializedTagResult = TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(serializedTagEntries, false));
                                     JsonElement serializedTagJson = serializedTagResult.getOrThrow(false, LOGGER::error);

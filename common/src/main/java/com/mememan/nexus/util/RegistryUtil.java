@@ -434,7 +434,7 @@ public final class RegistryUtil {
      */
     @NotNull
     public static <T> ResourceLocation getTextureLocationWithPrefixOrDefault(Supplier<T> targetObj, String prefix) {
-        return getTextureLocationWithPrefixOrDefault(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetObj), prefix);
+        return getTextureLocationWithPrefixOrDefault(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetObj.get()), prefix);
     }
 
     /**
@@ -453,7 +453,7 @@ public final class RegistryUtil {
      */
     @NotNull
     public static <T> ResourceLocation getTextureLocationWithSuffixOrDefault(Supplier<T> targetObj, String suffix) {
-        return getTextureLocationWithSuffixOrDefault(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetObj), suffix);
+        return getTextureLocationWithSuffixOrDefault(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetObj.get()), suffix);
     }
 
     /**
