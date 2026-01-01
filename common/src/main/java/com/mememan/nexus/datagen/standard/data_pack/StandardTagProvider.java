@@ -113,8 +113,6 @@ public class StandardTagProvider extends TagsProvider<Object> implements ModData
      */
     @Override
     protected void addTags(HolderLookup.@NotNull Provider provider) {
-        registryMappedBuilders.clear();
-
         addObjectTags(provider);
     }
 
@@ -237,24 +235,19 @@ public class StandardTagProvider extends TagsProvider<Object> implements ModData
 
                     HolderLookup.RegistryLookup<T> regBasedContentLookup = currentContents.lookupOrThrow(registryKey);
                     Predicate<ResourceLocation> elementPresenceWithinRegistryValidator = (tagLoc) -> regBasedContentLookup.get(ResourceKey.create(registryKey, tagLoc)).isPresent();
-                    Predicate<ResourceLocation> tagLocalOrParentPresenceValidator = (tagLoc) -> builders.containsKey(tagLoc) || parentTagLookup.contains(TagKey.create(registryKey, tagLoc));
+                    Predicate<ResourceLocation> tagLocalOrParentPresenceValidator = (tagLoc) -> (registryMappedBuilders.containsKey(registryKey) && registryMappedBuilders.get(registryKey).containsKey(tagLoc)) || builders.containsKey(tagLoc) || parentTagLookup.contains(TagKey.create(registryKey, tagLoc));
 
                     return tagBuilders.entrySet().stream()
                             .map(curTagEntry -> {
                                 ResourceLocation tagLoc = curTagEntry.getKey();
                                 TagBuilder tagBuilder = curTagEntry.getValue();
-                                List<TagEntry> serializedTagEntries = tagBuilder.build();
+                                List<TagEntry> serializedTagEntries = new ObjectArrayList<>(tagBuilder.build());
                                 List<TagEntry> missingSerializedTags = serializedTagEntries.stream().filter((tagEntry) -> !tagEntry.verifyIfPresent(elementPresenceWithinRegistryValidator, tagLocalOrParentPresenceValidator)).toList();
                                 boolean shouldCrash = validateAllEntries() && !missingSerializedTags.isEmpty();
 
                                 if (shouldCrash) throw new IllegalArgumentException(String.format(Locale.ROOT, "Couldn't define tag %s as it is missing following references: %s (required by mod of ID %s). Please ensure that these tags are registered and/or that their JSON files are generated beforehand (they don't have to be physically present, this primarily refers to generation order).", tagLoc, missingSerializedTags.stream().map(Objects::toString).collect(Collectors.joining(",")), modId));
                                 else {
-                                    if (!missingSerializedTags.isEmpty()) {
-                                        List<TagEntry> prunedSerializedTagEntries = new ObjectArrayList<>(serializedTagEntries);
-
-                                        prunedSerializedTagEntries.removeAll(missingSerializedTags);
-                                        serializedTagEntries = prunedSerializedTagEntries;
-                                    }
+                                    if (!missingSerializedTags.isEmpty()) serializedTagEntries.removeAll(missingSerializedTags);
 
                                     DataResult<JsonElement> serializedTagResult = TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(serializedTagEntries, false));
                                     JsonElement serializedTagJson = serializedTagResult.getOrThrow(false, LOGGER::error);
@@ -266,6 +259,24 @@ public class StandardTagProvider extends TagsProvider<Object> implements ModData
                             });
                 })
                 .toArray(CompletableFuture[]::new));
+    }
+
+    /**
+     * Refreshes/clears {@link #registryMappedBuilders} and {@link #builders} before regenerating tag entries via
+     * {@link #addObjectTags(HolderLookup.Provider)} once {@link #lookupProvider} is ready.
+     *
+     * @return A {@link CompletableFuture} that completes when all tag entries have been generated and are ready for
+     * further processing (in {@link #run(CachedOutput)} (duh)).
+     */
+    @Override
+    protected @NotNull CompletableFuture<HolderLookup.Provider> createContentsProvider() {
+        return this.lookupProvider.thenApply((curProvider) -> {
+            this.builders.clear(); // JIC
+            this.registryMappedBuilders.clear();
+
+            addTags(curProvider);
+            return curProvider;
+        });
     }
 
     /**

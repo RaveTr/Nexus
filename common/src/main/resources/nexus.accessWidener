@@ -112,6 +112,7 @@ extendable method net/minecraft/data/registries/RegistriesDatapackGenerator getN
 
 # TagsProvider
 extendable method net/minecraft/data/tags/TagsProvider getName ()Ljava/lang/String;
+accessible field net/minecraft/data/tags/TagsProvider lookupProvider Ljava/util/concurrent/CompletableFuture;
 accessible field net/minecraft/data/tags/TagsProvider contentsDone Ljava/util/concurrent/CompletableFuture;
 accessible field net/minecraft/data/tags/TagsProvider parentProvider Ljava/util/concurrent/CompletableFuture;
 accessible field net/minecraft/data/tags/TagsProvider builders Ljava/util/Map;
