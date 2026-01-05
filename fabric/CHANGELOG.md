@@ -1,9 +1,13 @@
 # Nexus API Changelog (Fabric)
 
-# v1.0.8 (1.20.1)
+# v1.0.9 (1.20.1)
 
 ## Bug Fixes
 
-- Fixed StandardTagProvider including missing tags by default when validateAllEntries is set to false for its corresponding ProviderType.
-- Added new methods for resolving texture locations to RegistryUtil and replaced all usages (getTextureLocationOrDefaultWithSuffix -> getTextureLocationWithSuffixOrDefault) appropriately for proper texture resolution.
+- Fixed RecipeUtil materialPieceFrom not factoring all potential material suffixes in.
 
+## New Features
+
+- Added new BlockPropertyWrapper templates to BlockPropertyWrapperTemplates: 'BRICKS' (+ tool variants), 'CHISELED_STONE' (+ tool variants), 'CHISELED_STONE_COBBLED' (+ tool variants), 'PILLAR' (+ tool variants).
+- Added utility methods to RecipeUtil for brick, chiseled block, chiseled block cobbled, and pillar recipes (+ overloads).
+- Added several new utility shortcut methods to RegistryUtil for stone block families.

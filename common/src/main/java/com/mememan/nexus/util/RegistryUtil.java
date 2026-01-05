@@ -4,10 +4,12 @@ import com.google.common.base.Suppliers;
 import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
+import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapper;
 import com.mememan.nexus.template.object.block.entity.sign.DefaultableCeilingHangingSignBlock;
 import com.mememan.nexus.template.object.block.entity.sign.DefaultableStandingSignBlock;
 import com.mememan.nexus.template.object.block.entity.sign.DefaultableWallHangingSignBlock;
 import com.mememan.nexus.template.object.block.entity.sign.DefaultableWallSignBlock;
+import com.mememan.nexus.template.object.block.misc.StoneBlockGroup;
 import com.mememan.nexus.template.object.block.misc.WoodenBlockGroup;
 import com.mememan.nexus.template.object.block_entity.sign.DefaultableHangingSignBlockEntity;
 import com.mememan.nexus.template.object.block_entity.sign.DefaultableSignBlockEntity;
@@ -25,6 +27,7 @@ import net.minecraft.Util;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.datafix.fixes.References;
@@ -41,6 +44,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.WoodType;
+import net.minecraft.world.level.storage.loot.LootTable;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -49,6 +53,8 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -93,6 +99,15 @@ public final class RegistryUtil {
     private static final String[] MATERIAL_SUFFIXES = new String[] {
             "_ingot", "_nugget", "_gem", "_shard", "_dust", "_crystal", "_ore", "_block"
     };
+    private static final BiFunction<ResourceLocation, ResourceLocation, ResourceLocation> BRICK_MEMBER_ID_MAPPER = (familyId, memberId) -> memberId.getPath().equals(familyId.getPath())
+            ? memberId.withSuffix("_bricks")
+            : memberId.withPath(curPath -> familyId.getPath()
+            .concat("_brick")
+            .concat(curPath.substring(familyId.getPath().length())));
+    private static final BiFunction<ResourceLocation, Supplier<Block>, LootTable.Builder> BASE_TO_COBBLED_LOOT_TABLE_BUILDER = (familyId, baseStoneBlockSup) -> BuiltInRegistries.BLOCK.getOptional(familyId.withPrefix("cobbled_"))
+            .map(foundCobbledBlock -> (Supplier<Block>) () -> foundCobbledBlock)
+            .map(foundCobbledBlock -> LootUtil.dropConditional(baseStoneBlockSup, foundCobbledBlock, LootUtil.HAS_SILK_TOUCH))
+            .orElse(LootUtil.dropSelf(baseStoneBlockSup));
 
     private RegistryUtil() {
         throw new IllegalAccessError("Attempted to construct instance of utility class! (RegistryUtil)");
@@ -1178,4 +1193,209 @@ public final class RegistryUtil {
     public static WoodenBlockGroup registerStandardWoodFamily(ResourceLocation familyId) {
         return registerStandardWoodFamily(familyId, Suppliers.ofInstance(null));
     }
-}
+
+    public static StoneBlockGroup registerStoneFamily(ResourceLocation familyId, int miningLevel, boolean includePressurePlateAndButton, boolean deepslateLike, Function<Supplier<Block>, LootTable.Builder> baseBlockLootTableBuilder, Function<Consumer<FinishedRecipe>, Consumer<Supplier<Block>>> baseBlockRecipeMapper, Function<ResourceLocation, ResourceLocation> familyMemberIdMapper, @Nullable BlockPropertyWrapper<Block> baseBlockTemplate, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> itemSupCol) {
+        return Util.make(() -> {
+            Set<Supplier<? extends Block>> stoneBlockFamilySet = new ObjectOpenHashSet<>();
+            BlockSetType stoneBlockSetType = getOrCreateBlockSetType(familyId.toString());
+            Function<ResourceLocation, ResourceLocation> memberMapperWrapper = familyMemberIdMapper == null ? Function.identity() : familyMemberIdMapper;
+
+            Supplier<Block> stoneBlock = BlockPropertyWrapperTemplates.registerWithItemAndChain(memberMapperWrapper.apply(familyId), () -> new Block(BlockBehaviour.Properties.copy(deepslateLike ? Blocks.DEEPSLATE : Blocks.STONE)), baseBlockTemplate != null ? baseBlockTemplate : BlockPropertyWrapperTemplates.BASIC_PICKAXE, blockSupCol, itemSupCol)
+                    .minimumMiningLevel(miningLevel)
+                    .withLootTable(baseBlockLootTableBuilder == null || Objects.equals(baseBlockLootTableBuilder, Function.identity()) ? baseBlockTemplate == null ? LootUtil::dropSelf : baseBlockTemplate.getLootTableBuilder().orElse(LootUtil::dropSelf) : baseBlockLootTableBuilder)
+                    .withRecipe(baseBlockRecipeMapper == null ? baseBlockTemplate == null ? null : baseBlockTemplate.getRecipeConsumer().orElse(null) : baseBlockRecipeMapper)
+                    .buildAndGet();
+            Supplier<StairBlock> stoneStairs = BlockPropertyWrapperTemplates.registerWithItemAndChain(memberMapperWrapper.apply(familyId.withSuffix("_stairs")), () -> new StairBlock(stoneBlock.get().defaultBlockState(), BlockBehaviour.Properties.copy(deepslateLike ? Blocks.DEEPSLATE_BRICK_STAIRS : Blocks.STONE_STAIRS)), BlockPropertyWrapperTemplates.STAIRS, blockSupCol, itemSupCol)
+                    .minimumMiningLevel(miningLevel)
+                    .buildAndGet();
+            Supplier<SlabBlock> stoneSlab = BlockPropertyWrapperTemplates.registerWithItemAndChain(memberMapperWrapper.apply(familyId.withSuffix("_slab")), () -> new SlabBlock(BlockBehaviour.Properties.copy(deepslateLike ? Blocks.DEEPSLATE_BRICK_SLAB : Blocks.STONE_SLAB)), BlockPropertyWrapperTemplates.SLAB, blockSupCol, itemSupCol)
+                    .minimumMiningLevel(miningLevel)
+                    .buildAndGet();
+            Supplier<WallBlock> stoneWall = BlockPropertyWrapperTemplates.registerWithItemAndChain(memberMapperWrapper.apply(familyId.withSuffix("_wall")), () -> new WallBlock(BlockBehaviour.Properties.copy(deepslateLike ? Blocks.DEEPSLATE_BRICK_WALL : Blocks.COBBLESTONE_WALL)), BlockPropertyWrapperTemplates.WALL, blockSupCol, itemSupCol)
+                    .minimumMiningLevel(miningLevel)
+                    .buildAndGet();
+
+            Supplier<Block> stonePressurePlate = null;
+            Supplier<Block> stoneButton = null;
+
+            if (includePressurePlateAndButton) {
+                stonePressurePlate = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(memberMapperWrapper.apply(familyId.withSuffix("_pressure_plate")), () -> new PressurePlateBlock(PressurePlateBlock.Sensitivity.MOBS, BlockBehaviour.Properties.copy(Blocks.STONE_PRESSURE_PLATE), stoneBlockSetType), BlockPropertyWrapperTemplates.PRESSURE_PLATE, blockSupCol, itemSupCol);
+                stoneButton = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(memberMapperWrapper.apply(familyId.withSuffix("_button")), () -> new ButtonBlock(BlockBehaviour.Properties.copy(Blocks.STONE_BUTTON), stoneBlockSetType, 20, false), BlockPropertyWrapperTemplates.BUTTON, blockSupCol, itemSupCol);
+            }
+
+            stoneBlockFamilySet.add(stoneBlock);
+            stoneBlockFamilySet.add(stoneStairs);
+            stoneBlockFamilySet.add(stoneSlab);
+            stoneBlockFamilySet.add(stoneWall);
+
+            if (includePressurePlateAndButton) {
+                stoneBlockFamilySet.add(stonePressurePlate);
+                stoneBlockFamilySet.add(stoneButton);
+            }
+
+            return new StoneBlockGroup(stoneBlockSetType, stoneBlockFamilySet);
+        });
+    }
+
+    public static StoneBlockGroup registerStoneFamily(ResourceLocation familyId, int miningLevel, boolean includePressurePlateAndButton, boolean deepslateLike, Function<Supplier<Block>, LootTable.Builder> baseBlockLootTableBuilder, Function<ResourceLocation, ResourceLocation> familyMemberIdMapper, @Nullable BlockPropertyWrapper<Block> baseBlockTemplate, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> itemSupCol) {
+        return registerStoneFamily(familyId, miningLevel, includePressurePlateAndButton, deepslateLike, baseBlockLootTableBuilder, null, familyMemberIdMapper, baseBlockTemplate, blockSupCol, itemSupCol);
+    }
+
+    public static StoneBlockGroup registerStoneFamily(ResourceLocation familyId, int miningLevel, boolean includePressurePlateAndButton, boolean deepslateLike, Function<ResourceLocation, ResourceLocation> familyMemberIdMapper, @Nullable BlockPropertyWrapper<Block> baseBlockTemplate, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> itemSupCol) {
+        return registerStoneFamily(familyId, miningLevel, includePressurePlateAndButton, deepslateLike, null, familyMemberIdMapper, baseBlockTemplate, blockSupCol, itemSupCol);
+    }
+
+    public static StoneBlockGroup registerStoneFamily(ResourceLocation familyId, int miningLevel, boolean includePressurePlateAndButton, boolean deepslateLike, @Nullable BlockPropertyWrapper<Block> baseBlockTemplate, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> itemSupCol) {
+        return registerStoneFamily(familyId, miningLevel, includePressurePlateAndButton, deepslateLike, Function.identity(), baseBlockTemplate, blockSupCol, itemSupCol);
+    }
+
+    public static StoneBlockGroup registerStoneFamily(ResourceLocation familyId, int miningLevel, boolean includePressurePlateAndButton, @Nullable BlockPropertyWrapper<Block> baseBlockTemplate, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> itemSupCol) {
+        return registerStoneFamily(familyId, miningLevel, includePressurePlateAndButton, false, baseBlockTemplate, blockSupCol, itemSupCol);
+    }
+
+    public static StoneBlockGroup registerStoneFamily(ResourceLocation familyId, int miningLevel, @Nullable BlockPropertyWrapper<Block> baseBlockTemplate, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> itemSupCol) {
+        return registerStoneFamily(familyId, miningLevel, true, baseBlockTemplate, blockSupCol, itemSupCol);
+    }
+
+    public static StoneBlockGroup registerStoneFamily(ResourceLocation familyId, int miningLevel, @Nullable BlockPropertyWrapper<Block> baseBlockTemplate) {
+        return registerStoneFamily(familyId, miningLevel, baseBlockTemplate, null, null);
+    }
+
+    public static StoneBlockGroup registerRegularStoneFamily(ResourceLocation familyId, @Nullable BlockPropertyWrapper<Block> baseBlockTemplate, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> itemSupCol) {
+        return registerStoneFamily(familyId, 0, true, false, baseStoneBlockSup -> BASE_TO_COBBLED_LOOT_TABLE_BUILDER.apply(familyId, baseStoneBlockSup), RecipeUtil::baseStoneFromCobbled, Function.identity(), baseBlockTemplate, blockSupCol, itemSupCol);
+    }
+
+    public static StoneBlockGroup registerRegularStoneFamily(ResourceLocation familyId, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> itemSupCol) {
+        return registerRegularStoneFamily(familyId, null, blockSupCol, itemSupCol);
+    }
+
+    public static StoneBlockGroup registerRegularStoneFamily(ResourceLocation familyId, @Nullable BlockPropertyWrapper<Block> baseBlockTemplate) {
+        return registerRegularStoneFamily(familyId, baseBlockTemplate, null, null);
+    }
+
+    public static StoneBlockGroup registerRegularStoneFamily(ResourceLocation familyId) {
+        return registerRegularStoneFamily(familyId, null, null, null);
+    }
+
+    public static StoneBlockGroup registerRegularReinforcedStoneFamily(ResourceLocation familyId, @Nullable BlockPropertyWrapper<Block> baseBlockTemplate, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> itemSupCol) {
+        return registerStoneFamily(familyId, 2, true, true, baseStoneBlockSup -> BASE_TO_COBBLED_LOOT_TABLE_BUILDER.apply(familyId, baseStoneBlockSup), RecipeUtil::baseStoneFromCobbled, Function.identity(), baseBlockTemplate, blockSupCol, itemSupCol);
+    }
+
+    public static StoneBlockGroup registerRegularReinforcedStoneFamily(ResourceLocation familyId, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> itemSupCol) {
+        return registerRegularReinforcedStoneFamily(familyId, null, blockSupCol, itemSupCol);
+    }
+
+    public static StoneBlockGroup registerRegularReinforcedStoneFamily(ResourceLocation familyId, @Nullable BlockPropertyWrapper<Block> baseBlockTemplate) {
+        return registerRegularReinforcedStoneFamily(familyId, baseBlockTemplate, null, null);
+    }
+
+    public static StoneBlockGroup registerRegularReinforcedStoneFamily(ResourceLocation familyId) {
+        return registerRegularReinforcedStoneFamily(familyId, null, null, null);
+    }
+
+    public static StoneBlockGroup registerStoneBrickFamily(ResourceLocation familyId, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> itemSupCol) {
+        return registerStoneFamily(familyId, 0, false, false, memberId -> BRICK_MEMBER_ID_MAPPER.apply(familyId, memberId), BlockPropertyWrapperTemplates.BRICKS_PICKAXE, blockSupCol, itemSupCol);
+    }
+
+    public static StoneBlockGroup registerStoneBrickFamily(ResourceLocation familyId) {
+        return registerStoneBrickFamily(familyId, null, null);
+    }
+
+    public static StoneBlockGroup registerReinforcedStoneBrickFamily(ResourceLocation familyId, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> itemSupCol) {
+        return registerStoneFamily(familyId, 2, false, true, memberId -> BRICK_MEMBER_ID_MAPPER.apply(familyId, memberId), BlockPropertyWrapperTemplates.BRICKS_PICKAXE, blockSupCol, itemSupCol);
+    }
+
+    public static StoneBlockGroup registerReinforcedStoneBrickFamily(ResourceLocation familyId) {
+        return registerReinforcedStoneBrickFamily(familyId, null, null);
+    }
+
+    public static StoneBlockGroup registerChiseledStoneFamily(ResourceLocation familyId, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> itemSupCol) {
+        return registerStoneFamily(familyId, 0, false, BlockPropertyWrapperTemplates.CHISELED_STONE_PICKAXE, blockSupCol, itemSupCol);
+    }
+
+    public static StoneBlockGroup registerChiseledStoneFamily(ResourceLocation familyId) {
+        return registerChiseledStoneFamily(familyId, null, null);
+    }
+
+    public static StoneBlockGroup registerReinforcedChiseledStoneFamily(ResourceLocation familyId, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> itemSupCol) {
+        return registerStoneFamily(familyId, 2, false, true, BlockPropertyWrapperTemplates.CHISELED_STONE_COBBLED_PICKAXE, blockSupCol, itemSupCol);
+    }
+
+    public static StoneBlockGroup registerReinforcedChiseledStoneFamily(ResourceLocation familyId) {
+        return registerReinforcedChiseledStoneFamily(familyId, null, null);
+    }
+
+    public static StoneBlockGroup registerStandardStoneFamily(ResourceLocation familyId, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> itemSupCol) {
+        return Util.make(() -> {
+            StoneBlockGroup standardStoneBlockGroup = registerRegularStoneFamily(familyId, blockSupCol, itemSupCol);
+            StoneBlockGroup stoneBrickBlockGroup = registerStoneBrickFamily(familyId, blockSupCol, itemSupCol);
+            StoneBlockGroup chiseledStoneBlockGroup = registerChiseledStoneFamily(familyId.withPrefix("chiseled_"), blockSupCol, itemSupCol);
+            StoneBlockGroup cobbledStoneBlockGroup = registerStoneFamily(familyId.withPrefix("cobbled_"), 0, false, null, blockSupCol, itemSupCol);
+
+            return standardStoneBlockGroup
+                    .chain(stoneBrickBlockGroup)
+                    .chain(chiseledStoneBlockGroup)
+                    .chain(cobbledStoneBlockGroup);
+        });
+    }
+
+    public static StoneBlockGroup registerStandardStoneFamily(ResourceLocation familyId) {
+        return registerStandardStoneFamily(familyId, null, null);
+    }
+
+    public static StoneBlockGroup registerDecorativeStoneFamily(ResourceLocation familyId, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> itemSupCol) {
+        return Util.make(() -> {
+            Set<Supplier<? extends Block>> decorativeStoneBlockFamilySet = new ObjectOpenHashSet<>();
+            BlockSetType decorativeStoneBlockSetType = getOrCreateBlockSetType(familyId.toString());
+
+            Supplier<Block> pillarStoneBlock = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(familyId.withSuffix("_pillar"), () -> new RotatedPillarBlock(BlockBehaviour.Properties.copy(Blocks.STONE)), BlockPropertyWrapperTemplates.PILLAR_PICKAXE, blockSupCol, itemSupCol);
+
+            decorativeStoneBlockFamilySet.add(pillarStoneBlock);
+
+            return registerStandardStoneFamily(familyId, blockSupCol, itemSupCol)
+                    .chain(new StoneBlockGroup(decorativeStoneBlockSetType, decorativeStoneBlockFamilySet));
+        });
+    }
+
+    public static StoneBlockGroup registerDecorativeStoneFamily(ResourceLocation familyId) {
+        return registerDecorativeStoneFamily(familyId, null, null);
+    }
+
+    public static StoneBlockGroup registerReinforcedStoneFamily(ResourceLocation familyId, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> itemSupCol) {
+        return Util.make(() -> {
+            StoneBlockGroup reinforcedStoneBlockGroup = registerRegularReinforcedStoneFamily(familyId, blockSupCol, itemSupCol);
+            StoneBlockGroup reinforcedStoneBrickBlockGroup = registerReinforcedStoneBrickFamily(familyId, blockSupCol, itemSupCol);
+            StoneBlockGroup reinforcedChiseledStoneBlockGroup = registerReinforcedChiseledStoneFamily(familyId.withPrefix("chiseled_"), blockSupCol, itemSupCol);
+            StoneBlockGroup reinforcedCobbledStoneBlockGroup = registerStoneFamily(familyId.withPrefix("cobbled_"), 2, false, true, null, blockSupCol, itemSupCol);
+
+            return reinforcedStoneBlockGroup
+                    .chain(reinforcedStoneBrickBlockGroup)
+                    .chain(reinforcedChiseledStoneBlockGroup)
+                    .chain(reinforcedCobbledStoneBlockGroup);
+        });
+    }
+
+    public static StoneBlockGroup registerReinforcedStoneFamily(ResourceLocation familyId) {
+        return registerReinforcedStoneFamily(familyId, null, null);
+    }
+
+    public static StoneBlockGroup registerReinforcedDecorativeStoneFamily(ResourceLocation familyId, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> itemSupCol) {
+        return Util.make(() -> {
+            Set<Supplier<? extends Block>> reinforcedDecorativeStoneBlockFamilySet = new ObjectOpenHashSet<>();
+            BlockSetType reinforcedDecorativeStoneBlockSetType = getOrCreateBlockSetType(familyId.toString());
+
+            Supplier<Block> reinforcedPillarStoneBlock = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(familyId.withSuffix("_pillar"), () -> new RotatedPillarBlock(BlockBehaviour.Properties.copy(Blocks.DEEPSLATE)), BlockPropertyWrapperTemplates.PILLAR_PICKAXE, blockSupCol, itemSupCol);
+
+            reinforcedDecorativeStoneBlockFamilySet.add(reinforcedPillarStoneBlock);
+
+            return registerReinforcedStoneFamily(familyId, blockSupCol, itemSupCol)
+                    .chain(new StoneBlockGroup(reinforcedDecorativeStoneBlockSetType, reinforcedDecorativeStoneBlockFamilySet));
+        });
+    }
+
+    public static StoneBlockGroup registerReinforcedDecorativeStoneFamily(ResourceLocation familyId) {
+        return registerReinforcedDecorativeStoneFamily(familyId, null, null);
+    }
+    }
+
+

@@ -174,6 +174,112 @@ public final class BlockPropertyWrapperTemplates {
             .withAdditionalTag(() -> ItemTags.LOGS)
             .build();
 
+    public static final BlockPropertyWrapper<Block> BRICKS = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC)
+            .withRecipe(RecipeUtil::bricksRecipeFrom)
+            .build();
+    public static final BlockPropertyWrapper<Block> BRICKS_PICKAXE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BRICKS)
+            .withTag(() -> BlockTags.MINEABLE_WITH_PICKAXE)
+            .build();
+    public static final BlockPropertyWrapper<Block> BRICKS_AXE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BRICKS)
+            .withTag(() -> BlockTags.MINEABLE_WITH_AXE)
+            .build();
+    public static final BlockPropertyWrapper<Block> BRICKS_HOE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BRICKS)
+            .withTag(() -> BlockTags.MINEABLE_WITH_HOE)
+            .build();
+    public static final BlockPropertyWrapper<Block> BRICKS_SHOVEL = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BRICKS)
+            .withTag(() -> BlockTags.MINEABLE_WITH_SHOVEL)
+            .build();
+
+    public static final BlockPropertyWrapper<Block> CHISELED_STONE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC)
+            .withRecipe(RecipeUtil::chiseledRecipeFrom)
+            .build();
+    public static final BlockPropertyWrapper<Block> CHISELED_STONE_PICKAXE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(CHISELED_STONE)
+            .withTag(() -> BlockTags.MINEABLE_WITH_PICKAXE)
+            .build();
+    public static final BlockPropertyWrapper<Block> CHISELED_STONE_AXE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(CHISELED_STONE)
+            .withTag(() -> BlockTags.MINEABLE_WITH_AXE)
+            .build();
+    public static final BlockPropertyWrapper<Block> CHISELED_STONE_HOE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(CHISELED_STONE)
+            .withTag(() -> BlockTags.MINEABLE_WITH_HOE)
+            .build();
+    public static final BlockPropertyWrapper<Block> CHISELED_STONE_SHOVEL = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(CHISELED_STONE)
+            .withTag(() -> BlockTags.MINEABLE_WITH_SHOVEL)
+            .build();
+
+    public static final BlockPropertyWrapper<Block> CHISELED_STONE_COBBLED = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC)
+            .withRecipe(RecipeUtil::chiseledRecipeFromCobbled)
+            .build();
+    public static final BlockPropertyWrapper<Block> CHISELED_STONE_COBBLED_PICKAXE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(CHISELED_STONE_COBBLED)
+            .withTag(() -> BlockTags.MINEABLE_WITH_PICKAXE)
+            .build();
+    public static final BlockPropertyWrapper<Block> CHISELED_STONE_COBBLED_AXE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(CHISELED_STONE_COBBLED)
+            .withTag(() -> BlockTags.MINEABLE_WITH_AXE)
+            .build();
+    public static final BlockPropertyWrapper<Block> CHISELED_STONE_COBBLED_HOE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(CHISELED_STONE_COBBLED)
+            .withTag(() -> BlockTags.MINEABLE_WITH_HOE)
+            .build();
+    public static final BlockPropertyWrapper<Block> CHISELED_STONE_COBBLED_SHOVEL = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(CHISELED_STONE_COBBLED)
+            .withTag(() -> BlockTags.MINEABLE_WITH_SHOVEL)
+            .build();
+
+    public static final BlockPropertyWrapper<Block> PILLAR = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC)
+            .withModelDefinition(ModelUtil::rotatedPillar)
+            .withBlockStateDefinition(ModelUtil::rotatedPillarBlockState)
+            .withRecipe(RecipeUtil::pillarRecipeFrom)
+            .build();
+    public static final BlockPropertyWrapper<Block> PILLAR_PICKAXE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(PILLAR)
+            .withTag(() -> BlockTags.MINEABLE_WITH_PICKAXE)
+            .build();
+    public static final BlockPropertyWrapper<Block> PILLAR_AXE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(PILLAR)
+            .withTag(() -> BlockTags.MINEABLE_WITH_AXE)
+            .build();
+    public static final BlockPropertyWrapper<Block> PILLAR_HOE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(PILLAR)
+            .withTag(() -> BlockTags.MINEABLE_WITH_HOE)
+            .build();
+    public static final BlockPropertyWrapper<Block> PILLAR_SHOVEL = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(PILLAR)
+            .withTag(() -> BlockTags.MINEABLE_WITH_SHOVEL)
+            .build();
+
     public static final BlockPropertyWrapper<Block> SLAB = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_PICKAXE)

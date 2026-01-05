@@ -214,6 +214,34 @@ public final class LootUtil {
 
     /**
      * Creates {@link LootTable.Builder} that will drop the given {@link Block} when it's destroyed, but only if it's
+     * destroyed with the given condition.
+     * <p>
+     * <h2>LOOT TABLE</h2>
+     * <h3>Pool 1</h3>
+     * <ul>
+     *  <li><b>Rolls:</b> 1.0</li>
+     *  <li><b>When:</b> {@code condition}</li>
+     *  <li><b>Drops:</b> {@code targetBlock}</li>
+     * </ul>
+     *
+     * @param targetBlock The {@link Supplier<Block>} representing the {@link Block} to be dropped when the condition
+     *                    is met.
+     * @param altBlock The {@link Supplier<Block>} representing the alternative {@link Block} to be dropped otherwise.
+     * @param condition The {@link LootItemCondition.Builder} representing the condition for dropping the block.
+     *
+     * @return A {@link LootTable.Builder} that will drop the given {@link Block} when it's destroyed, but only if it's
+     * destroyed with the given condition.
+     */
+    public static LootTable.Builder dropConditional(Supplier<Block> targetBlock, Supplier<Block> altBlock, LootItemCondition.Builder condition) {
+        return LootTable.lootTable().withPool(LootPool.lootPool()
+                .setRolls(ConstantValue.exactly(1.0F))
+                .add(LootItem.lootTableItem(targetBlock.get())
+                        .when(condition)
+                        .otherwise(LootItem.lootTableItem(altBlock.get()))));
+    }
+
+    /**
+     * Creates {@link LootTable.Builder} that will drop the given {@link Block} when it's destroyed, but only if it's
      * destroyed with shears or a tool enchanted with silk touch.
      * <p>
      * <h2>LOOT TABLE</h2>
