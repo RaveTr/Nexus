@@ -291,11 +291,6 @@ public final class RecipeUtil { //TODO Refactor tf out of this (tons of redundan
                         .group(parentItemLikeId.getNamespace())
                         .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(baseStoneItemLike))
                         .save(finishedRecipe, baseRecipeId.withPath(baseRecipeId.getPath() + "_from_smelting_" + componentItemLikeId.getPath()));
-
-                SimpleCookingRecipeBuilder.blasting(Ingredient.of(baseStoneItemLike), RecipeCategory.MISC, parentItemLike, 0.7F, 100)
-                        .group(parentItemLikeId.getNamespace())
-                        .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(baseStoneItemLike))
-                        .save(finishedRecipe, baseRecipeId.withPath(baseRecipeId.getPath() + "_from_blasting_" + componentItemLikeId.getPath()));
             }
         };
     }
