@@ -5,6 +5,7 @@
 ## Bug Fixes
 
 - Fixed RecipeUtil materialPieceFrom not factoring all potential material suffixes in.
+- Fixed dedicated server crash due to IntegratedServer type check in TickEvent. 
 
 ## New Features
 

@@ -13,11 +13,6 @@ public abstract class ServerLifeCycleEventBlueprint<SLCE extends ServerLifeCycle
     protected ServerLifeCycleEventBlueprint(Class<SLCE> eventInterface, SLCE defaultResult, boolean isCancellable, ModSide eventSide) {
         super(eventInterface, defaultResult, isCancellable, eventSide);
     }
-
-    @Override
-    protected SLCE mergeListenerResults(SLCE curResult, SLCE newResult) {
-        return newResult;
-    }
     
     public static class ServerStartingEventBlueprint extends ServerLifeCycleEventBlueprint<ServerLifeCycleEvent.ServerStartingEvent>  {
 

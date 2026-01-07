@@ -2,7 +2,6 @@ package com.mememan.nexus.template.event.def.common;
 
 import com.mememan.nexus.event.object.BaseEvent;
 import com.mememan.nexus.loader.ModSide;
-import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -57,7 +56,7 @@ public abstract class TickEvent extends BaseEvent {
         protected final BooleanSupplier hasTime;
 
         public ServerTickEvent(Phase tickPhase, MinecraftServer curServer, BooleanSupplier hasTime) {
-            super(curServer instanceof IntegratedServer ? ModSide.COMMON : ModSide.SERVER, tickPhase);
+            super(!curServer.isDedicatedServer() ? ModSide.COMMON : ModSide.SERVER, tickPhase);
 
             this.curServer = curServer;
             this.hasTime = hasTime;
@@ -102,7 +101,7 @@ public abstract class TickEvent extends BaseEvent {
         protected final BooleanSupplier hasTime;
 
         public ServerLevelTickEvent(Phase tickPhase, ServerLevel targetLevel, BooleanSupplier hasTime) {
-            super(targetLevel.getServer() instanceof IntegratedServer ? ModSide.COMMON : ModSide.SERVER, tickPhase, targetLevel);
+            super(!targetLevel.getServer().isDedicatedServer() ? ModSide.COMMON : ModSide.SERVER, tickPhase, targetLevel);
             this.hasTime = hasTime;
         }
 
