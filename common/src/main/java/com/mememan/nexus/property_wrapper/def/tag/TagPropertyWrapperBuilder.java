@@ -11,14 +11,22 @@ import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
 
+/**
+ * Definite builder implementation for {@link TagKey} objects, with constrained generic types for {@code SELF} and
+ * {@code BUILDER}. Extends from and repurposes methods from {@link SpecializedTagPropertyWrapperBuilder}.
+ *
+ * @param <T> Any taggable object type.
+ * @param <TK> Any {@link TagKey} type.
+ *
+ * @see TagPropertyWrapper
+ */
 public class TagPropertyWrapperBuilder<T, TK extends TagKey<T>> extends SpecializedTagPropertyWrapperBuilder<TK, TagPropertyWrapperBuilder<T, TK>, TagPropertyWrapper<T, TK>> {
     protected final List<Supplier<T>> storedTaggedObjects = new ObjectArrayList<>();
     protected final List<Supplier<TK>> storedTags = new ObjectArrayList<>();
-    protected Optional<Integer> cookTime = Optional.empty();
-    protected Optional<IntIntMutablePair> flammabilityPair = Optional.empty();
+    protected int cookTime;
+    protected IntIntMutablePair flammabilityPair;
 
     public TagPropertyWrapperBuilder(@NotNull TagPropertyWrapper<T, TK> ownerWrapper) {
         super(ownerWrapper);
@@ -29,7 +37,7 @@ public class TagPropertyWrapperBuilder<T, TK extends TagKey<T>> extends Speciali
         return super.copyFrom(propertyWrapper)
                 .setTaggedObjects(propertyWrapper.getTaggedObjects())
                 .setChildTags(propertyWrapper.getChildTags())
-                .withCookTime(propertyWrapper.getCookTime().orElse(null))
+                .withCookTime(propertyWrapper.getCookTime())
                 .withFlammability(propertyWrapper.getFlammabilityPair().orElse(null));
     }
 
@@ -354,7 +362,7 @@ public class TagPropertyWrapperBuilder<T, TK extends TagKey<T>> extends Speciali
      * @return {@link #self()} (builder method).
      */
     public TagPropertyWrapperBuilder<T, TK> withCookTime(Integer cookTime) {
-        this.cookTime = Optional.ofNullable(Math.abs(cookTime) > 0 ? cookTime : null);
+        this.cookTime = cookTime != null && Math.abs(cookTime) > 0 ? cookTime : 0;
         return self();
     }
 
@@ -372,7 +380,7 @@ public class TagPropertyWrapperBuilder<T, TK extends TagKey<T>> extends Speciali
      * @see #withFlammability(int, int)
      */
     public TagPropertyWrapperBuilder<T, TK> withFlammability(IntIntMutablePair flammabilityPair) {
-        this.flammabilityPair = Optional.ofNullable(flammabilityPair);
+        this.flammabilityPair = flammabilityPair;
         return self();
     }
 

@@ -445,11 +445,32 @@ public final class RegistryUtil {
      *
      * @return The {@link ResourceLocation} of the texture for the given {@code targetObj}.
      *
-     * @see #getTextureLocationWithPrefixOrDefault(Supplier, String)
+     * @see #getTextureLocationWithPrefixOrDefault(Supplier, String, String)
      */
     @NotNull
     public static <T> ResourceLocation getTextureLocationWithPrefixOrDefault(Supplier<T> targetObj, String prefix) {
         return getTextureLocationWithPrefixOrDefault(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetObj.get()), prefix);
+    }
+
+    /**
+     * Overloaded variant of {@link #getTextureLocationWithPrefixOrDefault(ResourceLocation, String, String)}. Attempts
+     * to retrieve the path of the texture based on the given {@code targetObj} with {@code prefix} prepended from
+     * {@link #CACHED_TEXTURE_LOOKUP} within any directories containing the provided {@code dirPrefix}.
+     *
+     * @param targetObj The object whose id should be used for resolution.
+     * @param prefix The prefix to prepend to the texture being looked up.
+     * @param dirPrefix The directory prefix to validate any texture file path matches against (e.g. {@code "item"},
+     * {@code "block"}).
+     *
+     * @param <T> The type of the object.
+     *
+     * @return The {@link ResourceLocation} of the texture for the given {@code targetObj}.
+     *
+     * @see #getTextureLocationWithPrefixOrDefault(Supplier, String)
+     */
+    @NotNull
+    public static <T> ResourceLocation getTextureLocationWithPrefixOrDefault(Supplier<T> targetObj, String prefix, String dirPrefix) {
+        return getTextureLocationWithPrefixOrDefault(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetObj.get()), prefix, dirPrefix);
     }
 
     /**
@@ -464,11 +485,33 @@ public final class RegistryUtil {
      *
      * @return The {@link ResourceLocation} of the texture for the given {@code targetObj}.
      *
-     * @see #getTextureLocationWithSuffixOrDefault(Supplier, String)
+     * @see #getTextureLocationWithSuffixOrDefault(Supplier, String, String)
      */
     @NotNull
     public static <T> ResourceLocation getTextureLocationWithSuffixOrDefault(Supplier<T> targetObj, String suffix) {
         return getTextureLocationWithSuffixOrDefault(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetObj.get()), suffix);
+    }
+
+    /**
+     * Overloaded variant of {@link #getTextureLocationWithSuffixOrDefault(ResourceLocation, String, String)}. Attempts to retrieve
+     * the {@link ResourceLocation} of the texture for the given {@code targetObj} with {@code suffix} appended
+     * from {@link #CACHED_TEXTURE_LOOKUP} within any directories containing the provided {@code dirPrefix}.
+     *
+     * @param targetObj The {@link Supplier} of the target object to find the texture for.
+     * @param suffix The suffix to append to the texture path.
+     * @param dirPrefix The directory prefix to validate any texture file path matches against (e.g. {@code "item"},
+     *                  {@code "block"}).
+     *
+     * @param <T> The type of the target object.
+     *
+     * @return The {@link ResourceLocation} of the texture for the given {@code targetObj}, or the provided
+     * {@code defaultTextureLocation} if no match is found.
+     *
+     * @see #getTextureLocationWithSuffixOrDefault(Supplier, String)
+     */
+    @NotNull
+    public static <T> ResourceLocation getTextureLocationWithSuffixOrDefault(Supplier<T> targetObj, String suffix, String dirPrefix) {
+        return getTextureLocationWithSuffixOrDefault(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetObj.get()), suffix, dirPrefix);
     }
 
     /**
@@ -482,10 +525,30 @@ public final class RegistryUtil {
      * @return The {@link ResourceLocation} of the texture for the given {@code targetObj}.
      *
      * @see #getTextureLocationOrDefault(ResourceLocation)
+     * @see #getTextureLocationWithPrefixOrDefault(ResourceLocation, String, String)
      */
     @NotNull
     public static ResourceLocation getTextureLocationWithPrefixOrDefault(ResourceLocation baseLoc, String prefix) {
         return getTextureLocationOrDefault(pickPrefix(baseLoc, prefix));
+    }
+
+    /**
+     * Overloaded variant of {@link #getTextureLocationWithPrefixOrDefault(ResourceLocation, String)}. Attempts to retrieve
+     * the {@link ResourceLocation} of the texture based on the given {@code baseLoc} with {@code prefix} prepended
+     * from {@link #CACHED_TEXTURE_LOOKUP} within any directories containing the provided {@code dirPrefix}.
+     *
+     * @param baseLoc The base texture location to use for resolution.
+     * @param prefix The prefix to prepend to the texture being looked up.
+     * @param dirPrefix The directory prefix to validate any texture file path matches against (e.g. {@code "item"},
+     *                  {@code "block"}).
+     *
+     * @return The {@link ResourceLocation} of the texture for the given {@code targetObj}.
+     *
+     * @see #getTextureLocationWithPrefixOrDefault(ResourceLocation, String)
+     */
+    @NotNull
+    public static ResourceLocation getTextureLocationWithPrefixOrDefault(ResourceLocation baseLoc, String prefix, String dirPrefix) {
+        return getTextureLocationOrDefault(pickPrefix(baseLoc, prefix), dirPrefix);
     }
 
     /**
@@ -499,10 +562,31 @@ public final class RegistryUtil {
      * @return The {@link ResourceLocation} of the texture for the given {@code targetObj}.
      *
      * @see #getTextureLocationOrDefault(ResourceLocation)
+     * @see #getTextureLocationWithSuffixOrDefault(ResourceLocation, String, String)
      */
     @NotNull
     public static ResourceLocation getTextureLocationWithSuffixOrDefault(ResourceLocation baseLoc, String suffix) {
         return getTextureLocationOrDefault(pickSuffix(baseLoc, suffix));
+    }
+
+    /**
+     * Overloaded variant of {@link #getTextureLocationWithSuffixOrDefault(ResourceLocation, String)}. Attempts to retrieve
+     * the {@link ResourceLocation} of the texture based on the given {@code baseLoc} with {@code suffix} appended
+     * from {@link #CACHED_TEXTURE_LOOKUP}, within any directories containing the provided {@code dirPrefix}.
+     *
+     * @param baseLoc The base texture location to use for resolution.
+     * @param suffix The suffix to append to the texture path.
+     * @param dirPrefix The directory prefix to validate any texture file path matches against (e.g. {@code "item"},
+     *                  {@code "block"}).
+     *
+     * @return The {@link ResourceLocation} of the texture for the given {@code targetObj}, or the provided
+     * {@code defaultTextureLocation} if no match is found.
+     *
+     * @see #getTextureLocationWithSuffixOrDefault(ResourceLocation, String)
+     */
+    @NotNull
+    public static ResourceLocation getTextureLocationWithSuffixOrDefault(ResourceLocation baseLoc, String suffix, String dirPrefix) {
+        return getTextureLocationOrDefault(pickSuffix(baseLoc, suffix), dirPrefix);
     }
 
     /**
@@ -1396,6 +1480,4 @@ public final class RegistryUtil {
     public static StoneBlockGroup registerReinforcedDecorativeStoneFamily(ResourceLocation familyId) {
         return registerReinforcedDecorativeStoneFamily(familyId, null, null);
     }
-    }
-
-
+}

@@ -16,9 +16,17 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * Definite builder implementation for {@link Item} objects, with constrained generic types for {@code SELF} and
+ * {@code BUILDER}.
+ *
+ * @param <I> Any {@link Item} type.
+ *
+ * @see ItemPropertyWrapper
+ */
 public class ItemPropertyWrapperBuilder<I extends Item> extends BaseDefaultableDataGenPropertyWrapperBuilder<I, ItemPropertyWrapperBuilder<I>, ItemPropertyWrapper<I>> implements DefaultableVanillaBasedPropertyWrapperBuilder<I, ItemPropertyWrapperBuilder<I>, ItemPropertyWrapper<I>> {
     protected final SpecializedVanillaPropertyWrapperBuilder<I, ItemPropertyWrapperBuilder<I>, ItemPropertyWrapper<I>> compositeVanillaBuilder;
-    protected Optional<Function<Supplier<I>, WrappedItemColor>> itemColorMappingFunc = Optional.empty();
+    protected Function<Supplier<I>, WrappedItemColor> itemColorMappingFunc;
     protected final Map<ResourceLocation, WrappedClampedItemPropertyFunction> itemModelPredicates = new Object2ObjectOpenHashMap<>();
 
     public ItemPropertyWrapperBuilder(@NotNull ItemPropertyWrapper<I> ownerWrapper) {
@@ -36,7 +44,7 @@ public class ItemPropertyWrapperBuilder<I extends Item> extends BaseDefaultableD
     }
 
     public ItemPropertyWrapperBuilder<I> withItemColor(Function<Supplier<I>, WrappedItemColor> itemColorMappingFunc) {
-        this.itemColorMappingFunc = Optional.ofNullable(itemColorMappingFunc);
+        this.itemColorMappingFunc = itemColorMappingFunc;
         return this;
     }
 

@@ -10,6 +10,12 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * Specialized implementation of {@link RecipeBasedPropertyWrapper}. Implements all recipe-related getter methods,
+ * generic types, and default behaviour for recipe-based property wrapper handling.
+ *
+ * @see SpecializedRecipePropertyWrapperBuilder
+ */
 public class SpecializedRecipePropertyWrapper<T, SELF extends RecipeBasedPropertyWrapper<T, SELF, BUILDER>, BUILDER extends SpecializedRecipePropertyWrapperBuilder<T, BUILDER, SELF>> extends BaseDataGenPropertyWrapper<T, SELF, BUILDER> implements RecipeBasedPropertyWrapper<T, SELF, BUILDER> {
 
     public SpecializedRecipePropertyWrapper(Supplier<T> parentObject, boolean isTemplate, String modId) {
@@ -26,6 +32,6 @@ public class SpecializedRecipePropertyWrapper<T, SELF extends RecipeBasedPropert
 
     @Override
     public Optional<Function<Consumer<FinishedRecipe>, Consumer<Supplier<T>>>> getRecipeConsumer() {
-        return rawBuilder().flatMap(builder -> builder.recipeConsumerFunc);
+        return rawBuilder().map(builder -> builder.recipeConsumerFunc);
     }
 }

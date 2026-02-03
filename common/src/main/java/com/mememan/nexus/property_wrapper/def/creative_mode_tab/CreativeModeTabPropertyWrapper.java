@@ -9,6 +9,14 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+/**
+ * Definite wrapper implementation for {@link CreativeModeTab} objects, with constrained generic types for {@code SELF} and
+ * {@code BUILDER}.
+ *
+ * @param <CMT> Any {@link CreativeModeTab} type.
+ *
+ * @see CreativeModeTabPropertyWrapperBuilder
+ */
 public class CreativeModeTabPropertyWrapper<CMT extends CreativeModeTab> extends BaseDataGenPropertyWrapper<CMT, CreativeModeTabPropertyWrapper<CMT>, CreativeModeTabPropertyWrapperBuilder<CMT>> implements DefaultableLanguageBasedPropertyWrapper<CMT, CreativeModeTabPropertyWrapper<CMT>, CreativeModeTabPropertyWrapperBuilder<CMT>> {
     protected final SpecializedLanguagePropertyWrapper<CMT, ?, ?> compositeLanguageWrapper;
 

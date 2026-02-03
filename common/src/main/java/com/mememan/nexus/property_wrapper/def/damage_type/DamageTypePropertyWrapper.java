@@ -7,6 +7,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
+/**
+ * Definite wrapper implementation for {@link DamageType} objects, with constrained generic types for {@code SELF} and
+ * {@code BUILDER}.
+ *
+ * @param <DT> Any {@link DamageType} type.
+ *
+ * @see DamageTypePropertyWrapperBuilder
+ */
 public class DamageTypePropertyWrapper<DT extends DamageType> extends DynamicPropertyWrapper<DT, DamageTypePropertyWrapper<DT>, DamageTypePropertyWrapperBuilder<DT>> {
 
     public DamageTypePropertyWrapper(Supplier<ResourceKey<DT>> parentObject, boolean isTemplate, String modId) {

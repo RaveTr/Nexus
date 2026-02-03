@@ -6,12 +6,17 @@ import com.mememan.nexus.property_wrapper.impl.generic.BaseDataGenPropertyWrappe
 import net.minecraft.world.level.storage.loot.LootTable;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * Specialized implementation of {@link LootBasedPropertyWrapperBuilder}. Implements all loot-related builder methods,
+ * generic types, and default behaviour for loot-based property wrapper handling.
+ *
+ * @see SpecializedLootPropertyWrapper
+ */
 public class SpecializedLootPropertyWrapperBuilder<T, SELF extends LootBasedPropertyWrapperBuilder<T, SELF, LBPW>, LBPW extends LootBasedPropertyWrapper<T, LBPW, SELF>> extends BaseDataGenPropertyWrapperBuilder<T, SELF, LBPW> implements LootBasedPropertyWrapperBuilder<T, SELF, LBPW> {
-    protected Optional<Function<Supplier<T>, LootTable.Builder>> lootTableBuilder = Optional.empty();
+    protected Function<Supplier<T>, LootTable.Builder> lootTableBuilder;
 
     public SpecializedLootPropertyWrapperBuilder(@NotNull LBPW ownerWrapper) {
         super(ownerWrapper);
@@ -25,7 +30,7 @@ public class SpecializedLootPropertyWrapperBuilder<T, SELF extends LootBasedProp
 
     @Override
     public SELF withLootTable(Function<Supplier<T>, LootTable.Builder> lootTableBuilderFunc) {
-        this.lootTableBuilder = Optional.ofNullable(lootTableBuilderFunc);
+        this.lootTableBuilder = lootTableBuilderFunc;
         return self();
     }
 }

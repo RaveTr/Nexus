@@ -11,14 +11,19 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * Specialized implementation of {@link VanillaBasedPropertyWrapperBuilder}. Implements all vanilla-related builder methods,
+ * generic types, and default behaviour for vanilla-based property wrapper handling for {@linkplain ItemLike ItemLikes}.
+ *
+ * @see SpecializedVanillaPropertyWrapper
+ */
 public class SpecializedVanillaPropertyWrapperBuilder<IL extends ItemLike, SELF extends VanillaBasedPropertyWrapperBuilder<IL, SELF, VBPW>, VBPW extends VanillaBasedPropertyWrapper<IL, VBPW, SELF>> extends BasePropertyWrapperBuilder<IL, SELF, VBPW> implements VanillaBasedPropertyWrapperBuilder<IL, SELF, VBPW> {
-    protected Optional<Function<Supplier<IL>, Float>> compostMapperFunc = Optional.empty();
-    protected Optional<Function<Supplier<IL>, Integer>> fuelMapperFunc = Optional.empty();
-    protected Optional<Function<Supplier<IL>, DispenseItemBehavior>> dispenseBehaviourMapperFunc = Optional.empty();
+    protected Function<Supplier<IL>, Float> compostMapperFunc;
+    protected Function<Supplier<IL>, Integer> fuelMapperFunc;
+    protected Function<Supplier<IL>, DispenseItemBehavior> dispenseBehaviourMapperFunc;
     protected final List<Supplier<CreativeModeTab>> parentTabs = new ObjectArrayList<>();
 
     public SpecializedVanillaPropertyWrapperBuilder(@NotNull VBPW ownerWrapper) {
@@ -31,24 +36,24 @@ public class SpecializedVanillaPropertyWrapperBuilder<IL extends ItemLike, SELF 
                 .asCompostable(propertyWrapper.getCompostMapper().orElse(null))
                 .asFuel(propertyWrapper.getFuelMapper().orElse(null))
                 .asDispensable(propertyWrapper.getDispenseBehaviourMapper().orElse(null))
-                .setParentTabs(new ObjectArrayList<>(propertyWrapper.getParentCreativeModeTabs()));
+                .setParentTabs(propertyWrapper.getParentCreativeModeTabs());
     }
 
     @Override
     public SELF asCompostable(Function<Supplier<IL>, Float> compostMapper) {
-        this.compostMapperFunc = Optional.ofNullable(compostMapper);
+        this.compostMapperFunc = compostMapper;
         return self();
     }
 
     @Override
     public SELF asFuel(Function<Supplier<IL>, Integer> fuelTimeMapper) {
-        this.fuelMapperFunc = Optional.ofNullable(fuelTimeMapper);
+        this.fuelMapperFunc = fuelTimeMapper;
         return self();
     }
 
     @Override
     public SELF asDispensable(Function<Supplier<IL>, DispenseItemBehavior> dispenseBehaviourMapper) {
-        this.dispenseBehaviourMapperFunc = Optional.ofNullable(dispenseBehaviourMapper);
+        this.dispenseBehaviourMapperFunc = dispenseBehaviourMapper;
         return self();
     }
 

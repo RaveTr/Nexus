@@ -13,10 +13,18 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+/**
+ * Definite builder implementation for {@link EntityType} objects, with constrained generic types for {@code SELF} and
+ * {@code BUILDER}.
+ *
+ * @param <E> Any {@link Entity} type.
+ *
+ * @see EntityTypePropertyWrapper
+ */
 public class EntityTypePropertyWrapperBuilder<E extends Entity> extends BaseDefaultableBareDataGenPropertyWrapperBuilder<EntityType<E>, EntityTypePropertyWrapperBuilder<E>, EntityTypePropertyWrapper<E>> implements DefaultableLootBasedPropertyWrapperBuilder<EntityType<E>, EntityTypePropertyWrapperBuilder<E>, EntityTypePropertyWrapper<E>> {
     protected final SpecializedLootPropertyWrapperBuilder<EntityType<E>, EntityTypePropertyWrapperBuilder<E>, EntityTypePropertyWrapper<E>> compositeLootBuilder;
-    protected Optional<Supplier<AttributeSupplier.Builder>> entityTypeAttributes = Optional.empty();
-    protected Optional<Supplier<EntityClientData<E>>> clientData = Optional.empty();
+    protected Supplier<AttributeSupplier.Builder> entityTypeAttributes;
+    protected Supplier<EntityClientData<E>> clientData;
 
     public EntityTypePropertyWrapperBuilder(@NotNull EntityTypePropertyWrapper<E> ownerWrapper) {
         super(ownerWrapper);
@@ -41,7 +49,7 @@ public class EntityTypePropertyWrapperBuilder<E extends Entity> extends BaseDefa
      * @return {@link #self()} (builder method).
      */
     public EntityTypePropertyWrapperBuilder<E> withAttributes(Supplier<AttributeSupplier.Builder> entityTypeAttributes) {
-        this.entityTypeAttributes = Optional.ofNullable(entityTypeAttributes);
+        this.entityTypeAttributes = entityTypeAttributes;
         return self();
     }
 
@@ -56,7 +64,7 @@ public class EntityTypePropertyWrapperBuilder<E extends Entity> extends BaseDefa
      * @see EntityClientData
      */
     public EntityTypePropertyWrapperBuilder<E> withClientData(Supplier<EntityClientData<E>> clientData) {
-        this.clientData = Optional.ofNullable(clientData);
+        this.clientData = clientData;
         return self();
     }
 

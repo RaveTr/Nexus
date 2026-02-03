@@ -11,6 +11,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+/**
+ * Definite wrapper implementation for {@link TagKey} objects, with constrained generic types for {@code SELF} and
+ * {@code BUILDER}. Extends from and repurposes methods from {@link SpecializedTagPropertyWrapper}.
+ *
+ * @param <T> Any taggable object type.
+ * @param <TK> Any {@link TagKey} type.
+ *
+ * @see TagPropertyWrapperBuilder
+ */
 public class TagPropertyWrapper<T, TK extends TagKey<T>> extends SpecializedTagPropertyWrapper<TK, TagPropertyWrapper<T, TK>, TagPropertyWrapperBuilder<T, TK>> {
 
     public TagPropertyWrapper(Supplier<TK> parentObject, boolean isTemplate, String modId) {
@@ -62,8 +71,8 @@ public class TagPropertyWrapper<T, TK extends TagKey<T>> extends SpecializedTagP
      *
      * @see TagPropertyWrapperBuilder#withCookTime(Integer)
      */
-    public Optional<Integer> getCookTime() {
-        return rawBuilder().flatMap(builder -> builder.cookTime);
+    public int getCookTime() {
+        return rawBuilder().map(builder -> builder.cookTime).orElse(0);
     }
 
     /**
@@ -75,6 +84,6 @@ public class TagPropertyWrapper<T, TK extends TagKey<T>> extends SpecializedTagP
      * @see TagPropertyWrapperBuilder#withFlammability(IntIntMutablePair)
      */
     public Optional<IntIntMutablePair> getFlammabilityPair() {
-        return rawBuilder().flatMap(builder -> builder.flammabilityPair);
+        return rawBuilder().map(builder -> builder.flammabilityPair);
     }
 }

@@ -21,7 +21,16 @@ import java.util.function.Supplier;
  * related to models in general.
  */
 public final class ModelUtil {
+    public static final TextureSlot BARS_TEXTURE_SLOT = TextureSlot.create("bars");
+    public static final TextureSlot OVERLAY_TEXTURE_SLOT = TextureSlot.create("overlay");
     public static final ModelTemplate EMPTY_MODEL_TEMPLATE = new ModelTemplate(Optional.empty(), Optional.empty());
+    public static final ModelTemplate BARS_CAP_MODEL_TEMPLATE = new ModelTemplate(Optional.of(new ResourceLocation("block/iron_bars_cap")), Optional.of("_cap"), TextureSlot.PARTICLE, BARS_TEXTURE_SLOT, TextureSlot.EDGE);
+    public static final ModelTemplate BARS_CAP_ALT_MODEL_TEMPLATE = new ModelTemplate(Optional.of(new ResourceLocation("block/iron_bars_cap_alt")), Optional.of("_cap_alt"), TextureSlot.PARTICLE, BARS_TEXTURE_SLOT, TextureSlot.EDGE);
+    public static final ModelTemplate BARS_POST_MODEL_TEMPLATE = new ModelTemplate(Optional.of(new ResourceLocation("block/iron_bars_post")), Optional.of("_post"), TextureSlot.PARTICLE, BARS_TEXTURE_SLOT);
+    public static final ModelTemplate BARS_POST_ENDS_MODEL_TEMPLATE = new ModelTemplate(Optional.of(new ResourceLocation("block/iron_bars_post_ends")), Optional.of("_post_ends"), TextureSlot.PARTICLE, BARS_TEXTURE_SLOT);
+    public static final ModelTemplate BARS_SIDE_MODEL_TEMPLATE = new ModelTemplate(Optional.of(new ResourceLocation("block/iron_bars_side")), Optional.of("_side"), TextureSlot.PARTICLE, BARS_TEXTURE_SLOT, TextureSlot.EDGE);
+    public static final ModelTemplate BARS_SIDE_ALT_MODEL_TEMPLATE = new ModelTemplate(Optional.of(new ResourceLocation("block/iron_bars_side_alt")), Optional.of("_side_alt"), TextureSlot.PARTICLE, BARS_TEXTURE_SLOT, TextureSlot.EDGE);
+    public static final ModelTemplate GRASS_BLOCK_MODEL_TEMPLATE = new ModelTemplate(Optional.of(new ResourceLocation("block/grass_block")), Optional.empty(), TextureSlot.PARTICLE, TextureSlot.BOTTOM, TextureSlot.TOP, TextureSlot.SIDE, OVERLAY_TEXTURE_SLOT);
     public static final TextureMapping EMPTY_TEXTURE_MAPPING = new TextureMapping();
     public static final ResourceLocation SOLID_RENDER_TYPE = new ResourceLocation("solid");
     public static final ResourceLocation CUTOUT_MIPPED_RENDER_TYPE = new ResourceLocation("cutout_mipped");
@@ -85,7 +94,7 @@ public final class ModelUtil {
      * @see #simpleBlockState(Supplier)
      */
     public static BlockModelDefinition cubeAll(Supplier<Block> ownerBlockSup) {
-        return cubeAll(ownerBlockSup, RegistryUtil.getTextureLocationOrDefault(ownerBlockSup));
+        return cubeAll(ownerBlockSup, RegistryUtil.getTextureLocationOrDefault(ownerBlockSup, "block"));
     }
 
     /**
@@ -142,9 +151,9 @@ public final class ModelUtil {
     public static BlockModelDefinition cubeBottomTop(Supplier<Block> ownerBlockSup) {
         return cubeBottomTop(
                 ownerBlockSup,
-                RegistryUtil.getTextureLocationWithSuffixOrDefault(ownerBlockSup, "_side"),
-                RegistryUtil.getTextureLocationWithSuffixOrDefault(ownerBlockSup, "_bottom"),
-                RegistryUtil.getTextureLocationWithSuffixOrDefault(ownerBlockSup, "_top")
+                RegistryUtil.getTextureLocationWithSuffixOrDefault(ownerBlockSup, "_side", "block"),
+                RegistryUtil.getTextureLocationWithSuffixOrDefault(ownerBlockSup, "_bottom", "block"),
+                RegistryUtil.getTextureLocationWithSuffixOrDefault(ownerBlockSup, "_top", "block")
         );
     }
 
@@ -236,7 +245,7 @@ public final class ModelUtil {
      * @see #carpet(Supplier, ResourceLocation)
      */
     public static BlockModelDefinition carpet(Supplier<Block> targetBlock) {
-        return carpet(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock));
+        return carpet(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"));
     }
 
     /**
@@ -277,7 +286,7 @@ public final class ModelUtil {
      * @see #cross(ResourceLocation)
      */
     public static BlockModelDefinition cross(Supplier<Block> targetBlock) {
-        return cross(RegistryUtil.getTextureLocationOrDefault(targetBlock));
+        return cross(RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"));
     }
 
     /**
@@ -320,7 +329,7 @@ public final class ModelUtil {
      * @see #cross(Supplier)
      */
     public static BlockModelDefinition crossCutout(Supplier<Block> targetBlock) {
-        return crossCutout(RegistryUtil.getTextureLocationOrDefault(targetBlock));
+        return crossCutout(RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"));
     }
 
     /**
@@ -363,7 +372,7 @@ public final class ModelUtil {
      * @see #tintedCross(Supplier, ResourceLocation)
      */
     public static BlockModelDefinition tintedCross(Supplier<Block> targetBlock) {
-        return tintedCross(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock));
+        return tintedCross(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"));
     }
 
     /**
@@ -408,7 +417,7 @@ public final class ModelUtil {
      * @see #tintedCross(Supplier)
      */
     public static BlockModelDefinition tintedCrossCutout(Supplier<Block> targetBlock) {
-        return tintedCrossCutout(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock));
+        return tintedCrossCutout(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"));
     }
 
     /**
@@ -453,7 +462,7 @@ public final class ModelUtil {
                                 parentBlockPath.startsWith("potted_")
                                         ? parentBlockPath.substring("potted_".length())
                                         : parentBlockPath)
-                )
+                , "block")
         );
     }
 
@@ -519,6 +528,45 @@ public final class ModelUtil {
     }
 
     /**
+     * Creates a {@link BlockModelDefinition} for a glass block.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#ALL} -> {@code RegistryUtil.pickBlockPrefix(glassTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the glass {@link Block} to be used for
+     *                    automatic model location resolution.
+     * @param glassTexture The {@link ResourceLocation} representing the texture of the glass.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_ALL} template and {@link #CUTOUT_RENDER_TYPE}.
+     *
+     * @see #glass(Supplier)
+     */
+    public static BlockModelDefinition glass(Supplier<Block> targetBlock, ResourceLocation glassTexture) {
+        return cubeAll(targetBlock, glassTexture)
+                .withRenderType(CUTOUT_RENDER_TYPE);
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} for a glass block using the default texture from the target block.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#ALL} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the glass block to use for texture resolution.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_ALL} template and {@link #CUTOUT_RENDER_TYPE}.
+     *
+     * @see #glass(Supplier, ResourceLocation)
+     */
+    public static BlockModelDefinition glass(Supplier<Block> targetBlock) {
+        return glass(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"));
+    }
+
+    /**
      * Creates a {@link BlockStateDefinition}, using {@link MultiVariantGenerator} with the {@link VariantProperties#MODEL}
      * property set to the supplied {@linkplain Block Block's} default model location.
      * <p>
@@ -558,6 +606,734 @@ public final class ModelUtil {
         return new BlockStateDefinition(targetBlock)
                 .withBlockStateSupplier(MultiVariantGenerator.multiVariant(targetBlock.get(), Variant.variant()
                         .with(VariantProperties.MODEL, modelLocation)));
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} for a glass pane with no side texture.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PANE} -> {@code RegistryUtil.pickBlockPrefix(glassPaneTexture)}</li>
+     *     </ul>
+     *
+     * @param glassPaneTexture The {@link ResourceLocation} of the glass pane texture.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#STAINED_GLASS_PANE_NOSIDE} template and {@link #CUTOUT_RENDER_TYPE}.
+     *
+     * @see #glassPaneNoSideAlt(ResourceLocation)
+     */
+    public static BlockModelDefinition glassPaneNoSide(ResourceLocation glassPaneTexture) {
+        return new BlockModelDefinition(ModelTemplates.STAINED_GLASS_PANE_NOSIDE)
+                .withTextureMapping(new TextureMapping().put(TextureSlot.PANE, RegistryUtil.pickBlockPrefix(glassPaneTexture)))
+                .withRenderType(CUTOUT_RENDER_TYPE);
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} for a glass pane with no side texture using an alternate template.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PANE} -> {@code RegistryUtil.pickBlockPrefix(glassPaneTexture)}</li>
+     *     </ul>
+     *
+     * @param glassPaneTexture The {@link ResourceLocation} of the glass pane texture.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#STAINED_GLASS_PANE_NOSIDE_ALT} template and {@link #CUTOUT_RENDER_TYPE}.
+     *
+     * @see #glassPaneNoSide(ResourceLocation)
+     */
+    public static BlockModelDefinition glassPaneNoSideAlt(ResourceLocation glassPaneTexture) {
+        return new BlockModelDefinition(ModelTemplates.STAINED_GLASS_PANE_NOSIDE_ALT)
+                .withTextureMapping(new TextureMapping().put(TextureSlot.PANE, RegistryUtil.pickBlockPrefix(glassPaneTexture)))
+                .withRenderType(CUTOUT_RENDER_TYPE);
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} for a glass pane with a post texture.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PANE} -> {@code RegistryUtil.pickBlockPrefix(glassPaneTexture)}</li>
+     *         <li>{@link TextureSlot#EDGE} -> {@code RegistryUtil.pickBlockPrefix(glassPaneTopTexture)}</li>
+     *     </ul>
+     *
+     * @param glassPaneTexture The {@link ResourceLocation} of the glass pane texture.
+     * @param glassPaneTopTexture The {@link ResourceLocation} of the glass pane top texture.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#STAINED_GLASS_PANE_POST} template and {@link #CUTOUT_RENDER_TYPE}.
+     *
+     * @see #glassPane(ResourceLocation, ResourceLocation)
+     */
+    public static BlockModelDefinition glassPanePost(ResourceLocation glassPaneTexture, ResourceLocation glassPaneTopTexture) {
+        return new BlockModelDefinition(ModelTemplates.STAINED_GLASS_PANE_POST)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.PANE, RegistryUtil.pickBlockPrefix(glassPaneTexture))
+                        .put(TextureSlot.EDGE, RegistryUtil.pickBlockPrefix(glassPaneTopTexture)))
+                .withRenderType(CUTOUT_RENDER_TYPE);
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} for a glass pane with a side texture.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PANE} -> {@code RegistryUtil.pickBlockPrefix(glassPaneTexture)}</li>
+     *         <li>{@link TextureSlot#EDGE} -> {@code RegistryUtil.pickBlockPrefix(glassPaneTopTexture)}</li>
+     *     </ul>
+     *
+     * @param glassPaneTexture The {@link ResourceLocation} pointing towards the side texture for the glass pane.
+     * @param glassPaneTopTexture The {@link ResourceLocation} pointing towards the top texture for the glass pane.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#STAINED_GLASS_PANE_SIDE} template and {@link #CUTOUT_RENDER_TYPE}.
+     *
+     * @see #glassPaneSideAlt(ResourceLocation, ResourceLocation)
+     */
+    public static BlockModelDefinition glassPaneSide(ResourceLocation glassPaneTexture, ResourceLocation glassPaneTopTexture) {
+        return new BlockModelDefinition(ModelTemplates.STAINED_GLASS_PANE_SIDE)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.PANE, RegistryUtil.pickBlockPrefix(glassPaneTexture))
+                        .put(TextureSlot.EDGE, RegistryUtil.pickBlockPrefix(glassPaneTopTexture)))
+                .withRenderType(CUTOUT_RENDER_TYPE);
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} with the {@link ModelTemplates#STAINED_GLASS_PANE_SIDE_ALT} template.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PANE} -> {@code RegistryUtil.pickBlockPrefix(glassPaneTexture)}</li>
+     *         <li>{@link TextureSlot#EDGE} -> {@code RegistryUtil.pickBlockPrefix(glassPaneTopTexture)}</li>
+     *     </ul>
+     *
+     * @param glassPaneTexture The {@link ResourceLocation} pointing towards the pane texture for the block model.
+     * @param glassPaneTopTexture The {@link ResourceLocation} pointing towards the top edge texture for the block model.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#STAINED_GLASS_PANE_SIDE_ALT} template and {@link #CUTOUT_RENDER_TYPE}.
+     *
+     * @see #glassPaneSide(ResourceLocation, ResourceLocation)
+     */
+    public static BlockModelDefinition glassPaneSideAlt(ResourceLocation glassPaneTexture, ResourceLocation glassPaneTopTexture) {
+        return new BlockModelDefinition(ModelTemplates.STAINED_GLASS_PANE_SIDE_ALT)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.PANE, RegistryUtil.pickBlockPrefix(glassPaneTexture))
+                        .put(TextureSlot.EDGE, RegistryUtil.pickBlockPrefix(glassPaneTopTexture)))
+                .withRenderType(CUTOUT_RENDER_TYPE);
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} for a glass pane with all possible models generated based off of the 2
+     * provided texture locations.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PANE} -> {@code RegistryUtil.pickBlockPrefix(glassPaneTexture)}</li>
+     *         <li>{@link TextureSlot#EDGE} -> {@code RegistryUtil.pickBlockPrefix(glassPaneTopTexture)}</li>
+     *     </ul>
+     *
+     * @param glassPaneTexture The {@link ResourceLocation} pointing towards the pane texture for the glass pane.
+     * @param glassPaneTopTexture The {@link ResourceLocation} pointing towards the top edge texture for the glass pane.
+     *
+     * @return A {@link BlockModelDefinition} chaining all possible glass pane variants.
+     *
+     * @see #glassPaneNoSide(ResourceLocation)
+     * @see #glassPaneNoSideAlt(ResourceLocation)
+     * @see #glassPanePost(ResourceLocation, ResourceLocation)
+     * @see #glassPaneSide(ResourceLocation, ResourceLocation)
+     * @see #glassPaneSideAlt(ResourceLocation, ResourceLocation)
+     * @see #generatedBlock(ResourceLocation)
+     */
+    public static BlockModelDefinition glassPane(ResourceLocation glassPaneTexture, ResourceLocation glassPaneTopTexture) {
+        return glassPaneNoSide(glassPaneTexture)
+                .withOrdinalModelDefinitions(
+                        glassPaneNoSideAlt(glassPaneTexture),
+                        glassPanePost(glassPaneTexture, glassPaneTopTexture),
+                        glassPaneSide(glassPaneTexture, glassPaneTopTexture),
+                        glassPaneSideAlt(glassPaneTexture, glassPaneTopTexture),
+                        generatedBlock(glassPaneTexture)
+                );
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} for a glass pane using default texture locations.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PANE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *         <li>{@link TextureSlot#EDGE} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top")}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the owner {@link Block} to be used for
+     *                   automatic texture and model location resolution.
+     *
+     * @return A {@link BlockModelDefinition} chaining all possible glass pane variants.
+     *
+     * @see #glassPane(ResourceLocation, ResourceLocation)
+     */
+    public static BlockModelDefinition glassPane(Supplier<Block> targetBlock) {
+        return glassPane(
+                RegistryUtil.getTextureLocationOrDefault(targetBlock, "block", RegistryUtil.getTextureLocationOrDefault(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get()).withPath(curPath -> curPath.replace("_pane", "")), "block")),
+                RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block")
+        );
+    }
+
+    /**
+     * Creates a {@link BlockStateDefinition} for a glass pane block with the specified model locations for each
+     * pane variant.
+     * <p>
+     *     <h3>Multipart Conditions</h3>
+     *     <ul>
+     *         <li>Post (always) -> {@code glassPanePostModel}</li>
+     *         <li>{@link BlockStateProperties#NORTH} = true -> {@code glassPaneSideModel}</li>
+     *         <li>{@link BlockStateProperties#EAST} = true -> {@code glassPaneSideModel} (rotated 90°)</li>
+     *         <li>{@link BlockStateProperties#SOUTH} = true -> {@code glassPaneSideAltModel}</li>
+     *         <li>{@link BlockStateProperties#WEST} = true -> {@code glassPaneSideAltModel} (rotated 90°)</li>
+     *         <li>{@link BlockStateProperties#NORTH} = false -> {@code glassPaneNoSideModel}</li>
+     *         <li>{@link BlockStateProperties#EAST} = false -> {@code glassPaneNoSideAltModel}</li>
+     *         <li>{@link BlockStateProperties#SOUTH} = false -> {@code glassPaneNoSideAltModel} (rotated 90°)</li>
+     *         <li>{@link BlockStateProperties#WEST} = false -> {@code glassPaneNoSideModel} (rotated 270°)</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the glass pane {@link Block} to create the blockstate for.
+     * @param glassPanePostModel The {@link ResourceLocation} of the center post model.
+     * @param glassPaneSideModel The {@link ResourceLocation} of the side connection model.
+     * @param glassPaneSideAltModel The {@link ResourceLocation} of the alternate side connection model.
+     * @param glassPaneNoSideModel The {@link ResourceLocation} of the no-side model.
+     * @param glassPaneNoSideAltModel The {@link ResourceLocation} of the alternate no-side model.
+     *
+     * @return A new {@link BlockStateDefinition} with a multipart glass pane blockstate.
+     *
+     * @see #glassPaneBlockState(Supplier)
+     * @see #glassPane(ResourceLocation, ResourceLocation)
+     */
+    public static BlockStateDefinition glassPaneBlockState(Supplier<Block> targetBlock, ResourceLocation glassPanePostModel, ResourceLocation glassPaneSideModel, ResourceLocation glassPaneSideAltModel, ResourceLocation glassPaneNoSideModel, ResourceLocation glassPaneNoSideAltModel) {
+        return new BlockStateDefinition(targetBlock)
+                .withBlockStateSupplier(
+                        MultiPartGenerator.multiPart(targetBlock.get())
+                                .with(Variant.variant().with(VariantProperties.MODEL, glassPanePostModel))
+                                .with(Condition.condition().term(BlockStateProperties.NORTH, true), Variant.variant().with(VariantProperties.MODEL, glassPaneSideModel))
+                                .with(Condition.condition().term(BlockStateProperties.EAST, true), Variant.variant().with(VariantProperties.MODEL, glassPaneSideModel).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
+                                .with(Condition.condition().term(BlockStateProperties.SOUTH, true), Variant.variant().with(VariantProperties.MODEL, glassPaneSideAltModel))
+                                .with(Condition.condition().term(BlockStateProperties.WEST, true), Variant.variant().with(VariantProperties.MODEL, glassPaneSideAltModel).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
+                                .with(Condition.condition().term(BlockStateProperties.NORTH, false), Variant.variant().with(VariantProperties.MODEL, glassPaneNoSideModel))
+                                .with(Condition.condition().term(BlockStateProperties.EAST, false), Variant.variant().with(VariantProperties.MODEL, glassPaneNoSideAltModel))
+                                .with(Condition.condition().term(BlockStateProperties.SOUTH, false), Variant.variant().with(VariantProperties.MODEL, glassPaneNoSideAltModel).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
+                                .with(Condition.condition().term(BlockStateProperties.WEST, false), Variant.variant().with(VariantProperties.MODEL, glassPaneNoSideModel).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270))
+                );
+    }
+
+    /**
+     * Overloaded variant of {@link #glassPaneBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation)}.
+     * Creates a {@link BlockStateDefinition} for a glass pane block using assumed model locations from the provided
+     * {@code targetBlock}.
+     * <p>
+     *     <h3>Multipart Conditions</h3>
+     *     <ul>
+     *         <li>Post (always) -> {@code targetBlock}_post</li>
+     *         <li>{@link BlockStateProperties#NORTH} = true -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_post")}</li>
+     *         <li>{@link BlockStateProperties#EAST} = true -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_side")} (rotated 90°)</li>
+     *         <li>{@link BlockStateProperties#SOUTH} = true -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_side_alt")}</li>
+     *         <li>{@link BlockStateProperties#WEST} = true -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_side_alt")} (rotated 90°)</li>
+     *         <li>{@link BlockStateProperties#NORTH} = false -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_noside")}</li>
+     *         <li>{@link BlockStateProperties#EAST} = false -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_noside_alt")}</li>
+     *         <li>{@link BlockStateProperties#SOUTH} = false -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_noside_alt")} (rotated 90°)</li>
+     *         <li>{@link BlockStateProperties#WEST} = false -> {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_noside")} (rotated 270°)</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the glass pane {@link Block} to be used for
+     *                    automatic model location resolution.
+     *
+     * @return A new {@link BlockStateDefinition} with a multipart glass pane blockstate.
+     *
+     * @see #glassPaneBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation)
+     * @see #glassPane(Supplier)
+     */
+    public static BlockStateDefinition glassPaneBlockState(Supplier<Block> targetBlock) {
+        return glassPaneBlockState(targetBlock,
+                ModelLocationUtils.getModelLocation(targetBlock.get(), "_post"),
+                ModelLocationUtils.getModelLocation(targetBlock.get(), "_side"),
+                ModelLocationUtils.getModelLocation(targetBlock.get(), "_side_alt"),
+                ModelLocationUtils.getModelLocation(targetBlock.get(), "_noside"),
+                ModelLocationUtils.getModelLocation(targetBlock.get(), "_noside_alt")
+        );
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} for a bars cap model with the specified textures.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PARTICLE} -> {@code RegistryUtil.pickBlockPrefix(barsParticleTexture)}</li>
+     *         <li>{@link #BARS_TEXTURE_SLOT} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *         <li>{@link TextureSlot#EDGE} -> {@code RegistryUtil.pickBlockPrefix(barsEdgeTexture)}</li>
+     *     </ul>
+     *
+     * @param barsParticleTexture The {@link ResourceLocation} of the bars particle texture.
+     * @param barsBlockTexture The {@link ResourceLocation} of the bars block texture.
+     * @param barsEdgeTexture The {@link ResourceLocation} of the bars edge texture.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link #BARS_CAP_MODEL_TEMPLATE} template and {@link #CUTOUT_RENDER_TYPE}.
+     *
+     * @see #barsCap(ResourceLocation)
+     */
+    public static BlockModelDefinition barsCap(ResourceLocation barsParticleTexture, ResourceLocation barsBlockTexture, ResourceLocation barsEdgeTexture) {
+        return new BlockModelDefinition(BARS_CAP_MODEL_TEMPLATE)
+                .withTextureMapping(
+                        new TextureMapping()
+                                .put(TextureSlot.PARTICLE, RegistryUtil.pickBlockPrefix(barsParticleTexture))
+                                .put(BARS_TEXTURE_SLOT, RegistryUtil.pickBlockPrefix(barsBlockTexture))
+                                .put(TextureSlot.EDGE, RegistryUtil.pickBlockPrefix(barsEdgeTexture))
+                )
+                .withRenderType(CUTOUT_RENDER_TYPE);
+    }
+
+    /**
+     * Overloaded variant of {@link #barsCap(ResourceLocation, ResourceLocation, ResourceLocation)}.
+     * Creates a {@link BlockModelDefinition} for a bars cap model using the same texture for all slots.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PARTICLE} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *         <li>{@link #BARS_TEXTURE_SLOT} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *         <li>{@link TextureSlot#EDGE} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *     </ul>
+     *
+     * @param barsBlockTexture The {@link ResourceLocation} of the bars texture to use for all slots.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link #BARS_CAP_MODEL_TEMPLATE} template and {@link #CUTOUT_RENDER_TYPE}.
+     *
+     * @see #barsCap(ResourceLocation, ResourceLocation, ResourceLocation)
+     */
+    public static BlockModelDefinition barsCap(ResourceLocation barsBlockTexture) {
+        return barsCap(barsBlockTexture, barsBlockTexture, barsBlockTexture);
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} for an alternate bars cap model with the specified textures.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PARTICLE} -> {@code RegistryUtil.pickBlockPrefix(barsParticleTexture)}</li>
+     *         <li>{@link #BARS_TEXTURE_SLOT} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *         <li>{@link TextureSlot#EDGE} -> {@code RegistryUtil.pickBlockPrefix(barsEdgeTexture)}</li>
+     *     </ul>
+     *
+     * @param barsParticleTexture The {@link ResourceLocation} of the bars particle texture.
+     * @param barsBlockTexture The {@link ResourceLocation} of the bars block texture.
+     * @param barsEdgeTexture The {@link ResourceLocation} of the bars edge texture.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link #BARS_CAP_ALT_MODEL_TEMPLATE} template and {@link #CUTOUT_RENDER_TYPE}.
+     *
+     * @see #barsCapAlt(ResourceLocation)
+     */
+    public static BlockModelDefinition barsCapAlt(ResourceLocation barsParticleTexture, ResourceLocation barsBlockTexture, ResourceLocation barsEdgeTexture) {
+        return new BlockModelDefinition(BARS_CAP_ALT_MODEL_TEMPLATE)
+                .withTextureMapping(
+                        new TextureMapping()
+                                .put(TextureSlot.PARTICLE, RegistryUtil.pickBlockPrefix(barsParticleTexture))
+                                .put(BARS_TEXTURE_SLOT, RegistryUtil.pickBlockPrefix(barsBlockTexture))
+                                .put(TextureSlot.EDGE, RegistryUtil.pickBlockPrefix(barsEdgeTexture))
+                )
+                .withRenderType(CUTOUT_RENDER_TYPE);
+    }
+
+    /**
+     * Overloaded variant of {@link #barsCapAlt(ResourceLocation, ResourceLocation, ResourceLocation)}.
+     * Creates a {@link BlockModelDefinition} for an alternate bars cap model using the same texture for all slots.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PARTICLE} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *         <li>{@link #BARS_TEXTURE_SLOT} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *         <li>{@link TextureSlot#EDGE} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *     </ul>
+     *
+     * @param barsBlockTexture The {@link ResourceLocation} of the bars texture to use for all slots.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link #BARS_CAP_ALT_MODEL_TEMPLATE} template and {@link #CUTOUT_RENDER_TYPE}.
+     *
+     * @see #barsCapAlt(ResourceLocation, ResourceLocation, ResourceLocation)
+     */
+    public static BlockModelDefinition barsCapAlt(ResourceLocation barsBlockTexture) {
+        return barsCapAlt(barsBlockTexture, barsBlockTexture, barsBlockTexture);
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} for a bars post model with the specified textures.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PARTICLE} -> {@code RegistryUtil.pickBlockPrefix(barsParticleTexture)}</li>
+     *         <li>{@link #BARS_TEXTURE_SLOT} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *     </ul>
+     *
+     * @param barsParticleTexture The {@link ResourceLocation} of the bars particle texture.
+     * @param barsBlockTexture The {@link ResourceLocation} of the bars block texture.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link #BARS_POST_MODEL_TEMPLATE} template and {@link #CUTOUT_RENDER_TYPE}.
+     *
+     * @see #barsPost(ResourceLocation)
+     */
+    public static BlockModelDefinition barsPost(ResourceLocation barsParticleTexture, ResourceLocation barsBlockTexture) {
+        return new BlockModelDefinition(BARS_POST_MODEL_TEMPLATE)
+                .withTextureMapping(
+                        new TextureMapping()
+                                .put(TextureSlot.PARTICLE, RegistryUtil.pickBlockPrefix(barsParticleTexture))
+                                .put(BARS_TEXTURE_SLOT, RegistryUtil.pickBlockPrefix(barsBlockTexture))
+                )
+                .withRenderType(CUTOUT_RENDER_TYPE);
+    }
+
+    /**
+     * Overloaded variant of {@link #barsPost(ResourceLocation, ResourceLocation)}.
+     * Creates a {@link BlockModelDefinition} for a bars post model using the same texture for all slots.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PARTICLE} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *         <li>{@link #BARS_TEXTURE_SLOT} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *     </ul>
+     *
+     * @param barsBlockTexture The {@link ResourceLocation} of the bars texture to use for all slots.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link #BARS_POST_MODEL_TEMPLATE} template and {@link #CUTOUT_RENDER_TYPE}.
+     *
+     * @see #barsPost(ResourceLocation, ResourceLocation)
+     */
+    public static BlockModelDefinition barsPost(ResourceLocation barsBlockTexture) {
+        return barsPost(barsBlockTexture, barsBlockTexture);
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} for a bars post with end caps model with the specified textures.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PARTICLE} -> {@code RegistryUtil.pickBlockPrefix(barsParticleTexture)}</li>
+     *         <li>{@link #BARS_TEXTURE_SLOT} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *     </ul>
+     *
+     * @param barsParticleTexture The {@link ResourceLocation} of the bars particle texture.
+     * @param barsBlockTexture The {@link ResourceLocation} of the bars block texture.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link #BARS_POST_ENDS_MODEL_TEMPLATE} template and {@link #CUTOUT_RENDER_TYPE}.
+     *
+     * @see #barsPostEnds(ResourceLocation)
+     */
+    public static BlockModelDefinition barsPostEnds(ResourceLocation barsParticleTexture, ResourceLocation barsBlockTexture) {
+        return new BlockModelDefinition(BARS_POST_ENDS_MODEL_TEMPLATE)
+                .withTextureMapping(
+                        new TextureMapping()
+                                .put(TextureSlot.PARTICLE, RegistryUtil.pickBlockPrefix(barsParticleTexture))
+                                .put(BARS_TEXTURE_SLOT, RegistryUtil.pickBlockPrefix(barsBlockTexture))
+                )
+                .withRenderType(CUTOUT_RENDER_TYPE);
+    }
+
+    /**
+     * Overloaded variant of {@link #barsPostEnds(ResourceLocation, ResourceLocation)}.
+     * Creates a {@link BlockModelDefinition} for a bars post with end caps model using the same texture for all slots.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PARTICLE} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *         <li>{@link #BARS_TEXTURE_SLOT} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *     </ul>
+     *
+     * @param barsBlockTexture The {@link ResourceLocation} of the bars texture to use for all slots.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link #BARS_POST_ENDS_MODEL_TEMPLATE} template and {@link #CUTOUT_RENDER_TYPE}.
+     *
+     * @see #barsPostEnds(ResourceLocation, ResourceLocation)
+     */
+    public static BlockModelDefinition barsPostEnds(ResourceLocation barsBlockTexture) {
+        return barsPostEnds(barsBlockTexture, barsBlockTexture);
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} for a bars side connection model with the specified textures.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PARTICLE} -> {@code RegistryUtil.pickBlockPrefix(barsParticleTexture)}</li>
+     *         <li>{@link #BARS_TEXTURE_SLOT} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *         <li>{@link TextureSlot#EDGE} -> {@code RegistryUtil.pickBlockPrefix(barsEdgeTexture)}</li>
+     *     </ul>
+     *
+     * @param barsParticleTexture The {@link ResourceLocation} of the bars particle texture.
+     * @param barsBlockTexture The {@link ResourceLocation} of the bars block texture.
+     * @param barsEdgeTexture The {@link ResourceLocation} of the bars edge texture.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link #BARS_SIDE_MODEL_TEMPLATE} template and {@link #CUTOUT_RENDER_TYPE}.
+     *
+     * @see #barsSide(ResourceLocation)
+     */
+    public static BlockModelDefinition barsSide(ResourceLocation barsParticleTexture, ResourceLocation barsBlockTexture, ResourceLocation barsEdgeTexture) {
+        return new BlockModelDefinition(BARS_SIDE_MODEL_TEMPLATE)
+                .withTextureMapping(
+                        new TextureMapping()
+                                .put(TextureSlot.PARTICLE, RegistryUtil.pickBlockPrefix(barsParticleTexture))
+                                .put(BARS_TEXTURE_SLOT, RegistryUtil.pickBlockPrefix(barsBlockTexture))
+                                .put(TextureSlot.EDGE, RegistryUtil.pickBlockPrefix(barsEdgeTexture))
+                )
+                .withRenderType(CUTOUT_RENDER_TYPE);
+    }
+
+    /**
+     * Overloaded variant of {@link #barsSide(ResourceLocation, ResourceLocation, ResourceLocation)}.
+     * Creates a {@link BlockModelDefinition} for a bars side connection model using the same texture for all slots.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PARTICLE} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *         <li>{@link #BARS_TEXTURE_SLOT} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *         <li>{@link TextureSlot#EDGE} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *     </ul>
+     *
+     * @param barsBlockTexture The {@link ResourceLocation} of the bars texture to use for all slots.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link #BARS_SIDE_MODEL_TEMPLATE} template and {@link #CUTOUT_RENDER_TYPE}.
+     *
+     * @see #barsSide(ResourceLocation, ResourceLocation, ResourceLocation)
+     */
+    public static BlockModelDefinition barsSide(ResourceLocation barsBlockTexture) {
+        return barsSide(barsBlockTexture, barsBlockTexture, barsBlockTexture);
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} for an alternate bars side connection model with the specified textures.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PARTICLE} -> {@code RegistryUtil.pickBlockPrefix(barsParticleTexture)}</li>
+     *         <li>{@link #BARS_TEXTURE_SLOT} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *         <li>{@link TextureSlot#EDGE} -> {@code RegistryUtil.pickBlockPrefix(barsEdgeTexture)}</li>
+     *     </ul>
+     *
+     * @param barsParticleTexture The {@link ResourceLocation} of the bars particle texture.
+     * @param barsBlockTexture The {@link ResourceLocation} of the bars block texture.
+     * @param barsEdgeTexture The {@link ResourceLocation} of the bars edge texture.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link #BARS_SIDE_ALT_MODEL_TEMPLATE} template and {@link #CUTOUT_RENDER_TYPE}.
+     *
+     * @see #barsSideAlt(ResourceLocation)
+     */
+    public static BlockModelDefinition barsSideAlt(ResourceLocation barsParticleTexture, ResourceLocation barsBlockTexture, ResourceLocation barsEdgeTexture) {
+        return new BlockModelDefinition(BARS_SIDE_ALT_MODEL_TEMPLATE)
+                .withTextureMapping(
+                        new TextureMapping()
+                                .put(TextureSlot.PARTICLE, RegistryUtil.pickBlockPrefix(barsParticleTexture))
+                                .put(BARS_TEXTURE_SLOT, RegistryUtil.pickBlockPrefix(barsBlockTexture))
+                                .put(TextureSlot.EDGE, RegistryUtil.pickBlockPrefix(barsEdgeTexture))
+                )
+                .withRenderType(CUTOUT_RENDER_TYPE);
+    }
+
+    /**
+     * Overloaded variant of {@link #barsSideAlt(ResourceLocation, ResourceLocation, ResourceLocation)}.
+     * Creates a {@link BlockModelDefinition} for an alternate bars side connection model using the same texture for all slots.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PARTICLE} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *         <li>{@link #BARS_TEXTURE_SLOT} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *         <li>{@link TextureSlot#EDGE} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *     </ul>
+     *
+     * @param barsBlockTexture The {@link ResourceLocation} of the bars texture to use for all slots.
+     *
+     * @return A {@link BlockModelDefinition} with the {@link #BARS_SIDE_ALT_MODEL_TEMPLATE} template and {@link #CUTOUT_RENDER_TYPE}.
+     *
+     * @see #barsSideAlt(ResourceLocation, ResourceLocation, ResourceLocation)
+     */
+    public static BlockModelDefinition barsSideAlt(ResourceLocation barsBlockTexture) {
+        return barsSideAlt(barsBlockTexture, barsBlockTexture, barsBlockTexture);
+    }
+
+    /**
+     * Creates a {@link BlockModelDefinition} for bars with all possible models generated based on the provided textures.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PARTICLE} -> {@code RegistryUtil.pickBlockPrefix(barsParticleTexture)}</li>
+     *         <li>{@link #BARS_TEXTURE_SLOT} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *         <li>{@link TextureSlot#EDGE} -> {@code RegistryUtil.pickBlockPrefix(barsEdgeTexture)}</li>
+     *     </ul>
+     *
+     * @param barsParticleTexture The {@link ResourceLocation} of the bars particle texture.
+     * @param barsBlockTexture The {@link ResourceLocation} of the bars block texture.
+     * @param barsEdgeTexture The {@link ResourceLocation} of the bars edge texture.
+     *
+     * @return A {@link BlockModelDefinition} chaining all possible bars variants.
+     *
+     * @see #barsCap(ResourceLocation, ResourceLocation, ResourceLocation)
+     * @see #barsCapAlt(ResourceLocation, ResourceLocation, ResourceLocation)
+     * @see #barsPost(ResourceLocation, ResourceLocation)
+     * @see #barsPostEnds(ResourceLocation, ResourceLocation)
+     * @see #barsSide(ResourceLocation, ResourceLocation, ResourceLocation)
+     * @see #barsSideAlt(ResourceLocation, ResourceLocation, ResourceLocation)
+     * @see #generatedBlock(ResourceLocation)
+     */
+    public static BlockModelDefinition bars(ResourceLocation barsParticleTexture, ResourceLocation barsBlockTexture, ResourceLocation barsEdgeTexture) {
+        return barsCap(barsParticleTexture, barsBlockTexture, barsEdgeTexture)
+                .withOrdinalModelDefinitions(
+                        barsCapAlt(barsParticleTexture, barsBlockTexture, barsEdgeTexture),
+                        barsPost(barsParticleTexture, barsBlockTexture),
+                        barsPostEnds(barsParticleTexture, barsBlockTexture),
+                        barsSide(barsParticleTexture, barsBlockTexture, barsEdgeTexture),
+                        barsSideAlt(barsParticleTexture, barsBlockTexture, barsEdgeTexture),
+                        generatedBlock(barsBlockTexture)
+                );
+    }
+
+    /**
+     * Overloaded variant of {@link #bars(ResourceLocation, ResourceLocation, ResourceLocation)}.
+     * Creates a {@link BlockModelDefinition} for bars using the same texture for all slots.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PARTICLE} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *         <li>{@link #BARS_TEXTURE_SLOT} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *         <li>{@link TextureSlot#EDGE} -> {@code RegistryUtil.pickBlockPrefix(barsBlockTexture)}</li>
+     *     </ul>
+     *
+     * @param barsBlockTexture The {@link ResourceLocation} of the bars texture to use for all slots.
+     *
+     * @return A {@link BlockModelDefinition} chaining all possible bars variants.
+     *
+     * @see #bars(ResourceLocation, ResourceLocation, ResourceLocation)
+     */
+    public static BlockModelDefinition bars(ResourceLocation barsBlockTexture) {
+        return bars(barsBlockTexture, barsBlockTexture, barsBlockTexture);
+    }
+
+    /**
+     * Overloaded variant of {@link #bars(ResourceLocation)}.
+     * Creates a {@link BlockModelDefinition} for bars using automatic texture resolution.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PARTICLE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *         <li>{@link #BARS_TEXTURE_SLOT} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *         <li>{@link TextureSlot#EDGE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the bars {@link Block} to be used for
+     *                    automatic texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} chaining all possible bars variants.
+     *
+     * @see #bars(ResourceLocation)
+     */
+    public static BlockModelDefinition bars(Supplier<Block> targetBlock) {
+        return bars(RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"));
+    }
+
+    /**
+     * Creates a {@link BlockStateDefinition} for a bars block with the specified model locations for each bars variant.
+     * This method generates a complex multipart blockstate that handles all connection states (north, east, south, west)
+     * with appropriate model variants and rotations, including special handling for single-connection cap models.
+     * <p>
+     *     <h3>Multipart Conditions</h3>
+     *     <ul>
+     *         <li>Post ends (always) -> {@code barsPostEndsModel}</li>
+     *         <li>All directions false -> {@code barsPostModel}</li>
+     *         <li>Only {@link BlockStateProperties#NORTH} true -> {@code barsCapModel}</li>
+     *         <li>Only {@link BlockStateProperties#EAST} true -> {@code barsCapModel} (rotated 90°)</li>
+     *         <li>Only {@link BlockStateProperties#SOUTH} true -> {@code barsCapAltModel}</li>
+     *         <li>Only {@link BlockStateProperties#WEST} true -> {@code barsCapAltModel} (rotated 90°)</li>
+     *         <li>{@link BlockStateProperties#NORTH} = true -> {@code barsSideModel}</li>
+     *         <li>{@link BlockStateProperties#EAST} = true -> {@code barsSideModel} (rotated 90°)</li>
+     *         <li>{@link BlockStateProperties#SOUTH} = true -> {@code barsSideAltModel}</li>
+     *         <li>{@link BlockStateProperties#WEST} = true -> {@code barsSideAltModel} (rotated 90°)</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the bars {@link Block} to create the blockstate for.
+     * @param barsPostModel The {@link ResourceLocation} of the standalone post model.
+     * @param barsPostEndsModel The {@link ResourceLocation} of the post with end caps model.
+     * @param barsSideModel The {@link ResourceLocation} of the side connection model.
+     * @param barsSideAltModel The {@link ResourceLocation} of the alternate side connection model.
+     * @param barsCapModel The {@link ResourceLocation} of the single-connection cap model.
+     * @param barsCapAltModel The {@link ResourceLocation} of the alternate single-connection cap model.
+     *
+     * @return A new {@link BlockStateDefinition} with a multipart bars blockstate.
+     *
+     * @see #barsBlockState(Supplier)
+     * @see #bars(ResourceLocation, ResourceLocation, ResourceLocation)
+     */
+    public static BlockStateDefinition barsBlockState(Supplier<Block> targetBlock, ResourceLocation barsPostModel, ResourceLocation barsPostEndsModel, ResourceLocation barsSideModel, ResourceLocation barsSideAltModel, ResourceLocation barsCapModel, ResourceLocation barsCapAltModel) {
+        return new BlockStateDefinition(targetBlock)
+                .withBlockStateSupplier(
+                        MultiPartGenerator.multiPart(targetBlock.get())
+                                .with(Variant.variant()
+                                        .with(VariantProperties.MODEL, barsPostEndsModel))
+                                .with(Condition.condition()
+                                        .term(BlockStateProperties.NORTH, false)
+                                        .term(BlockStateProperties.EAST, false)
+                                        .term(BlockStateProperties.SOUTH, false)
+                                        .term(BlockStateProperties.WEST, false), Variant.variant().with(VariantProperties.MODEL, barsPostModel))
+                                .with(Condition.condition()
+                                        .term(BlockStateProperties.NORTH, true)
+                                        .term(BlockStateProperties.EAST, false)
+                                        .term(BlockStateProperties.SOUTH, false)
+                                        .term(BlockStateProperties.WEST, false), Variant.variant().with(VariantProperties.MODEL, barsCapModel))
+                                .with(Condition.condition().term(BlockStateProperties.NORTH, false)
+                                        .term(BlockStateProperties.EAST, true)
+                                        .term(BlockStateProperties.SOUTH, false)
+                                        .term(BlockStateProperties.WEST, false), Variant.variant().with(VariantProperties.MODEL, barsCapModel).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
+                                .with(Condition.condition().term(BlockStateProperties.NORTH, false)
+                                        .term(BlockStateProperties.EAST, false)
+                                        .term(BlockStateProperties.SOUTH, true)
+                                        .term(BlockStateProperties.WEST, false), Variant.variant().with(VariantProperties.MODEL, barsCapAltModel))
+                                .with(Condition.condition().term(BlockStateProperties.NORTH, false)
+                                        .term(BlockStateProperties.EAST, false)
+                                        .term(BlockStateProperties.SOUTH, false)
+                                        .term(BlockStateProperties.WEST, true), Variant.variant().with(VariantProperties.MODEL, barsCapAltModel).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
+                                .with(Condition.condition()
+                                        .term(BlockStateProperties.NORTH, true), Variant.variant().with(VariantProperties.MODEL, barsSideModel))
+                                .with(Condition.condition()
+                                        .term(BlockStateProperties.EAST, true), Variant.variant().with(VariantProperties.MODEL, barsSideModel).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
+                                .with(Condition.condition()
+                                        .term(BlockStateProperties.SOUTH, true), Variant.variant().with(VariantProperties.MODEL, barsSideAltModel))
+                                .with(Condition.condition()
+                                        .term(BlockStateProperties.WEST, true), Variant.variant().with(VariantProperties.MODEL, barsSideAltModel).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
+                );
+    }
+
+    /**
+     * Overloaded variant of {@link #barsBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation)}.
+     * Creates a {@link BlockStateDefinition} for a bars block using automatic model location resolution.
+     * <p>
+     *     <h3>Multipart Conditions</h3>
+     *     <ul>
+     *         <li>Post ends (always) -> {@code targetBlock}_post_ends</li>
+     *         <li>All directions false -> {@code targetBlock}_post</li>
+     *         <li>Only {@link BlockStateProperties#NORTH} true -> {@code targetBlock}_cap</li>
+     *         <li>Only {@link BlockStateProperties#EAST} true -> {@code targetBlock}_cap (rotated 90°)</li>
+     *         <li>Only {@link BlockStateProperties#SOUTH} true -> {@code targetBlock}_cap_alt</li>
+     *         <li>Only {@link BlockStateProperties#WEST} true -> {@code targetBlock}_cap_alt (rotated 90°)</li>
+     *         <li>{@link BlockStateProperties#NORTH} = true -> {@code targetBlock}_side</li>
+     *         <li>{@link BlockStateProperties#EAST} = true -> {@code targetBlock}_side (rotated 90°)</li>
+     *         <li>{@link BlockStateProperties#SOUTH} = true -> {@code targetBlock}_side_alt</li>
+     *         <li>{@link BlockStateProperties#WEST} = true -> {@code targetBlock}_side_alt (rotated 90°)</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the bars {@link Block} to be used for
+     *                    automatic model location resolution.
+     *
+     * @return A new {@link BlockStateDefinition} with a multipart bars blockstate.
+     *
+     * @see #barsBlockState(Supplier, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation)
+     * @see #bars(Supplier)
+     */
+    public static BlockStateDefinition barsBlockState(Supplier<Block> targetBlock) {
+        return barsBlockState(targetBlock,
+                ModelLocationUtils.getModelLocation(targetBlock.get(), "_post"),
+                ModelLocationUtils.getModelLocation(targetBlock.get(), "_post_ends"),
+                ModelLocationUtils.getModelLocation(targetBlock.get(), "_side"),
+                ModelLocationUtils.getModelLocation(targetBlock.get(), "_side_alt"),
+                ModelLocationUtils.getModelLocation(targetBlock.get(), "_cap"),
+                ModelLocationUtils.getModelLocation(targetBlock.get(), "_cap_alt")
+        );
     }
 
     /**
@@ -618,7 +1394,7 @@ public final class ModelUtil {
      * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_COLUMN} template.
      */
     public static BlockModelDefinition cubeColumn(Supplier<Block> targetBlock) {
-        return cubeColumn(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top"));
+        return cubeColumn(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"));
     }
 
     /**
@@ -674,7 +1450,7 @@ public final class ModelUtil {
      * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_COLUMN_HORIZONTAL} template.
      */
     public static BlockModelDefinition cubeColumnHorizontal(Supplier<Block> targetBlock) {
-        return cubeColumnHorizontal(RegistryUtil.getTextureLocationOrDefault(targetBlock), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top"));
+        return cubeColumnHorizontal(RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"));
     }
 
     /**
@@ -729,7 +1505,7 @@ public final class ModelUtil {
      * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#CUBE_COLUMN_MIRRORED} template.
      */
     public static BlockModelDefinition cubeColumnMirrored(Supplier<Block> targetBlock) {
-        return cubeColumnMirrored(RegistryUtil.getTextureLocationOrDefault(targetBlock), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top"));
+        return cubeColumnMirrored(RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"));
     }
 
     /**
@@ -774,7 +1550,7 @@ public final class ModelUtil {
      * @see #rotatedPillarBlockState(Supplier)
      */
     public static BlockModelDefinition rotatedPillar(Supplier<Block> targetBlock) {
-        return rotatedPillar(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top"));
+        return rotatedPillar(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"));
     }
 
     /**
@@ -908,31 +1684,34 @@ public final class ModelUtil {
      * Creates two {@link BlockModelDefinition}s for a double plant block, with separate top and bottom {@link ModelTemplates#CROSS}
      * models using {@link #CUTOUT_RENDER_TYPE}. Generates a single item model from the bottom model.
      * <p>
-     *     <h3>Required Texture Slots (Top Model)</h3>
-     *     <ul>
-     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.pickBlockPrefix(topTexture)}</li>
-     *     </ul>
-     *     <h3>Required Texture Slots (Bottom Model)</h3>
-     *     <ul>
-     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.pickBlockPrefix(bottomTexture)}</li>
-     *     </ul>
+     * <h3>Required Texture Slots (Top Model)</h3>
+     * <ul>
+     *     <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.pickBlockPrefix(topTexture)}</li>
+     * </ul>
+     * <h3>Required Texture Slots (Bottom Model)</h3>
+     * <ul>
+     *     <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.pickBlockPrefix(bottomTexture)}</li>
+     * </ul>
      *
-     * @param topTexture The {@link ResourceLocation} representing the texture of the upper half.
+     * @param targetBlock The {@code Supplier<Block>} representing the double plant {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     * @param topTexture    The {@link ResourceLocation} representing the texture of the upper half.
      * @param bottomTexture The {@link ResourceLocation} representing the texture of the lower half.
-     *
      * @return A {@link BlockModelDefinition} with nested top and bottom {@link ModelTemplates#CROSS} models.
-     *
      * @see #doublePlant(Supplier)
      * @see #doublePlantBlockState(Supplier, ResourceLocation, ResourceLocation)
      */
-    public static BlockModelDefinition doublePlant(ResourceLocation topTexture, ResourceLocation bottomTexture) {
-        return crossCutout(topTexture)
+    public static BlockModelDefinition doublePlant(Supplier<Block> targetBlock, ResourceLocation topTexture, ResourceLocation bottomTexture) {
+        ResourceLocation basePlantId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
+
+        return crossCutout(topTexture).withCustomName(basePlantId.getPath().concat("_top"))
                 .withOrdinalModelDefinition(crossCutout(bottomTexture)
+                        .withCustomName(basePlantId.getPath().concat("_bottom"))
                         .setOrdinalModelDefinitions(ObjectArrayList.of())); // Ensure generation of 1 item model, not 2
     }
 
     /**
-     * Overloaded variant of {@link #doublePlant(ResourceLocation, ResourceLocation)}. Creates two
+     * Overloaded variant of {@link #doublePlant(Supplier, ResourceLocation, ResourceLocation)}. Creates two
      * {@link BlockModelDefinition}s for a double plant block using automatic texture resolution with {@code _top} and
      * {@code _bottom} suffixes.
      * <p>
@@ -950,11 +1729,11 @@ public final class ModelUtil {
      *
      * @return A {@link BlockModelDefinition} with nested top and bottom {@link ModelTemplates#CROSS} models.
      *
-     * @see #doublePlant(ResourceLocation, ResourceLocation)
+     * @see #doublePlant(Supplier, ResourceLocation, ResourceLocation)
      * @see #doublePlantBlockState(Supplier)
      */
     public static BlockModelDefinition doublePlant(Supplier<Block> targetBlock) {
-        return doublePlant(RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom"));
+        return doublePlant(targetBlock, RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom"));
     }
 
     /**
@@ -979,11 +1758,15 @@ public final class ModelUtil {
      * @return A {@link BlockModelDefinition} with nested top and bottom {@link ModelTemplates#TINTED_CROSS} models.
      *
      * @see #tintedDoublePlant(Supplier)
-     * @see #doublePlant(ResourceLocation, ResourceLocation)
+     * @see #doublePlant(Supplier, ResourceLocation, ResourceLocation)
      */
     public static BlockModelDefinition tintedDoublePlant(Supplier<Block> targetBlock, ResourceLocation topTexture, ResourceLocation bottomTexture) {
+        ResourceLocation basePlantId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
+
         return tintedCrossCutout(targetBlock, topTexture)
+                .withCustomName(basePlantId.getPath().concat("_top"))
                 .withOrdinalModelDefinition(tintedCrossCutout(targetBlock, bottomTexture)
+                        .withCustomName(basePlantId.getPath().concat("_bottom"))
                         .setOrdinalModelDefinitions(ObjectArrayList.of())); // Ensure generation of 1 item model, not 2
     }
 
@@ -1031,7 +1814,7 @@ public final class ModelUtil {
      * @return A {@link BlockStateDefinition} with {@link BlockStateProperties#DOUBLE_BLOCK_HALF} property dispatch.
      *
      * @see #doublePlantBlockState(Supplier)
-     * @see #doublePlant(ResourceLocation, ResourceLocation)
+     * @see #doublePlant(Supplier, ResourceLocation, ResourceLocation)
      */
     public static BlockStateDefinition doublePlantBlockState(Supplier<Block> targetBlock, ResourceLocation topModel, ResourceLocation bottomModel) {
         return new BlockStateDefinition(targetBlock)
@@ -4612,7 +5395,10 @@ public final class ModelUtil {
      * @see #farmland(Supplier, ResourceLocation, ResourceLocation, ResourceLocation)
      */
     public static BlockModelDefinition farmlandMoist(Supplier<Block> targetBlock, ResourceLocation moistFarmlandTexture, ResourceLocation dirtTexture) {
+        ResourceLocation baseFarmlandId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
+
         return new BlockModelDefinition(ModelTemplates.FARMLAND)
+                .withCustomName(baseFarmlandId.getPath().concat("_moist"))
                 .withTextureMapping(new TextureMapping()
                         .put(TextureSlot.DIRT, RegistryUtil.pickBlockPrefix(dirtTexture))
                         .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(moistFarmlandTexture)))
@@ -4794,6 +5580,34 @@ public final class ModelUtil {
      */
     public static BlockStateDefinition farmlandBlockState(Supplier<Block> targetBlock) {
         return farmlandBlockState(targetBlock, ModelLocationUtils.getModelLocation(targetBlock.get()), ModelLocationUtils.getModelLocation(targetBlock.get()).withSuffix("_moist"));
+    }
+
+
+    public static BlockModelDefinition grassBlock(ResourceLocation particleTexture, ResourceLocation bottomTexture, ResourceLocation topTexture, ResourceLocation sideTexture, ResourceLocation overlayTexture) {
+        return new BlockModelDefinition(GRASS_BLOCK_MODEL_TEMPLATE)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.PARTICLE, RegistryUtil.pickBlockPrefix(particleTexture))
+                        .put(TextureSlot.BOTTOM, RegistryUtil.pickBlockPrefix(bottomTexture))
+                        .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topTexture))
+                        .put(TextureSlot.SIDE, RegistryUtil.pickBlockPrefix(sideTexture))
+                        .put(OVERLAY_TEXTURE_SLOT, RegistryUtil.pickBlockPrefix(overlayTexture)))
+                .withRenderType(CUTOUT_MIPPED_RENDER_TYPE);
+    }
+
+    public static BlockModelDefinition grassBlock(Supplier<Block> targetBlock) {
+        ResourceLocation targetGrassBlockId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
+        ResourceLocation bottomTexture = RegistryUtil.getTextureLocationOrDefault(
+                targetGrassBlockId.withSuffix("_bottom"), "block",
+                RegistryUtil.getTextureLocationOrDefault(targetGrassBlockId.withPath(targetGrassBlockId.getPath().replace("_grass_block", "_dirt")), "block")
+        );
+
+        return grassBlock(
+                bottomTexture,
+                bottomTexture,
+                RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "block"),
+                RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"),
+                RegistryUtil.getTextureLocationOrDefault(targetBlock, "block")
+        );
     }
 
     /**

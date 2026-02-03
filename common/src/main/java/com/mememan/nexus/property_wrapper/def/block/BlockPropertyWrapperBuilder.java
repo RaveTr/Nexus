@@ -23,14 +23,14 @@ import java.util.function.Supplier;
 
 public class BlockPropertyWrapperBuilder<B extends Block> extends BaseDefaultableDataGenPropertyWrapperBuilder<B, BlockPropertyWrapperBuilder<B>, BlockPropertyWrapper<B>> implements DefaultableVanillaBasedPropertyWrapperBuilder<B, BlockPropertyWrapperBuilder<B>, BlockPropertyWrapper<B>> {
     protected final SpecializedVanillaPropertyWrapperBuilder<B, BlockPropertyWrapperBuilder<B>, BlockPropertyWrapper<B>> compositeVanillaBuilder;
-    protected Optional<Function<Supplier<B>, BlockStateDefinition>> blockStateDefMapperFunc = Optional.empty();
-    protected Optional<Function<Supplier<B>, WrappedBlockColor>> blockColorMappingFunc = Optional.empty();
-    protected Optional<Function<Supplier<B>, IntIntMutablePair>> flammabilityMappingFunc = Optional.empty();
-    protected Optional<Function<BlockState, BlockState>> blockStrippingMappingFunc = Optional.empty();
-    protected Optional<Function<Supplier<B>, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>>>> blockTillingMappingFunc = Optional.empty();
-    protected Optional<Function<BlockState, BlockState>> blockFlatteningMappingFunc = Optional.empty();
-    protected Optional<Function<Supplier<B>, Supplier<Block>>> blockOxidizationMappingFunc = Optional.empty();
-    protected Optional<Function<Supplier<B>, Supplier<Block>>> blockWaxingMappingFunc = Optional.empty();
+    protected Function<Supplier<B>, BlockStateDefinition> blockStateDefMapperFunc;
+    protected Function<Supplier<B>, WrappedBlockColor> blockColorMappingFunc;
+    protected Function<Supplier<B>, IntIntMutablePair> flammabilityMappingFunc;
+    protected Function<BlockState, BlockState> blockStrippingMappingFunc;
+    protected Function<Supplier<B>, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>>> blockTillingMappingFunc;
+    protected Function<BlockState, BlockState> blockFlatteningMappingFunc;
+    protected Function<Supplier<B>, Supplier<Block>> blockOxidizationMappingFunc;
+    protected Function<Supplier<B>, Supplier<Block>> blockWaxingMappingFunc;
     protected int minMiningLevel = 0;
 
     public BlockPropertyWrapperBuilder(@NotNull BlockPropertyWrapper<B> ownerWrapper) {
@@ -62,7 +62,7 @@ public class BlockPropertyWrapperBuilder<B extends Block> extends BaseDefaultabl
      * @return {@link #self()} (builder method).
      */
     public BlockPropertyWrapperBuilder<B> withBlockStateDefinition(Function<Supplier<B>, BlockStateDefinition> bsdMappingFunc) {
-        this.blockStateDefMapperFunc = Optional.ofNullable(bsdMappingFunc);
+        this.blockStateDefMapperFunc = bsdMappingFunc;
         return self();
     }
 
@@ -77,7 +77,7 @@ public class BlockPropertyWrapperBuilder<B extends Block> extends BaseDefaultabl
      * @return {@link #self()} (builder method).
      */
     public BlockPropertyWrapperBuilder<B> withBlockColor(Function<Supplier<B>, WrappedBlockColor> blockColorMappingFunc) {
-        this.blockColorMappingFunc = Optional.ofNullable(blockColorMappingFunc);
+        this.blockColorMappingFunc = blockColorMappingFunc;
         return self();
     }
 
@@ -92,7 +92,7 @@ public class BlockPropertyWrapperBuilder<B extends Block> extends BaseDefaultabl
      * @return {@link #self()} (builder method).
      */
     public BlockPropertyWrapperBuilder<B> withFlammability(Function<Supplier<B>, IntIntMutablePair> flammabilityMappingFunc) {
-        this.flammabilityMappingFunc = Optional.ofNullable(flammabilityMappingFunc);
+        this.flammabilityMappingFunc = flammabilityMappingFunc;
         return self();
     }
 
@@ -107,7 +107,7 @@ public class BlockPropertyWrapperBuilder<B extends Block> extends BaseDefaultabl
      * @return {@link #self()} (builder method).
      */
     public BlockPropertyWrapperBuilder<B> withBlockStripping(Function<BlockState, BlockState> blockStrippingMappingFunc) {
-        this.blockStrippingMappingFunc = Optional.ofNullable(blockStrippingMappingFunc);
+        this.blockStrippingMappingFunc = blockStrippingMappingFunc;
         return self();
     }
 
@@ -123,7 +123,7 @@ public class BlockPropertyWrapperBuilder<B extends Block> extends BaseDefaultabl
      * @return {@link #self()} (builder method).
      */
     public BlockPropertyWrapperBuilder<B> withBlockTilling(Function<Supplier<B>, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>>> blockTillingMappingFunc) {
-        this.blockTillingMappingFunc = Optional.ofNullable(blockTillingMappingFunc);
+        this.blockTillingMappingFunc = blockTillingMappingFunc;
         return self();
     }
 
@@ -138,7 +138,7 @@ public class BlockPropertyWrapperBuilder<B extends Block> extends BaseDefaultabl
      * @return {@link #self()} (builder method).
      */
     public BlockPropertyWrapperBuilder<B> withBlockFlattening(Function<BlockState, BlockState> blockFlatteningMappingFunc) {
-        this.blockFlatteningMappingFunc = Optional.ofNullable(blockFlatteningMappingFunc);
+        this.blockFlatteningMappingFunc = blockFlatteningMappingFunc;
         return self();
     }
 
@@ -153,7 +153,7 @@ public class BlockPropertyWrapperBuilder<B extends Block> extends BaseDefaultabl
      * @return {@link #self()} (builder method).
      */
     public BlockPropertyWrapperBuilder<B> withBlockOxidization(Function<Supplier<B>, Supplier<Block>> blockOxidizationMappingFunc) {
-        this.blockOxidizationMappingFunc = Optional.ofNullable(blockOxidizationMappingFunc);
+        this.blockOxidizationMappingFunc = blockOxidizationMappingFunc;
         return self();
     }
 
@@ -168,7 +168,7 @@ public class BlockPropertyWrapperBuilder<B extends Block> extends BaseDefaultabl
      * @return {@link #self()} (builder method).
      */
     public BlockPropertyWrapperBuilder<B> withBlockWaxing(Function<Supplier<B>, Supplier<Block>> blockWaxingMappingFunc) {
-        this.blockWaxingMappingFunc = Optional.ofNullable(blockWaxingMappingFunc);
+        this.blockWaxingMappingFunc = blockWaxingMappingFunc;
         return self();
     }
 

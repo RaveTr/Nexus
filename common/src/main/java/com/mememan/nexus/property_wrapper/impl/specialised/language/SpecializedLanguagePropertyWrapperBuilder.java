@@ -9,13 +9,18 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 
+/**
+ * Specialized implementation of {@link LanguageBasedPropertyWrapper}. Implements all language-related builder methods,
+ * generic types, and default behaviour for language-based property wrapper handling.
+ *
+ * @see SpecializedLanguagePropertyWrapper
+ */
 public class SpecializedLanguagePropertyWrapperBuilder<T, SELF extends LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW>, LBPW extends LanguageBasedPropertyWrapper<T, LBPW, SELF>> extends BaseDataGenPropertyWrapperBuilder<T, SELF, LBPW> implements LanguageBasedPropertyWrapperBuilder<T, SELF, LBPW> {
-    protected Optional<String> customName = Optional.empty();
+    protected String customName;
     protected boolean literalTranslation = false;
-    protected Optional<Function<String, String>> objectPostTranslationMapper = Optional.empty();
+    protected Function<String, String> objectPostTranslationMapper;
     protected boolean bypassDefaultTranslation = false;
     protected final List<String> customSeparatorWords = ObjectArrayList.of(DEFAULT_SEPARATOR_WORDS.toArray(String[]::new));
     protected final Map<String, Function<String, String>> additionalLocalizations = new Object2ObjectOpenHashMap<>();
@@ -31,13 +36,13 @@ public class SpecializedLanguagePropertyWrapperBuilder<T, SELF extends LanguageB
                 .literalTranslation(propertyWrapper.hasLiteralTranslation())
                 .withLocalization(propertyWrapper.getObjectPostTranslationMapper().orElse(null))
                 .bypassDefaultTranslation(propertyWrapper.bypassesDefaultTranslation())
-                .setCustomSeparatorWords(new ObjectArrayList<>(propertyWrapper.getCustomSeparatorWords()))
-                .setAdditionalLocalizationKeys(new Object2ObjectOpenHashMap<>(propertyWrapper.getAdditionalLocalizationKeys()));
+                .setCustomSeparatorWords(propertyWrapper.getCustomSeparatorWords())
+                .setAdditionalLocalizationKeys(propertyWrapper.getAdditionalLocalizationKeys());
     }
 
     @Override
     public SELF withCustomName(String manuallyLocalizedObjectName) {
-        this.customName = Optional.ofNullable(manuallyLocalizedObjectName); // Allow blanks cuz why not + JIC
+        this.customName = manuallyLocalizedObjectName; // Allow blanks cuz why not + JIC
         return self();
     }
 
@@ -49,7 +54,7 @@ public class SpecializedLanguagePropertyWrapperBuilder<T, SELF extends LanguageB
 
     @Override
     public SELF withLocalization(Function<String, String> objectTranslationFunc) {
-        this.objectPostTranslationMapper = Optional.ofNullable(objectTranslationFunc); // JIC
+        this.objectPostTranslationMapper = objectTranslationFunc;
         return self();
     }
 

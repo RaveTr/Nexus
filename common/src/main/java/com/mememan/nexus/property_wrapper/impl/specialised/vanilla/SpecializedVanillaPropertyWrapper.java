@@ -13,6 +13,12 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * Specialized implementation of {@link VanillaBasedPropertyWrapper}. Implements all vanilla-related getter methods,
+ * generic types, and default behaviour for vanilla-based property wrapper handling for {@linkplain ItemLike ItemLikes}.
+ *
+ * @see SpecializedVanillaPropertyWrapperBuilder
+ */
 public class SpecializedVanillaPropertyWrapper<IL extends ItemLike, SELF extends VanillaBasedPropertyWrapper<IL, SELF, BUILDER>, BUILDER extends SpecializedVanillaPropertyWrapperBuilder<IL, BUILDER, SELF>> extends BasePropertyWrapper<IL, SELF, BUILDER> implements VanillaBasedPropertyWrapper<IL, SELF, BUILDER> {
 
     public SpecializedVanillaPropertyWrapper(Supplier<IL> parentObject, boolean isTemplate, String modId) {
@@ -29,21 +35,21 @@ public class SpecializedVanillaPropertyWrapper<IL extends ItemLike, SELF extends
 
     @Override
     public Optional<Function<Supplier<IL>, Float>> getCompostMapper() {
-        return rawBuilder().flatMap(builder -> builder.compostMapperFunc);
+        return rawBuilder().map(b -> b.compostMapperFunc);
     }
 
     @Override
     public Optional<Function<Supplier<IL>, Integer>> getFuelMapper() {
-        return rawBuilder().flatMap(builder -> builder.fuelMapperFunc);
+        return rawBuilder().map(b -> b.fuelMapperFunc);
     }
 
     @Override
     public Optional<Function<Supplier<IL>, DispenseItemBehavior>> getDispenseBehaviourMapper() {
-        return rawBuilder().flatMap(builder -> builder.dispenseBehaviourMapperFunc);
+        return rawBuilder().map(b -> b.dispenseBehaviourMapperFunc);
     }
 
     @Override
     public List<Supplier<CreativeModeTab>> getParentCreativeModeTabs() {
-        return rawBuilder().map(builder -> builder.parentTabs).orElse(ObjectArrayList.of());
+        return rawBuilder().map(builder -> new ObjectArrayList<>(builder.parentTabs)).orElse(ObjectArrayList.of());
     }
 }

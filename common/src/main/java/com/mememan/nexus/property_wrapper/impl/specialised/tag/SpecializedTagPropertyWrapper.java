@@ -1,6 +1,7 @@
 package com.mememan.nexus.property_wrapper.impl.specialised.tag;
 
 import com.mememan.nexus.property_wrapper.base.specialised.tag.TagBasedPropertyWrapper;
+import com.mememan.nexus.property_wrapper.def.tag.TagPropertyWrapperBuilder;
 import com.mememan.nexus.property_wrapper.impl.generic.BaseDataGenPropertyWrapper;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.tags.TagKey;
@@ -9,6 +10,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.function.Supplier;
 
+/**
+ * Specialized implementation of {@link TagBasedPropertyWrapper}. Implements all tag-related getter methods,
+ * generic types, and default behaviour for tag-based property wrapper handling for taggable objects.
+ *
+ * @see SpecializedTagPropertyWrapperBuilder
+ * @see TagPropertyWrapperBuilder
+ */
 public class SpecializedTagPropertyWrapper<T, SELF extends TagBasedPropertyWrapper<T, SELF, BUILDER>, BUILDER extends SpecializedTagPropertyWrapperBuilder<T, BUILDER, SELF>> extends BaseDataGenPropertyWrapper<T, SELF, BUILDER> implements TagBasedPropertyWrapper<T, SELF, BUILDER> {
 
     public SpecializedTagPropertyWrapper(Supplier<T> parentObject, boolean isTemplate, String modId) {
@@ -25,11 +33,11 @@ public class SpecializedTagPropertyWrapper<T, SELF extends TagBasedPropertyWrapp
 
     @Override
     public List<Supplier<TagKey<? super T>>> getObjectTags() {
-        return rawBuilder().map(b -> b.objectTagKeys).orElse(ObjectArrayList.of());
+        return rawBuilder().map(b -> new ObjectArrayList<>(b.objectTagKeys)).orElse(ObjectArrayList.of());
     }
 
     @Override
     public List<Supplier<TagKey<?>>> getAdditionalTags() {
-        return rawBuilder().map(b -> b.additionalTagKeys).orElse(ObjectArrayList.of());
+        return rawBuilder().map(b -> new ObjectArrayList<>(b.additionalTagKeys)).orElse(ObjectArrayList.of());
     }
 }

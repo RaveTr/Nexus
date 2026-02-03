@@ -6,11 +6,18 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Optional;
 import java.util.function.Supplier;
 
+/**
+ * Definite builder implementation for {@link BlockEntityType} objects, with constrained generic types for {@code SELF} and
+ * {@code BUILDER}.
+ *
+ * @param <BE> Any {@link BlockEntity} type.
+ *
+ * @see BlockEntityTypePropertyWrapper
+ */
 public class BlockEntityTypePropertyWrapperBuilder<BE extends BlockEntity> extends BaseDefaultableBareDataGenPropertyWrapperBuilder<BlockEntityType<BE>, BlockEntityTypePropertyWrapperBuilder<BE>, BlockEntityTypePropertyWrapper<BE>> {
-    protected Optional<Supplier<BlockEntityClientData<BE>>> clientData = Optional.empty();
+    protected Supplier<BlockEntityClientData<BE>> clientData;
 
     public BlockEntityTypePropertyWrapperBuilder(@NotNull BlockEntityTypePropertyWrapper<BE> ownerWrapper) {
         super(ownerWrapper);
@@ -35,7 +42,7 @@ public class BlockEntityTypePropertyWrapperBuilder<BE extends BlockEntity> exten
      * @see BlockEntityClientData
      */
     public BlockEntityTypePropertyWrapperBuilder<BE> withClientData(Supplier<BlockEntityClientData<BE>> clientData) {
-        this.clientData = Optional.ofNullable(clientData);
+        this.clientData = clientData;
         return self();
     }
 }

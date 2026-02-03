@@ -198,7 +198,8 @@ public final class VanillaUtil {
      * The returned block color mapper uses biome colors to calculate the grass color based on the block's position
      * (biome determination). If the block is not a grass block, it returns the default grass color (0.5, 1.0).
      *
-     * @param targetBlock The {@link Supplier<Block>} representing the block to create the block color mapper for.
+     * @param targetBlock The {@link Supplier<Block>} representing the block to create the block color mapper for. Only
+     *                    really used as a dummy parameter for functional lambda reference convenience.
      *
      * @return The {@link WrappedBlockColor} for the given block, using the vanilla grass color logic.
      */

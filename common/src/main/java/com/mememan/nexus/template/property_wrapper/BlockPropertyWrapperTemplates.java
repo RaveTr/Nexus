@@ -533,6 +533,8 @@ public final class BlockPropertyWrapperTemplates {
     public static final BlockPropertyWrapper<Block> GRASS_BLOCK = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_SHOVEL)
+            .literalTranslation()
+            .withModelDefinition(ModelUtil::grassBlock)
             .withBlockTilling(VanillaUtil::grassBlockFarmlandTillingAction)
             .withBlockFlattening(VanillaUtil::grassBlockPathFlatteningAction)
             .withBlockColor(VanillaUtil::standardGrassColor)
@@ -654,6 +656,36 @@ public final class BlockPropertyWrapperTemplates {
             .builder()
             .copyFrom(MATERIAL_BLOCK_SHOVEL)
             .withLootTable(LootUtil::dropComponents)
+            .build();
+
+    public static final BlockPropertyWrapper<Block> GLASS = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC)
+            .withModelDefinition(ModelUtil::glass)
+            .withLootTable(LootUtil::dropSilkTouchOnly)
+            .build();
+    public static final BlockPropertyWrapper<Block> GLASS_PANE = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(GLASS)
+            .withModelDefinition(ModelUtil::glassPane)
+            .withBlockStateDefinition(ModelUtil::glassPaneBlockState)
+            .build();
+
+    public static final BlockPropertyWrapper<Block> BARS = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BASIC_PICKAXE)
+            .withModelDefinition(ModelUtil::bars)
+            .withBlockStateDefinition(ModelUtil::barsBlockState)
+            .build();
+    public static final BlockPropertyWrapper<Block> BARS_IRON = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BARS)
+            .withTag(() -> BlockTags.NEEDS_IRON_TOOL)
+            .build();
+    public static final BlockPropertyWrapper<Block> BARS_DIAMOND = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(BARS)
+            .withTag(() -> BlockTags.NEEDS_DIAMOND_TOOL)
             .build();
 
     private BlockPropertyWrapperTemplates() {

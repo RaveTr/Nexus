@@ -96,14 +96,15 @@ public final class FabricVanillaCompat {
                     .stream()
                     .map(curPW -> (TagPropertyWrapper<?, ? extends TagKey<?>>) curPW)
                     .forEach(curPW -> {
-                        Optional<Integer> tagCookTime = curPW.getCookTime();
+                        Optional<Integer> tagCookTime = Optional.of(curPW.getCookTime())
+                                .filter(cookTime -> Math.abs(cookTime) > 0);
                         Optional<IntIntMutablePair> tagFlammabilityProperties = curPW.getFlammabilityPair();
                         Supplier<? extends TagKey<?>> parentTagKeySup = curPW.getParentObject();
                         TagKey<?> parentTagKey = parentTagKeySup.get();
 
                         tagCookTime
                                 .filter(cookTime -> parentTagKey.isFor(Registries.ITEM) || parentTagKey.isFor(Registries.BLOCK))
-                                .flatMap(cookTime -> curPW.getCookTime())
+                                .map(cookTime -> curPW.getCookTime())
                                 .ifPresent(cookTime -> {
                                     if (parentTagKey.isFor(Registries.BLOCK)) {
                                         BuiltInRegistries.BLOCK.getTagOrEmpty((TagKey<Block>) parentTagKey).forEach(curBlockHolder -> {

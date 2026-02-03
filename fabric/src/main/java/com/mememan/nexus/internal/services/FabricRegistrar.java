@@ -109,6 +109,16 @@ public class FabricRegistrar implements Registrar {
     }
 
     @Override
+    public <T> void appellate(ResourceLocation objId, ResourceLocation aliasId, ResourceKey<Registry<T>> targetRegistryKey) {
+
+    }
+
+    @Override
+    public <T, V extends T> Supplier<T> overrideObject(ResourceLocation objId, Supplier<V> objSup, Registry<V> targetRegistry) {
+        return null;
+    }
+
+    @Override
     public <T> Registry<T> registerStandardRegistry(StandardRegistryBuilder<T, Registry<T>> registryBuilder) {
         Registry<T> builtReg = registryBuilder.buildAndGetRegistry();
 
@@ -151,6 +161,11 @@ public class FabricRegistrar implements Registrar {
     @Override
     public Map<ResourceKey<? extends Registry<?>>, RegistrySynchronization.NetworkedRegistryData<?>> getSyncedDynamicRegistries() {
         return ImmutableMap.copyOf(RegistrySynchronization.NETWORKABLE_REGISTRIES);
+    }
+
+    @Override
+    public Map<ResourceKey<? extends Registry<?>>, Map<Integer, Multimap<ResourceLocation, ResourceLocation>>> getAppellations() {
+        return Map.of();
     }
 
     @Override

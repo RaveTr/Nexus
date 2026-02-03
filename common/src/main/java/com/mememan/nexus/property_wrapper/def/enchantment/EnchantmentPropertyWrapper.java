@@ -6,6 +6,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
+/**
+ * Definite wrapper implementation for {@link Enchantment} objects, with constrained generic types for {@code SELF} and
+ * {@code BUILDER}.
+ *
+ * @param <E> Any {@link Enchantment} type.
+ *
+ * @see EnchantmentPropertyWrapperBuilder
+ */
 public class EnchantmentPropertyWrapper<E extends Enchantment> extends BaseDefaultableBareDataGenPropertyWrapper<E, EnchantmentPropertyWrapper<E>, EnchantmentPropertyWrapperBuilder<E>> {
 
     public EnchantmentPropertyWrapper(Supplier<E> parentObject, boolean isTemplate, String modId) {

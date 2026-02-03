@@ -129,6 +129,16 @@ public class ForgeRegistrar implements Registrar {
     }
 
     @Override
+    public <T> void appellate(ResourceLocation objId, ResourceLocation aliasId, ResourceKey<Registry<T>> targetRegistryKey) {
+
+    }
+
+    @Override
+    public <T, V extends T> Supplier<T> overrideObject(ResourceLocation objId, Supplier<V> objSup, Registry<V> targetRegistry) {
+        return null;
+    }
+
+    @Override
     public <T> Registry<T> registerStandardRegistry(StandardRegistryBuilder<T, Registry<T>> registryBuilder) {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus(); // Should not be null at the time this method is called
         DeferredRegister<T> defReg = DeferredRegister.create(registryBuilder.getRegistryKey(), registryBuilder.getRegistryKey().location().getNamespace());
@@ -174,6 +184,11 @@ public class ForgeRegistrar implements Registrar {
     @Override
     public Map<ResourceKey<? extends Registry<?>>, RegistrySynchronization.NetworkedRegistryData<?>> getSyncedDynamicRegistries() {
         return DataPackRegistriesHooksAccessor.getNetworkableRegistries();
+    }
+
+    @Override
+    public Map<ResourceKey<? extends Registry<?>>, Map<Integer, Multimap<ResourceLocation, ResourceLocation>>> getAppellations() {
+        return Map.of();
     }
 
     @Override

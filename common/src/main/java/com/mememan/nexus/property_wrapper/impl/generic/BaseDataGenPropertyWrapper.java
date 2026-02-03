@@ -3,6 +3,7 @@ package com.mememan.nexus.property_wrapper.impl.generic;
 import com.mememan.nexus.datagen.ProviderType;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapperBuilder;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -48,6 +49,6 @@ public class BaseDataGenPropertyWrapper<T, SELF extends DataGenPropertyWrapper<T
 
     @Override
     public Map<ProviderType, Boolean> getProviderTypeRequisites() {
-        return rawBuilder().map(b -> b.providerTypeRequisites).orElse(Map.of());
+        return rawBuilder().map(b -> new Object2BooleanOpenHashMap<>(b.providerTypeRequisites)).orElse(new Object2BooleanOpenHashMap<>());
     }
 }

@@ -14,6 +14,14 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * Definite wrapper implementation for {@link Item} objects, with constrained generic types for {@code SELF} and
+ * {@code BUILDER}.
+ *
+ * @param <I> Any {@link Item} type.
+ *
+ * @see ItemPropertyWrapperBuilder
+ */
 public class ItemPropertyWrapper<I extends Item> extends BaseDefaultableDataGenPropertyWrapper<I, ItemPropertyWrapper<I>, ItemPropertyWrapperBuilder<I>> implements DefaultableVanillaBasedPropertyWrapper<I, ItemPropertyWrapper<I>, ItemPropertyWrapperBuilder<I>> {
     protected final SpecializedVanillaPropertyWrapper<I, ?, ?> compositeVanillaWrapper;
 
@@ -36,7 +44,7 @@ public class ItemPropertyWrapper<I extends Item> extends BaseDefaultableDataGenP
     }
 
     public Optional<Function<Supplier<I>, WrappedItemColor>> getItemColorMapper() {
-        return rawBuilder().flatMap(builder -> builder.itemColorMappingFunc);
+        return rawBuilder().map(builder -> builder.itemColorMappingFunc);
     }
 
     public Map<ResourceLocation, WrappedClampedItemPropertyFunction> getItemModelPredicates() {

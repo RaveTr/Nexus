@@ -18,6 +18,14 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+/**
+ * Definite wrapper implementation for {@link Block} objects, with constrained generic types for {@code SELF} and
+ * {@code BUILDER}.
+ *
+ * @param <B> Any {@link Block} type.
+ *
+ * @see BlockPropertyWrapperBuilder
+ */
 public class BlockPropertyWrapper<B extends Block> extends BaseDefaultableDataGenPropertyWrapper<B, BlockPropertyWrapper<B>, BlockPropertyWrapperBuilder<B>> implements DefaultableVanillaBasedPropertyWrapper<B, BlockPropertyWrapper<B>, BlockPropertyWrapperBuilder<B>> {
     protected final SpecializedVanillaPropertyWrapper<B, ?, ?> compositeVanillaWrapper;
 
@@ -48,7 +56,7 @@ public class BlockPropertyWrapper<B extends Block> extends BaseDefaultableDataGe
      * @see BlockPropertyWrapperBuilder#withBlockStateDefinition(Function)
      */
     public Optional<Function<Supplier<B>, BlockStateDefinition>> getBlockStateDefinition() {
-        return rawBuilder().flatMap(builder -> builder.blockStateDefMapperFunc);
+        return rawBuilder().map(builder -> builder.blockStateDefMapperFunc);
     }
 
     /**
@@ -61,7 +69,7 @@ public class BlockPropertyWrapper<B extends Block> extends BaseDefaultableDataGe
      * @see BlockPropertyWrapperBuilder#withBlockColor(Function)
      */
     public Optional<Function<Supplier<B>, WrappedBlockColor>> getBlockColorMapper() {
-        return rawBuilder().flatMap(builder -> builder.blockColorMappingFunc);
+        return rawBuilder().map(builder -> builder.blockColorMappingFunc);
     }
 
     /**
@@ -74,7 +82,7 @@ public class BlockPropertyWrapper<B extends Block> extends BaseDefaultableDataGe
      * @see BlockPropertyWrapperBuilder#withFlammability(Function)
      */
     public Optional<Function<Supplier<B>, IntIntMutablePair>> getFlammabilityMapper() {
-        return rawBuilder().flatMap(builder -> builder.flammabilityMappingFunc);
+        return rawBuilder().map(builder -> builder.flammabilityMappingFunc);
     }
 
     /**
@@ -86,7 +94,7 @@ public class BlockPropertyWrapper<B extends Block> extends BaseDefaultableDataGe
      * @see BlockPropertyWrapperBuilder#withBlockStripping(Function)
      */
     public Optional<Function<BlockState, BlockState>> getBlockStrippingMapper() {
-        return rawBuilder().flatMap(builder -> builder.blockStrippingMappingFunc);
+        return rawBuilder().map(builder -> builder.blockStrippingMappingFunc);
     }
 
     /**
@@ -99,7 +107,7 @@ public class BlockPropertyWrapper<B extends Block> extends BaseDefaultableDataGe
      * @see BlockPropertyWrapperBuilder#withBlockTilling(Function)
      */
     public Optional<Function<Supplier<B>, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>>>> getBlockTillingMapper() {
-        return rawBuilder().flatMap(builder -> builder.blockTillingMappingFunc);
+        return rawBuilder().map(builder -> builder.blockTillingMappingFunc);
     }
 
     /**
@@ -111,7 +119,7 @@ public class BlockPropertyWrapper<B extends Block> extends BaseDefaultableDataGe
      * @see BlockPropertyWrapperBuilder#withBlockFlattening(Function)
      */
     public Optional<Function<BlockState, BlockState>> getBlockFlatteningMapper() {
-        return rawBuilder().flatMap(builder -> builder.blockFlatteningMappingFunc);
+        return rawBuilder().map(builder -> builder.blockFlatteningMappingFunc);
     }
 
     /**
@@ -124,7 +132,7 @@ public class BlockPropertyWrapper<B extends Block> extends BaseDefaultableDataGe
      * @see BlockPropertyWrapperBuilder#withBlockOxidization(Function)
      */
     public Optional<Function<Supplier<B>, Supplier<Block>>> getBlockOxidizationMapper() {
-        return rawBuilder().flatMap(builder -> builder.blockOxidizationMappingFunc);
+        return rawBuilder().map(builder -> builder.blockOxidizationMappingFunc);
     }
 
     /**
@@ -137,11 +145,12 @@ public class BlockPropertyWrapper<B extends Block> extends BaseDefaultableDataGe
      * @see BlockPropertyWrapperBuilder#withBlockWaxing(Function)
      */
     public Optional<Function<Supplier<B>, Supplier<Block>>> getBlockWaxingMapper() {
-        return rawBuilder().flatMap(builder -> builder.blockWaxingMappingFunc);
+        return rawBuilder().map(builder -> builder.blockWaxingMappingFunc);
     }
 
     /**
-     * Gets the minimum mining level required to mine this BlockPropertyWrapper's parent block.
+     * Gets the minimum mining level required to mine this BlockPropertyWrapper's parent block. 0 represents none
+     * (i.e. this property won't have any effect on its own).
      *
      * @return The minimum mining level required to mine this BlockPropertyWrapper's parent block.
      *

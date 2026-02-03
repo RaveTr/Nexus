@@ -9,6 +9,12 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * Specialized implementation of {@link LootBasedPropertyWrapper}. Implements all loot-related getter methods,
+ * generic types, and default behaviour for loot-based property wrapper handling.
+ *
+ * @see SpecializedLootPropertyWrapperBuilder
+ */
 public class SpecializedLootPropertyWrapper<T, SELF extends LootBasedPropertyWrapper<T, SELF, BUILDER>, BUILDER extends SpecializedLootPropertyWrapperBuilder<T, BUILDER, SELF>> extends BaseDataGenPropertyWrapper<T, SELF, BUILDER> implements LootBasedPropertyWrapper<T, SELF, BUILDER> {
 
     public SpecializedLootPropertyWrapper(Supplier<T> parentObject, boolean isTemplate, String modId) {
@@ -25,6 +31,6 @@ public class SpecializedLootPropertyWrapper<T, SELF extends LootBasedPropertyWra
 
     @Override
     public Optional<Function<Supplier<T>, LootTable.Builder>> getLootTableBuilder() {
-        return rawBuilder().flatMap(b -> b.lootTableBuilder);
+        return rawBuilder().map(b -> b.lootTableBuilder);
     }
 }

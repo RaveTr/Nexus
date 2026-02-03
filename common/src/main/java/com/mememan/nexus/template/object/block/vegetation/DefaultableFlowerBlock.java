@@ -27,6 +27,10 @@ public class DefaultableFlowerBlock extends FlowerBlock implements ConfigurableP
         this.suspiciousStewEffect = suspiciousStewEffect;
     }
 
+    public DefaultableFlowerBlock(Supplier<MobEffect> suspiciousStewEffect, int effectDurationSeconds, Properties properties) {
+        this(suspiciousStewEffect, effectDurationSeconds, properties, ObjectOpenHashSet.of(() -> BlockTags.DIRT));
+    }
+
     public DefaultableFlowerBlock(Properties properties, Set<Supplier<TagKey<Block>>> validPlacementTags) {
         this(null, 0, properties, validPlacementTags);
     }

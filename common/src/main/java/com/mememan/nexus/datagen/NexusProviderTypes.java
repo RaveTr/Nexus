@@ -7,6 +7,7 @@ import com.mememan.nexus.datagen.standard.data_pack.StandardTagProvider;
 import com.mememan.nexus.datagen.standard.resource_pack.StandardBlockStateProvider;
 import com.mememan.nexus.datagen.standard.resource_pack.StandardLanguageProvider;
 import com.mememan.nexus.datagen.standard.resource_pack.StandardModelProvider;
+import com.mememan.nexus.datagen.standard.resource_pack.StandardSoundDefinitionProvider;
 import com.mememan.nexus.loader.ModSide;
 import org.jetbrains.annotations.NotNull;
 
@@ -45,6 +46,11 @@ public enum NexusProviderTypes implements ProviderType {
      * item (as well as any other object type) recipes.
      */
     RECIPE_PROVIDER(ModSide.SERVER),
+    /**
+     * Represents the {@linkplain StandardSoundDefinitionProvider provider} responsible for generating the
+     * {@code sounds.json} file for a given mod within its resource pack.
+     */
+    SOUND_DEFINITION_PROVIDER(ModSide.CLIENT),
     /**
      * Represents the general {@linkplain StandardTagProvider providers} responsible for generating all types of tags.
      */

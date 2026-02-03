@@ -48,6 +48,15 @@ public final class ReflectionUtil {
         throw new IllegalArgumentException(String.format("Could not determine functional interface for lambda function: %s", lambda));
     }
 
+    /**
+     * Compares the generic type argument of a {@code baseInterface} with the provided {@code targetGenericType}.
+     *
+     * @param baseInterface The {@link Class} representing the base {@code interface} to compare.
+     * @param targetGenericType The {@link Class} representing the target generic type to compare against.
+     *
+     * @return {@code true} if the generic type argument of the {@code baseInterface} matches the {@code targetGenericType},
+     * {@code false} otherwise.
+     */
     public static boolean compareGenericInterfaceType(Class<?> baseInterface, Class<?> targetGenericType) {
         if (!baseInterface.isInterface()) return false;
 

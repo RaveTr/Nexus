@@ -1,5 +1,6 @@
 package com.mememan.nexus.platform.services;
 
+import com.google.common.collect.Multimap;
 import com.mememan.nexus.Nexus;
 import com.mememan.nexus.asm.annotations.RegistrarEntry;
 import com.mememan.nexus.loader.StandardRegistryBuilder;
@@ -183,6 +184,55 @@ public interface Registrar {
     <V, T extends V> Supplier<ResourceKey<T>> registerDatapackObject(final ResourceLocation objId, Function<BootstapContext<T>, Supplier<T>> objSupMappingFunc, final ResourceKey<Registry<V>> targetDatapackRegistry);
 
     /**
+     * Registers an alternative ID by which a registry entry may be identified. Primarily useful in cases where the
+     * original ID isn't resolvable on level load for whatever reason.
+     * <br></br>
+     * Aliases may be chained together, tying to the original {@code objId}. For instance, you can call this method more
+     * than once in reference to the original {@code objId} to associate multiple different alias IDs with it.
+     *
+     * @param objId The target registry entry's original ID.
+     * @param aliasId The alternative ID for the object tied to {@code objId}.
+     * @param targetRegistryKey The registry pertaining to the ID being remapped.
+     *
+     * @param <T> The registry object type.
+     *
+     * @apiNote Nexus assumes that an object tied to the provided {@code aliasId} is registered by default to the specified
+     * {@code targetRegistryKey}'s associated {@link Registry}, should the original {@code objId} fail to resolve.
+     */
+    <T> void appellate(final ResourceLocation objId, final ResourceLocation aliasId, ResourceKey<Registry<T>> targetRegistryKey);
+
+    /**
+     * Attempts to override an existing object in the specified {@linkplain Registry targetRegistry}.
+     * <br></br>
+     * <b>Important:</b> Using this on any registered object will result in the corresponding entry for all worlds
+     * loaded while this is in effect to be permanently replaced. This is unlike the behaviour of
+     * {@link #appellate(ResourceLocation, ResourceLocation, ResourceKey)}, which is backwards-compatible with the
+     * reintroduction of mapping(s) tied to the original ID.
+     *
+     * @param objId The id of the object to override, following Minecraft's regex naming conventions/constraints
+     *              (<code>[a-z0-9_.-]</code>). Duplicate exceptions and other edge-cases are handled accordingly
+     *              within the target mod-loader's registry implementation.
+     * @param objSup The object to override. Has to be valid (e.g. non-{@code null}, matching the target registry's
+     *               type, etc.) for the target registry.
+     * @param targetRegistry The target {@link Registry} pertaining to the object being overridden.
+     *
+     * @return The <code>objSup</code> that was overridden/new value associated with the provided {@code objId}.
+     *
+     * @param <V> The parent object type of {@code <T>} (So if {@code targetRegistry} is {@link BuiltInRegistries#ITEM},
+     *           {@code <V>} would be of type {@link Item}, which makes {@code <T>} any object type extending
+     *           {@link Item}).
+     * @param <T> The object type to override (e.g. ({@code extends}) {@link Item} or {@link Attribute}).
+     *
+     * @apiNote This method will only override an existing object if it exists in the specified {@code targetRegistry}.
+     * If the object doesn't exist, this method will simply return the provided {@code objSup}, similar to
+     * {@link #registerObject(ResourceLocation, Supplier, Registry)}.
+     * <br></br>
+     * Other edge cases (e.g. IDs being resolved against {@code null} values) are handled by each loader's internal
+     * registry mechanisms/systems.
+     */
+    <T, V extends T> Supplier<T> overrideObject(ResourceLocation objId, Supplier<V> objSup, Registry<V> targetRegistry);
+
+    /**
      * Attempts to register a standard {@link Registry} using the {@code registryBuilder} passed in, leveraging additional
      * configurations made within said builder.
      *
@@ -354,6 +404,17 @@ public interface Registrar {
      * @return A {@link Map} of all registered dynamic registries synced to the client.
      */
     Map<ResourceKey<? extends Registry<?>>, RegistrySynchronization.NetworkedRegistryData<?>> getSyncedDynamicRegistries();
+
+    /**
+     * Retrieves a copy of appellations (i.e. nicknames/aliases) for registry entries per tracked registry. Tracks both
+     * aliases added through Nexus and the respective loader's API (if appropriate).
+     * <br></br>
+     * Primarily intended for use in remapping missing registry entries to the same ID across different versions of mods,
+     * which may add or remove content between versions.
+     *
+     * @return A {@link Map} of all registry appellations pertaining to existing registry entries.
+     */
+    Map<ResourceKey<? extends Registry<?>>, Map<Integer, Multimap<ResourceLocation, ResourceLocation>>> getAppellations();
 
     /**
      * Gets a copy of all {@linkplain PreparableReloadListener PreparableReloadListeners} registered to and tracked by

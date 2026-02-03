@@ -9,6 +9,14 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+/**
+ * Definite wrapper implementation for {@link BlockEntityType} objects, with constrained generic types for {@code SELF} and
+ * {@code BUILDER}.
+ *
+ * @param <BE> Any {@link BlockEntity} type.
+ *
+ * @see BlockEntityTypePropertyWrapperBuilder
+ */
 public class BlockEntityTypePropertyWrapper<BE extends BlockEntity> extends BaseDefaultableBareDataGenPropertyWrapper<BlockEntityType<BE>, BlockEntityTypePropertyWrapper<BE>, BlockEntityTypePropertyWrapperBuilder<BE>> {
 
     public BlockEntityTypePropertyWrapper(Supplier<BlockEntityType<BE>> parentObject, boolean isTemplate, String modId) {
@@ -31,6 +39,6 @@ public class BlockEntityTypePropertyWrapper<BE extends BlockEntity> extends Base
      * @see BlockEntityTypePropertyWrapperBuilder#withClientData(Supplier)
      */
     public Optional<Supplier<BlockEntityClientData<BE>>> getBlockEntityClientData() {
-        return rawBuilder().flatMap(builder -> builder.clientData);
+        return rawBuilder().map(builder -> builder.clientData);
     }
 }

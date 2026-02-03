@@ -123,7 +123,8 @@ public class NexusForgeCommonMiscEvents {
                 .forEach(curPW -> {
                     TagKey<?> parentTagKey = curPW.getParentObject().get();
 
-                    curPW.getCookTime()
+                    Optional.of(curPW.getCookTime())
+                            .filter(cookTime -> Math.abs(cookTime) > 0)
                             .filter(curPair -> parentTagKey.isFor(Registries.BLOCK) || parentTagKey.isFor(Registries.ITEM))
                             .ifPresent(cookTime -> {
                                 if (parentTagKey.isFor(Registries.BLOCK)) {

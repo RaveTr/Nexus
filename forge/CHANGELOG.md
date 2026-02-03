@@ -1,6 +1,6 @@
 # Nexus API Changelog (Forge)
 
-# v1.0.8 (1.20.1)
+# v1.0.9 (1.20.1)
 
 ## Bug Fixes
 

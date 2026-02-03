@@ -7,6 +7,14 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+/**
+ * Definite wrapper implementation for {@link MobEffect} objects, with constrained generic types for {@code SELF} and
+ * {@code BUILDER}.
+ *
+ * @param <ME> Any {@link MobEffect} type.
+ *
+ * @see MobEffectPropertyWrapperBuilder
+ */
 public class MobEffectPropertyWrapper<ME extends MobEffect> extends BaseDefaultableBareDataGenPropertyWrapper<ME, MobEffectPropertyWrapper<ME>, MobEffectPropertyWrapperBuilder<ME>> {
 
     public MobEffectPropertyWrapper(Supplier<ME> parentObject, boolean isTemplate, String modId) {

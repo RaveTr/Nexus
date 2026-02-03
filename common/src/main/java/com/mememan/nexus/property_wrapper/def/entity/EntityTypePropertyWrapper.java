@@ -12,6 +12,14 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+/**
+ * Definite wrapper implementation for {@link EntityType} objects, with constrained generic types for {@code SELF} and
+ * {@code BUILDER}.
+ *
+ * @param <E> Any {@link Entity} type.
+ *
+ * @see EntityTypePropertyWrapperBuilder
+ */
 public class EntityTypePropertyWrapper<E extends Entity> extends BaseDefaultableBareDataGenPropertyWrapper<EntityType<E>, EntityTypePropertyWrapper<E>, EntityTypePropertyWrapperBuilder<E>> implements DefaultableLootBasedPropertyWrapper<EntityType<E>, EntityTypePropertyWrapper<E>, EntityTypePropertyWrapperBuilder<E>> {
     protected final SpecializedLootPropertyWrapper<EntityType<E>, ?, ?> compositeLootWrapper;
 
@@ -41,7 +49,7 @@ public class EntityTypePropertyWrapper<E extends Entity> extends BaseDefaultable
      * @see EntityTypePropertyWrapperBuilder#withAttributes(Supplier)
      */
     public Optional<Supplier<AttributeSupplier.Builder>> getEntityTypeAttributes() {
-        return rawBuilder().flatMap(builder -> builder.entityTypeAttributes);
+        return rawBuilder().map(builder -> builder.entityTypeAttributes);
     }
 
     /**
@@ -52,7 +60,7 @@ public class EntityTypePropertyWrapper<E extends Entity> extends BaseDefaultable
      * @see EntityTypePropertyWrapperBuilder#withClientData(Supplier)
      */
     public Optional<Supplier<EntityClientData<E>>> getEntityClientData() {
-        return rawBuilder().flatMap(builder -> builder.clientData);
+        return rawBuilder().map(builder -> builder.clientData);
     }
 
     @Override
