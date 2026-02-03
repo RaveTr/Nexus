@@ -68,7 +68,12 @@ public class StandardSoundDefinitionProvider implements ModDataProvider {
     }
 
     /**
+     * Serializes all valid sound definitions, based on all found {@link SoundEventPropertyWrapper} instances stored in
+     * {@link #mappedSoundEventPWs}, to the provided {@code soundsFile}.
      *
+     * @param soundsFile The {@link JsonObject} to serialize sound definitions to.
+     *
+     * @see #serializeSoundDefinition(SoundEventPropertyWrapper)
      */
     protected void serializeSoundDefinitions(JsonObject soundsFile) {
         mappedSoundEventPWs.forEach(curPW -> {
@@ -78,6 +83,16 @@ public class StandardSoundDefinitionProvider implements ModDataProvider {
         });
     }
 
+    /**
+     * Serializes a single sound definition based on the provided {@link SoundEventPropertyWrapper}. Properties whose
+     * values are defaulted are not included in the serialized output (see references below for more info).
+     *
+     * @param targetSEPW The {@link SoundEventPropertyWrapper} to serialize a sound definition for.
+     *
+     * @return A {@link JsonElement} representing the serialized sound definition.
+     *
+     * @see SoundPropertyHolder#hasDefaultProperties()
+     */
     protected <SE extends SoundEvent> JsonElement serializeSoundDefinition(SoundEventPropertyWrapper<SE> targetSEPW) {
         JsonObject mappedObj = new JsonObject();
         boolean replaceOriginal = targetSEPW.replacesOriginalSoundEvent();
