@@ -1042,7 +1042,7 @@ public final class RegistryUtil {
      * @see #pickBlockId(Supplier)
      */
     public static ResourceLocation pickBlockTexture(Supplier<Block> targetBlock) {
-        return getTextureLocationOrDefault(targetBlock, getTextureLocationOrDefault(pickBlockId(targetBlock)));
+        return getTextureLocationOrDefault(targetBlock, "block", getTextureLocationOrDefault(pickBlockId(targetBlock), "block"));
     }
 
     /**

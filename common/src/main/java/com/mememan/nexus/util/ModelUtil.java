@@ -1733,7 +1733,7 @@ public final class ModelUtil {
      * @see #doublePlantBlockState(Supplier)
      */
     public static BlockModelDefinition doublePlant(Supplier<Block> targetBlock) {
-        return doublePlant(targetBlock, RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom"));
+        return doublePlant(targetBlock, RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block"));
     }
 
     /**
@@ -1793,7 +1793,7 @@ public final class ModelUtil {
      * @see #doublePlant(Supplier)
      */
     public static BlockModelDefinition tintedDoublePlant(Supplier<Block> targetBlock) {
-        return tintedDoublePlant(targetBlock, RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom"));
+        return tintedDoublePlant(targetBlock, RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block"));
     }
 
     /**
@@ -1846,7 +1846,7 @@ public final class ModelUtil {
      * @see #doublePlant(Supplier)
      */
     public static BlockStateDefinition doublePlantBlockState(Supplier<Block> targetBlock) {
-        return doublePlantBlockState(targetBlock, RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom"));
+        return doublePlantBlockState(targetBlock, RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block"));
     }
 
     /**
@@ -1900,7 +1900,7 @@ public final class ModelUtil {
      * @see #slab(Supplier)
      */
     public static BlockModelDefinition slabBottom(Supplier<Block> targetBlock) {
-        return slabBottom(targetBlock, RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top"), RegistryUtil.getTextureLocationOrDefault(targetBlock));
+        return slabBottom(targetBlock, RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"), RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"));
     }
 
     /**
@@ -1955,7 +1955,7 @@ public final class ModelUtil {
      * @see #slab(Supplier)
      */
     public static BlockModelDefinition slabTop(Supplier<Block> targetBlock) {
-        return slabTop(targetBlock, RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top"), RegistryUtil.getTextureLocationOrDefault(targetBlock));
+        return slabTop(targetBlock, RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"), RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"));
     }
 
     /**
@@ -3313,8 +3313,8 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom"))}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top"))}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block")}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block")}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
@@ -3329,9 +3329,7 @@ public final class ModelUtil {
      * @see #door(Supplier)
      */
     public static BlockModelDefinition doorBottomLeft(Supplier<Block> targetBlock) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
-
-        return doorBottomLeft(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
+        return doorBottomLeft(targetBlock, RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"));
     }
 
     /**
@@ -3377,8 +3375,8 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom"))}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top"))}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block")}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block")}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
@@ -3393,9 +3391,7 @@ public final class ModelUtil {
      * @see #door(Supplier)
      */
     public static BlockModelDefinition doorBottomLeftOpen(Supplier<Block> targetBlock) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
-
-        return doorBottomLeftOpen(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
+        return doorBottomLeftOpen(targetBlock, RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"));
     }
 
     /**
@@ -3441,8 +3437,8 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom"))}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top"))}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block")}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block")}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
@@ -3457,9 +3453,7 @@ public final class ModelUtil {
      * @see #door(Supplier)
      */
     public static BlockModelDefinition doorBottomRight(Supplier<Block> targetBlock) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
-
-        return doorBottomRight(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
+        return doorBottomRight(targetBlock, RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"));
     }
 
     /**
@@ -3505,8 +3499,8 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom"))}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top"))}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block")}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block")}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
@@ -3521,9 +3515,7 @@ public final class ModelUtil {
      * @see #door(Supplier)
      */
     public static BlockModelDefinition doorBottomRightOpen(Supplier<Block> targetBlock) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
-
-        return doorBottomRightOpen(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
+        return doorBottomRightOpen(targetBlock, RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"));
     }
 
     /**
@@ -3569,8 +3561,8 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom"))}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top"))}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block")}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block")}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
@@ -3585,9 +3577,7 @@ public final class ModelUtil {
      * @see #door(Supplier)
      */
     public static BlockModelDefinition doorTopLeft(Supplier<Block> targetBlock) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
-
-        return doorTopLeft(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
+        return doorTopLeft(targetBlock, RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"));
     }
 
     /**
@@ -3633,8 +3623,8 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom"))}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top"))}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block")}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block")}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
@@ -3649,9 +3639,7 @@ public final class ModelUtil {
      * @see #door(Supplier)
      */
     public static BlockModelDefinition doorTopLeftOpen(Supplier<Block> targetBlock) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
-
-        return doorTopLeftOpen(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
+        return doorTopLeftOpen(targetBlock, RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"));
     }
 
     /**
@@ -3697,8 +3685,8 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom"))}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top"))}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block")}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block")}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
@@ -3713,9 +3701,7 @@ public final class ModelUtil {
      * @see #door(Supplier)
      */
     public static BlockModelDefinition doorTopRight(Supplier<Block> targetBlock) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
-
-        return doorTopRight(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
+        return doorTopRight(targetBlock, RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"));
     }
 
     /**
@@ -3761,8 +3747,8 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom"))}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top"))}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block")}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block")}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the door {@link Block} to be used for
@@ -3777,9 +3763,7 @@ public final class ModelUtil {
      * @see #door(Supplier)
      */
     public static BlockModelDefinition doorTopRightOpen(Supplier<Block> targetBlock) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
-
-        return doorTopRightOpen(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
+        return doorTopRightOpen(targetBlock, RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"));
     }
 
     /**
@@ -3902,8 +3886,8 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom"))}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top"))}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block")}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block")}</li>
      *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.pickItemPrefix(derivedItemTexture)}</li>
      *     </ul>
      *
@@ -3925,9 +3909,7 @@ public final class ModelUtil {
      * @see #doorItem(Supplier)
      */
     public static BlockModelDefinition door(Supplier<Block> targetBlock) {
-        ResourceLocation baseDoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
-
-        return door(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_bottom")), RegistryUtil.getTextureLocationOrDefault(baseDoorId.withSuffix("_top")));
+        return door(targetBlock, RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"));
     }
 
     /**
@@ -4218,7 +4200,7 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, "block")}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the trapdoor {@link Block} to be used for
@@ -4232,9 +4214,7 @@ public final class ModelUtil {
      * @see #trapdoor(Supplier)
      */
     public static BlockModelDefinition trapdoorBottom(Supplier<Block> targetBlock) {
-        ResourceLocation baseTrapdoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
-
-        return trapdoorBottom(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseTrapdoorId));
+        return trapdoorBottom(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"));
     }
 
     /**
@@ -4272,7 +4252,7 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, "block")}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the trapdoor {@link Block} to be used for
@@ -4286,9 +4266,7 @@ public final class ModelUtil {
      * @see #trapdoor(Supplier)
      */
     public static BlockModelDefinition trapdoorOpen(Supplier<Block> targetBlock) {
-        ResourceLocation baseTrapdoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
-
-        return trapdoorOpen(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseTrapdoorId));
+        return trapdoorOpen(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"));
     }
 
     /**
@@ -4326,7 +4304,7 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, "block")}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the trapdoor {@link Block} to be used for
@@ -4340,9 +4318,7 @@ public final class ModelUtil {
      * @see #trapdoor(Supplier)
      */
     public static BlockModelDefinition trapdoorTop(Supplier<Block> targetBlock) {
-        ResourceLocation baseTrapdoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
-
-        return trapdoorTop(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseTrapdoorId));
+        return trapdoorTop(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"));
     }
 
     /**
@@ -4378,7 +4354,7 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *         <li>{@link TextureSlot#TEXTURE} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, "block")}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the trapdoor {@link Block} to be used for
@@ -4392,9 +4368,7 @@ public final class ModelUtil {
      * @see #trapdoor(Supplier, ResourceLocation)
      */
     public static BlockModelDefinition trapdoor(Supplier<Block> targetBlock) {
-        ResourceLocation baseTrapdoorId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
-
-        return trapdoor(targetBlock, RegistryUtil.getTextureLocationOrDefault(baseTrapdoorId));
+        return trapdoor(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"));
     }
 
     /**
@@ -5331,7 +5305,7 @@ public final class ModelUtil {
      *     <h3>Required Texture Slots</h3>
      *     <ul>
      *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(dryFarmlandTexture)}</li>
-     *         <li>{@link TextureSlot#DIRT} -> resolved automatically</li>
+     *         <li>{@link TextureSlot#DIRT} -> Resolved based on {@code targetBlock}'s registry ID</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the farmland {@link Block} to be used for
@@ -5346,7 +5320,8 @@ public final class ModelUtil {
     public static BlockModelDefinition farmlandDry(Supplier<Block> targetBlock, ResourceLocation dryFarmlandTexture) {
         return farmlandDry(targetBlock, dryFarmlandTexture, RegistryUtil.getTextureLocationOrDefault(
                 dryFarmlandTexture.withPath(dryFarmlandTexture.getPath().replace("_farmland", "_dirt")),
-                RegistryUtil.getTextureLocationOrDefault(dryFarmlandTexture.withPath(dryFarmlandTexture.getPath().replace("_farmland", "")))));
+                "block",
+                RegistryUtil.getTextureLocationOrDefault(dryFarmlandTexture.withPath(dryFarmlandTexture.getPath().replace("_farmland", "")), "block")));
     }
 
     /**
@@ -5356,8 +5331,8 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(RegistryUtil.getTextureLocationOrDefault(targetBlock))}</li>
-     *         <li>{@link TextureSlot#DIRT} -> resolved automatically</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"))}</li>
+     *         <li>{@link TextureSlot#DIRT} -> Resolved based on {@code targetBlock}'s registry ID</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the farmland {@link Block} to be used for
@@ -5369,7 +5344,7 @@ public final class ModelUtil {
      * @see #farmlandDry(Supplier, ResourceLocation, ResourceLocation)
      */
     public static BlockModelDefinition farmlandDry(Supplier<Block> targetBlock) {
-        return farmlandDry(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock));
+        return farmlandDry(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"));
     }
 
     /**
@@ -5413,7 +5388,7 @@ public final class ModelUtil {
      *     <h3>Required Texture Slots</h3>
      *     <ul>
      *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(moistFarmlandTexture)}</li>
-     *         <li>{@link TextureSlot#DIRT} -> resolved automatically</li>
+     *         <li>{@link TextureSlot#DIRT} -> Resolved based on {@code targetBlock}'s registry ID</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the farmland {@link Block} to be used for
@@ -5428,7 +5403,8 @@ public final class ModelUtil {
     public static BlockModelDefinition farmlandMoist(Supplier<Block> targetBlock, ResourceLocation moistFarmlandTexture) {
         return farmlandMoist(targetBlock, moistFarmlandTexture, RegistryUtil.getTextureLocationOrDefault(
                 moistFarmlandTexture.withPath(moistFarmlandTexture.getPath().replace("_farmland_moist", "_dirt")),
-                RegistryUtil.getTextureLocationOrDefault(moistFarmlandTexture.withPath(moistFarmlandTexture.getPath().replace("_farmland_moist", "")))));
+                "block",
+                RegistryUtil.getTextureLocationOrDefault(moistFarmlandTexture.withPath(moistFarmlandTexture.getPath().replace("_farmland_moist", "")), "block")));
     }
 
     /**
@@ -5438,8 +5414,8 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_moist"))}</li>
-     *         <li>{@link TextureSlot#DIRT} -> resolved automatically</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_moist", "block"))}</li>
+     *         <li>{@link TextureSlot#DIRT} -> Resolved based on {@code targetBlock}'s registry ID</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the farmland {@link Block} to be used for
@@ -5451,7 +5427,7 @@ public final class ModelUtil {
      * @see #farmlandMoist(Supplier, ResourceLocation, ResourceLocation)
      */
     public static BlockModelDefinition farmlandMoist(Supplier<Block> targetBlock) {
-        return farmlandMoist(targetBlock, RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_moist"));
+        return farmlandMoist(targetBlock, RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_moist", "block"));
     }
 
     /**
@@ -5492,7 +5468,7 @@ public final class ModelUtil {
      *     <ul>
      *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(dryFarmlandTexture)}</li>
      *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(moistFarmlandTexture)}</li>
-     *         <li>{@link TextureSlot#DIRT} -> resolved automatically</li>
+     *         <li>{@link TextureSlot#DIRT} -> Resolved based on {@code targetBlock}'s registry ID</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the farmland {@link Block} to be used for
@@ -5518,7 +5494,7 @@ public final class ModelUtil {
      *     <ul>
      *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(RegistryUtil.getTextureLocationOrDefault(targetBlock))}</li>
      *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_moist"))}</li>
-     *         <li>{@link TextureSlot#DIRT} -> resolved automatically</li>
+     *         <li>{@link TextureSlot#DIRT} -> Resolved based on {@code targetBlock}'s registry ID</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the farmland {@link Block} to be used for
@@ -5582,7 +5558,28 @@ public final class ModelUtil {
         return farmlandBlockState(targetBlock, ModelLocationUtils.getModelLocation(targetBlock.get()), ModelLocationUtils.getModelLocation(targetBlock.get()).withSuffix("_moist"));
     }
 
-
+    /**
+     * Creates a {@link BlockModelDefinition} for grass blocks using the {@link #GRASS_BLOCK_MODEL_TEMPLATE} template.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PARTICLE} -> {@code RegistryUtil.pickBlockPrefix(particleTexture)}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickBlockPrefix(bottomTexture)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(topTexture)}</li>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.pickBlockPrefix(sideTexture)}</li>
+     *         <li>{@link #OVERLAY_TEXTURE_SLOT} -> {@code RegistryUtil.pickBlockPrefix(overlayTexture)}</li>
+     *     </ul>
+     *
+     * @param particleTexture The {@link ResourceLocation} representing the particle texture for the grass block.
+     * @param bottomTexture The {@link ResourceLocation} representing the bottom texture for the grass block.
+     * @param topTexture The {@link ResourceLocation} representing the top texture for the grass block.
+     * @param sideTexture The {@link ResourceLocation} representing the side texture for the grass block.
+     * @param overlayTexture The {@link ResourceLocation} representing the overlay texture for the grass block.
+     *
+     * @return A {@link BlockModelDefinition} for grass blocks.
+     *
+     * @see #grassBlock(Supplier)
+     */
     public static BlockModelDefinition grassBlock(ResourceLocation particleTexture, ResourceLocation bottomTexture, ResourceLocation topTexture, ResourceLocation sideTexture, ResourceLocation overlayTexture) {
         return new BlockModelDefinition(GRASS_BLOCK_MODEL_TEMPLATE)
                 .withTextureMapping(new TextureMapping()
@@ -5594,6 +5591,25 @@ public final class ModelUtil {
                 .withRenderType(CUTOUT_MIPPED_RENDER_TYPE);
     }
 
+    /**
+     * Overloaded variant of {@link #grassBlock(ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation)}.
+     * Creates a {@link BlockModelDefinition} for grass blocks using the {@link #GRASS_BLOCK_MODEL_TEMPLATE} template.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PARTICLE} -> Resolved based on the {@code targetBlock}'s ID (either a bottom texture or dirt texture).</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> Resolved based on the {@code targetBlock}'s ID (either a bottom texture or dirt texture).</li>
+     *         <li>{@link TextureSlot#TOP} -> RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block")</li>
+     *         <li>{@link TextureSlot#SIDE} -> RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_side", "block"){@code RegistryUtil.pickBlockPrefix(sideTexture)}</li>
+     *         <li>{@link #OVERLAY_TEXTURE_SLOT} -> RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_side_overlay", "block")</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the grass block {@link Block} to create the model for.
+     *
+     * @return A {@link BlockModelDefinition} for grass blocks.
+     *
+     * @see #grassBlock(ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation)
+     */
     public static BlockModelDefinition grassBlock(Supplier<Block> targetBlock) {
         ResourceLocation targetGrassBlockId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
         ResourceLocation bottomTexture = RegistryUtil.getTextureLocationOrDefault(
@@ -5604,9 +5620,9 @@ public final class ModelUtil {
         return grassBlock(
                 bottomTexture,
                 bottomTexture,
-                RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "block"),
-                RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"),
-                RegistryUtil.getTextureLocationOrDefault(targetBlock, "block")
+                RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"),
+                RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_side", "block"),
+                RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_side_overlay", "block")
         );
     }
 
@@ -5636,7 +5652,7 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.getTextureLocationOrDefault(targetItem)}</li>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.getTextureLocationOrDefault(targetItem, "item")}</li>
      *     </ul>
      *
      * @param targetItem The {@linkplain Item Item} to use as the base for the {@link ItemModelDefinition} {@code layer0}
@@ -5676,7 +5692,7 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock)}</li>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.getTextureLocationOrDefault(targetBlock, "item")}</li>
      *     </ul>
      *
      * @param targetBlock The {@linkplain Block Block} to use as the base for the {@link ItemModelDefinition} {@code layer0}
@@ -5687,7 +5703,7 @@ public final class ModelUtil {
      * @see #generatedBlock(ResourceLocation)
      */
     public static ItemModelDefinition generatedBlock(Supplier<Block> targetBlock) {
-        return generatedBlock(RegistryUtil.getTextureLocationOrDefault(targetBlock));
+        return generatedBlock(RegistryUtil.getTextureLocationOrDefault(targetBlock, "item"));
     }
 
     /**
@@ -5716,7 +5732,7 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.getTextureLocationOrDefault(targetItem)}</li>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.getTextureLocationOrDefault(targetItem, "item")}</li>
      *     </ul>
      *
      * @param targetItem The {@linkplain Item Item} to use as the base for the {@link ItemModelDefinition} {@code layer0}
@@ -5756,7 +5772,7 @@ public final class ModelUtil {
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
-     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.pickItemPrefix(RegistryUtil.getTextureLocationOrDefault(targetItem))}</li>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.pickItemPrefix(RegistryUtil.getTextureLocationOrDefault(targetItem, "item"))}</li>
      *     </ul>
      *
      * @param targetItem The {@code Supplier<Item>} used to automatically resolve the texture location.
