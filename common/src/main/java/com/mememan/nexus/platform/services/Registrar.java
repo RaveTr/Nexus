@@ -1,12 +1,12 @@
 package com.mememan.nexus.platform.services;
 
-import com.google.common.collect.Multimap;
 import com.mememan.nexus.Nexus;
 import com.mememan.nexus.asm.annotations.RegistrarEntry;
 import com.mememan.nexus.loader.StandardRegistryBuilder;
 import com.mememan.nexus.resource.config.ResourceReloadListenerConfig;
 import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.Pair;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.RegistrySetBuilder;
@@ -28,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -414,7 +415,7 @@ public interface Registrar {
      *
      * @return A {@link Map} of all registry appellations pertaining to existing registry entries.
      */
-    Map<ResourceKey<? extends Registry<?>>, Map<Integer, Multimap<ResourceLocation, ResourceLocation>>> getAppellations();
+    Map<ResourceKey<? extends Registry<?>>, Int2ObjectMap<? extends Set<ResourceLocation>>> getAppellations();
 
     /**
      * Gets a copy of all {@linkplain PreparableReloadListener PreparableReloadListeners} registered to and tracked by

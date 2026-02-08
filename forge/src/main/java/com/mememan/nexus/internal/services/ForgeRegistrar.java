@@ -9,16 +9,20 @@ import com.mememan.nexus.asm.ClassFinder;
 import com.mememan.nexus.asm.annotations.RegistrarEntry;
 import com.mememan.nexus.loader.StandardRegistryBuilder;
 import com.mememan.nexus.mixins.forge.registries.DataPackRegistriesHooksAccessor;
+import com.mememan.nexus.mixins.forge.registries.NamespacedWrapperAccessor;
 import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.platform.services.Registrar;
 import com.mememan.nexus.resource.config.ResourceReloadListenerConfig;
 import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.Pair;
-import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
-import it.unimi.dsi.fastutil.objects.ObjectObjectMutablePair;
-import net.minecraft.core.*;
+import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.objects.*;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistrySetBuilder;
+import net.minecraft.core.RegistrySynchronization;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.resources.RegistryDataLoader;
 import net.minecraft.resources.ResourceKey;
@@ -33,6 +37,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -44,6 +49,7 @@ public class ForgeRegistrar implements Registrar {
     private static final Multimap<ResourceKey<? extends Registry<?>>, ObjectObjectMutablePair<ResourceKey<?>, Function<? extends BootstapContext<?>, ? extends Supplier<?>>>> CACHED_DATAPACK_OBJECT_ENTRIES = ArrayListMultimap.create(); // Slower put() than HashMultiMap, but we need to allow duplicates for leniency
     private static final Map<ResourceLocation, Pair<? extends PreparableReloadListener, Optional<ResourceReloadListenerConfig<? extends PreparableReloadListener>>>> CACHED_RESOURCE_RELOAD_LISTENERS = new Object2ObjectOpenHashMap<>();
     private static final Multimap<ResourceKey<? extends Registry<?>>, ResourceLocation> EARLY_REFLECTED_ENTRIES = ArrayListMultimap.create();
+    private static final Object2ObjectLinkedOpenHashMap<ResourceKey<? extends Registry<?>>, Int2ObjectLinkedOpenHashMap<ObjectLinkedOpenHashSet<ResourceLocation>>> APPELLATIONS = new Object2ObjectLinkedOpenHashMap<>();
     private static RegistrySetBuilder DATAPACK_REGISTRY_SET_BUILDER;
 
     @Override
@@ -130,7 +136,20 @@ public class ForgeRegistrar implements Registrar {
 
     @Override
     public <T> void appellate(ResourceLocation objId, ResourceLocation aliasId, ResourceKey<Registry<T>> targetRegistryKey) {
+        Registry<T> targetRegistry = BuiltInRegistries.REGISTRY.get((ResourceKey) targetRegistryKey);
 
+        if (targetRegistry == null) {
+            NexusConstants.LOGGER.warn("Registry {} does not exist in root registry. Skipping designation of alias '{}' for original ID '{}'", targetRegistryKey, aliasId, objId);
+            return;
+        }
+
+        APPELLATIONS.computeIfAbsent(targetRegistryKey, k -> new Int2ObjectLinkedOpenHashMap<>())
+                .computeIfAbsent(targetRegistry.getId(targetRegistry.getOptional(objId).orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry found for ID: %s", objId)))), k -> new ObjectLinkedOpenHashSet<>(ObjectLinkedOpenHashSet.of(objId)))
+                .add(aliasId);
+
+        if (targetRegistry instanceof NamespacedWrapperAccessor accessor) {
+            accessor.getDelegate().addAlias(objId, aliasId);
+        }
     }
 
     @Override
@@ -187,8 +206,8 @@ public class ForgeRegistrar implements Registrar {
     }
 
     @Override
-    public Map<ResourceKey<? extends Registry<?>>, Map<Integer, Multimap<ResourceLocation, ResourceLocation>>> getAppellations() {
-        return Map.of();
+    public Map<ResourceKey<? extends Registry<?>>, Int2ObjectMap<? extends Set<ResourceLocation>>> getAppellations() {
+        return ImmutableMap.copyOf(APPELLATIONS);
     }
 
     @Override

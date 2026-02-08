@@ -10,11 +10,14 @@
     "fabric_api.datagen.PackAccessor",
     "fabric_api.resource_loader.ResourceManagerHelperImplMixin",
     "item.DiggerItemMixin",
+    "level_data.LevelStorageAccessMixin",
     "server.PlayerListMixin"
   ],
   "client": [
+    "client.FabricMinecraftMixin"
   ],
   "server": [
+    "server.FabricMinecraftServerMainMixin"
   ],
   "injectors": {
     "defaultRequire": 1

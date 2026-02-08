@@ -8,8 +8,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation interface used by loader-specific implementations of {@link NetworkManager} in order to discover and
- * load network registrar classes annotated with this annotation.
+ * Annotation {@code interface} used by loader-specific implementations of {@link NetworkManager} in order to discover
+ * and load network registrar classes annotated with this annotation.
  *
  * @see NetworkManager
  */

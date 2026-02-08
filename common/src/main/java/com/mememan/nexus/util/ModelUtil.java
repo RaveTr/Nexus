@@ -567,6 +567,74 @@ public final class ModelUtil {
     }
 
     /**
+     * Creates a {@link BlockModelDefinition} for grass blocks using the {@link #GRASS_BLOCK_MODEL_TEMPLATE} template.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PARTICLE} -> {@code RegistryUtil.pickBlockPrefix(particleTexture)}</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickBlockPrefix(bottomTexture)}</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(topTexture)}</li>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.pickBlockPrefix(sideTexture)}</li>
+     *         <li>{@link #OVERLAY_TEXTURE_SLOT} -> {@code RegistryUtil.pickBlockPrefix(overlayTexture)}</li>
+     *     </ul>
+     *
+     * @param particleTexture The {@link ResourceLocation} representing the particle texture for the grass block.
+     * @param bottomTexture The {@link ResourceLocation} representing the bottom texture for the grass block.
+     * @param topTexture The {@link ResourceLocation} representing the top texture for the grass block.
+     * @param sideTexture The {@link ResourceLocation} representing the side texture for the grass block.
+     * @param overlayTexture The {@link ResourceLocation} representing the overlay texture for the grass block.
+     *
+     * @return A {@link BlockModelDefinition} for grass blocks.
+     *
+     * @see #grassBlock(Supplier)
+     */
+    public static BlockModelDefinition grassBlock(ResourceLocation particleTexture, ResourceLocation bottomTexture, ResourceLocation topTexture, ResourceLocation sideTexture, ResourceLocation overlayTexture) {
+        return new BlockModelDefinition(GRASS_BLOCK_MODEL_TEMPLATE)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.PARTICLE, RegistryUtil.pickBlockPrefix(particleTexture))
+                        .put(TextureSlot.BOTTOM, RegistryUtil.pickBlockPrefix(bottomTexture))
+                        .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topTexture))
+                        .put(TextureSlot.SIDE, RegistryUtil.pickBlockPrefix(sideTexture))
+                        .put(OVERLAY_TEXTURE_SLOT, RegistryUtil.pickBlockPrefix(overlayTexture)))
+                .withRenderType(CUTOUT_MIPPED_RENDER_TYPE);
+    }
+
+    /**
+     * Overloaded variant of {@link #grassBlock(ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation)}.
+     * Creates a {@link BlockModelDefinition} for grass blocks using the {@link #GRASS_BLOCK_MODEL_TEMPLATE} template.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#PARTICLE} -> Resolved based on the {@code targetBlock}'s ID (either a bottom texture or dirt texture).</li>
+     *         <li>{@link TextureSlot#BOTTOM} -> Resolved based on the {@code targetBlock}'s ID (either a bottom texture or dirt texture).</li>
+     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block")}</li>
+     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_side", "block")}</li>
+     *         <li>{@link #OVERLAY_TEXTURE_SLOT} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_side_overlay", "block")}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the grass block {@link Block} to create the model for.
+     *
+     * @return A {@link BlockModelDefinition} for grass blocks.
+     *
+     * @see #grassBlock(ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation)
+     */
+    public static BlockModelDefinition grassBlock(Supplier<Block> targetBlock) {
+        ResourceLocation targetGrassBlockId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
+        ResourceLocation bottomTexture = RegistryUtil.getTextureLocationOrDefault(
+                targetGrassBlockId.withSuffix("_bottom"), "block",
+                RegistryUtil.getTextureLocationOrDefault(targetGrassBlockId.withPath(targetGrassBlockId.getPath().replace("_grass_block", "_dirt")), "block")
+        );
+
+        return grassBlock(
+                bottomTexture,
+                bottomTexture,
+                RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"),
+                RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_side", "block"),
+                RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_side_overlay", "block")
+        );
+    }
+
+    /**
      * Creates a {@link BlockStateDefinition}, using {@link MultiVariantGenerator} with the {@link VariantProperties#MODEL}
      * property set to the supplied {@linkplain Block Block's} default model location.
      * <p>
@@ -1697,7 +1765,9 @@ public final class ModelUtil {
      *                    automatic model and texture location resolution.
      * @param topTexture    The {@link ResourceLocation} representing the texture of the upper half.
      * @param bottomTexture The {@link ResourceLocation} representing the texture of the lower half.
+     *
      * @return A {@link BlockModelDefinition} with nested top and bottom {@link ModelTemplates#CROSS} models.
+     *
      * @see #doublePlant(Supplier)
      * @see #doublePlantBlockState(Supplier, ResourceLocation, ResourceLocation)
      */
@@ -1847,6 +1917,10 @@ public final class ModelUtil {
      */
     public static BlockStateDefinition doublePlantBlockState(Supplier<Block> targetBlock) {
         return doublePlantBlockState(targetBlock, RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block"));
+    }
+
+    public static BlockModelDefinition multiLayerPlant() {
+        return new BlockModelDefinition(null);
     }
 
     /**
@@ -5556,74 +5630,6 @@ public final class ModelUtil {
      */
     public static BlockStateDefinition farmlandBlockState(Supplier<Block> targetBlock) {
         return farmlandBlockState(targetBlock, ModelLocationUtils.getModelLocation(targetBlock.get()), ModelLocationUtils.getModelLocation(targetBlock.get()).withSuffix("_moist"));
-    }
-
-    /**
-     * Creates a {@link BlockModelDefinition} for grass blocks using the {@link #GRASS_BLOCK_MODEL_TEMPLATE} template.
-     * <p>
-     *     <h3>Required Texture Slots</h3>
-     *     <ul>
-     *         <li>{@link TextureSlot#PARTICLE} -> {@code RegistryUtil.pickBlockPrefix(particleTexture)}</li>
-     *         <li>{@link TextureSlot#BOTTOM} -> {@code RegistryUtil.pickBlockPrefix(bottomTexture)}</li>
-     *         <li>{@link TextureSlot#TOP} -> {@code RegistryUtil.pickBlockPrefix(topTexture)}</li>
-     *         <li>{@link TextureSlot#SIDE} -> {@code RegistryUtil.pickBlockPrefix(sideTexture)}</li>
-     *         <li>{@link #OVERLAY_TEXTURE_SLOT} -> {@code RegistryUtil.pickBlockPrefix(overlayTexture)}</li>
-     *     </ul>
-     *
-     * @param particleTexture The {@link ResourceLocation} representing the particle texture for the grass block.
-     * @param bottomTexture The {@link ResourceLocation} representing the bottom texture for the grass block.
-     * @param topTexture The {@link ResourceLocation} representing the top texture for the grass block.
-     * @param sideTexture The {@link ResourceLocation} representing the side texture for the grass block.
-     * @param overlayTexture The {@link ResourceLocation} representing the overlay texture for the grass block.
-     *
-     * @return A {@link BlockModelDefinition} for grass blocks.
-     *
-     * @see #grassBlock(Supplier)
-     */
-    public static BlockModelDefinition grassBlock(ResourceLocation particleTexture, ResourceLocation bottomTexture, ResourceLocation topTexture, ResourceLocation sideTexture, ResourceLocation overlayTexture) {
-        return new BlockModelDefinition(GRASS_BLOCK_MODEL_TEMPLATE)
-                .withTextureMapping(new TextureMapping()
-                        .put(TextureSlot.PARTICLE, RegistryUtil.pickBlockPrefix(particleTexture))
-                        .put(TextureSlot.BOTTOM, RegistryUtil.pickBlockPrefix(bottomTexture))
-                        .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topTexture))
-                        .put(TextureSlot.SIDE, RegistryUtil.pickBlockPrefix(sideTexture))
-                        .put(OVERLAY_TEXTURE_SLOT, RegistryUtil.pickBlockPrefix(overlayTexture)))
-                .withRenderType(CUTOUT_MIPPED_RENDER_TYPE);
-    }
-
-    /**
-     * Overloaded variant of {@link #grassBlock(ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation)}.
-     * Creates a {@link BlockModelDefinition} for grass blocks using the {@link #GRASS_BLOCK_MODEL_TEMPLATE} template.
-     * <p>
-     *     <h3>Required Texture Slots</h3>
-     *     <ul>
-     *         <li>{@link TextureSlot#PARTICLE} -> Resolved based on the {@code targetBlock}'s ID (either a bottom texture or dirt texture).</li>
-     *         <li>{@link TextureSlot#BOTTOM} -> Resolved based on the {@code targetBlock}'s ID (either a bottom texture or dirt texture).</li>
-     *         <li>{@link TextureSlot#TOP} -> RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block")</li>
-     *         <li>{@link TextureSlot#SIDE} -> RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_side", "block"){@code RegistryUtil.pickBlockPrefix(sideTexture)}</li>
-     *         <li>{@link #OVERLAY_TEXTURE_SLOT} -> RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_side_overlay", "block")</li>
-     *     </ul>
-     *
-     * @param targetBlock The {@code Supplier<Block>} representing the grass block {@link Block} to create the model for.
-     *
-     * @return A {@link BlockModelDefinition} for grass blocks.
-     *
-     * @see #grassBlock(ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation)
-     */
-    public static BlockModelDefinition grassBlock(Supplier<Block> targetBlock) {
-        ResourceLocation targetGrassBlockId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
-        ResourceLocation bottomTexture = RegistryUtil.getTextureLocationOrDefault(
-                targetGrassBlockId.withSuffix("_bottom"), "block",
-                RegistryUtil.getTextureLocationOrDefault(targetGrassBlockId.withPath(targetGrassBlockId.getPath().replace("_grass_block", "_dirt")), "block")
-        );
-
-        return grassBlock(
-                bottomTexture,
-                bottomTexture,
-                RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"),
-                RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_side", "block"),
-                RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_side_overlay", "block")
-        );
     }
 
     /**

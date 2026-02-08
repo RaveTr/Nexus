@@ -12,6 +12,7 @@ import com.mememan.nexus.platform.services.Registrar;
 import com.mememan.nexus.resource.config.ResourceReloadListenerConfig;
 import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.Pair;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import it.unimi.dsi.fastutil.objects.ObjectObjectMutablePair;
@@ -33,6 +34,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -164,7 +166,7 @@ public class FabricRegistrar implements Registrar {
     }
 
     @Override
-    public Map<ResourceKey<? extends Registry<?>>, Map<Integer, Multimap<ResourceLocation, ResourceLocation>>> getAppellations() {
+    public Map<ResourceKey<? extends Registry<?>>, Int2ObjectMap<? extends Set<ResourceLocation>>> getAppellations() {
         return Map.of();
     }
 

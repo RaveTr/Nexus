@@ -562,15 +562,36 @@ public final class BlockPropertyWrapperTemplates {
             .withBlockStateDefinition(ModelUtil::doublePlantBlockState)
             .withLootTable(LootUtil::dropDoublePlantShearsOrSilkTouch)
             .build();
+    public static final BlockPropertyWrapper<Block> MULTI_LAYER_PLANT = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(PLANT)
+      /*      .withModelDefinition(ModelUtil::tintedMultiLayerPlant)
+            .withBlockStateDefinition(ModelUtil::multiLayerPlantBlockState)
+            .withLootTable(LootUtil::dropMultiLayerPlantShearsOrSilkTouch) */
+            .build();
+
     public static final BlockPropertyWrapper<Block> NO_TINT_PLANT = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(PLANT)
+            .withModelDefinition(ModelUtil::crossCutout)
             .withBlockColor(null)
             .build();
     public static final BlockPropertyWrapper<Block> NO_TINT_TALL_PLANT = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(TALL_PLANT)
+            .withModelDefinition(ModelUtil::doublePlant)
             .withBlockColor(null)
+            .build();
+    public static final BlockPropertyWrapper<Block> NO_TINT_MULTI_LAYER_PLANT = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(MULTI_LAYER_PLANT)
+    //        .withModelDefinition(ModelUtil::multiLayerPlant)
+            .build();
+
+    public static final BlockPropertyWrapper<Block> SAPLING = new BlockPropertyWrapper<>()
+            .builder()
+            .copyFrom(NO_TINT_PLANT)
+            .withLootTable(LootUtil::dropSelf)
             .build();
 
     public static final BlockPropertyWrapper<Block> LEAVES = new BlockPropertyWrapper<>()

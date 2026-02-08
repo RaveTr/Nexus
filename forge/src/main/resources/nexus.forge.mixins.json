@@ -9,9 +9,11 @@
     "forge.datagen.DatagenModLoaderMixin",
     "forge.registries.DataPackRegistriesHooksAccessor",
     "forge.registries.DeferredRegisterMixin",
+    "forge.registries.NamespacedWrapperAccessor",
     "forge.registries.NamespacedWrapperMixin",
     "item.DiggerItemMixin",
-    "item.HoeItemMixin"
+    "item.HoeItemMixin",
+    "level_data.LevelStorageAccessMixin"
   ],
   "client": [
   ],

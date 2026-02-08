@@ -51,7 +51,7 @@ public abstract class PropagatingEventBlueprint<BE extends BaseEvent, R> extends
                     shortCircuitedThroughPropagation.set(shortCircuitedThroughPropagation.get() || parentEventResult.shortCircuit());
                 }
 
-                if (inferredBlueprint instanceof PropagatingEventBlueprint<BaseEvent, Object>) break; // It'll handle the recursive traversal up on its own atp, so break to avoid firing multiple times
+                if (inferredBlueprint instanceof PropagatingEventBlueprint) break; // It'll handle the recursive traversal up on its own atp, so break to avoid firing multiple times
             } else {
                 BooleanObjectMutablePair<Map<Class<? extends BaseEvent>, List<EventListener<?, ?>>>> superClazzListeners = RAW_EVENT_SUPERCLASS_LISTENERS.computeIfAbsent(getActualEventType(), oK -> new BooleanObjectMutablePair<>(true, new Object2ObjectOpenHashMap<>()));
 

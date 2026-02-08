@@ -87,6 +87,7 @@ public class ForgeEventWrapper<T> {
                                 if (returnType == boolean.class) return false;
                                 if (returnType == void.class) return null;
                                 if (returnType.isPrimitive()) return 0;
+
                                 return null;
                             }
                     )

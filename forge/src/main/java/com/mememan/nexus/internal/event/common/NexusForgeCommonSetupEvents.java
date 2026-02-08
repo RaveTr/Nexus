@@ -2,7 +2,9 @@ package com.mememan.nexus.internal.event.common;
 
 import com.mememan.nexus.Nexus;
 import com.mememan.nexus.NexusForge;
+import com.mememan.nexus.asm.annotations.PostInit;
 import com.mememan.nexus.internal.ForgeVanillaCompat;
+import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.specialised.vanilla.VanillaBasedPropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.entity.EntityTypePropertyWrapper;
@@ -16,6 +18,7 @@ import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 
 import java.util.Objects;
 
@@ -31,6 +34,11 @@ public class NexusForgeCommonSetupEvents {
         Nexus.initializeDeferred();
 
         event.enqueueWork(() -> ForgeVanillaCompat.registerVanillaIntegration());
+    }
+
+    @SubscribeEvent
+    public static void onFMLLoadCompleteEvent(final FMLLoadCompleteEvent event) {
+        NexusServices.PLATFORM_MANAGER.discoverAnnotatedClasses(PostInit.class);
     }
 
     @SubscribeEvent

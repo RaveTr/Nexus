@@ -48,6 +48,11 @@ accessible method net/minecraft/world/level/block/ButtonBlock <init> (Lnet/minec
 # PressurePlateBlock
 accessible method net/minecraft/world/level/block/PressurePlateBlock <init> (Lnet/minecraft/world/level/block/PressurePlateBlock$Sensitivity;Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;Lnet/minecraft/world/level/block/state/properties/BlockSetType;)V
 
+# FlowerPotBlock
+accessible field net/minecraft/world/level/block/FlowerPotBlock POTTED_BY_CONTENT Ljava/util/Map;
+accessible method net/minecraft/world/level/block/FlowerPotBlock isEmpty ()Z
+extendable method net/minecraft/world/level/block/FlowerPotBlock isEmpty ()Z
+
 # BlockSetType
 accessible method net/minecraft/world/level/block/state/properties/BlockSetType register (Lnet/minecraft/world/level/block/state/properties/BlockSetType;)Lnet/minecraft/world/level/block/state/properties/BlockSetType;
 
