@@ -34,7 +34,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -166,7 +165,7 @@ public class FabricRegistrar implements Registrar {
     }
 
     @Override
-    public Map<ResourceKey<? extends Registry<?>>, Int2ObjectMap<? extends Set<ResourceLocation>>> getAppellations() {
+    public Map<ResourceKey<? extends Registry<?>>, Int2ObjectMap<? extends List<ResourceLocation>>> getAppellations() {
         return Map.of();
     }
 

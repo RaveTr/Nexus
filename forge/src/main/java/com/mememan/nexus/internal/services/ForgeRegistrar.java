@@ -34,10 +34,10 @@ import net.minecraftforge.registries.*;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -49,7 +49,7 @@ public class ForgeRegistrar implements Registrar {
     private static final Multimap<ResourceKey<? extends Registry<?>>, ObjectObjectMutablePair<ResourceKey<?>, Function<? extends BootstapContext<?>, ? extends Supplier<?>>>> CACHED_DATAPACK_OBJECT_ENTRIES = ArrayListMultimap.create(); // Slower put() than HashMultiMap, but we need to allow duplicates for leniency
     private static final Map<ResourceLocation, Pair<? extends PreparableReloadListener, Optional<ResourceReloadListenerConfig<? extends PreparableReloadListener>>>> CACHED_RESOURCE_RELOAD_LISTENERS = new Object2ObjectOpenHashMap<>();
     private static final Multimap<ResourceKey<? extends Registry<?>>, ResourceLocation> EARLY_REFLECTED_ENTRIES = ArrayListMultimap.create();
-    private static final Object2ObjectLinkedOpenHashMap<ResourceKey<? extends Registry<?>>, Int2ObjectLinkedOpenHashMap<ObjectLinkedOpenHashSet<ResourceLocation>>> APPELLATIONS = new Object2ObjectLinkedOpenHashMap<>();
+    private static final Object2ObjectLinkedOpenHashMap<ResourceKey<? extends Registry<?>>, Int2ObjectLinkedOpenHashMap<LinkedList<ResourceLocation>>> APPELLATIONS = new Object2ObjectLinkedOpenHashMap<>();
     private static RegistrySetBuilder DATAPACK_REGISTRY_SET_BUILDER;
 
     @Override
@@ -144,11 +144,11 @@ public class ForgeRegistrar implements Registrar {
         }
 
         APPELLATIONS.computeIfAbsent(targetRegistryKey, k -> new Int2ObjectLinkedOpenHashMap<>())
-                .computeIfAbsent(targetRegistry.getId(targetRegistry.getOptional(objId).orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry found for ID: %s", objId)))), k -> new ObjectLinkedOpenHashSet<>(ObjectLinkedOpenHashSet.of(objId)))
+                .computeIfAbsent(targetRegistry.getId(targetRegistry.getOptional(objId).orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry found for ID: %s", objId)))), k -> new LinkedList<>(ObjectArrayList.of(objId)))
                 .add(aliasId);
 
         if (targetRegistry instanceof NamespacedWrapperAccessor accessor) {
-            accessor.getDelegate().addAlias(objId, aliasId);
+       //     accessor.getDelegate().addAlias(objId, aliasId);
         }
     }
 
@@ -206,7 +206,7 @@ public class ForgeRegistrar implements Registrar {
     }
 
     @Override
-    public Map<ResourceKey<? extends Registry<?>>, Int2ObjectMap<? extends Set<ResourceLocation>>> getAppellations() {
+    public Map<ResourceKey<? extends Registry<?>>, Int2ObjectMap<? extends List<ResourceLocation>>> getAppellations() {
         return ImmutableMap.copyOf(APPELLATIONS);
     }
 

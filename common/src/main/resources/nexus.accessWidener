@@ -176,3 +176,6 @@ accessible method net/minecraft/client/renderer/entity/BoatRenderer getTextureLo
 
 # SignRenderer
 accessible method net/minecraft/client/renderer/blockentity/SignRenderer renderSignWithText (Lnet/minecraft/world/level/block/entity/SignBlockEntity;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;IILnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/SignBlock;Lnet/minecraft/world/level/block/state/properties/WoodType;Lnet/minecraft/client/model/Model;)V
+
+# LevelResource
+accessible method net/minecraft/world/level/storage/LevelResource <init> (Ljava/lang/String;)V

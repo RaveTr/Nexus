@@ -28,7 +28,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -199,6 +198,9 @@ public interface Registrar {
      *
      * @apiNote Nexus assumes that an object tied to the provided {@code aliasId} is registered by default to the specified
      * {@code targetRegistryKey}'s associated {@link Registry}, should the original {@code objId} fail to resolve.
+     *
+     * @implSpec {@code objId} should always be the first element in any iterable containing it and its appellations, as
+     * per the impl spec in {@link #getAppellations()}.
      */
     <T> void appellate(final ResourceLocation objId, final ResourceLocation aliasId, ResourceKey<Registry<T>> targetRegistryKey);
 
@@ -413,9 +415,14 @@ public interface Registrar {
      * Primarily intended for use in remapping missing registry entries to the same ID across different versions of mods,
      * which may add or remove content between versions.
      *
+     * @implSpec The first element for any object ID {@link Int2ObjectMap} value for each registry key should always be
+     * the base/original name of the object ID tied to any aliases (see references below).
+     *
      * @return A {@link Map} of all registry appellations pertaining to existing registry entries.
+     *
+     * @see #appellate(ResourceLocation, ResourceLocation, ResourceKey)
      */
-    Map<ResourceKey<? extends Registry<?>>, Int2ObjectMap<? extends Set<ResourceLocation>>> getAppellations();
+    Map<ResourceKey<? extends Registry<?>>, Int2ObjectMap<? extends List<ResourceLocation>>> getAppellations();
 
     /**
      * Gets a copy of all {@linkplain PreparableReloadListener PreparableReloadListeners} registered to and tracked by
