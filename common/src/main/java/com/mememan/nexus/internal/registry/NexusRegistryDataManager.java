@@ -8,6 +8,7 @@ import com.mememan.nexus.platform.services.Registrar;
 import com.mememan.nexus.template.event.blueprint.common.LevelDataEventBlueprint;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
@@ -41,6 +42,9 @@ public final class NexusRegistryDataManager {
     }
 
     private static void handleLevelRegistryData() {
+        NexusServices.REGISTRAR.appellate(new ResourceLocation("dirt"), new ResourceLocation("soil"), Registries.BLOCK);
+        NexusServices.REGISTRAR.appellate(new ResourceLocation("stone"), new ResourceLocation("rock"), Registries.BLOCK);
+
         // Platform-agnostic listeners for Nexus API level data n stuff
         LevelDataEventBlueprint.SAVE_LEVEL_DATA.onEvent(event -> {
             LevelStorageSource.LevelDirectory rootLevelDir = event.getLevelDirectory();
@@ -49,17 +53,16 @@ public final class NexusRegistryDataManager {
             Map<ResourceKey<? extends Registry<?>>, Int2ObjectMap<? extends List<ResourceLocation>>> appellations = NexusServices.REGISTRAR.getAppellations();
 
             if (!appellations.isEmpty()) {
-                CompoundTag appellationsTag = new CompoundTag();
-                CompoundTag individualRegAppTag = new CompoundTag();
+                CompoundTag appellationDataTag = new CompoundTag();
+                CompoundTag mappedAppellationsTag = new CompoundTag();
 
                 appellations.forEach((regKey, appellatedIds) -> {
-                    CompoundTag regAppellationsTag = new CompoundTag();
-
                     if (!appellatedIds.isEmpty()) {
                         appellatedIds.forEach((numericalId, aliases) -> {
+                            CompoundTag entryAppellationsTag = new CompoundTag();
                             ResourceLocation baseRegEntryId = aliases.get(0); // The first entry is always guaranteed to be the base ID passed in, as per the impl spec for Registrar#appellate
 
-                            regAppellationsTag.putInt("NumericalId", numericalId);
+                            entryAppellationsTag.putInt("NumericalId", numericalId);
 
                             ListTag aliasListTag = new ListTag();
 
@@ -72,19 +75,19 @@ public final class NexusRegistryDataManager {
                                 }
                             });
 
-                            regAppellationsTag.put("Aliases", aliasListTag);
-                            individualRegAppTag.put(baseRegEntryId.toString(), regAppellationsTag);
+                            entryAppellationsTag.put("Aliases", aliasListTag);
+                            mappedAppellationsTag.put(baseRegEntryId.toString(), entryAppellationsTag);
                         });
                     }
 
-                    appellationsTag.put(regKey.location().toString(), individualRegAppTag);
+                    appellationDataTag.put(regKey.location().toString(), mappedAppellationsTag);
                 });
 
-                regBackupDataTag.put("Appellations", appellationsTag);
+                regBackupDataTag.put("Appellations", appellationDataTag);
             }
 
             try {
-                File regDataLockFile = new File(dataLevelDirectory, "RegistryDataLock.dat");
+                File regDataLockFile = new File(dataLevelDirectory, REGISTRY_DATA_LOCK.getId());
 
                 try (FileOutputStream fileOutputStream = new FileOutputStream(regDataLockFile)) {
                     NbtIo.writeCompressed(regBackupDataTag, fileOutputStream);
