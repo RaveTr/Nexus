@@ -12,7 +12,6 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -20,7 +19,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
@@ -81,6 +79,26 @@ public class DefaultableMultiLayerPlantBlock extends BushBlock implements Boneme
     }
 
     @Override
+    public void playerWillDestroy(Level curLevel, BlockPos curPos, BlockState targetState, net.minecraft.world.entity.player.Player responsiblePlayer) {
+        if (!curLevel.isClientSide) { // Fake it 'till you make it ahh approach (we're going to depend on the bottom layer entirely for drops to account for any additional loot table predicates that may be associated with this block's loot table)
+            int curPlantLayerLevel = getLevelForState(targetState);
+
+            if (curPlantLayerLevel != 0) {
+                BlockPos bottomPos = curPos.below(curPlantLayerLevel);
+                BlockState bottomState = curLevel.getBlockState(bottomPos);
+
+                if (bottomState.is(this) && getLevelForState(bottomState) == 0) {
+                    if (!responsiblePlayer.isCreative()) Block.dropResources(bottomState, curLevel, bottomPos, null, responsiblePlayer, responsiblePlayer.getMainHandItem());
+
+                    curLevel.setBlock(bottomPos, Blocks.AIR.defaultBlockState(), 35); // Remove bottom layer without triggering its loot table again (no explicit update flag cuz we wanna do it silently)
+                }
+            }
+        }
+
+        super.playerWillDestroy(curLevel, curPos, targetState, responsiblePlayer);
+    }
+
+    @Override
     public @Nullable BlockState getStateForPlacement(BlockPlaceContext ctx) {
         Level curLevel = ctx.getLevel();
         BlockPos clickedPos = ctx.getClickedPos();
@@ -96,11 +114,6 @@ public class DefaultableMultiLayerPlantBlock extends BushBlock implements Boneme
         if (curPlantLayerLevel != -1 && (facingDir.getAxis() != Direction.Axis.Y || (curPlantLayerLevel == getPossibleLevels().asList().get(getPossibleLevels().size() - 1)) == (facingDir == Direction.UP) || (adjacentState.is(this) && getLevelForState(adjacentState) != curPlantLayerLevel))) {
             return curPlantLayerLevel == 0 && facingDir == Direction.DOWN && !targetState.canSurvive(curLevel, curPos) ? Blocks.AIR.defaultBlockState() : super.updateShape(targetState, facingDir, adjacentState, curLevel, curPos, adjacentPos);
         } else return Blocks.AIR.defaultBlockState();
-    }
-
-    @Override
-    public void playerDestroy(Level curLevel, Player responsiblePlayer, BlockPos curPos, BlockState droppedState, @Nullable BlockEntity targetBlockEntity, ItemStack usedStack) {
-        super.playerDestroy(curLevel, responsiblePlayer, curPos, Blocks.AIR.defaultBlockState(), targetBlockEntity, usedStack);
     }
 
     @Override
@@ -130,8 +143,14 @@ public class DefaultableMultiLayerPlantBlock extends BushBlock implements Boneme
                 : level;
     }
 
+    public int getMaxLevel() {
+        return maxLevel;
+    }
+
     public ImmutableSet<Integer> getPossibleLevels() {
-        return ImmutableSet.copyOf(getLevelProperty().getPossibleValues());
+        return ImmutableSet.copyOf(getLevelProperty().getPossibleValues().stream()
+                .sorted()
+                .toList());
     }
 
     public ImmutableSet<Integer> getModularLevels() {

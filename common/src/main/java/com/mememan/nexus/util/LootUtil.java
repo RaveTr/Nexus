@@ -1,5 +1,6 @@
 package com.mememan.nexus.util;
 
+import com.mememan.nexus.template.object.block.vegetation.DefaultableMultiLayerPlantBlock;
 import net.minecraft.advancements.critereon.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -432,6 +433,30 @@ public final class LootUtil {
                                                 .hasProperty(DoublePlantBlock.HALF, DoubleBlockHalf.LOWER)
                                                 .build())
                                         .build()), new BlockPos(0, -1, 0))));
+    }
+
+    public static LootTable.Builder dropMultiLayerPlant(Supplier<Block> targetBlock) {
+        DefaultableMultiLayerPlantBlock defaultableMultiLayerPlantBlock = (DefaultableMultiLayerPlantBlock) targetBlock.get();
+
+        return LootTable.lootTable().withPool(LootPool.lootPool()
+                .setRolls(ConstantValue.exactly(1.0F))
+                .when(ExplosionCondition.survivesExplosion())
+                .add(LootItem.lootTableItem(defaultableMultiLayerPlantBlock)
+                        .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(defaultableMultiLayerPlantBlock)
+                                .setProperties(StatePropertiesPredicate.Builder.properties()
+                                        .hasProperty(defaultableMultiLayerPlantBlock.getLevelProperty(), 0)))));
+    }
+
+    public static LootTable.Builder dropMultiLayerPlantShearsOrSilkTouch(Supplier<Block> targetBlock) {
+        DefaultableMultiLayerPlantBlock defaultableMultiLayerPlantBlock = (DefaultableMultiLayerPlantBlock) targetBlock.get();
+
+        return LootTable.lootTable().withPool(LootPool.lootPool()
+                .setRolls(ConstantValue.exactly(1.0F))
+                .when(HAS_SHEARS_OR_SILK_TOUCH)
+                .add(LootItem.lootTableItem(defaultableMultiLayerPlantBlock)
+                        .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(defaultableMultiLayerPlantBlock)
+                                .setProperties(StatePropertiesPredicate.Builder.properties()
+                                        .hasProperty(defaultableMultiLayerPlantBlock.getLevelProperty(), 0)))));
     }
 
     /**

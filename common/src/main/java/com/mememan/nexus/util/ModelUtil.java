@@ -4,6 +4,7 @@ import com.mememan.nexus.client.block.BlockStateDefinition;
 import com.mememan.nexus.client.model.block.BlockModelDefinition;
 import com.mememan.nexus.client.model.item.ItemModelDefinition;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
+import com.mememan.nexus.template.object.block.vegetation.DefaultableMultiLayerPlantBlock;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.Direction;
 import net.minecraft.data.models.blockstates.*;
@@ -340,8 +341,6 @@ public final class ModelUtil {
      *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.pickBlockPrefix(tintedCrossTexture)}</li>
      *     </ul>
      *
-     * @param targetBlock The {@code Supplier<Block>} representing the tinted cross {@link Block} to be used for
-     *                    automatic model location resolution.
      * @param tintedCrossTexture The {@link ResourceLocation} representing the texture of the tinted cross. Item model
      *                           uses the same texture.
      *
@@ -349,14 +348,14 @@ public final class ModelUtil {
      *
      * @see #tintedCross(Supplier)
      */
-    public static BlockModelDefinition tintedCross(Supplier<Block> targetBlock, ResourceLocation tintedCrossTexture) {
+    public static BlockModelDefinition tintedCross(ResourceLocation tintedCrossTexture) {
         return new BlockModelDefinition(ModelTemplates.TINTED_CROSS)
                 .withTextureMapping(TextureMapping.cross(RegistryUtil.pickBlockPrefix(tintedCrossTexture)))
                 .withOrdinalModelDefinition(generatedBlock(tintedCrossTexture));
     }
 
     /**
-     * Overloaded variant of {@link #tintedCross(Supplier, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * Overloaded variant of {@link #tintedCross(ResourceLocation)}. Creates a {@link BlockModelDefinition}
      * with the {@link ModelTemplates#TINTED_CROSS} template using automatic texture resolution.
      * <p>
      *     <h3>Required Texture Slots</h3>
@@ -369,10 +368,10 @@ public final class ModelUtil {
      *
      * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#TINTED_CROSS} template.
      *
-     * @see #tintedCross(Supplier, ResourceLocation)
+     * @see #tintedCross(ResourceLocation)
      */
     public static BlockModelDefinition tintedCross(Supplier<Block> targetBlock) {
-        return tintedCross(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"));
+        return tintedCross(RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"));
     }
 
     /**
@@ -384,22 +383,20 @@ public final class ModelUtil {
      *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.pickBlockPrefix(tintedCrossTexture)}</li>
      *     </ul>
      *
-     * @param targetBlock The {@code Supplier<Block>} representing the tinted cross {@link Block} to be used for
-     *                    automatic model location resolution.
      * @param tintedCrossTexture The {@link ResourceLocation} representing the texture of the tinted cross.
      *
      * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#TINTED_CROSS} template and {@link #CUTOUT_RENDER_TYPE}.
      *
      * @see #tintedCrossCutout(Supplier)
-     * @see #tintedCross(Supplier, ResourceLocation)
+     * @see #tintedCross(ResourceLocation)
      */
-    public static BlockModelDefinition tintedCrossCutout(Supplier<Block> targetBlock, ResourceLocation tintedCrossTexture) {
-        return tintedCross(targetBlock, tintedCrossTexture)
+    public static BlockModelDefinition tintedCrossCutout(ResourceLocation tintedCrossTexture) {
+        return tintedCross(tintedCrossTexture)
                 .withRenderType(CUTOUT_RENDER_TYPE);
     }
 
     /**
-     * Overloaded variant of {@link #tintedCrossCutout(Supplier, ResourceLocation)}. Creates a {@link BlockModelDefinition}
+     * Overloaded variant of {@link #tintedCrossCutout(ResourceLocation)}. Creates a {@link BlockModelDefinition}
      * with the {@link ModelTemplates#TINTED_CROSS} template using automatic texture resolution and sets the render type
      * to {@link #CUTOUT_RENDER_TYPE} for proper transparency handling.
      * <p>
@@ -413,11 +410,11 @@ public final class ModelUtil {
      *
      * @return A {@link BlockModelDefinition} with the {@link ModelTemplates#TINTED_CROSS} template and {@link #CUTOUT_RENDER_TYPE}.
      *
-     * @see #tintedCrossCutout(Supplier, ResourceLocation)
+     * @see #tintedCrossCutout(ResourceLocation)
      * @see #tintedCross(Supplier)
      */
     public static BlockModelDefinition tintedCrossCutout(Supplier<Block> targetBlock) {
-        return tintedCrossCutout(targetBlock, RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"));
+        return tintedCrossCutout(RegistryUtil.getTextureLocationOrDefault(targetBlock, "block"));
     }
 
     /**
@@ -1833,9 +1830,9 @@ public final class ModelUtil {
     public static BlockModelDefinition tintedDoublePlant(Supplier<Block> targetBlock, ResourceLocation topTexture, ResourceLocation bottomTexture) {
         ResourceLocation basePlantId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
 
-        return tintedCrossCutout(targetBlock, topTexture)
+        return tintedCrossCutout(topTexture)
                 .withCustomName(basePlantId.getPath().concat("_top"))
-                .withOrdinalModelDefinition(tintedCrossCutout(targetBlock, bottomTexture)
+                .withOrdinalModelDefinition(tintedCrossCutout(bottomTexture)
                         .withCustomName(basePlantId.getPath().concat("_bottom"))
                         .setOrdinalModelDefinitions(ObjectArrayList.of())); // Ensure generation of 1 item model, not 2
     }
@@ -1919,8 +1916,567 @@ public final class ModelUtil {
         return doublePlantBlockState(targetBlock, RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block"));
     }
 
-    public static BlockModelDefinition multiLayerPlant() {
-        return new BlockModelDefinition(null);
+    /**
+     * Creates multiple {@link BlockModelDefinition}s for a multi-layer plant block with configurable middle layers,
+     * using separate top, middle, and bottom {@link ModelTemplates#CROSS} models with {@link #CUTOUT_RENDER_TYPE}.
+     * The middle layers can be numbered individually or use a single shared texture based on the {@code numberMiddleLayers}
+     * parameter. Generates a single item model from the bottom model.
+     * <p>
+     *     <h3>Required Texture Slots (Top Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.pickBlockPrefix(topPlantTexture)}</li>
+     *     </ul>
+     *     <h3>Required Texture Slots (Middle Model(s))</h3>
+     *     <ul>
+     *         <li>If {@code numberMiddleLayers} is {@code false} or {@code middleLayerCount <= 1}:</li>
+     *         <ul>
+     *             <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.pickBlockPrefix(middlePlantTexture)}</li>
+     *         </ul>
+     *         <li>If {@code numberMiddleLayers} is {@code true} and {@code middleLayerCount > 1}:</li>
+     *         <ul>
+     *             <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.pickBlockPrefix(middlePlantTexture.withSuffix("_" + layerIndex))} for each layer</li>
+     *         </ul>
+     *     </ul>
+     *     <h3>Required Texture Slots (Bottom Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.pickBlockPrefix(bottomPlantTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the multi-layer plant {@link Block} to be used for
+     *                    automatic model location resolution.
+     * @param topPlantTexture The {@link ResourceLocation} representing the texture of the topmost layer.
+     * @param middlePlantTexture The {@link ResourceLocation} representing the base texture of the middle layer(s).
+     *                           If {@code numberMiddleLayers} is {@code true}, this will be suffixed with {@code _0},
+     *                           {@code _1}, etc. for each middle layer.
+     * @param bottomPlantTexture The {@link ResourceLocation} representing the texture of the bottommost layer.
+     * @param numberMiddleLayers If {@code true}, each middle layer will have a uniquely numbered texture and model.
+     *                           If {@code false}, all middle layers share the same texture.
+     * @param middleLayerCount The number of middle layers to generate. If {@code <= 1}, only one middle layer is created.
+     *
+     * @return A {@link BlockModelDefinition} with nested top, middle, and bottom {@link ModelTemplates#CROSS} models.
+     *
+     * @see #multiLayerPlant(Supplier, boolean, int)
+     * @see #multiLayerPlant(Supplier)
+     * @see #quadLayerPlant(Supplier)
+     * @see #pentaLayerPlant(Supplier)
+     * @see #hexaLayerPlant(Supplier)
+     * @see #multiLayerPlantBlockState(Supplier)
+     */
+    public static BlockModelDefinition multiLayerPlant(Supplier<Block> targetBlock, ResourceLocation topPlantTexture, ResourceLocation middlePlantTexture, ResourceLocation bottomPlantTexture, boolean numberMiddleLayers, int middleLayerCount) {
+        ResourceLocation targetBlockId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
+        BlockModelDefinition topModelDefinition = crossCutout(topPlantTexture)
+                .withCustomName(targetBlockId.withSuffix("_top").getPath());
+        BlockModelDefinition bottomModelDefinition = crossCutout(bottomPlantTexture)
+                .withCustomName(targetBlockId.withSuffix("_bottom").getPath())
+                .setOrdinalModelDefinitions(ObjectArrayList.of());
+        ObjectArrayList<BlockModelDefinition> middleModelDefinitions = new ObjectArrayList<>();
+        
+        if (!numberMiddleLayers || middleLayerCount <= 1) middleModelDefinitions.add(crossCutout(middlePlantTexture).withCustomName(targetBlockId.withSuffix("_middle").getPath()).setOrdinalModelDefinitions(ObjectArrayList.of()));
+        else {
+            for (int curLayer = 0; curLayer < middleLayerCount; curLayer++) {
+                middleModelDefinitions.add(crossCutout(middlePlantTexture.withSuffix("_" + curLayer)).withCustomName(targetBlockId.withSuffix("_middle_" + curLayer).getPath()).setOrdinalModelDefinitions(ObjectArrayList.of()));
+            }
+        }
+
+        return topModelDefinition
+                .withOrdinalModelDefinition(bottomModelDefinition)
+                .withOrdinalModelDefinitions(middleModelDefinitions.toArray(BlockModelDefinition[]::new));
+    }
+
+    /**
+     * Overloaded variant of {@link #multiLayerPlant(Supplier, ResourceLocation, ResourceLocation, ResourceLocation, boolean, int)}.
+     * Creates multiple {@link BlockModelDefinition}s for a multi-layer plant block using automatic texture resolution
+     * with {@code _top}, {@code _middle}, and {@code _bottom} suffixes. The middle layers can be numbered individually
+     * or use a single shared texture based on the {@code numberMiddleLayers} parameter.
+     * <p>
+     *     <h3>Required Texture Slots (Top Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top")}</li>
+     *     </ul>
+     *     <h3>Required Texture Slots (Middle Model(s))</h3>
+     *     <ul>
+     *         <li>If {@code numberMiddleLayers} is {@code false} or {@code middleLayerCount <= 1}:</li>
+     *         <ul>
+     *             <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle")}</li>
+     *         </ul>
+     *         <li>If {@code numberMiddleLayers} is {@code true} and {@code middleLayerCount > 1}:</li>
+     *         <ul>
+     *             <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle_" + layerIndex)} for each layer</li>
+     *         </ul>
+     *     </ul>
+     *     <h3>Required Texture Slots (Bottom Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom")}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the multi-layer plant {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     * @param numberMiddleLayers If {@code true}, each middle layer will have a uniquely numbered texture and model.
+     *                           If {@code false}, all middle layers share the same texture.
+     * @param middleLayerCount The number of middle layers to generate. If {@code <= 1}, only one middle layer is created.
+     *
+     * @return A {@link BlockModelDefinition} with nested top, middle, and bottom {@link ModelTemplates#CROSS} models.
+     *
+     * @see #multiLayerPlant(Supplier, ResourceLocation, ResourceLocation, ResourceLocation, boolean, int)
+     * @see #multiLayerPlant(Supplier)
+     * @see #quadLayerPlant(Supplier)
+     * @see #pentaLayerPlant(Supplier)
+     * @see #hexaLayerPlant(Supplier)
+     */
+    public static BlockModelDefinition multiLayerPlant(Supplier<Block> targetBlock, boolean numberMiddleLayers, int middleLayerCount) {
+        ResourceLocation topPlantTexture = RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block");
+        ResourceLocation middlePlantTexture = RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle", "block");
+        ResourceLocation bottomPlantTexture = RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block");
+
+        return multiLayerPlant(targetBlock, topPlantTexture, middlePlantTexture, bottomPlantTexture, numberMiddleLayers, middleLayerCount);
+    }
+
+    /**
+     * Overloaded variant of {@link #multiLayerPlant(Supplier, boolean, int)}. Creates a triple-layer plant
+     * {@link BlockModelDefinition} (top, middle, bottom) using automatic texture resolution with {@code _top},
+     * {@code _middle}, and {@code _bottom} suffixes. This is the simplest variant with a single unnumbered middle layer.
+     * <p>
+     *     <h3>Required Texture Slots (Top Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top")}</li>
+     *     </ul>
+     *     <h3>Required Texture Slots (Middle Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle")}</li>
+     *     </ul>
+     *     <h3>Required Texture Slots (Bottom Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom")}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the multi-layer plant {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with nested top, middle, and bottom {@link ModelTemplates#CROSS} models.
+     *
+     * @see #multiLayerPlant(Supplier, boolean, int)
+     * @see #multiLayerPlant(Supplier, ResourceLocation, ResourceLocation, ResourceLocation, boolean, int)
+     * @see #quadLayerPlant(Supplier)
+     * @see #pentaLayerPlant(Supplier)
+     * @see #hexaLayerPlant(Supplier)
+     * @see #multiLayerPlantBlockState(Supplier)
+     */
+    public static BlockModelDefinition multiLayerPlant(Supplier<Block> targetBlock) {
+        return multiLayerPlant(targetBlock, false, 1);
+    }
+
+    /**
+     * Convenience method for creating a 4-layer plant {@link BlockModelDefinition} (top, 2 numbered middle layers, bottom).
+     * This is a specialized variant of {@link #multiLayerPlant(Supplier, boolean, int)} with {@code numberMiddleLayers = true}
+     * and {@code middleLayerCount = 2}.
+     * <p>
+     *     <h3>Required Texture Slots (Top Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top")}</li>
+     *     </ul>
+     *     <h3>Required Texture Slots (Middle Models)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle_0")}</li>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle_1")}</li>
+     *     </ul>
+     *     <h3>Required Texture Slots (Bottom Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom")}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the 4-layer plant {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with nested top, 2 numbered middle, and bottom {@link ModelTemplates#CROSS} models.
+     *
+     * @see #multiLayerPlant(Supplier, boolean, int)
+     * @see #multiLayerPlant(Supplier)
+     * @see #pentaLayerPlant(Supplier)
+     * @see #hexaLayerPlant(Supplier)
+     */
+    public static BlockModelDefinition quadLayerPlant(Supplier<Block> targetBlock) {
+        return multiLayerPlant(targetBlock, true, 2);
+    }
+
+    /**
+     * Convenience method for creating a 5-layer plant {@link BlockModelDefinition} (top, 3 numbered middle layers, bottom).
+     * This is a specialized variant of {@link #multiLayerPlant(Supplier, boolean, int)} with {@code numberMiddleLayers = true}
+     * and {@code middleLayerCount = 3}.
+     * <p>
+     *     <h3>Required Texture Slots (Top Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top")}</li>
+     *     </ul>
+     *     <h3>Required Texture Slots (Middle Models)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle_0")}</li>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle_1")}</li>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle_2")}</li>
+     *     </ul>
+     *     <h3>Required Texture Slots (Bottom Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom")}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the 5-layer plant {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with nested top, 3 numbered middle, and bottom {@link ModelTemplates#CROSS} models.
+     *
+     * @see #multiLayerPlant(Supplier, boolean, int)
+     * @see #multiLayerPlant(Supplier)
+     * @see #quadLayerPlant(Supplier)
+     * @see #hexaLayerPlant(Supplier)
+     */
+    public static BlockModelDefinition pentaLayerPlant(Supplier<Block> targetBlock) {
+        return multiLayerPlant(targetBlock, true, 3);
+    }
+
+    /**
+     * Convenience method for creating a 6-layer plant {@link BlockModelDefinition} (top, 4 numbered middle layers, bottom).
+     * This is a specialized variant of {@link #multiLayerPlant(Supplier, boolean, int)} with {@code numberMiddleLayers = true}
+     * and {@code middleLayerCount = 4}.
+     * <p>
+     *     <h3>Required Texture Slots (Top Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top")}</li>
+     *     </ul>
+     *     <h3>Required Texture Slots (Middle Models)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle_0")}</li>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle_1")}</li>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle_2")}</li>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle_3")}</li>
+     *     </ul>
+     *     <h3>Required Texture Slots (Bottom Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom")}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the 6-layer plant {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with nested top, 4 numbered middle, and bottom {@link ModelTemplates#CROSS} models.
+     *
+     * @see #multiLayerPlant(Supplier, boolean, int)
+     * @see #multiLayerPlant(Supplier)
+     * @see #quadLayerPlant(Supplier)
+     * @see #pentaLayerPlant(Supplier)
+     */
+    public static BlockModelDefinition hexaLayerPlant(Supplier<Block> targetBlock) {
+        return multiLayerPlant(targetBlock, true, 4);
+    }
+
+    /**
+     * Creates multiple {@link BlockModelDefinition}s for a tinted multi-layer plant block with configurable middle layers,
+     * using separate top, middle, and bottom {@link ModelTemplates#TINTED_CROSS} models with {@link #CUTOUT_RENDER_TYPE}.
+     * The middle layers can be numbered individually or use a single shared texture based on the {@code numberMiddleLayers}
+     * parameter. Generates a single item model from the bottom model.
+     * <p>
+     *     <h3>Required Texture Slots (Top Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.pickBlockPrefix(topPlantTexture)}</li>
+     *     </ul>
+     *     <h3>Required Texture Slots (Middle Model(s))</h3>
+     *     <ul>
+     *         <li>If {@code numberMiddleLayers} is {@code false} or {@code middleLayerCount <= 1}:</li>
+     *         <ul>
+     *             <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.pickBlockPrefix(middlePlantTexture)}</li>
+     *         </ul>
+     *         <li>If {@code numberMiddleLayers} is {@code true} and {@code middleLayerCount > 1}:</li>
+     *         <ul>
+     *             <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.pickBlockPrefix(middlePlantTexture.withSuffix("_" + layerIndex))} for each layer</li>
+     *         </ul>
+     *     </ul>
+     *     <h3>Required Texture Slots (Bottom Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.pickBlockPrefix(bottomPlantTexture)}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the tinted multi-layer plant {@link Block} to be used for
+     *                    automatic model location resolution.
+     * @param topPlantTexture The {@link ResourceLocation} representing the texture of the topmost layer.
+     * @param middlePlantTexture The {@link ResourceLocation} representing the base texture of the middle layer(s).
+     *                           If {@code numberMiddleLayers} is {@code true}, this will be suffixed with {@code _0},
+     *                           {@code _1}, etc. for each middle layer.
+     * @param bottomPlantTexture The {@link ResourceLocation} representing the texture of the bottommost layer.
+     * @param numberMiddleLayers If {@code true}, each middle layer will have a uniquely numbered texture and model.
+     *                           If {@code false}, all middle layers share the same texture.
+     * @param middleLayerCount The number of middle layers to generate. If {@code <= 1}, only one middle layer is created.
+     *
+     * @return A {@link BlockModelDefinition} with nested top, middle, and bottom {@link ModelTemplates#TINTED_CROSS} models.
+     *
+     * @see #tintedMultiLayerPlant(Supplier, boolean, int)
+     * @see #tintedMultiLayerPlant(Supplier)
+     * @see #tintedQuadLayerPlant(Supplier)
+     * @see #tintedPentaLayerPlant(Supplier)
+     * @see #tintedHexaLayerPlant(Supplier)
+     * @see #multiLayerPlant(Supplier, ResourceLocation, ResourceLocation, ResourceLocation, boolean, int)
+     */
+    public static BlockModelDefinition tintedMultiLayerPlant(Supplier<Block> targetBlock, ResourceLocation topPlantTexture, ResourceLocation middlePlantTexture, ResourceLocation bottomPlantTexture, boolean numberMiddleLayers, int middleLayerCount) {
+        ResourceLocation targetBlockId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get());
+        BlockModelDefinition topModelDefinition = tintedCrossCutout(topPlantTexture)
+                .withCustomName(targetBlockId.withSuffix("_top").getPath());
+        BlockModelDefinition bottomModelDefinition = tintedCrossCutout(bottomPlantTexture)
+                .withCustomName(targetBlockId.withSuffix("_bottom").getPath())
+                .setOrdinalModelDefinitions(ObjectArrayList.of()); // Avoid generating duplicate item models
+        ObjectArrayList<BlockModelDefinition> middleModelDefinitions = new ObjectArrayList<>();
+
+        if (!numberMiddleLayers || middleLayerCount <= 1) middleModelDefinitions.add(tintedCrossCutout(middlePlantTexture).withCustomName(targetBlockId.withSuffix("_middle").getPath()).setOrdinalModelDefinitions(ObjectArrayList.of()));
+        else {
+            for (int curLayer = 0; curLayer < middleLayerCount; curLayer++) {
+                middleModelDefinitions.add(tintedCrossCutout(middlePlantTexture.withSuffix("_" + curLayer)).withCustomName(targetBlockId.withSuffix("_middle_" + curLayer).getPath()).setOrdinalModelDefinitions(ObjectArrayList.of()));
+            }
+        }
+
+        return topModelDefinition
+                .withOrdinalModelDefinition(bottomModelDefinition)
+                .withOrdinalModelDefinitions(middleModelDefinitions.toArray(BlockModelDefinition[]::new));
+    }
+
+    /**
+     * Overloaded variant of {@link #tintedMultiLayerPlant(Supplier, ResourceLocation, ResourceLocation, ResourceLocation, boolean, int)}.
+     * Creates multiple {@link BlockModelDefinition}s for a tinted multi-layer plant block using automatic texture resolution
+     * with {@code _top}, {@code _middle}, and {@code _bottom} suffixes. The middle layers can be numbered individually
+     * or use a single shared texture based on the {@code numberMiddleLayers} parameter.
+     * <p>
+     *     <h3>Required Texture Slots (Top Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top")}</li>
+     *     </ul>
+     *     <h3>Required Texture Slots (Middle Model(s))</h3>
+     *     <ul>
+     *         <li>If {@code numberMiddleLayers} is {@code false} or {@code middleLayerCount <= 1}:</li>
+     *         <ul>
+     *             <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle")}</li>
+     *         </ul>
+     *         <li>If {@code numberMiddleLayers} is {@code true} and {@code middleLayerCount > 1}:</li>
+     *         <ul>
+     *             <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle_" + layerIndex)} for each layer</li>
+     *         </ul>
+     *     </ul>
+     *     <h3>Required Texture Slots (Bottom Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom")}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the tinted multi-layer plant {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     * @param numberMiddleLayers If {@code true}, each middle layer will have a uniquely numbered texture and model.
+     *                           If {@code false}, all middle layers share the same texture.
+     * @param middleLayerCount The number of middle layers to generate. If {@code <= 1}, only one middle layer is created.
+     *
+     * @return A {@link BlockModelDefinition} with nested top, middle, and bottom {@link ModelTemplates#TINTED_CROSS} models.
+     *
+     * @see #tintedMultiLayerPlant(Supplier, ResourceLocation, ResourceLocation, ResourceLocation, boolean, int)
+     * @see #tintedMultiLayerPlant(Supplier)
+     * @see #tintedQuadLayerPlant(Supplier)
+     * @see #tintedPentaLayerPlant(Supplier)
+     * @see #tintedHexaLayerPlant(Supplier)
+     */
+    public static BlockModelDefinition tintedMultiLayerPlant(Supplier<Block> targetBlock, boolean numberMiddleLayers, int middleLayerCount) {
+        ResourceLocation topPlantTexture = RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block");
+        ResourceLocation middlePlantTexture = RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle", "block");
+        ResourceLocation bottomPlantTexture = RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block");
+
+        return tintedMultiLayerPlant(targetBlock, topPlantTexture, middlePlantTexture, bottomPlantTexture, numberMiddleLayers, middleLayerCount);
+    }
+
+    /**
+     * Overloaded variant of {@link #tintedMultiLayerPlant(Supplier, boolean, int)}. Creates a tinted triple-layer plant
+     * {@link BlockModelDefinition} (top, middle, bottom) using automatic texture resolution with {@code _top},
+     * {@code _middle}, and {@code _bottom} suffixes. This is the simplest variant with a single unnumbered middle layer.
+     * <p>
+     *     <h3>Required Texture Slots (Top Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top")}</li>
+     *     </ul>
+     *     <h3>Required Texture Slots (Middle Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle")}</li>
+     *     </ul>
+     *     <h3>Required Texture Slots (Bottom Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom")}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the tinted multi-layer plant {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with nested top, middle, and bottom {@link ModelTemplates#TINTED_CROSS} models.
+     *
+     * @see #tintedMultiLayerPlant(Supplier, boolean, int)
+     * @see #tintedMultiLayerPlant(Supplier, ResourceLocation, ResourceLocation, ResourceLocation, boolean, int)
+     * @see #tintedQuadLayerPlant(Supplier)
+     * @see #tintedPentaLayerPlant(Supplier)
+     * @see #tintedHexaLayerPlant(Supplier)
+     * @see #multiLayerPlant(Supplier)
+     */
+    public static BlockModelDefinition tintedMultiLayerPlant(Supplier<Block> targetBlock) {
+        return tintedMultiLayerPlant(targetBlock, false, 1);
+    }
+
+    /**
+     * Convenience method for creating a tinted 4-layer plant {@link BlockModelDefinition} (top, 2 numbered middle layers, bottom).
+     * This is a specialized variant of {@link #tintedMultiLayerPlant(Supplier, boolean, int)} with {@code numberMiddleLayers = true}
+     * and {@code middleLayerCount = 2}.
+     * <p>
+     *     <h3>Required Texture Slots (Top Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top")}</li>
+     *     </ul>
+     *     <h3>Required Texture Slots (Middle Models)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle_0")}</li>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle_1")}</li>
+     *     </ul>
+     *     <h3>Required Texture Slots (Bottom Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom")}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the tinted 4-layer plant {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with nested top, 2 numbered middle, and bottom {@link ModelTemplates#TINTED_CROSS} models.
+     *
+     * @see #tintedMultiLayerPlant(Supplier, boolean, int)
+     * @see #tintedMultiLayerPlant(Supplier)
+     * @see #tintedPentaLayerPlant(Supplier)
+     * @see #tintedHexaLayerPlant(Supplier)
+     * @see #quadLayerPlant(Supplier)
+     */
+    public static BlockModelDefinition tintedQuadLayerPlant(Supplier<Block> targetBlock) {
+        return tintedMultiLayerPlant(targetBlock, true, 2);
+    }
+
+    /**
+     * Convenience method for creating a tinted 5-layer plant {@link BlockModelDefinition} (top, 3 numbered middle layers, bottom).
+     * This is a specialized variant of {@link #tintedMultiLayerPlant(Supplier, boolean, int)} with {@code numberMiddleLayers = true}
+     * and {@code middleLayerCount = 3}.
+     * <p>
+     *     <h3>Required Texture Slots (Top Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top")}</li>
+     *     </ul>
+     *     <h3>Required Texture Slots (Middle Models)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle_0")}</li>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle_1")}</li>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle_2")}</li>
+     *     </ul>
+     *     <h3>Required Texture Slots (Bottom Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom")}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the tinted 5-layer plant {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with nested top, 3 numbered middle, and bottom {@link ModelTemplates#TINTED_CROSS} models.
+     *
+     * @see #tintedMultiLayerPlant(Supplier, boolean, int)
+     * @see #tintedMultiLayerPlant(Supplier)
+     * @see #tintedQuadLayerPlant(Supplier)
+     * @see #tintedHexaLayerPlant(Supplier)
+     * @see #pentaLayerPlant(Supplier)
+     */
+    public static BlockModelDefinition tintedPentaLayerPlant(Supplier<Block> targetBlock) {
+        return tintedMultiLayerPlant(targetBlock, true, 3);
+    }
+
+    /**
+     * Convenience method for creating a tinted 6-layer plant {@link BlockModelDefinition} (top, 4 numbered middle layers, bottom).
+     * This is a specialized variant of {@link #tintedMultiLayerPlant(Supplier, boolean, int)} with {@code numberMiddleLayers = true}
+     * and {@code middleLayerCount = 4}.
+     * <p>
+     *     <h3>Required Texture Slots (Top Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top")}</li>
+     *     </ul>
+     *     <h3>Required Texture Slots (Middle Models)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle_0")}</li>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle_1")}</li>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle_2")}</li>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_middle_3")}</li>
+     *     </ul>
+     *     <h3>Required Texture Slots (Bottom Model)</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#CROSS} -> {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom")}</li>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the tinted 6-layer plant {@link Block} to be used for
+     *                    automatic model and texture location resolution.
+     *
+     * @return A {@link BlockModelDefinition} with nested top, 4 numbered middle, and bottom {@link ModelTemplates#TINTED_CROSS} models.
+     *
+     * @see #tintedMultiLayerPlant(Supplier, boolean, int)
+     * @see #tintedMultiLayerPlant(Supplier)
+     * @see #tintedQuadLayerPlant(Supplier)
+     * @see #tintedPentaLayerPlant(Supplier)
+     * @see #hexaLayerPlant(Supplier)
+     */
+    public static BlockModelDefinition tintedHexaLayerPlant(Supplier<Block> targetBlock) {
+        return tintedMultiLayerPlant(targetBlock, true, 4);
+    }
+
+    /**
+     * Creates a {@link BlockStateDefinition} for a multi-layer plant block using {@link MultiVariantGenerator} with
+     * dynamic property dispatch based on the block's level property. This method intelligently handles blocks that
+     * implement {@link DefaultableMultiLayerPlantBlock} by mapping each layer level to its corresponding model.
+     * <p>
+     *     <h3>Variants</h3>
+     *     <ul>
+     *         <li>Level {@code 0} (bottom) -> {@link VariantProperties#MODEL} = {@code blockId + "_bottom"}</li>
+     *         <li>Level {@code maxPlantLayerLevel} (top) -> {@link VariantProperties#MODEL} = {@code blockId + "_top"}</li>
+     *         <li>If {@code maxPlantLayerLevel > 2}:</li>
+     *         <ul>
+     *             <li>Middle levels {@code 1} to {@code maxPlantLayerLevel - 1} -> {@link VariantProperties#MODEL} = {@code blockId + "_middle_" + levelIndex}</li>
+     *         </ul>
+     *         <li>If {@code maxPlantLayerLevel == 2}:</li>
+     *         <ul>
+     *             <li>Level {@code 1} (single middle) -> {@link VariantProperties#MODEL} = {@code blockId + "_middle"}</li>
+     *         </ul>
+     *     </ul>
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the multi-layer plant {@link Block}. If the block
+     *                    is an instance of {@link DefaultableMultiLayerPlantBlock}, the blockstate will be configured
+     *                    with appropriate level-based model dispatching.
+     *
+     * @return A {@link BlockStateDefinition} with dynamic level property dispatch for multi-layer plants.
+     *
+     * @see #multiLayerPlant(Supplier)
+     * @see #multiLayerPlant(Supplier, boolean, int)
+     * @see #quadLayerPlant(Supplier)
+     * @see #pentaLayerPlant(Supplier)
+     * @see #hexaLayerPlant(Supplier)
+     * @see DefaultableMultiLayerPlantBlock
+     */
+    public static BlockStateDefinition multiLayerPlantBlockState(Supplier<Block> targetBlock) {
+        MultiVariantGenerator stateGen = MultiVariantGenerator.multiVariant(targetBlock.get());
+
+        if (targetBlock.get() instanceof DefaultableMultiLayerPlantBlock targetMultiLayerPlantBlock) {
+            int maxPlantLayerLevel = targetMultiLayerPlantBlock.getPossibleLevels().asList().get(targetMultiLayerPlantBlock.getPossibleLevels().size() - 1);
+            PropertyDispatch.C1<Integer> plantLayerLevelDispatch = PropertyDispatch.property(targetMultiLayerPlantBlock.getLevelProperty());
+
+            plantLayerLevelDispatch
+                    .select(0, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(targetBlock.get()).withSuffix("_bottom")))
+                    .select(maxPlantLayerLevel, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(targetBlock.get()).withSuffix("_top")));
+
+            if (maxPlantLayerLevel > 1) {
+                if (maxPlantLayerLevel > 2) {
+                    for (int i = 1; i < maxPlantLayerLevel - 1; i++) {
+                        plantLayerLevelDispatch.select(i, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(targetBlock.get()).withSuffix("_middle_" + i)));
+                    }
+                } else plantLayerLevelDispatch.select(1, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(targetBlock.get()).withSuffix("_middle")));
+            }
+
+            stateGen.with(plantLayerLevelDispatch);
+        }
+
+        return new BlockStateDefinition(targetBlock)
+                .withBlockStateSupplier(stateGen);
     }
 
     /**

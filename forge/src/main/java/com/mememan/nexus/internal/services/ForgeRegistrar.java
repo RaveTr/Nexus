@@ -144,11 +144,11 @@ public class ForgeRegistrar implements Registrar {
         }
 
         APPELLATIONS.computeIfAbsent(targetRegistryKey, k -> new Int2ObjectLinkedOpenHashMap<>())
-                .computeIfAbsent(targetRegistry.getId(targetRegistry.getOptional(objId).orElseThrow(() -> new IllegalArgumentException(String.format("No registry entry found for ID: %s", objId)))), k -> new LinkedList<>(ObjectArrayList.of(objId)))
-                .add(aliasId); //TODO Consistent num IDs
+                .computeIfAbsent(targetRegistry.getId(targetRegistry.get(objId)), k -> new LinkedList<>(ObjectArrayList.of(objId)))
+                .add(aliasId);
 
         if (targetRegistry instanceof NamespacedWrapperAccessor accessor) {
-       //     accessor.getDelegate().addAlias(objId, aliasId);
+        //    accessor.getDelegate().addAlias(objId, aliasId);
         }
     }
 

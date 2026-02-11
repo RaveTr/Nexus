@@ -50,41 +50,8 @@ public final class NexusRegistryDataManager {
             LevelStorageSource.LevelDirectory rootLevelDir = event.getLevelDirectory();
             File dataLevelDirectory = rootLevelDir.resourcePath(LEVEL_DATA_DIR).toFile();
             CompoundTag regBackupDataTag = new CompoundTag();
-            Map<ResourceKey<? extends Registry<?>>, Int2ObjectMap<? extends List<ResourceLocation>>> appellations = NexusServices.REGISTRAR.getAppellations();
 
-            if (!appellations.isEmpty()) {
-                CompoundTag appellationDataTag = new CompoundTag();
-                CompoundTag mappedAppellationsTag = new CompoundTag();
-
-                appellations.forEach((regKey, appellatedIds) -> {
-                    if (!appellatedIds.isEmpty()) {
-                        appellatedIds.forEach((numericalId, aliases) -> {
-                            CompoundTag entryAppellationsTag = new CompoundTag();
-                            ResourceLocation baseRegEntryId = aliases.get(0); // The first entry is always guaranteed to be the base ID passed in, as per the impl spec for Registrar#appellate
-
-                            entryAppellationsTag.putInt("NumericalId", numericalId);
-
-                            ListTag aliasListTag = new ListTag();
-
-                            aliases.forEach(aliasId -> {
-                                if (!Objects.equals(baseRegEntryId, aliasId)) {
-                                    CompoundTag aliasTag = new CompoundTag();
-
-                                    aliasTag.putString("Alias", aliasId.toString());
-                                    aliasListTag.add(aliasTag);
-                                }
-                            });
-
-                            entryAppellationsTag.put("Aliases", aliasListTag);
-                            mappedAppellationsTag.put(baseRegEntryId.toString(), entryAppellationsTag);
-                        });
-                    }
-
-                    appellationDataTag.put(regKey.location().toString(), mappedAppellationsTag);
-                });
-
-                regBackupDataTag.put("Appellations", appellationDataTag);
-            }
+            writeAppellationData(regBackupDataTag); // TODO Add handling for when the file already exists: Retrieve file data => append => overwrite
 
             try {
                 File regDataLockFile = new File(dataLevelDirectory, REGISTRY_DATA_LOCK.getId());
@@ -112,10 +79,35 @@ public final class NexusRegistryDataManager {
                         .filter(Optional::isPresent)
                         .map(Optional::get)
                         .forEach(curRegistry -> {
-                            CompoundTag curRegTag = serializedRegistriesTag.getCompound(curRegistry.key().location().toString()); // .registry() here refers to the root registry
+                            ResourceLocation curRegId = curRegistry.key().location();
+                            CompoundTag curRegTag = serializedRegistriesTag.getCompound(curRegId.toString()); // .registry() here refers to the root registry
                             ListTag aliasesTag = curRegTag.getList("aliases", Tag.TAG_COMPOUND);
+                            Map<ResourceKey<? extends Registry<?>>, Int2ObjectMap<? extends List<ResourceLocation>>> appellations = NexusServices.REGISTRAR.getAppellations();
 
+                            if (!appellations.isEmpty()) {
+                                appellations.entrySet().stream()
+                                        .filter(curEntry -> Objects.equals(curEntry.getKey(), curRegistry.key()))
+                                        .map(Map.Entry::getValue)
+                                        .findFirst()
+                                        .ifPresent((appellatedIds) -> {
+                                            if (!appellatedIds.isEmpty()) {
+                                                appellatedIds.forEach((numericalId, aliases) -> {
+                                                    ResourceLocation baseId = aliases.get(0);
 
+                                                    aliases.forEach(aliasId -> {
+                                                        if (!Objects.equals(baseId, aliasId)) {
+                                                            CompoundTag aliasTag = new CompoundTag();
+
+                                                            aliasTag.putString("K", baseId.toString());
+                                                            aliasTag.putString("V", aliasId.toString());
+
+                                                            aliasesTag.add(aliasTag);
+                                                        }
+                                                    });
+                                                });
+                                            }
+                                        });
+                            }
                         });
             });
         }
@@ -126,6 +118,44 @@ public final class NexusRegistryDataManager {
 
                 levelDataTag.putString("Test", "ZAMN");
             });
+        }
+    }
+
+    private static void writeAppellationData(CompoundTag rootRegDataTag) {
+        Map<ResourceKey<? extends Registry<?>>, Int2ObjectMap<? extends List<ResourceLocation>>> appellations = NexusServices.REGISTRAR.getAppellations();
+
+        if (!appellations.isEmpty()) {
+            CompoundTag appellationDataTag = new CompoundTag();
+            CompoundTag mappedRegEntriesTag = new CompoundTag();
+
+            appellations.forEach((regKey, appellatedIds) -> {
+                if (!appellatedIds.isEmpty()) {
+                    appellatedIds.forEach((numericalId, aliases) -> {
+                        CompoundTag entryAppellationDataTag = new CompoundTag();
+                        ResourceLocation baseRegEntryId = aliases.get(0); // The first entry is always guaranteed to be the base ID passed in, as per the impl spec for Registrar#appellate
+
+                        entryAppellationDataTag.putInt("NumericalId", numericalId);
+
+                        ListTag aliasListTag = new ListTag();
+
+                        aliases.forEach(aliasId -> {
+                            if (!Objects.equals(baseRegEntryId, aliasId)) {
+                                CompoundTag aliasTag = new CompoundTag();
+
+                                aliasTag.putString("Alias", aliasId.toString());
+                                aliasListTag.add(aliasTag);
+                            }
+                        });
+
+                        entryAppellationDataTag.put("Aliases", aliasListTag);
+                        mappedRegEntriesTag.put(baseRegEntryId.toString(), entryAppellationDataTag);
+                    });
+                }
+
+                appellationDataTag.put(regKey.location().toString(), mappedRegEntriesTag);
+            });
+
+            rootRegDataTag.put("Appellations", appellationDataTag);
         }
     }
 }

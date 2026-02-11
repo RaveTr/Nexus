@@ -418,6 +418,9 @@ public interface Registrar {
      * @implSpec The first element for any object ID {@link Int2ObjectMap} value for each registry key should always be
      * the base/original name of the object ID tied to any aliases (see references below).
      *
+     * @apiNote This retrieves a global view of the appellations stored in memory, which may differ from aliases stored
+     * in saves from session to session based on the user's mod configuration.
+     *
      * @return A {@link Map} of all registry appellations pertaining to existing registry entries.
      *
      * @see #appellate(ResourceLocation, ResourceLocation, ResourceKey)
