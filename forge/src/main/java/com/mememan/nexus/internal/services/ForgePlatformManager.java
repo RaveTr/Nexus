@@ -26,6 +26,7 @@ import org.objectweb.asm.Type;
 import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -53,7 +54,7 @@ public class ForgePlatformManager implements PlatformManager {
     }
 
     @Override
-    public List<Class<?>> discoverAnnotatedClasses(Class<? extends Annotation> annotationTypeClazz, @Nullable Comparator<String> classLoadingSorter, @Nullable List<String> validModIds, @Nullable Consumer<String> beforeClassInitConsumer) {
+    public List<Class<?>> discoverAnnotatedClasses(Class<? extends Annotation> annotationTypeClazz, @Nullable Comparator<String> classLoadingSorter, @Nullable List<String> validModIds, @Nullable Predicate<String> initFilter, @Nullable Consumer<String> beforeClassInitConsumer) {
         Type targetAnnotType = Type.getType(annotationTypeClazz); // Micro-optimization: Cache the annotation class' type in a local field
 
         if (validModIds == null || validModIds.isEmpty() || validModIds.stream().noneMatch(curModId -> ModList.get().isLoaded(curModId))) {
@@ -64,6 +65,7 @@ public class ForgePlatformManager implements PlatformManager {
                     .map(ModFileScanData.AnnotationData::clazz)
                     .map(Type::getClassName)
                     .sorted(classLoadingSorter != null ? classLoadingSorter : String::compareTo)
+                    .filter(name -> initFilter == null || initFilter.test(name))
                     .peek(name -> {
                         if (beforeClassInitConsumer != null) beforeClassInitConsumer.accept(name);
                     })
@@ -80,6 +82,7 @@ public class ForgePlatformManager implements PlatformManager {
                 .map(ModFileScanData.AnnotationData::clazz)
                 .map(Type::getClassName)
                 .sorted(classLoadingSorter != null ? classLoadingSorter : String::compareTo)
+                .filter(name -> initFilter == null || initFilter.test(name))
                 .peek(name -> {
                     if (beforeClassInitConsumer != null) beforeClassInitConsumer.accept(name);
                 })

@@ -225,7 +225,7 @@ public final class ModelUtil {
     public static BlockModelDefinition carpet(Supplier<Block> targetBlock, ResourceLocation carpetTexture) {
         return new BlockModelDefinition(ModelTemplates.CARPET)
                 .withTextureMapping(TextureMapping.wool(RegistryUtil.pickBlockPrefix(carpetTexture)))
-                .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get()))));
+                .withOrdinalModelDefinition(standardBlock(targetBlock));
     }
 
     /**
@@ -671,6 +671,57 @@ public final class ModelUtil {
         return new BlockStateDefinition(targetBlock)
                 .withBlockStateSupplier(MultiVariantGenerator.multiVariant(targetBlock.get(), Variant.variant()
                         .with(VariantProperties.MODEL, modelLocation)));
+    }
+
+    public static BlockModelDefinition orientableCube(ResourceLocation frontTexture, ResourceLocation sideTexture, ResourceLocation topTexture) {
+        return new BlockModelDefinition(ModelTemplates.CUBE_ORIENTABLE)
+                .withTextureMapping(new TextureMapping()
+                        .put(TextureSlot.FRONT, RegistryUtil.pickBlockPrefix(frontTexture))
+                        .put(TextureSlot.SIDE, RegistryUtil.pickBlockPrefix(sideTexture))
+                        .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topTexture)));
+    }
+
+    public static BlockModelDefinition orientableCube(Supplier<Block> targetBlock) {
+        return orientableCube(
+                RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_front", "block"),
+                RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_side", "block"),
+                RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block")
+        ).withOrdinalModelDefinition(standardBlock(targetBlock));
+    }
+
+    public static BlockStateDefinition orientableCubeBlockState(Supplier<Block> targetBlock) {
+        return new BlockStateDefinition(targetBlock)
+                .withBlockStateSupplier(MultiVariantGenerator.multiVariant(targetBlock.get())
+                        .with(PropertyDispatch.property(BlockStateProperties.HORIZONTAL_FACING)
+                                .select(Direction.EAST, Variant.variant()
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
+                                .select(Direction.SOUTH, Variant.variant()
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180))
+                                .select(Direction.WEST, Variant.variant()
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270))
+                                .select(Direction.NORTH, Variant.variant())));
+    }
+
+    public static BlockStateDefinition litOrientableCubeBlockState(Supplier<Block> targetBlock, ResourceLocation litModelLocation, ResourceLocation baseModelLocation) {
+        return new BlockStateDefinition(targetBlock)
+                .withBlockStateSupplier(MultiVariantGenerator.multiVariant(targetBlock.get())
+                        .with(PropertyDispatch.property(BlockStateProperties.LIT)
+                                .select(true, Variant.variant()
+                                        .with(VariantProperties.MODEL, litModelLocation))
+                                .select(false, Variant.variant()
+                                        .with(VariantProperties.MODEL, baseModelLocation)))
+                        .with(PropertyDispatch.property(BlockStateProperties.HORIZONTAL_FACING)
+                                .select(Direction.EAST, Variant.variant()
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
+                                .select(Direction.SOUTH, Variant.variant()
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180))
+                                .select(Direction.WEST, Variant.variant()
+                                        .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270))
+                                .select(Direction.NORTH, Variant.variant())));
+    }
+
+    public static BlockStateDefinition litOrientableCubeBlockState(Supplier<Block> targetBlock) {
+        return litOrientableCubeBlockState(targetBlock, ModelLocationUtils.getModelLocation(targetBlock.get(), "_lit"), ModelLocationUtils.getModelLocation(targetBlock.get()));
     }
 
     /**
@@ -1422,7 +1473,7 @@ public final class ModelUtil {
                 .withTextureMapping(new TextureMapping()
                         .put(TextureSlot.SIDE, RegistryUtil.pickBlockPrefix(sideTexture))
                         .put(TextureSlot.END, RegistryUtil.pickBlockPrefix(endTexture)))
-                .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get()))));
+                .withOrdinalModelDefinition(standardBlock(targetBlock));
     }
 
     /**
@@ -1970,7 +2021,7 @@ public final class ModelUtil {
                 .withCustomName(targetBlockId.withSuffix("_bottom").getPath())
                 .setOrdinalModelDefinitions(ObjectArrayList.of());
         ObjectArrayList<BlockModelDefinition> middleModelDefinitions = new ObjectArrayList<>();
-        
+
         if (!numberMiddleLayers || middleLayerCount <= 1) middleModelDefinitions.add(crossCutout(middlePlantTexture).withCustomName(targetBlockId.withSuffix("_middle").getPath()).setOrdinalModelDefinitions(ObjectArrayList.of()));
         else {
             for (int curLayer = 0; curLayer < middleLayerCount; curLayer++) {
@@ -2507,7 +2558,7 @@ public final class ModelUtil {
                         .put(TextureSlot.BOTTOM, RegistryUtil.pickBlockPrefix(bottomTexture))
                         .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topTexture))
                         .put(TextureSlot.SIDE, RegistryUtil.pickBlockPrefix(sideTexture)))
-                .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get()))));
+                .withOrdinalModelDefinition(standardBlock(targetBlock));
     }
 
     /**
@@ -2750,7 +2801,7 @@ public final class ModelUtil {
                         .put(TextureSlot.SIDE, RegistryUtil.pickBlockPrefix(sideTexture))
                         .put(TextureSlot.BOTTOM, RegistryUtil.pickBlockPrefix(bottomTexture))
                         .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(topTexture)))
-                .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get()))));
+                .withOrdinalModelDefinition(standardBlock(targetBlock));
     }
 
     /**
@@ -3765,7 +3816,7 @@ public final class ModelUtil {
     public static BlockModelDefinition pressurePlateUp(Supplier<Block> targetBlock, ResourceLocation pressurePlateTexture) {
         return new BlockModelDefinition(ModelTemplates.PRESSURE_PLATE_UP)
                 .withTextureMapping(TextureMapping.defaultTexture(RegistryUtil.pickBlockPrefix(pressurePlateTexture)))
-                .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get()))));
+                .withOrdinalModelDefinition(standardBlock(targetBlock));
     }
 
     /**
@@ -5500,7 +5551,7 @@ public final class ModelUtil {
     public static BlockModelDefinition fenceGateClosed(Supplier<Block> targetBlock, ResourceLocation fenceGateTexture) {
         return new BlockModelDefinition(ModelTemplates.FENCE_GATE_CLOSED)
                 .withTextureMapping(TextureMapping.defaultTexture(RegistryUtil.pickBlockPrefix(fenceGateTexture)))
-                .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get()))));
+                .withOrdinalModelDefinition(standardBlock(targetBlock));
     }
 
     /**
@@ -5924,7 +5975,7 @@ public final class ModelUtil {
                 .withTextureMapping(new TextureMapping()
                         .put(TextureSlot.DIRT, RegistryUtil.pickBlockPrefix(dirtTexture))
                         .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(dryFarmlandTexture)))
-                .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get()))));
+                .withOrdinalModelDefinition(standardBlock(targetBlock));
     }
 
     /**
@@ -6007,7 +6058,7 @@ public final class ModelUtil {
                 .withTextureMapping(new TextureMapping()
                         .put(TextureSlot.DIRT, RegistryUtil.pickBlockPrefix(dirtTexture))
                         .put(TextureSlot.TOP, RegistryUtil.pickBlockPrefix(moistFarmlandTexture)))
-                .withOrdinalModelDefinition(new ItemModelDefinition(fromLocation(ModelLocationUtils.getModelLocation(targetBlock.get()))));
+                .withOrdinalModelDefinition(standardBlock(targetBlock));
     }
 
     /**
@@ -6266,6 +6317,14 @@ public final class ModelUtil {
      */
     public static ItemModelDefinition generatedBlock(Supplier<Block> targetBlock) {
         return generatedBlock(RegistryUtil.getTextureLocationOrDefault(targetBlock, "item"));
+    }
+
+    public static ItemModelDefinition standardBlock(ResourceLocation modelLocation) {
+        return new ItemModelDefinition(fromLocation(modelLocation));
+    }
+
+    public static ItemModelDefinition standardBlock(Supplier<Block> targetBlock) {
+        return standardBlock(ModelLocationUtils.getModelLocation(targetBlock.get()));
     }
 
     /**

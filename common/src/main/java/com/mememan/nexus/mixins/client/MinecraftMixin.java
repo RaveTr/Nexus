@@ -66,6 +66,7 @@ public abstract class MinecraftMixin {
     private void nexus$handlePostRenderTickEventHook(CallbackInfo ci, @Local(argsOnly = true) boolean renderLevel) {
         float actualPartialTick = this.pause ? this.pausePartialTick : this.timer.partialTick;
         TickEvent.RenderTickEvent renderTickEventHook = new TickEvent.RenderTickEvent(TickEvent.Phase.END, renderLevel, actualPartialTick);
+
         TickEventBlueprint.RENDER_TICK.fireEvent(renderTickEventHook);
     }
 }

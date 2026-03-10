@@ -21,6 +21,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -48,10 +49,10 @@ public class FabricPlatformManager implements PlatformManager {
     }
 
     @Override
-    public List<Class<?>> discoverAnnotatedClasses(Class<? extends Annotation> annotationTypeClazz, @Nullable Comparator<String> classLoadingSorter, @Nullable List<String> validModIds, @Nullable Consumer<String> beforeClassInitConsumer) {
+    public List<Class<?>> discoverAnnotatedClasses(Class<? extends Annotation> annotationTypeClazz, @Nullable Comparator<String> classLoadingSorter, @Nullable List<String> validModIds, @Nullable Predicate<String> initFilter, @Nullable Consumer<String> beforeClassInitConsumer) {
         return MOD_DATA_CACHE.stream()
                 .filter(currentModData -> validModIds == null || validModIds.isEmpty() || validModIds.contains(currentModData.getModMetadata().modId()))
-                .flatMap(currentModData -> currentModData.discoverAnnotatedClasses(annotationTypeClazz, classLoadingSorter, beforeClassInitConsumer).stream())
+                .flatMap(currentModData -> currentModData.discoverAnnotatedClasses(annotationTypeClazz, classLoadingSorter, beforeClassInitConsumer, initFilter).stream())
                 .collect(Collectors.toCollection(ObjectArrayList::new));
     }
 

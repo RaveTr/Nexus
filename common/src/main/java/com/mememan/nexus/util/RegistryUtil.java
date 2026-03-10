@@ -21,6 +21,7 @@ import com.mememan.nexus.template.property_wrapper.BlockEntityTypePropertyWrappe
 import com.mememan.nexus.template.property_wrapper.BlockPropertyWrapperTemplates;
 import com.mememan.nexus.template.property_wrapper.EntityTypePropertyWrapperTemplates;
 import com.mememan.nexus.template.property_wrapper.ItemPropertyWrapperTemplates;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.Util;
@@ -50,9 +51,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -1129,51 +1130,75 @@ public final class RegistryUtil {
 
     public static WoodenBlockGroup registerStandardWoodFamily(ResourceLocation familyId, Supplier<TagKey<Item>> logTag, @Nullable Collection<Supplier<Item>> itemSupCol, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<BlockEntityType<BlockEntity>>> blockEntityTypeSupCol, @Nullable Collection<Supplier<EntityType<Entity>>> entityTypeSupCol) {
         return Util.make(() -> {
-            Set<Supplier<? extends Block>> woodBlockFamilySet = new ObjectOpenHashSet<>();
-            Set<Supplier<? extends Item>> woodItemFamilySet = new ObjectOpenHashSet<>();
-            Set<Supplier<? extends BlockEntityType<? extends BlockEntity>>> woodBlockEntityFamilySet = new ObjectOpenHashSet<>();
-            Set<Supplier<? extends EntityType<? extends Entity>>> woodEntityTypeFamilySet = new ObjectOpenHashSet<>();
+            Map<ResourceLocation, Supplier<? extends Block>> woodBlockFamilyMap = new Object2ObjectOpenHashMap<>();
+            Map<ResourceLocation, Supplier<? extends Item>> woodItemFamilyMap = new Object2ObjectOpenHashMap<>();
+            Map<ResourceLocation, Supplier<? extends BlockEntityType<? extends BlockEntity>>> woodBlockEntityFamilyMap = new Object2ObjectOpenHashMap<>();
+            Map<ResourceLocation, Supplier<? extends EntityType<? extends Entity>>> woodEntityTypeFamilyMap = new Object2ObjectOpenHashMap<>();
             BlockSetType woodBlockSetType = BlockSetType.register(new BlockSetType(familyId.toString()));
             WoodType woodBlockType = WoodType.register(new WoodType(familyId.toString(), woodBlockSetType));
-            ResourceLocation standardSignId = familyId.withSuffix("_sign");
-            ResourceLocation standardHangingSignId = familyId.withSuffix("_hanging_sign");
 
-            Supplier<RotatedPillarBlock> woodenLog = BlockPropertyWrapperTemplates.registerWithItemAndReflectAndChain(familyId.withSuffix("_log"), () -> new RotatedPillarBlock(BlockBehaviour.Properties.copy(Blocks.OAK_LOG)), BlockPropertyWrapperTemplates.WOODEN_LOG, blockSupCol, itemSupCol)
+            ResourceLocation woodenLogId = familyId.withSuffix("_log");
+            ResourceLocation woodBlockId = familyId.withSuffix("_wood");
+            ResourceLocation woodenStrippedLogId = familyId.withPrefix("stripped_").withSuffix("_log");
+
+            Supplier<RotatedPillarBlock> woodenLog = BlockPropertyWrapperTemplates.registerWithItemAndReflectAndChain(woodenLogId, () -> new RotatedPillarBlock(BlockBehaviour.Properties.copy(Blocks.OAK_LOG)), BlockPropertyWrapperTemplates.WOODEN_LOG, blockSupCol, itemSupCol)
                     .withAdditionalTag(logTag::get)
                     .buildAndGet();
-            Supplier<RotatedPillarBlock> woodBlock = BlockPropertyWrapperTemplates.registerWithItemAndChain(familyId.withSuffix("_wood"), () -> new RotatedPillarBlock(BlockBehaviour.Properties.copy(Blocks.OAK_WOOD)), BlockPropertyWrapperTemplates.WOOD, blockSupCol, itemSupCol)
+            Supplier<RotatedPillarBlock> woodBlock = BlockPropertyWrapperTemplates.registerWithItemAndChain(woodBlockId, () -> new RotatedPillarBlock(BlockBehaviour.Properties.copy(Blocks.OAK_WOOD)), BlockPropertyWrapperTemplates.WOOD, blockSupCol, itemSupCol)
                     .withAdditionalTag(logTag::get)
                     .buildAndGet();
-            Supplier<RotatedPillarBlock> woodenStrippedLog = BlockPropertyWrapperTemplates.registerWithItemAndChain(familyId.withPrefix("stripped_").withSuffix("_log"), () -> new RotatedPillarBlock(BlockBehaviour.Properties.copy(Blocks.STRIPPED_OAK_LOG)), BlockPropertyWrapperTemplates.STRIPPED_WOODEN_LOG, blockSupCol, itemSupCol)
+            Supplier<RotatedPillarBlock> woodenStrippedLog = BlockPropertyWrapperTemplates.registerWithItemAndChain(woodenStrippedLogId, () -> new RotatedPillarBlock(BlockBehaviour.Properties.copy(Blocks.STRIPPED_OAK_LOG)), BlockPropertyWrapperTemplates.STRIPPED_WOODEN_LOG, blockSupCol, itemSupCol)
                     .withAdditionalTag(logTag::get)
                     .buildAndGet();
 
-            Supplier<Block> woodenPlanks = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(familyId.withSuffix("_planks"), () -> new Block(BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS)), BlockPropertyWrapperTemplates.WOODEN_PLANKS, blockSupCol, itemSupCol);
-            Supplier<Block> woodenSlab = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(familyId.withSuffix("_slab"), () -> new SlabBlock(BlockBehaviour.Properties.copy(Blocks.OAK_SLAB)), BlockPropertyWrapperTemplates.WOODEN_SLAB, blockSupCol, itemSupCol);
-            Supplier<Block> woodenStairs = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(familyId.withSuffix("_stairs"), () -> new StairBlock(woodenPlanks.get().defaultBlockState(), BlockBehaviour.Properties.copy(Blocks.OAK_STAIRS)), BlockPropertyWrapperTemplates.WOODEN_STAIRS, blockSupCol, itemSupCol);
+            ResourceLocation woodenPlanksId = familyId.withSuffix("_planks");
+            ResourceLocation woodenSlabId = familyId.withSuffix("_slab");
+            ResourceLocation woodenStairsId = familyId.withSuffix("_stairs");
 
-            Supplier<Block> woodenFence = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(familyId.withSuffix("_fence"), () -> new FenceBlock(BlockBehaviour.Properties.copy(Blocks.OAK_FENCE)), BlockPropertyWrapperTemplates.WOODEN_FENCE, blockSupCol, itemSupCol);
-            Supplier<Block> woodenFenceGate = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(familyId.withSuffix("_fence_gate"), () -> new FenceGateBlock(BlockBehaviour.Properties.copy(Blocks.OAK_FENCE_GATE), woodBlockType), BlockPropertyWrapperTemplates.WOODEN_FENCE_GATE, blockSupCol, itemSupCol);
+            ResourceLocation woodenFenceId = familyId.withSuffix("_fence");
+            ResourceLocation woodenFenceGateId = familyId.withSuffix("_fence_gate");
+            ResourceLocation woodenDoorId = familyId.withSuffix("_door");
+            ResourceLocation woodenTrapdoorId = familyId.withSuffix("_trapdoor");
 
-            Supplier<Block> woodenDoor = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(familyId.withSuffix("_door"), () -> new DoorBlock(BlockBehaviour.Properties.copy(Blocks.OAK_DOOR), woodBlockSetType), BlockPropertyWrapperTemplates.WOODEN_DOOR, blockSupCol, itemSupCol);
-            Supplier<Block> woodenTrapdoor = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(familyId.withSuffix("_trapdoor"), () -> new TrapDoorBlock(BlockBehaviour.Properties.copy(Blocks.OAK_TRAPDOOR), woodBlockSetType), BlockPropertyWrapperTemplates.WOODEN_TRAPDOOR, blockSupCol, itemSupCol);
+            ResourceLocation woodenPressurePlateId = familyId.withSuffix("_pressure_plate");
+            ResourceLocation woodenButtonId = familyId.withSuffix("_button");
 
-            Supplier<Block> woodenPressurePlate = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(familyId.withSuffix("_pressure_plate"), () -> new PressurePlateBlock(PressurePlateBlock.Sensitivity.EVERYTHING, BlockBehaviour.Properties.copy(Blocks.OAK_PRESSURE_PLATE), woodBlockSetType), BlockPropertyWrapperTemplates.WOODEN_PRESSURE_PLATE, blockSupCol, itemSupCol);
-            Supplier<Block> woodenButton = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(familyId.withSuffix("_button"), () -> new ButtonBlock(BlockBehaviour.Properties.copy(Blocks.OAK_BUTTON), woodBlockSetType, 30, true), BlockPropertyWrapperTemplates.WOODEN_BUTTON, blockSupCol, itemSupCol);
+            ResourceLocation woodenSignId = familyId.withSuffix("_sign");
+            ResourceLocation woodenWallSignId = familyId.withSuffix("_wall_sign");
 
-            Supplier<Block> woodenStandingSign = BlockPropertyWrapperTemplates.registerBlockFromTemplateAndReflect(standardSignId, () -> new DefaultableStandingSignBlock(BlockBehaviour.Properties.copy(Blocks.OAK_SIGN), woodBlockType), BlockPropertyWrapperTemplates.WOODEN_STANDING_SIGN, blockSupCol);
-            Supplier<Block> woodenWallSign = BlockPropertyWrapperTemplates.registerBlockFromTemplateAndReflect(familyId.withSuffix("_wall_sign"), () -> new DefaultableWallSignBlock(BlockBehaviour.Properties.copy(Blocks.OAK_WALL_SIGN).dropsLike(woodenStandingSign.get()), woodBlockType), BlockPropertyWrapperTemplates.WOODEN_WALL_SIGN, blockSupCol);
+            ResourceLocation woodenHangingSignId = familyId.withSuffix("_hanging_sign");
+            ResourceLocation woodenCeilingHangingSignId = familyId.withSuffix("_ceiling_hanging_sign");
+            ResourceLocation woodenWallHangingSignId = familyId.withSuffix("_wall_hanging_sign");
 
-            Supplier<Block> woodenCeilingHangingSign = BlockPropertyWrapperTemplates.registerBlockFromTemplateAndReflect(standardHangingSignId, () -> new DefaultableCeilingHangingSignBlock(BlockBehaviour.Properties.copy(Blocks.OAK_HANGING_SIGN), woodBlockType), BlockPropertyWrapperTemplates.WOODEN_CEILING_HANGING_SIGN, blockSupCol);
-            Supplier<Block> woodenWallHangingSign = BlockPropertyWrapperTemplates.registerBlockFromTemplateAndReflect(familyId.withSuffix("_wall_hanging_sign"), () -> new DefaultableWallHangingSignBlock(BlockBehaviour.Properties.copy(Blocks.OAK_WALL_HANGING_SIGN).dropsLike(woodenCeilingHangingSign.get()), woodBlockType), BlockPropertyWrapperTemplates.WOODEN_WALL_HANGING_SIGN, blockSupCol);
+            Supplier<Block> woodenPlanks = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(woodenPlanksId, () -> new Block(BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS)), BlockPropertyWrapperTemplates.WOODEN_PLANKS, blockSupCol, itemSupCol);
+            Supplier<Block> woodenSlab = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(woodenSlabId, () -> new SlabBlock(BlockBehaviour.Properties.copy(Blocks.OAK_SLAB)), BlockPropertyWrapperTemplates.WOODEN_SLAB, blockSupCol, itemSupCol);
+            Supplier<Block> woodenStairs = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(woodenStairsId, () -> new StairBlock(woodenPlanks.get().defaultBlockState(), BlockBehaviour.Properties.copy(Blocks.OAK_STAIRS)), BlockPropertyWrapperTemplates.WOODEN_STAIRS, blockSupCol, itemSupCol);
 
-            Supplier<SignItem> woodenSignItem = ItemPropertyWrapperTemplates.registerItem(standardSignId, () -> new SignItem(new Item.Properties().stacksTo(16), woodenStandingSign.get(), woodenWallSign.get()), itemSupCol);
-            Supplier<HangingSignItem> woodenHangingSignItem = ItemPropertyWrapperTemplates.registerItem(standardHangingSignId, () -> new HangingSignItem(woodenCeilingHangingSign.get(), woodenWallHangingSign.get(), new Item.Properties().stacksTo(16)), itemSupCol);
+            Supplier<Block> woodenFence = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(woodenFenceId, () -> new FenceBlock(BlockBehaviour.Properties.copy(Blocks.OAK_FENCE)), BlockPropertyWrapperTemplates.WOODEN_FENCE, blockSupCol, itemSupCol);
+            Supplier<Block> woodenFenceGate = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(woodenFenceGateId, () -> new FenceGateBlock(BlockBehaviour.Properties.copy(Blocks.OAK_FENCE_GATE), woodBlockType), BlockPropertyWrapperTemplates.WOODEN_FENCE_GATE, blockSupCol, itemSupCol);
 
-            Supplier<Item> woodenBoatItem = ItemPropertyWrapperTemplates.registerItemFromTemplate(familyId.withSuffix("_boat"), () -> new DefaultableBoatItem(false, BoatType.register(familyId.toString().replace(':', '-'), woodenPlanks), new Item.Properties().stacksTo(1)), ItemPropertyWrapperTemplates.BOAT, itemSupCol);
-            Supplier<Item> woodenChestBoatItem = ItemPropertyWrapperTemplates.registerItemFromTemplate(familyId.withSuffix("_chest_boat"), () -> new DefaultableBoatItem(true, BoatType.register(familyId.toString().replace(':', '-'), woodenPlanks), new Item.Properties().stacksTo(1)), ItemPropertyWrapperTemplates.CHEST_BOAT, itemSupCol);
+            Supplier<Block> woodenDoor = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(woodenDoorId, () -> new DoorBlock(BlockBehaviour.Properties.copy(Blocks.OAK_DOOR), woodBlockSetType), BlockPropertyWrapperTemplates.WOODEN_DOOR, blockSupCol, itemSupCol);
+            Supplier<Block> woodenTrapdoor = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(woodenTrapdoorId, () -> new TrapDoorBlock(BlockBehaviour.Properties.copy(Blocks.OAK_TRAPDOOR), woodBlockSetType), BlockPropertyWrapperTemplates.WOODEN_TRAPDOOR, blockSupCol, itemSupCol);
 
-            BuiltInRegistries.BLOCK_ENTITY_TYPE.getOptional(familyId.withPath("sign"))
+            Supplier<Block> woodenPressurePlate = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(woodenPressurePlateId, () -> new PressurePlateBlock(PressurePlateBlock.Sensitivity.EVERYTHING, BlockBehaviour.Properties.copy(Blocks.OAK_PRESSURE_PLATE), woodBlockSetType), BlockPropertyWrapperTemplates.WOODEN_PRESSURE_PLATE, blockSupCol, itemSupCol);
+            Supplier<Block> woodenButton = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(woodenButtonId, () -> new ButtonBlock(BlockBehaviour.Properties.copy(Blocks.OAK_BUTTON), woodBlockSetType, 30, true), BlockPropertyWrapperTemplates.WOODEN_BUTTON, blockSupCol, itemSupCol);
+
+            Supplier<Block> woodenStandingSign = BlockPropertyWrapperTemplates.registerBlockFromTemplateAndReflect(woodenSignId, () -> new DefaultableStandingSignBlock(BlockBehaviour.Properties.copy(Blocks.OAK_SIGN), woodBlockType), BlockPropertyWrapperTemplates.WOODEN_STANDING_SIGN, blockSupCol);
+            Supplier<Block> woodenWallSign = BlockPropertyWrapperTemplates.registerBlockFromTemplateAndReflect(woodenWallSignId, () -> new DefaultableWallSignBlock(BlockBehaviour.Properties.copy(Blocks.OAK_WALL_SIGN).dropsLike(woodenStandingSign.get()), woodBlockType), BlockPropertyWrapperTemplates.WOODEN_WALL_SIGN, blockSupCol);
+
+            Supplier<Block> woodenCeilingHangingSign = BlockPropertyWrapperTemplates.registerBlockFromTemplateAndReflect(woodenCeilingHangingSignId, () -> new DefaultableCeilingHangingSignBlock(BlockBehaviour.Properties.copy(Blocks.OAK_HANGING_SIGN), woodBlockType), BlockPropertyWrapperTemplates.WOODEN_CEILING_HANGING_SIGN, blockSupCol);
+            Supplier<Block> woodenWallHangingSign = BlockPropertyWrapperTemplates.registerBlockFromTemplateAndReflect(woodenWallHangingSignId, () -> new DefaultableWallHangingSignBlock(BlockBehaviour.Properties.copy(Blocks.OAK_WALL_HANGING_SIGN).dropsLike(woodenCeilingHangingSign.get()), woodBlockType), BlockPropertyWrapperTemplates.WOODEN_WALL_HANGING_SIGN, blockSupCol);
+
+            Supplier<SignItem> woodenSignItem = ItemPropertyWrapperTemplates.registerItem(woodenSignId, () -> new SignItem(new Item.Properties().stacksTo(16), woodenStandingSign.get(), woodenWallSign.get()), itemSupCol);
+            Supplier<HangingSignItem> woodenHangingSignItem = ItemPropertyWrapperTemplates.registerItem(woodenHangingSignId, () -> new HangingSignItem(woodenCeilingHangingSign.get(), woodenWallHangingSign.get(), new Item.Properties().stacksTo(16)), itemSupCol);
+
+            ResourceLocation woodenBoatId = familyId.withSuffix("_boat");
+            ResourceLocation woodenChestBoatId = familyId.withSuffix("_chest_boat");
+
+            Supplier<Item> woodenBoatItem = ItemPropertyWrapperTemplates.registerItemFromTemplate(woodenBoatId, () -> new DefaultableBoatItem(false, BoatType.register(familyId.toString().replace(':', '-'), woodenPlanks), new Item.Properties().stacksTo(1)), ItemPropertyWrapperTemplates.BOAT, itemSupCol);
+            Supplier<Item> woodenChestBoatItem = ItemPropertyWrapperTemplates.registerItemFromTemplate(woodenChestBoatId, () -> new DefaultableBoatItem(true, BoatType.register(familyId.toString().replace(':', '-'), woodenPlanks), new Item.Properties().stacksTo(1)), ItemPropertyWrapperTemplates.CHEST_BOAT, itemSupCol);
+
+            BuiltInRegistries.BLOCK_ENTITY_TYPE.getOptional(woodenSignId)
                     .ifPresentOrElse(alreadyRegisteredBaseSignBlockEntity -> {
                         Supplier<BlockEntityType<DefaultableSignBlockEntity>> mappedSignBlockEntitySup = () -> (BlockEntityType<DefaultableSignBlockEntity>) alreadyRegisteredBaseSignBlockEntity;
                         BlockEntityType<DefaultableSignBlockEntity> mappedSignBlockEntity = mappedSignBlockEntitySup.get();
@@ -1183,16 +1208,16 @@ public final class RegistryUtil {
                             existingValidBlocks.add(woodenWallSign.get());
                         });
 
-                        woodBlockEntityFamilySet.add(mappedSignBlockEntitySup);
+                        woodBlockEntityFamilyMap.put(woodenSignId, mappedSignBlockEntitySup);
                     }, () -> {
-                        Supplier<BlockEntityType<DefaultableSignBlockEntity>> woodenSignBlockEntityType = BlockEntityTypePropertyWrapperTemplates.registerBlockEntityTypeFromTemplateAndReflect(familyId.withPath("sign"), () -> BlockEntityType.Builder.of(
-                                (targetPos, targetState) -> new DefaultableSignBlockEntity(() -> BuiltInRegistries.BLOCK_ENTITY_TYPE.getOptional(familyId.withPath("sign")).orElseThrow(), targetPos, targetState),
+                        Supplier<BlockEntityType<DefaultableSignBlockEntity>> woodenSignBlockEntityType = BlockEntityTypePropertyWrapperTemplates.registerBlockEntityTypeFromTemplateAndReflect(woodenSignId, () -> BlockEntityType.Builder.of(
+                                (targetPos, targetState) -> new DefaultableSignBlockEntity(() -> BuiltInRegistries.BLOCK_ENTITY_TYPE.getOptional(woodenSignId).orElseThrow(), targetPos, targetState),
                                 woodenStandingSign.get(), woodenWallSign.get()
-                        ).build(Util.fetchChoiceType(References.BLOCK_ENTITY, standardSignId.getPath())), BlockEntityTypePropertyWrapperTemplates.SIGN, blockEntityTypeSupCol);
+                        ).build(Util.fetchChoiceType(References.BLOCK_ENTITY, woodenSignId.getPath())), BlockEntityTypePropertyWrapperTemplates.SIGN, blockEntityTypeSupCol);
 
-                        woodBlockEntityFamilySet.add(woodenSignBlockEntityType);
+                        woodBlockEntityFamilyMap.put(woodenSignId, woodenSignBlockEntityType);
                     });
-            BuiltInRegistries.BLOCK_ENTITY_TYPE.getOptional(familyId.withPath("hanging_sign"))
+            BuiltInRegistries.BLOCK_ENTITY_TYPE.getOptional(woodenHangingSignId)
                     .ifPresentOrElse(alreadyRegisteredBaseHangingSignBlockEntity -> {
                         Supplier<BlockEntityType<DefaultableHangingSignBlockEntity>> mappedHangingSignBlockEntitySup = () -> (BlockEntityType<DefaultableHangingSignBlockEntity>) alreadyRegisteredBaseHangingSignBlockEntity;
                         BlockEntityType<DefaultableHangingSignBlockEntity> mappedHangingSignBlockEntity = mappedHangingSignBlockEntitySup.get();
@@ -1202,71 +1227,71 @@ public final class RegistryUtil {
                             existingValidBlocks.add(woodenWallHangingSign.get());
                         });
 
-                        woodBlockEntityFamilySet.add(mappedHangingSignBlockEntitySup);
+                        woodBlockEntityFamilyMap.put(woodenHangingSignId, mappedHangingSignBlockEntitySup);
                     }, () -> {
-                        Supplier<BlockEntityType<DefaultableHangingSignBlockEntity>> woodenHangingSignBlockEntityType = BlockEntityTypePropertyWrapperTemplates.registerBlockEntityTypeFromTemplateAndReflect(familyId.withPath("hanging_sign"), () -> BlockEntityType.Builder.of(
-                                (targetPos, targetState) -> new DefaultableHangingSignBlockEntity(() -> BuiltInRegistries.BLOCK_ENTITY_TYPE.getOptional(familyId.withPath("hanging_sign")).orElseThrow(), targetPos, targetState),
+                        Supplier<BlockEntityType<DefaultableHangingSignBlockEntity>> woodenHangingSignBlockEntityType = BlockEntityTypePropertyWrapperTemplates.registerBlockEntityTypeFromTemplateAndReflect(woodenHangingSignId, () -> BlockEntityType.Builder.of(
+                                (targetPos, targetState) -> new DefaultableHangingSignBlockEntity(() -> BuiltInRegistries.BLOCK_ENTITY_TYPE.getOptional(woodenHangingSignId).orElseThrow(), targetPos, targetState),
                                 woodenCeilingHangingSign.get(), woodenWallHangingSign.get()
-                        ).build(Util.fetchChoiceType(References.BLOCK_ENTITY, standardHangingSignId.getPath())), BlockEntityTypePropertyWrapperTemplates.HANGING_SIGN, blockEntityTypeSupCol);
+                        ).build(Util.fetchChoiceType(References.BLOCK_ENTITY, woodenHangingSignId.getPath())), BlockEntityTypePropertyWrapperTemplates.HANGING_SIGN, blockEntityTypeSupCol);
 
-                        woodBlockEntityFamilySet.add(woodenHangingSignBlockEntityType);
+                        woodBlockEntityFamilyMap.put(woodenHangingSignId, woodenHangingSignBlockEntityType);
                     });
 
-            BuiltInRegistries.ENTITY_TYPE.getOptional(familyId.withPath("boat"))
+            BuiltInRegistries.ENTITY_TYPE.getOptional(woodenBoatId)
                     .ifPresentOrElse(alreadyRegisteredBaseBoatEntity -> {
-                        woodEntityTypeFamilySet.add(() -> alreadyRegisteredBaseBoatEntity);
+                        woodEntityTypeFamilyMap.put(woodenBoatId, () -> alreadyRegisteredBaseBoatEntity);
                     }, () -> {
-                        Supplier<EntityType<DefaultableBoat>> woodenBoatEntityType = EntityTypePropertyWrapperTemplates.registerEntityTypeFromTemplateAndReflect(familyId.withPath("boat"),
+                        Supplier<EntityType<DefaultableBoat>> woodenBoatEntityType = EntityTypePropertyWrapperTemplates.registerEntityTypeFromTemplateAndReflect(woodenBoatId,
                                 () -> EntityType.Builder.<DefaultableBoat>of(DefaultableBoat::new, MobCategory.MISC)
                                         .sized(1.375F, 0.5625F)
                                         .clientTrackingRange(10)
-                                        .build(familyId.withPath("boat").toString()), EntityTypePropertyWrapperTemplates.BOAT, entityTypeSupCol);
+                                        .build(woodenBoatId.toString()), EntityTypePropertyWrapperTemplates.BOAT, entityTypeSupCol);
 
-                        woodEntityTypeFamilySet.add(woodenBoatEntityType);
+                        woodEntityTypeFamilyMap.put(woodenBoatId, woodenBoatEntityType);
                     });
-            BuiltInRegistries.ENTITY_TYPE.getOptional(familyId.withPath("chest_boat"))
+            BuiltInRegistries.ENTITY_TYPE.getOptional(woodenChestBoatId)
                     .ifPresentOrElse(alreadyRegisteredBaseChestBoatEntity -> {
-                        woodEntityTypeFamilySet.add(() -> alreadyRegisteredBaseChestBoatEntity);
+                        woodEntityTypeFamilyMap.put(woodenChestBoatId, () -> alreadyRegisteredBaseChestBoatEntity);
                     }, () -> {
-                        Supplier<EntityType<DefaultableChestBoat>> woodenChestBoatEntityType = EntityTypePropertyWrapperTemplates.registerEntityTypeFromTemplateAndReflect(familyId.withPath("chest_boat"),
+                        Supplier<EntityType<DefaultableChestBoat>> woodenChestBoatEntityType = EntityTypePropertyWrapperTemplates.registerEntityTypeFromTemplateAndReflect(woodenChestBoatId,
                                 () -> EntityType.Builder.<DefaultableChestBoat>of(DefaultableChestBoat::new, MobCategory.MISC)
                                         .sized(1.375F, 0.5625F)
                                         .clientTrackingRange(10)
-                                        .build(familyId.withPath("chest_boat").toString()), EntityTypePropertyWrapperTemplates.CHEST_BOAT, entityTypeSupCol);
+                                        .build(woodenChestBoatId.toString()), EntityTypePropertyWrapperTemplates.CHEST_BOAT, entityTypeSupCol);
 
-                        woodEntityTypeFamilySet.add(woodenChestBoatEntityType);
+                        woodEntityTypeFamilyMap.put(woodenChestBoatId, woodenChestBoatEntityType);
                     });
 
-            woodBlockFamilySet.add(woodenLog);
-            woodBlockFamilySet.add(woodBlock);
-            woodBlockFamilySet.add(woodenStrippedLog);
+            woodBlockFamilyMap.put(woodenLogId, woodenLog);
+            woodBlockFamilyMap.put(woodBlockId, woodBlock);
+            woodBlockFamilyMap.put(woodenStrippedLogId, woodenStrippedLog);
 
-            woodBlockFamilySet.add(woodenPlanks);
-            woodBlockFamilySet.add(woodenSlab);
-            woodBlockFamilySet.add(woodenStairs);
+            woodBlockFamilyMap.put(woodenPlanksId, woodenPlanks);
+            woodBlockFamilyMap.put(woodenSlabId, woodenSlab);
+            woodBlockFamilyMap.put(woodenStairsId, woodenStairs);
 
-            woodBlockFamilySet.add(woodenFence);
-            woodBlockFamilySet.add(woodenFenceGate);
+            woodBlockFamilyMap.put(woodenFenceId, woodenFence);
+            woodBlockFamilyMap.put(woodenFenceGateId, woodenFenceGate);
 
-            woodBlockFamilySet.add(woodenDoor);
-            woodBlockFamilySet.add(woodenTrapdoor);
+            woodBlockFamilyMap.put(woodenDoorId, woodenDoor);
+            woodBlockFamilyMap.put(woodenTrapdoorId, woodenTrapdoor);
 
-            woodBlockFamilySet.add(woodenPressurePlate);
-            woodBlockFamilySet.add(woodenButton);
+            woodBlockFamilyMap.put(woodenPressurePlateId, woodenPressurePlate);
+            woodBlockFamilyMap.put(woodenButtonId, woodenButton);
 
-            woodBlockFamilySet.add(woodenStandingSign);
-            woodBlockFamilySet.add(woodenWallSign);
+            woodBlockFamilyMap.put(woodenSignId, woodenStandingSign);
+            woodBlockFamilyMap.put(woodenWallSignId, woodenWallSign);
 
-            woodBlockFamilySet.add(woodenCeilingHangingSign);
-            woodBlockFamilySet.add(woodenWallHangingSign);
+            woodBlockFamilyMap.put(woodenCeilingHangingSignId, woodenCeilingHangingSign);
+            woodBlockFamilyMap.put(woodenWallHangingSignId, woodenWallHangingSign);
 
-            woodItemFamilySet.add(woodenSignItem);
-            woodItemFamilySet.add(woodenHangingSignItem);
+            woodItemFamilyMap.put(woodenSignId, woodenSignItem);
+            woodItemFamilyMap.put(woodenHangingSignId, woodenHangingSignItem);
 
-            woodItemFamilySet.add(woodenBoatItem);
-            woodItemFamilySet.add(woodenChestBoatItem);
+            woodItemFamilyMap.put(woodenBoatId, woodenBoatItem);
+            woodItemFamilyMap.put(woodenChestBoatId, woodenChestBoatItem);
 
-            return new WoodenBlockGroup(woodBlockSetType, woodBlockType, woodBlockFamilySet, woodItemFamilySet, woodBlockEntityFamilySet, woodEntityTypeFamilySet);
+            return new WoodenBlockGroup(woodBlockSetType, woodBlockType, woodBlockFamilyMap, woodItemFamilyMap, woodBlockEntityFamilyMap, woodEntityTypeFamilyMap);
         });
     }
 
@@ -1280,44 +1305,52 @@ public final class RegistryUtil {
 
     public static StoneBlockGroup registerStoneFamily(ResourceLocation familyId, int miningLevel, boolean includePressurePlateAndButton, boolean deepslateLike, Function<Supplier<Block>, LootTable.Builder> baseBlockLootTableBuilder, Function<Consumer<FinishedRecipe>, Consumer<Supplier<Block>>> baseBlockRecipeMapper, Function<ResourceLocation, ResourceLocation> familyMemberIdMapper, @Nullable BlockPropertyWrapper<Block> baseBlockTemplate, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> itemSupCol) {
         return Util.make(() -> {
-            Set<Supplier<? extends Block>> stoneBlockFamilySet = new ObjectOpenHashSet<>();
+            Map<ResourceLocation, Supplier<? extends Block>> stoneBlockFamilyMap = new Object2ObjectOpenHashMap<>();
             BlockSetType stoneBlockSetType = getOrCreateBlockSetType(familyId.toString());
             Function<ResourceLocation, ResourceLocation> memberMapperWrapper = familyMemberIdMapper == null ? Function.identity() : familyMemberIdMapper;
 
-            Supplier<Block> stoneBlock = BlockPropertyWrapperTemplates.registerWithItemAndChain(memberMapperWrapper.apply(familyId), () -> new Block(BlockBehaviour.Properties.copy(deepslateLike ? Blocks.DEEPSLATE : Blocks.STONE)), baseBlockTemplate != null ? baseBlockTemplate : BlockPropertyWrapperTemplates.BASIC_PICKAXE, blockSupCol, itemSupCol)
+            ResourceLocation standardStoneBlockId = familyId;
+            ResourceLocation stoneStairsId = familyId.withSuffix("_stairs");
+            ResourceLocation stoneSlabId = familyId.withSuffix("_slab");
+            ResourceLocation stoneWallId = familyId.withSuffix("_wall");
+
+            Supplier<Block> stoneBlock = BlockPropertyWrapperTemplates.registerWithItemAndChain(memberMapperWrapper.apply(standardStoneBlockId), () -> new Block(BlockBehaviour.Properties.copy(deepslateLike ? Blocks.DEEPSLATE : Blocks.STONE)), baseBlockTemplate != null ? baseBlockTemplate : BlockPropertyWrapperTemplates.BASIC_PICKAXE, blockSupCol, itemSupCol)
                     .minimumMiningLevel(miningLevel)
                     .withLootTable(baseBlockLootTableBuilder == null || Objects.equals(baseBlockLootTableBuilder, Function.identity()) ? baseBlockTemplate == null ? LootUtil::dropSelf : baseBlockTemplate.getLootTableBuilder().orElse(LootUtil::dropSelf) : baseBlockLootTableBuilder)
                     .withRecipe(baseBlockRecipeMapper == null ? baseBlockTemplate == null ? null : baseBlockTemplate.getRecipeConsumer().orElse(null) : baseBlockRecipeMapper)
                     .buildAndGet();
-            Supplier<StairBlock> stoneStairs = BlockPropertyWrapperTemplates.registerWithItemAndChain(memberMapperWrapper.apply(familyId.withSuffix("_stairs")), () -> new StairBlock(stoneBlock.get().defaultBlockState(), BlockBehaviour.Properties.copy(deepslateLike ? Blocks.DEEPSLATE_BRICK_STAIRS : Blocks.STONE_STAIRS)), BlockPropertyWrapperTemplates.STAIRS, blockSupCol, itemSupCol)
+            Supplier<StairBlock> stoneStairs = BlockPropertyWrapperTemplates.registerWithItemAndChain(memberMapperWrapper.apply(stoneStairsId), () -> new StairBlock(stoneBlock.get().defaultBlockState(), BlockBehaviour.Properties.copy(deepslateLike ? Blocks.DEEPSLATE_BRICK_STAIRS : Blocks.STONE_STAIRS)), BlockPropertyWrapperTemplates.STAIRS, blockSupCol, itemSupCol)
                     .minimumMiningLevel(miningLevel)
                     .buildAndGet();
-            Supplier<SlabBlock> stoneSlab = BlockPropertyWrapperTemplates.registerWithItemAndChain(memberMapperWrapper.apply(familyId.withSuffix("_slab")), () -> new SlabBlock(BlockBehaviour.Properties.copy(deepslateLike ? Blocks.DEEPSLATE_BRICK_SLAB : Blocks.STONE_SLAB)), BlockPropertyWrapperTemplates.SLAB, blockSupCol, itemSupCol)
+            Supplier<SlabBlock> stoneSlab = BlockPropertyWrapperTemplates.registerWithItemAndChain(memberMapperWrapper.apply(stoneSlabId), () -> new SlabBlock(BlockBehaviour.Properties.copy(deepslateLike ? Blocks.DEEPSLATE_BRICK_SLAB : Blocks.STONE_SLAB)), BlockPropertyWrapperTemplates.SLAB, blockSupCol, itemSupCol)
                     .minimumMiningLevel(miningLevel)
                     .buildAndGet();
-            Supplier<WallBlock> stoneWall = BlockPropertyWrapperTemplates.registerWithItemAndChain(memberMapperWrapper.apply(familyId.withSuffix("_wall")), () -> new WallBlock(BlockBehaviour.Properties.copy(deepslateLike ? Blocks.DEEPSLATE_BRICK_WALL : Blocks.COBBLESTONE_WALL)), BlockPropertyWrapperTemplates.WALL, blockSupCol, itemSupCol)
+            Supplier<WallBlock> stoneWall = BlockPropertyWrapperTemplates.registerWithItemAndChain(memberMapperWrapper.apply(stoneWallId), () -> new WallBlock(BlockBehaviour.Properties.copy(deepslateLike ? Blocks.DEEPSLATE_BRICK_WALL : Blocks.COBBLESTONE_WALL)), BlockPropertyWrapperTemplates.WALL, blockSupCol, itemSupCol)
                     .minimumMiningLevel(miningLevel)
                     .buildAndGet();
+
+            ResourceLocation stonePressurePlateId = familyId.withSuffix("_pressure_plate");
+            ResourceLocation stoneButtonId = familyId.withSuffix("_button");
 
             Supplier<Block> stonePressurePlate = null;
             Supplier<Block> stoneButton = null;
 
             if (includePressurePlateAndButton) {
-                stonePressurePlate = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(memberMapperWrapper.apply(familyId.withSuffix("_pressure_plate")), () -> new PressurePlateBlock(PressurePlateBlock.Sensitivity.MOBS, BlockBehaviour.Properties.copy(Blocks.STONE_PRESSURE_PLATE), stoneBlockSetType), BlockPropertyWrapperTemplates.PRESSURE_PLATE, blockSupCol, itemSupCol);
-                stoneButton = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(memberMapperWrapper.apply(familyId.withSuffix("_button")), () -> new ButtonBlock(BlockBehaviour.Properties.copy(Blocks.STONE_BUTTON), stoneBlockSetType, 20, false), BlockPropertyWrapperTemplates.BUTTON, blockSupCol, itemSupCol);
+                stonePressurePlate = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(memberMapperWrapper.apply(stonePressurePlateId), () -> new PressurePlateBlock(PressurePlateBlock.Sensitivity.MOBS, BlockBehaviour.Properties.copy(Blocks.STONE_PRESSURE_PLATE), stoneBlockSetType), BlockPropertyWrapperTemplates.PRESSURE_PLATE, blockSupCol, itemSupCol);
+                stoneButton = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(memberMapperWrapper.apply(stoneButtonId), () -> new ButtonBlock(BlockBehaviour.Properties.copy(Blocks.STONE_BUTTON), stoneBlockSetType, 20, false), BlockPropertyWrapperTemplates.BUTTON, blockSupCol, itemSupCol);
             }
 
-            stoneBlockFamilySet.add(stoneBlock);
-            stoneBlockFamilySet.add(stoneStairs);
-            stoneBlockFamilySet.add(stoneSlab);
-            stoneBlockFamilySet.add(stoneWall);
+            stoneBlockFamilyMap.put(standardStoneBlockId, stoneBlock);
+            stoneBlockFamilyMap.put(stoneStairsId, stoneStairs);
+            stoneBlockFamilyMap.put(stoneSlabId, stoneSlab);
+            stoneBlockFamilyMap.put(stoneWallId, stoneWall);
 
             if (includePressurePlateAndButton) {
-                stoneBlockFamilySet.add(stonePressurePlate);
-                stoneBlockFamilySet.add(stoneButton);
+                stoneBlockFamilyMap.put(stonePressurePlateId, stonePressurePlate);
+                stoneBlockFamilyMap.put(stoneButtonId, stoneButton);
             }
 
-            return new StoneBlockGroup(stoneBlockSetType, stoneBlockFamilySet);
+            return new StoneBlockGroup(stoneBlockSetType, stoneBlockFamilyMap);
         });
     }
 
@@ -1429,12 +1462,13 @@ public final class RegistryUtil {
 
     public static StoneBlockGroup registerDecorativeStoneFamily(ResourceLocation familyId, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> itemSupCol) {
         return Util.make(() -> {
-            Set<Supplier<? extends Block>> decorativeStoneBlockFamilySet = new ObjectOpenHashSet<>();
+            Map<ResourceLocation, Supplier<? extends Block>> decorativeStoneBlockFamilySet = new Object2ObjectOpenHashMap<>();
             BlockSetType decorativeStoneBlockSetType = getOrCreateBlockSetType(familyId.toString());
 
-            Supplier<Block> pillarStoneBlock = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(familyId.withSuffix("_pillar"), () -> new RotatedPillarBlock(BlockBehaviour.Properties.copy(Blocks.STONE)), BlockPropertyWrapperTemplates.PILLAR_PICKAXE, blockSupCol, itemSupCol);
+            ResourceLocation pillarStoneBlockId = familyId.withSuffix("_pillar");
+            Supplier<Block> pillarStoneBlock = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(pillarStoneBlockId, () -> new RotatedPillarBlock(BlockBehaviour.Properties.copy(Blocks.STONE)), BlockPropertyWrapperTemplates.PILLAR_PICKAXE, blockSupCol, itemSupCol);
 
-            decorativeStoneBlockFamilySet.add(pillarStoneBlock);
+            decorativeStoneBlockFamilySet.put(pillarStoneBlockId, pillarStoneBlock);
 
             return registerStandardStoneFamily(familyId, blockSupCol, itemSupCol)
                     .chain(new StoneBlockGroup(decorativeStoneBlockSetType, decorativeStoneBlockFamilySet));
@@ -1465,12 +1499,13 @@ public final class RegistryUtil {
 
     public static StoneBlockGroup registerReinforcedDecorativeStoneFamily(ResourceLocation familyId, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> itemSupCol) {
         return Util.make(() -> {
-            Set<Supplier<? extends Block>> reinforcedDecorativeStoneBlockFamilySet = new ObjectOpenHashSet<>();
+            Map<ResourceLocation, Supplier<? extends Block>> reinforcedDecorativeStoneBlockFamilySet = new Object2ObjectOpenHashMap<>();
             BlockSetType reinforcedDecorativeStoneBlockSetType = getOrCreateBlockSetType(familyId.toString());
 
-            Supplier<Block> reinforcedPillarStoneBlock = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(familyId.withSuffix("_pillar"), () -> new RotatedPillarBlock(BlockBehaviour.Properties.copy(Blocks.DEEPSLATE)), BlockPropertyWrapperTemplates.PILLAR_PICKAXE, blockSupCol, itemSupCol);
+            ResourceLocation reinforcedPillarStoneBlockId = familyId.withSuffix("_pillar");
+            Supplier<Block> reinforcedPillarStoneBlock = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(reinforcedPillarStoneBlockId, () -> new RotatedPillarBlock(BlockBehaviour.Properties.copy(Blocks.DEEPSLATE)), BlockPropertyWrapperTemplates.PILLAR_PICKAXE, blockSupCol, itemSupCol);
 
-            reinforcedDecorativeStoneBlockFamilySet.add(reinforcedPillarStoneBlock);
+            reinforcedDecorativeStoneBlockFamilySet.put(reinforcedPillarStoneBlockId, reinforcedPillarStoneBlock);
 
             return registerReinforcedStoneFamily(familyId, blockSupCol, itemSupCol)
                     .chain(new StoneBlockGroup(reinforcedDecorativeStoneBlockSetType, reinforcedDecorativeStoneBlockFamilySet));

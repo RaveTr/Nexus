@@ -54,7 +54,7 @@ public final class DataGenUtil {
 
         values.asList().stream()
                 .map(JsonElement::getAsString)
-                .sorted()
+                .sorted() // Lexicographical ordering (cuz it's the natural order of String objects [duh])
                 .forEach(orderedValues::add);
 
         result.add("values", orderedValues);

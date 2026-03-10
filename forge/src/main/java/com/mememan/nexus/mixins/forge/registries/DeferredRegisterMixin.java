@@ -27,6 +27,7 @@ import java.util.function.Supplier;
  * @see Registrar#registerObjectAndReflect(ResourceLocation, Supplier, Registry)
  * @see RegisterEvent#register(ResourceKey, ResourceLocation, Supplier)
  * @see DeferredRegister#addEntries(RegisterEvent)
+ * @see NamespacedWrapperMixin
  */
 @Mixin(value = DeferredRegister.class, remap = false)
 public abstract class DeferredRegisterMixin {

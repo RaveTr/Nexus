@@ -1,6 +1,7 @@
 package com.mememan.nexus.asm.annotations;
 
 import com.mememan.nexus.asm.ClassFinder;
+import com.mememan.nexus.loader.ModSide;
 import com.mememan.nexus.platform.services.Registrar;
 
 import java.lang.annotation.ElementType;
@@ -51,4 +52,14 @@ public @interface RegistrarEntry {
      * @see <a href="https://docs.oracle.com/javase/specs/jls/se17/html/jls-15.html#jls-15.8.2">Class Literals (JLS)</a>
      */
     Class[] dependencies() default {};
+
+    /**
+     * Specifies the side on which this annotation's owning {@code class} should be initialized. Takes a {@link ModSide}
+     * value, but this actually affects the physical init side. For instance, {@link ModSide#CLIENT} will cause the
+     * owning {@code class} to be initialized on the physical client, and skip initialization on the dedicated server.
+     *
+     * @return The {@link ModSide} value this annotation's owning {@code class} should be initialized on. Defaults to
+     * {@link ModSide#COMMON}, which initializes the owning {@code class} on both the client and server.
+     */
+    ModSide initSide() default ModSide.COMMON;
 }

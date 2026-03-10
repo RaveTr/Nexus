@@ -13,10 +13,14 @@ public abstract class ConcreteEventBlueprint<BE extends BaseEvent> extends BaseE
     }
 
     public void onEvent(Consumer<BE> eventConsumer) {
+        onEvent(eventConsumer, 0);
+    }
+
+    public void onEvent(Consumer<BE> eventConsumer, int listenerPriority) {
         onEvent(event -> {
             eventConsumer.accept(event);
             return EventResult.success(event);
-        });
+        }, listenerPriority);
     }
 
     @Override

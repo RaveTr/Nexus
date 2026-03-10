@@ -12,46 +12,40 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.List;
 
 public class RegistryEvent extends BaseEvent {
-    protected final ResourceKey<? extends Registry<?>> registryKey;
     protected final Registry<?> registry;
 
-    public RegistryEvent(ResourceKey<? extends Registry<?>> registryKey, Registry<?> registry) {
+    public RegistryEvent(Registry<?> registry) {
         super(ModSide.COMMON);
 
-        this.registryKey = registryKey;
         this.registry = registry;
-    }
-
-    public ResourceKey<? extends Registry<?>> getRegistryKey() {
-        return registryKey;
     }
 
     public Registry<?> getRegistry() {
         return registry;
     }
 
-    public static class MissingRegistryEntriesEvent extends RegistryEvent {
-        protected final List<MissingRegistryEntriesEvent.WrappedEntry<?>> missingEntries;
+    public static class MissingRegistryEntriesEvent<T> extends RegistryEvent {
+        protected final List<MissingRegistryEntriesEvent.WrappedEntry<T>> missingEntries;
 
-        public MissingRegistryEntriesEvent(ResourceKey<? extends Registry<?>> registryKey, Registry<?> registry, List<MissingRegistryEntriesEvent.WrappedEntry<?>> missingEntries) {
-            super(registryKey, registry);
+        public MissingRegistryEntriesEvent(Registry<T> registry, List<MissingRegistryEntriesEvent.WrappedEntry<T>> missingEntries) {
+            super(registry);
 
             this.missingEntries = missingEntries;
         }
 
-        public List<MissingRegistryEntriesEvent.WrappedEntry<?>> getMissingEntries() {
+        public List<MissingRegistryEntriesEvent.WrappedEntry<T>> getMissingEntries() {
             return missingEntries;
         }
 
         public static class WrappedEntry<T> {
             protected final ResourceKey<? extends Registry<T>> pertainingRegistryKey;
-            protected final int regId; // Captured missing entry ID
+            protected final int lastKnownId; // Captured missing entry ID
             protected final ResourceLocation oldKey;
-            protected MissingEntryConsumer mappingAction = MappingAction.WARN;
+            protected MissingEntryConsumer mappingAction = MappingAction.BLOCK;
 
-            public WrappedEntry(ResourceKey<? extends Registry<T>> pertainingRegistryKey, int regId, ResourceLocation oldKey) {
+            public WrappedEntry(ResourceKey<? extends Registry<T>> pertainingRegistryKey, int lastKnownId, ResourceLocation oldKey) {
                 this.pertainingRegistryKey = pertainingRegistryKey;
-                this.regId = regId;
+                this.lastKnownId = lastKnownId;
                 this.oldKey = oldKey;
             }
 
@@ -59,21 +53,34 @@ public class RegistryEvent extends BaseEvent {
                 return pertainingRegistryKey;
             }
 
-            public int getId() {
-                return regId;
+            public int getLastKnownId() {
+                return lastKnownId;
             }
 
             public ResourceLocation getOldKey() {
                 return oldKey;
             }
 
-            public void attemptRemap(ResourceLocation newKey) {
-                mappingAction.accept(
+            public MissingEntryConsumer getMappingAction() {
+                return mappingAction;
+            }
+
+            public void attemptRemap(MissingEntryConsumer mappingAction, ResourceLocation newKey) {
+                (this.mappingAction = mappingAction).accept(
                         BuiltInRegistries.REGISTRY.getOrThrow((ResourceKey) getRegistryKey()),
-                        regId,
+                        lastKnownId,
                         oldKey,
                         newKey
                 );
+            }
+
+            public void attemptRemap(ResourceLocation newKey) {
+                attemptRemap(MappingAction.APPELLATE, newKey);
+            }
+
+            @Override
+            public String toString() {
+                return String.format("WrappedEntry{pertainingRegistryKey=%s, lastKnownId=%d, oldKey=%s, mappingAction=%s}", pertainingRegistryKey, lastKnownId, oldKey, mappingAction);
             }
         }
 
@@ -83,22 +90,29 @@ public class RegistryEvent extends BaseEvent {
         }
 
         public enum MappingAction implements MissingEntryConsumer {
-            REPLACE((pertainingRegistry, regId, oldKey, newKey) -> {
+            APPELLATE((pertainingRegistry, lastKnownId, oldKey, newKey) -> {
                 pertainingRegistry.getOptional(newKey).ifPresentOrElse(newlyMappedObj -> {
-                    NexusServices.REGISTRAR.appellate(oldKey, newKey, (ResourceKey) pertainingRegistry.key());
-                    NexusConstants.LOGGER.info("Appellated {} to {}", oldKey, newKey);
+                    ResourceKey<? extends Registry<?>> regKey = pertainingRegistry.key();
+
+                    NexusServices.REGISTRAR.getRegistryHookManager().appellate(oldKey, newKey, (ResourceKey) regKey);
+                    NexusConstants.LOGGER.info("Appellated {} to {} (for registry: {})", newKey, oldKey, regKey);
                 }, () -> {
-                    throw new IllegalStateException(String.format("Missing registry entry for %s with id %d, old reference key: %s", pertainingRegistry.key(), regId, oldKey));
+                    throw new IllegalStateException(String.format("Missing registry entry for %s with id %d, old reference key: %s", pertainingRegistry.key(), lastKnownId, oldKey));
                 });
             }),
-            IGNORE((pertainingRegistry, regId, oldKey, newKey) -> {
+            IGNORE((pertainingRegistry, lastKnownId, oldKey, newKey) -> {
 
             }),
-            WARN((pertainingRegistry, regId, oldKey, newKey) -> {
-                NexusConstants.LOGGER.warn("Missing registry entry for {} with id {}, old reference key: {}", pertainingRegistry.key(), regId, oldKey);
+            BLOCK((pertainingRegistry, lastKnownId, oldKey, newKey) -> {
+                NexusConstants.LOGGER.info("Missing registry entry for {} with id {}, old reference key: {}. Blocking missing entry's ID from being re-used until an alias is identified or the associated mapping is present again.", pertainingRegistry.key(), lastKnownId, oldKey);
+
+                NexusServices.REGISTRAR.getRegistryHookManager().blockId((ResourceKey) pertainingRegistry.key(), lastKnownId);
             }),
-            FAIL((pertainingRegistry, regId, oldKey, newKey) -> {
-                throw new IllegalStateException(String.format("Missing registry entry for %s with id %d, old reference key: %s, mod specified mappingAction to be MappingAction#FAIL. Preventing world from loading...", pertainingRegistry.key(), regId, oldKey));
+            WARN((pertainingRegistry, lastKnownId, oldKey, newKey) -> {
+                NexusConstants.LOGGER.warn("Missing registry entry for {} with id {}, old reference key: {}", pertainingRegistry.key(), lastKnownId, oldKey);
+            }),
+            FAIL((pertainingRegistry, lastKnownId, oldKey, newKey) -> {
+                throw new IllegalStateException(String.format("Missing registry entry for %s with id %d, old reference key: %s, mod specified mappingAction to be MappingAction#FAIL. Preventing world from loading...", pertainingRegistry.key(), lastKnownId, oldKey));
             });
 
             private final MissingEntryConsumer action;

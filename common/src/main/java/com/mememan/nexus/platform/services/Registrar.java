@@ -2,11 +2,11 @@ package com.mememan.nexus.platform.services;
 
 import com.mememan.nexus.Nexus;
 import com.mememan.nexus.asm.annotations.RegistrarEntry;
+import com.mememan.nexus.loader.RegistryHookManager;
 import com.mememan.nexus.loader.StandardRegistryBuilder;
 import com.mememan.nexus.resource.config.ResourceReloadListenerConfig;
 import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.Pair;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.RegistrySetBuilder;
@@ -184,58 +184,6 @@ public interface Registrar {
     <V, T extends V> Supplier<ResourceKey<T>> registerDatapackObject(final ResourceLocation objId, Function<BootstapContext<T>, Supplier<T>> objSupMappingFunc, final ResourceKey<Registry<V>> targetDatapackRegistry);
 
     /**
-     * Registers an alternative ID by which a registry entry may be identified. Primarily useful in cases where the
-     * original ID isn't resolvable on level load for whatever reason.
-     * <br></br>
-     * Aliases may be chained together, tying to the original {@code objId}. For instance, you can call this method more
-     * than once in reference to the original {@code objId} to associate multiple different alias IDs with it.
-     *
-     * @param objId The target registry entry's original ID.
-     * @param aliasId The alternative ID for the object tied to {@code objId}.
-     * @param targetRegistryKey The registry pertaining to the ID being remapped.
-     *
-     * @param <T> The registry object type.
-     *
-     * @apiNote Nexus assumes that an object tied to the provided {@code aliasId} is registered by default to the specified
-     * {@code targetRegistryKey}'s associated {@link Registry}, should the original {@code objId} fail to resolve.
-     *
-     * @implSpec {@code objId} should always be the first element in any iterable containing it and its appellations, as
-     * per the impl spec in {@link #getAppellations()}.
-     */
-    <T> void appellate(final ResourceLocation objId, final ResourceLocation aliasId, ResourceKey<Registry<T>> targetRegistryKey);
-
-    /**
-     * Attempts to override an existing object in the specified {@linkplain Registry targetRegistry}.
-     * <br></br>
-     * <b>Important:</b> Using this on any registered object will result in the corresponding entry for all worlds
-     * loaded while this is in effect to be permanently replaced. This is unlike the behaviour of
-     * {@link #appellate(ResourceLocation, ResourceLocation, ResourceKey)}, which is backwards-compatible with the
-     * reintroduction of mapping(s) tied to the original ID.
-     *
-     * @param objId The id of the object to override, following Minecraft's regex naming conventions/constraints
-     *              (<code>[a-z0-9_.-]</code>). Duplicate exceptions and other edge-cases are handled accordingly
-     *              within the target mod-loader's registry implementation.
-     * @param objSup The object to override. Has to be valid (e.g. non-{@code null}, matching the target registry's
-     *               type, etc.) for the target registry.
-     * @param targetRegistry The target {@link Registry} pertaining to the object being overridden.
-     *
-     * @return The <code>objSup</code> that was overridden/new value associated with the provided {@code objId}.
-     *
-     * @param <V> The parent object type of {@code <T>} (So if {@code targetRegistry} is {@link BuiltInRegistries#ITEM},
-     *           {@code <V>} would be of type {@link Item}, which makes {@code <T>} any object type extending
-     *           {@link Item}).
-     * @param <T> The object type to override (e.g. ({@code extends}) {@link Item} or {@link Attribute}).
-     *
-     * @apiNote This method will only override an existing object if it exists in the specified {@code targetRegistry}.
-     * If the object doesn't exist, this method will simply return the provided {@code objSup}, similar to
-     * {@link #registerObject(ResourceLocation, Supplier, Registry)}.
-     * <br></br>
-     * Other edge cases (e.g. IDs being resolved against {@code null} values) are handled by each loader's internal
-     * registry mechanisms/systems.
-     */
-    <T, V extends T> Supplier<T> overrideObject(ResourceLocation objId, Supplier<V> objSup, Registry<V> targetRegistry);
-
-    /**
      * Attempts to register a standard {@link Registry} using the {@code registryBuilder} passed in, leveraging additional
      * configurations made within said builder.
      *
@@ -368,11 +316,21 @@ public interface Registrar {
     }
 
     /**
+     * Gets the singleton loader-specific implementation of {@link RegistryHookManager} responsible for dealing with
+     * registry-related operations such as callbacks, ID management, and appellations.
+     *
+     * @return The singleton loader-specific implementation of {@link RegistryHookManager}.
+     *
+     * @see RegistryHookManager
+     */
+    RegistryHookManager getRegistryHookManager();
+
+    /**
      * Gets the current singleton {@link RegistrySetBuilder} responsible for populating datapack entries from registration
      * code. May be {@code null} if accessed too early (i.e. before the first datapack registrar {@code class} is hit).
      *
      * @return The current singleton {@link RegistrySetBuilder} used by Nexus API. May be {@code null}. Usually just a
-     * {@code static} method reference that delegates the value-getting to a lazily-initialized RSB (e.g. this would
+     * {@code static} method reference that delegates the value-getting to a lazily-initialized RSB (i.e. this would
      * probably just {@code return} {@code getDatapackRegistrySetBuilder()}, which would be a lazy init method for the
      * singleton RSB instance).
      */
@@ -407,25 +365,6 @@ public interface Registrar {
      * @return A {@link Map} of all registered dynamic registries synced to the client.
      */
     Map<ResourceKey<? extends Registry<?>>, RegistrySynchronization.NetworkedRegistryData<?>> getSyncedDynamicRegistries();
-
-    /**
-     * Retrieves a copy of appellations (i.e. nicknames/aliases) for registry entries per tracked registry. Tracks both
-     * aliases added through Nexus and the respective loader's API (if appropriate).
-     * <br></br>
-     * Primarily intended for use in remapping missing registry entries to the same ID across different versions of mods,
-     * which may add or remove content between versions.
-     *
-     * @implSpec The first element for any object ID {@link Int2ObjectMap} value for each registry key should always be
-     * the base/original name of the object ID tied to any aliases (see references below).
-     *
-     * @apiNote This retrieves a global view of the appellations stored in memory, which may differ from aliases stored
-     * in saves from session to session based on the user's mod configuration.
-     *
-     * @return A {@link Map} of all registry appellations pertaining to existing registry entries.
-     *
-     * @see #appellate(ResourceLocation, ResourceLocation, ResourceKey)
-     */
-    Map<ResourceKey<? extends Registry<?>>, Int2ObjectMap<? extends List<ResourceLocation>>> getAppellations();
 
     /**
      * Gets a copy of all {@linkplain PreparableReloadListener PreparableReloadListeners} registered to and tracked by

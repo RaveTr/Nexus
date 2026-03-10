@@ -6,13 +6,14 @@ import com.google.common.collect.Multimap;
 import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.asm.ClassFinder;
 import com.mememan.nexus.asm.annotations.RegistrarEntry;
+import com.mememan.nexus.internal.loader.FabricRegistryHookManager;
+import com.mememan.nexus.loader.ModSide;
 import com.mememan.nexus.loader.StandardRegistryBuilder;
 import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.platform.services.Registrar;
 import com.mememan.nexus.resource.config.ResourceReloadListenerConfig;
 import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.Pair;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import it.unimi.dsi.fastutil.objects.ObjectObjectMutablePair;
@@ -43,6 +44,7 @@ import java.util.function.Supplier;
 public class FabricRegistrar implements Registrar {
     private static final Multimap<ResourceKey<? extends Registry<?>>, ObjectObjectMutablePair<ResourceKey<?>, Function<? extends BootstapContext<?>, ? extends Supplier<?>>>> CACHED_DATAPACK_OBJECT_ENTRIES = ArrayListMultimap.create(); // Slower put() than HashMultiMap, but we need to allow duplicates for leniency
     private static final Map<ResourceLocation, Pair<? extends PreparableReloadListener, Optional<ResourceReloadListenerConfig<? extends PreparableReloadListener>>>> CACHED_RESOURCE_RELOAD_LISTENERS = new Object2ObjectOpenHashMap<>();
+    private static final FabricRegistryHookManager REGISTRY_HOOK_MANAGER = new FabricRegistryHookManager();
     private static RegistrySetBuilder DATAPACK_REGISTRY_SET_BUILDER;
 
     @Override
@@ -75,6 +77,12 @@ public class FabricRegistrar implements Registrar {
                     ClassFinder.forName(dependency.getName());
                 }
             }
+        }, (sortedClassName) -> {
+            Class<?> uninitializedTargetClass = ClassFinder.forNameNoInit(sortedClassName);
+            RegistrarEntry targetAnnotation = uninitializedTargetClass.getAnnotation(RegistrarEntry.class);
+            ModSide targetInitSide = targetAnnotation.initSide(); // Defaults to ModSide#COMMON anyway soooo...
+
+            return NexusServices.PLATFORM_MANAGER.getEnvironmentSide().pertainsTo(targetInitSide);
         });
 
         CACHED_DATAPACK_OBJECT_ENTRIES.asMap().forEach((registryKey, objSupMappingFuncs) -> {
@@ -110,16 +118,6 @@ public class FabricRegistrar implements Registrar {
     }
 
     @Override
-    public <T> void appellate(ResourceLocation objId, ResourceLocation aliasId, ResourceKey<Registry<T>> targetRegistryKey) {
-
-    }
-
-    @Override
-    public <T, V extends T> Supplier<T> overrideObject(ResourceLocation objId, Supplier<V> objSup, Registry<V> targetRegistry) {
-        return null;
-    }
-
-    @Override
     public <T> Registry<T> registerStandardRegistry(StandardRegistryBuilder<T, Registry<T>> registryBuilder) {
         Registry<T> builtReg = registryBuilder.buildAndGetRegistry();
 
@@ -150,6 +148,11 @@ public class FabricRegistrar implements Registrar {
     }
 
     @Override
+    public FabricRegistryHookManager getRegistryHookManager() {
+        return REGISTRY_HOOK_MANAGER;
+    }
+
+    @Override
     public @Nullable RegistrySetBuilder getRegistrySetBuilder() {
         return getDatapackRegistrySetBuilder();
     }
@@ -162,11 +165,6 @@ public class FabricRegistrar implements Registrar {
     @Override
     public Map<ResourceKey<? extends Registry<?>>, RegistrySynchronization.NetworkedRegistryData<?>> getSyncedDynamicRegistries() {
         return ImmutableMap.copyOf(RegistrySynchronization.NETWORKABLE_REGISTRIES);
-    }
-
-    @Override
-    public Map<ResourceKey<? extends Registry<?>>, Int2ObjectMap<? extends List<ResourceLocation>>> getAppellations() {
-        return Map.of();
     }
 
     @Override

@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -50,23 +51,62 @@ public abstract class LevelStorageAccessMixin {
         throw new IllegalArgumentException("Attempted to construct Mixin Class! (LevelStorageAccessMixin)");
     }
 
-    @Inject(method = "saveDataTag(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/world/level/storage/WorldData;Lnet/minecraft/nbt/CompoundTag;)V", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/common/ForgeHooks;writeAdditionalLevelSaveData(Lnet/minecraft/world/level/storage/WorldData;Lnet/minecraft/nbt/CompoundTag;)V", shift = At.Shift.AFTER, remap = false))
-    private void nexus$handleSaveLevelDataEventHook(RegistryAccess registries, WorldData serverConfiguration, CompoundTag hostPlayerNBT, CallbackInfo ci, @Local(ordinal = 2) CompoundTag levelDataTag) {
-        LevelDataEvent.SaveLevelDataEvent saveLevelDataEventHook = new LevelDataEvent.SaveLevelDataEvent(levelDirectory, levelDataTag, registries, serverConfiguration, hostPlayerNBT);
-        LevelDataEventBlueprint.SAVE_LEVEL_DATA.fireEvent(saveLevelDataEventHook);
+    @Inject(method = "saveDataTag(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/world/level/storage/WorldData;Lnet/minecraft/nbt/CompoundTag;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/CompoundTag;put(Ljava/lang/String;Lnet/minecraft/nbt/Tag;)Lnet/minecraft/nbt/Tag;", shift = At.Shift.BEFORE))
+    private void nexus$handlePreVanillaSaveLevelDataEventHook(RegistryAccess registries, WorldData serverConfiguration, CompoundTag hostPlayerNBT, CallbackInfo ci, @Local(ordinal = 2) CompoundTag levelDataTag) {
+        LevelDataEvent.SaveLevelDataEvent.PreVanilla preVanillaSaveLevelDataEventHook = new LevelDataEvent.SaveLevelDataEvent.PreVanilla(levelDirectory, levelDataTag, registries, serverConfiguration, hostPlayerNBT);
+        LevelDataEventBlueprint.SAVE_LEVEL_DATA_PRE_VANILLA.fireEvent(preVanillaSaveLevelDataEventHook);
     }
 
-    @ModifyArg(method = "getDataConfiguration", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource;readLevelData(Lnet/minecraft/world/level/storage/LevelStorageSource$LevelDirectory;Ljava/util/function/BiFunction;)Ljava/lang/Object;"), index = 1)
-    private <T> BiFunction<Path, DataFixer, T> nexus$handleLoadLevelDataEventHook(BiFunction<Path, DataFixer, T> levelDatReader) {
+    @Inject(method = "saveDataTag(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/world/level/storage/WorldData;Lnet/minecraft/nbt/CompoundTag;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/CompoundTag;put(Ljava/lang/String;Lnet/minecraft/nbt/Tag;)Lnet/minecraft/nbt/Tag;", shift = At.Shift.AFTER))
+    private void nexus$handlePostVanillaSaveLevelDataEventHook(RegistryAccess registries, WorldData serverConfiguration, CompoundTag hostPlayerNBT, CallbackInfo ci, @Local(ordinal = 2) CompoundTag levelDataTag) {
+        LevelDataEvent.SaveLevelDataEvent.PostVanilla postVanillaSaveLevelDataEventHook = new LevelDataEvent.SaveLevelDataEvent.PostVanilla(levelDirectory, levelDataTag, registries, serverConfiguration, hostPlayerNBT);
+        LevelDataEventBlueprint.SAVE_LEVEL_DATA_POST_VANILLA.fireEvent(postVanillaSaveLevelDataEventHook);
+    }
+
+    @Inject(method = "saveDataTag(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/world/level/storage/WorldData;Lnet/minecraft/nbt/CompoundTag;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/CompoundTag;put(Ljava/lang/String;Lnet/minecraft/nbt/Tag;)Lnet/minecraft/nbt/Tag;", shift = At.Shift.BEFORE), remap = false)
+    private void nexus$handlePreLoaderSaveLevelDataEventHook(RegistryAccess registries, WorldData serverConfiguration, CompoundTag hostPlayerNBT, CallbackInfo ci, @Local(ordinal = 2) CompoundTag levelDataTag) {
+        LevelDataEvent.SaveLevelDataEvent.PreLoader preLoaderSaveLevelDataEventHook = new LevelDataEvent.SaveLevelDataEvent.PreLoader(levelDirectory, levelDataTag, registries, serverConfiguration, hostPlayerNBT);
+        LevelDataEventBlueprint.SAVE_LEVEL_DATA_PRE_LOADER.fireEvent(preLoaderSaveLevelDataEventHook);
+    }
+
+    @Inject(method = "saveDataTag(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/world/level/storage/WorldData;Lnet/minecraft/nbt/CompoundTag;)V", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/common/ForgeHooks;writeAdditionalLevelSaveData(Lnet/minecraft/world/level/storage/WorldData;Lnet/minecraft/nbt/CompoundTag;)V", shift = At.Shift.AFTER, remap = false))
+    private void nexus$handlePostLoaderSaveLevelDataEventHook(RegistryAccess registries, WorldData serverConfiguration, CompoundTag hostPlayerNBT, CallbackInfo ci, @Local(ordinal = 2) CompoundTag levelDataTag) {
+        LevelDataEvent.SaveLevelDataEvent.PostLoader postLoaderSaveLevelDataEventHook = new LevelDataEvent.SaveLevelDataEvent.PostLoader(levelDirectory, levelDataTag, registries, serverConfiguration, hostPlayerNBT);
+        LevelDataEventBlueprint.SAVE_LEVEL_DATA_POST_LOADER.fireEvent(postLoaderSaveLevelDataEventHook);
+    }
+
+    @ModifyArg(method = "getDataTag", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource;readLevelData(Lnet/minecraft/world/level/storage/LevelStorageSource$LevelDirectory;Ljava/util/function/BiFunction;)Ljava/lang/Object;"), index = 1)
+    private <T> BiFunction<Path, DataFixer, T> nexus$handleVanillaLoadLevelDataEventHook(BiFunction<Path, DataFixer, T> levelDatReader) {
         return (pathToLevelDat, curDataFixer) -> {
             try {
-                LevelDataEvent.LoadLevelDataEvent loadLevelDataEventHook = new LevelDataEvent.LoadLevelDataEvent(levelDirectory, NbtIo.readCompressed(pathToLevelDat.toFile()));
-                LevelDataEventBlueprint.LOAD_LEVEL_DATA.fireEvent(loadLevelDataEventHook);
+                LevelDataEvent.LoadLevelDataEvent.PreVanilla preVanillaLoadLevelDataEventHook = new LevelDataEvent.LoadLevelDataEvent.PreVanilla(levelDirectory, NbtIo.readCompressed(pathToLevelDat.toFile()));
+                LevelDataEventBlueprint.LOAD_LEVEL_DATA_PRE_VANILLA.fireEvent(preVanillaLoadLevelDataEventHook);
             } catch (IOException e) {
-                NexusConstants.LOGGER.error("Failed to read level data when firing LoadLevelDataEvent for level '{}':", levelDirectory.directoryName(), e);
+                NexusConstants.LOGGER.error("Failed to read level data when firing LoadLevelDataEvent.PreVanilla for level '{}':", levelDirectory.directoryName(), e);
             }
 
-            return levelDatReader.apply(pathToLevelDat, curDataFixer);
+            T vanillaLevelData = levelDatReader.apply(pathToLevelDat, curDataFixer);
+
+            try {
+                LevelDataEvent.LoadLevelDataEvent.PostVanilla postVanillaLoadLevelDataEventHook = new LevelDataEvent.LoadLevelDataEvent.PostVanilla(levelDirectory, NbtIo.readCompressed(pathToLevelDat.toFile()));
+                LevelDataEventBlueprint.LOAD_LEVEL_DATA_POST_VANILLA.fireEvent(postVanillaLoadLevelDataEventHook);
+            } catch (IOException e) {
+                NexusConstants.LOGGER.error("Failed to read level data when firing LoadLevelDataEvent.PostVanilla for level '{}':", levelDirectory.directoryName(), e);
+            }
+
+            return vanillaLevelData;
         };
+    }
+
+    @Inject(method = "lambda$readAdditionalLevelSaveData$0", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/common/ForgeHooks;readAdditionalLevelSaveData(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/world/level/storage/LevelStorageSource$LevelDirectory;)V", remap = false, shift = At.Shift.BEFORE), remap = false)
+    private void nexus$handlePreLoaderLoadLevelDataEventHook(Path path, DataFixer dataFixer, CallbackInfoReturnable<String> cir, @Local(name = "compoundTag") CompoundTag levelDataTag) {
+        LevelDataEvent.LoadLevelDataEvent.PreLoader preLoaderLoadLevelDataEventHook = new LevelDataEvent.LoadLevelDataEvent.PreLoader(levelDirectory, levelDataTag);
+        LevelDataEventBlueprint.LOAD_LEVEL_DATA_PRE_LOADER.fireEvent(preLoaderLoadLevelDataEventHook);
+    }
+
+    @Inject(method = "lambda$readAdditionalLevelSaveData$0", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/common/ForgeHooks;readAdditionalLevelSaveData(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/world/level/storage/LevelStorageSource$LevelDirectory;)V", remap = false, shift = At.Shift.AFTER), remap = false)
+    private void nexus$handlePostLoaderLoadLevelDataEventHook(Path path, DataFixer dataFixer, CallbackInfoReturnable<String> cir, @Local(name = "compoundTag") CompoundTag levelDataTag) {
+        LevelDataEvent.LoadLevelDataEvent.PostLoader postLoaderLoadLevelDataEventHook = new LevelDataEvent.LoadLevelDataEvent.PostLoader(levelDirectory, levelDataTag);
+        LevelDataEventBlueprint.LOAD_LEVEL_DATA_POST_LOADER.fireEvent(postLoaderLoadLevelDataEventHook);
     }
 }
