@@ -1198,7 +1198,13 @@ public final class RegistryUtil {
             Supplier<Item> woodenBoatItem = ItemPropertyWrapperTemplates.registerItemFromTemplate(woodenBoatId, () -> new DefaultableBoatItem(false, BoatType.register(familyId.toString().replace(':', '-'), woodenPlanks), new Item.Properties().stacksTo(1)), ItemPropertyWrapperTemplates.BOAT, itemSupCol);
             Supplier<Item> woodenChestBoatItem = ItemPropertyWrapperTemplates.registerItemFromTemplate(woodenChestBoatId, () -> new DefaultableBoatItem(true, BoatType.register(familyId.toString().replace(':', '-'), woodenPlanks), new Item.Properties().stacksTo(1)), ItemPropertyWrapperTemplates.CHEST_BOAT, itemSupCol);
 
-            BuiltInRegistries.BLOCK_ENTITY_TYPE.getOptional(woodenSignId)
+            ResourceLocation signBlockEntityId = familyId.withPath("sign");
+            ResourceLocation hangingSignBlockEntityId = familyId.withPath("hanging_sign");
+
+            ResourceLocation boatEntityId = familyId.withPath("boat");
+            ResourceLocation chestBoatId = familyId.withPath("chest_boat");
+
+            BuiltInRegistries.BLOCK_ENTITY_TYPE.getOptional(signBlockEntityId)
                     .ifPresentOrElse(alreadyRegisteredBaseSignBlockEntity -> {
                         Supplier<BlockEntityType<DefaultableSignBlockEntity>> mappedSignBlockEntitySup = () -> (BlockEntityType<DefaultableSignBlockEntity>) alreadyRegisteredBaseSignBlockEntity;
                         BlockEntityType<DefaultableSignBlockEntity> mappedSignBlockEntity = mappedSignBlockEntitySup.get();
@@ -1208,16 +1214,16 @@ public final class RegistryUtil {
                             existingValidBlocks.add(woodenWallSign.get());
                         });
 
-                        woodBlockEntityFamilyMap.put(woodenSignId, mappedSignBlockEntitySup);
+                        woodBlockEntityFamilyMap.put(signBlockEntityId, mappedSignBlockEntitySup);
                     }, () -> {
-                        Supplier<BlockEntityType<DefaultableSignBlockEntity>> woodenSignBlockEntityType = BlockEntityTypePropertyWrapperTemplates.registerBlockEntityTypeFromTemplateAndReflect(woodenSignId, () -> BlockEntityType.Builder.of(
-                                (targetPos, targetState) -> new DefaultableSignBlockEntity(() -> BuiltInRegistries.BLOCK_ENTITY_TYPE.getOptional(woodenSignId).orElseThrow(), targetPos, targetState),
+                        Supplier<BlockEntityType<DefaultableSignBlockEntity>> woodenSignBlockEntityType = BlockEntityTypePropertyWrapperTemplates.registerBlockEntityTypeFromTemplateAndReflect(signBlockEntityId, () -> BlockEntityType.Builder.of(
+                                (targetPos, targetState) -> new DefaultableSignBlockEntity(() -> BuiltInRegistries.BLOCK_ENTITY_TYPE.getOptional(signBlockEntityId).orElseThrow(), targetPos, targetState),
                                 woodenStandingSign.get(), woodenWallSign.get()
-                        ).build(Util.fetchChoiceType(References.BLOCK_ENTITY, woodenSignId.getPath())), BlockEntityTypePropertyWrapperTemplates.SIGN, blockEntityTypeSupCol);
+                        ).build(Util.fetchChoiceType(References.BLOCK_ENTITY, signBlockEntityId.getPath())), BlockEntityTypePropertyWrapperTemplates.SIGN, blockEntityTypeSupCol);
 
-                        woodBlockEntityFamilyMap.put(woodenSignId, woodenSignBlockEntityType);
+                        woodBlockEntityFamilyMap.put(signBlockEntityId, woodenSignBlockEntityType);
                     });
-            BuiltInRegistries.BLOCK_ENTITY_TYPE.getOptional(woodenHangingSignId)
+            BuiltInRegistries.BLOCK_ENTITY_TYPE.getOptional(hangingSignBlockEntityId)
                     .ifPresentOrElse(alreadyRegisteredBaseHangingSignBlockEntity -> {
                         Supplier<BlockEntityType<DefaultableHangingSignBlockEntity>> mappedHangingSignBlockEntitySup = () -> (BlockEntityType<DefaultableHangingSignBlockEntity>) alreadyRegisteredBaseHangingSignBlockEntity;
                         BlockEntityType<DefaultableHangingSignBlockEntity> mappedHangingSignBlockEntity = mappedHangingSignBlockEntitySup.get();
@@ -1227,39 +1233,39 @@ public final class RegistryUtil {
                             existingValidBlocks.add(woodenWallHangingSign.get());
                         });
 
-                        woodBlockEntityFamilyMap.put(woodenHangingSignId, mappedHangingSignBlockEntitySup);
+                        woodBlockEntityFamilyMap.put(hangingSignBlockEntityId, mappedHangingSignBlockEntitySup);
                     }, () -> {
-                        Supplier<BlockEntityType<DefaultableHangingSignBlockEntity>> woodenHangingSignBlockEntityType = BlockEntityTypePropertyWrapperTemplates.registerBlockEntityTypeFromTemplateAndReflect(woodenHangingSignId, () -> BlockEntityType.Builder.of(
-                                (targetPos, targetState) -> new DefaultableHangingSignBlockEntity(() -> BuiltInRegistries.BLOCK_ENTITY_TYPE.getOptional(woodenHangingSignId).orElseThrow(), targetPos, targetState),
+                        Supplier<BlockEntityType<DefaultableHangingSignBlockEntity>> woodenHangingSignBlockEntityType = BlockEntityTypePropertyWrapperTemplates.registerBlockEntityTypeFromTemplateAndReflect(hangingSignBlockEntityId, () -> BlockEntityType.Builder.of(
+                                (targetPos, targetState) -> new DefaultableHangingSignBlockEntity(() -> BuiltInRegistries.BLOCK_ENTITY_TYPE.getOptional(hangingSignBlockEntityId).orElseThrow(), targetPos, targetState),
                                 woodenCeilingHangingSign.get(), woodenWallHangingSign.get()
-                        ).build(Util.fetchChoiceType(References.BLOCK_ENTITY, woodenHangingSignId.getPath())), BlockEntityTypePropertyWrapperTemplates.HANGING_SIGN, blockEntityTypeSupCol);
+                        ).build(Util.fetchChoiceType(References.BLOCK_ENTITY, hangingSignBlockEntityId.getPath())), BlockEntityTypePropertyWrapperTemplates.HANGING_SIGN, blockEntityTypeSupCol);
 
-                        woodBlockEntityFamilyMap.put(woodenHangingSignId, woodenHangingSignBlockEntityType);
+                        woodBlockEntityFamilyMap.put(hangingSignBlockEntityId, woodenHangingSignBlockEntityType);
                     });
 
-            BuiltInRegistries.ENTITY_TYPE.getOptional(woodenBoatId)
+            BuiltInRegistries.ENTITY_TYPE.getOptional(boatEntityId)
                     .ifPresentOrElse(alreadyRegisteredBaseBoatEntity -> {
-                        woodEntityTypeFamilyMap.put(woodenBoatId, () -> alreadyRegisteredBaseBoatEntity);
+                        woodEntityTypeFamilyMap.put(boatEntityId, () -> alreadyRegisteredBaseBoatEntity);
                     }, () -> {
-                        Supplier<EntityType<DefaultableBoat>> woodenBoatEntityType = EntityTypePropertyWrapperTemplates.registerEntityTypeFromTemplateAndReflect(woodenBoatId,
+                        Supplier<EntityType<DefaultableBoat>> woodenBoatEntityType = EntityTypePropertyWrapperTemplates.registerEntityTypeFromTemplateAndReflect(boatEntityId,
                                 () -> EntityType.Builder.<DefaultableBoat>of(DefaultableBoat::new, MobCategory.MISC)
                                         .sized(1.375F, 0.5625F)
                                         .clientTrackingRange(10)
-                                        .build(woodenBoatId.toString()), EntityTypePropertyWrapperTemplates.BOAT, entityTypeSupCol);
+                                        .build(boatEntityId.toString()), EntityTypePropertyWrapperTemplates.BOAT, entityTypeSupCol);
 
-                        woodEntityTypeFamilyMap.put(woodenBoatId, woodenBoatEntityType);
+                        woodEntityTypeFamilyMap.put(boatEntityId, woodenBoatEntityType);
                     });
-            BuiltInRegistries.ENTITY_TYPE.getOptional(woodenChestBoatId)
+            BuiltInRegistries.ENTITY_TYPE.getOptional(chestBoatId)
                     .ifPresentOrElse(alreadyRegisteredBaseChestBoatEntity -> {
-                        woodEntityTypeFamilyMap.put(woodenChestBoatId, () -> alreadyRegisteredBaseChestBoatEntity);
+                        woodEntityTypeFamilyMap.put(chestBoatId, () -> alreadyRegisteredBaseChestBoatEntity);
                     }, () -> {
-                        Supplier<EntityType<DefaultableChestBoat>> woodenChestBoatEntityType = EntityTypePropertyWrapperTemplates.registerEntityTypeFromTemplateAndReflect(woodenChestBoatId,
+                        Supplier<EntityType<DefaultableChestBoat>> woodenChestBoatEntityType = EntityTypePropertyWrapperTemplates.registerEntityTypeFromTemplateAndReflect(chestBoatId,
                                 () -> EntityType.Builder.<DefaultableChestBoat>of(DefaultableChestBoat::new, MobCategory.MISC)
                                         .sized(1.375F, 0.5625F)
                                         .clientTrackingRange(10)
-                                        .build(woodenChestBoatId.toString()), EntityTypePropertyWrapperTemplates.CHEST_BOAT, entityTypeSupCol);
+                                        .build(chestBoatId.toString()), EntityTypePropertyWrapperTemplates.CHEST_BOAT, entityTypeSupCol);
 
-                        woodEntityTypeFamilyMap.put(woodenChestBoatId, woodenChestBoatEntityType);
+                        woodEntityTypeFamilyMap.put(chestBoatId, woodenChestBoatEntityType);
                     });
 
             woodBlockFamilyMap.put(woodenLogId, woodenLog);
