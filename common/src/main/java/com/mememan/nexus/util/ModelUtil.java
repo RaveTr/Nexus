@@ -599,6 +599,7 @@ public final class ModelUtil {
     /**
      * Overloaded variant of {@link #grassBlock(ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation)}.
      * Creates a {@link BlockModelDefinition} for grass blocks using the {@link #GRASS_BLOCK_MODEL_TEMPLATE} template.
+     * Generates an item model using {@link #generatedBlock(Supplier)}.
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
@@ -628,7 +629,7 @@ public final class ModelUtil {
                 RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"),
                 RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_side", "block"),
                 RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_side_overlay", "block")
-        );
+        ).withOrdinalModelDefinition(generatedBlock(targetBlock));
     }
 
     /**
@@ -1951,8 +1952,8 @@ public final class ModelUtil {
      * <p>
      *     <h3>Variants</h3>
      *     <ul>
-     *         <li>{@link DoubleBlockHalf#LOWER} -> {@link VariantProperties#MODEL} = {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom")}</li>
-     *         <li>{@link DoubleBlockHalf#UPPER} -> {@link VariantProperties#MODEL} = {@code RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top")}</li>
+     *         <li>{@link DoubleBlockHalf#LOWER} -> {@link VariantProperties#MODEL} = {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_bottom")}</li>
+     *         <li>{@link DoubleBlockHalf#UPPER} -> {@link VariantProperties#MODEL} = {@code ModelLocationUtils.getModelLocation(targetBlock.get(), "_top")}</li>
      *     </ul>
      *
      * @param targetBlock The {@code Supplier<Block>} representing the double plant {@link Block} to be used for
@@ -1964,7 +1965,7 @@ public final class ModelUtil {
      * @see #doublePlant(Supplier)
      */
     public static BlockStateDefinition doublePlantBlockState(Supplier<Block> targetBlock) {
-        return doublePlantBlockState(targetBlock, RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"), RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_bottom", "block"));
+        return doublePlantBlockState(targetBlock, ModelLocationUtils.getModelLocation(targetBlock.get(), "_bottom"), ModelLocationUtils.getModelLocation(targetBlock.get(), "_top"));
     }
 
     /**
@@ -6137,7 +6138,8 @@ public final class ModelUtil {
      */
     public static BlockModelDefinition farmland(Supplier<Block> targetBlock, ResourceLocation dryFarmlandTexture, ResourceLocation moistFarmlandTexture, ResourceLocation dirtTexture) {
         return farmlandDry(targetBlock, dryFarmlandTexture, dirtTexture)
-                .withOrdinalModelDefinition(farmlandMoist(targetBlock, moistFarmlandTexture, dirtTexture));
+                .withOrdinalModelDefinition(farmlandMoist(targetBlock, moistFarmlandTexture, dirtTexture)
+                        .setOrdinalModelDefinitions(ObjectArrayList.of()));
     }
 
     /**
@@ -6164,7 +6166,8 @@ public final class ModelUtil {
      */
     public static BlockModelDefinition farmland(Supplier<Block> targetBlock, ResourceLocation dryFarmlandTexture, ResourceLocation moistFarmlandTexture) {
         return farmlandDry(targetBlock, dryFarmlandTexture)
-                .withOrdinalModelDefinition(farmlandMoist(targetBlock, moistFarmlandTexture));
+                .withOrdinalModelDefinition(farmlandMoist(targetBlock, moistFarmlandTexture)
+                        .setOrdinalModelDefinitions(ObjectArrayList.of()));
     }
 
     /**
@@ -6188,7 +6191,8 @@ public final class ModelUtil {
      */
     public static BlockModelDefinition farmland(Supplier<Block> targetBlock) {
         return farmlandDry(targetBlock)
-                .withOrdinalModelDefinition(farmlandMoist(targetBlock));
+                .withOrdinalModelDefinition(farmlandMoist(targetBlock)
+                        .setOrdinalModelDefinitions(ObjectArrayList.of()));
     }
 
     /**
