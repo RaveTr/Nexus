@@ -1,6 +1,5 @@
 package com.mememan.nexus.template.object.block.vegetation;
 
-import com.google.common.base.Suppliers;
 import com.mememan.nexus.util.RegistryUtil;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.core.BlockPos;
@@ -42,9 +41,9 @@ public class DefaultableSpreadingSnowyDirtBlock extends SpreadingSnowyDirtBlock 
         this.validSnowyTags = validSnowyTags;
 
         Supplier<Block> ownerRefSup = () -> this; // Peak Java generic type inference
-        this.baseDirtBlock = RegistryUtil.getSuppliedObjectFrom(ownerRefSup, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_grass_block", "_dirt")))
-                .orElse(RegistryUtil.getSuppliedObjectFrom(ownerRefSup, parentBlockId -> RegistryUtil.pickSuffix(parentBlockId, "_dirt"))
-                        .orElse(Suppliers.ofInstance(null)));
+        this.baseDirtBlock = () -> RegistryUtil.getObjectFrom(ownerRefSup, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_grass_block", "_dirt")))
+                .orElse(RegistryUtil.getObjectFrom(ownerRefSup, parentBlockId -> RegistryUtil.pickSuffix(parentBlockId, "_dirt"))
+                        .orElse(null));
     }
 
     public DefaultableSpreadingSnowyDirtBlock(Properties properties, Set<Supplier<TagKey<Block>>> validSnowyTags, Supplier<Block> baseDirtBlock) {

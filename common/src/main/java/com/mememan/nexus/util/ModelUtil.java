@@ -599,7 +599,7 @@ public final class ModelUtil {
     /**
      * Overloaded variant of {@link #grassBlock(ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation, ResourceLocation)}.
      * Creates a {@link BlockModelDefinition} for grass blocks using the {@link #GRASS_BLOCK_MODEL_TEMPLATE} template.
-     * Generates an item model using {@link #generatedBlock(Supplier)}.
+     * Generates an item model using {@link #standardBlock(Supplier)}.
      * <p>
      *     <h3>Required Texture Slots</h3>
      *     <ul>
@@ -629,7 +629,7 @@ public final class ModelUtil {
                 RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_top", "block"),
                 RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_side", "block"),
                 RegistryUtil.getTextureLocationWithSuffixOrDefault(targetBlock, "_side_overlay", "block")
-        ).withOrdinalModelDefinition(generatedBlock(targetBlock));
+        ).withOrdinalModelDefinition(standardBlock(targetBlock));
     }
 
     /**
@@ -1965,7 +1965,7 @@ public final class ModelUtil {
      * @see #doublePlant(Supplier)
      */
     public static BlockStateDefinition doublePlantBlockState(Supplier<Block> targetBlock) {
-        return doublePlantBlockState(targetBlock, ModelLocationUtils.getModelLocation(targetBlock.get(), "_bottom"), ModelLocationUtils.getModelLocation(targetBlock.get(), "_top"));
+        return doublePlantBlockState(targetBlock, ModelLocationUtils.getModelLocation(targetBlock.get(), "_top"), ModelLocationUtils.getModelLocation(targetBlock.get(), "_bottom"));
     }
 
     /**

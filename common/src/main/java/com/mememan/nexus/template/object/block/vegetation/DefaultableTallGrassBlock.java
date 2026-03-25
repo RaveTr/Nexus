@@ -37,9 +37,8 @@ public class DefaultableTallGrassBlock extends TallGrassBlock implements Configu
         this.validPlacementTags = validPlacementTags;
 
         Supplier<Block> ownerRefSup = () -> this; // Peak Java generic type inference
-        this.tallPlantBlock = () -> RegistryUtil.getObjectFrom(ownerRefSup, parentBlockId -> RegistryUtil.pickPrefix(parentBlockId, "tall_"))
+        this.tallPlantBlock = () -> (DoublePlantBlock) RegistryUtil.getObjectFrom(ownerRefSup, parentBlockId -> RegistryUtil.pickPrefix(parentBlockId, "tall_"))
                 .filter(ownerBlock -> ownerBlock instanceof DoublePlantBlock)
-                .map(ownerBlock -> (DoublePlantBlock) ownerBlock)
                 .orElse(null);
     }
 

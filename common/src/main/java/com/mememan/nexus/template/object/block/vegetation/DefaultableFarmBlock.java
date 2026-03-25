@@ -38,8 +38,9 @@ public class DefaultableFarmBlock extends FarmBlock {
         super(properties);
 
         Supplier<Block> ownerRefSup = () -> this; // Peak Java generic type inference
-        this.mappedDirtBlock = RegistryUtil.getSuppliedObjectFrom(ownerRefSup, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_farmland", "_dirt")))
-                .orElse(RegistryUtil.getSuppliedObjectFrom(ownerRefSup, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_farmland", ""))).orElse(null));
+        this.mappedDirtBlock = () -> RegistryUtil.getObjectFrom(ownerRefSup, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_farmland", "_dirt")))
+                .orElse(RegistryUtil.getObjectFrom(ownerRefSup, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_farmland", "")))
+                        .orElse(null));
     }
 
     @Override
