@@ -19,7 +19,6 @@ import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
@@ -656,7 +655,6 @@ public final class NexusRegistryDataManager {
             globalRegHookManager.updateActiveRegistryState((ResourceKey) regKey, ID_BLOCKER);
         });
 
-        globalRegHookManager.updateActiveRegistryState((ResourceKey) Registries.BLOCK, MISSING_SUBSTITUTOR);
         /*globalRegHookManager.getUpdatedAppellations().forEach((regKey, appellations) -> {
             globalRegHookManager.updateActiveRegistryState((ResourceKey) regKey, MISSING_SUBSTITUTOR);
         });*/
