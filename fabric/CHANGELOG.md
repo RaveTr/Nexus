@@ -8,6 +8,7 @@
 - Fixed all ModelUtil methods that use multiple textures and models (such as ModelUtil#doublePlant) attempting to look for invalid textures/models.
 - Minor cleanup in event blueprint classes.
 - (Not really a bug fix) bumped log level for `PropertyWrapper#getMappedPropertyWrappers` (+ the container field variant) down to `trace` from `debug`.
+- Fixed defaultable vegetation not working properly in general.
 
 ## New Features
 

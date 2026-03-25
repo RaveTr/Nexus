@@ -1,7 +1,9 @@
 package com.mememan.nexus.template.object.block.vegetation;
 
 import com.google.common.collect.ImmutableSet;
+import com.mememan.nexus.asm.annotations.PostInit;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
+import com.mememan.nexus.util.RegistryUtil;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -22,6 +24,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -98,5 +101,20 @@ public class DefaultableFlowerPotBlock extends FlowerPotBlock {
                 .filter(curBlockSup -> curBlockSup == flowerBlockSup || Objects.equals(curBlockSup.get(), flowerBlockSup.get()))
                 .findFirst()
                 .orElse(() -> Blocks.AIR);
+    }
+
+    @PostInit
+    private static class FlowerPotContainer {
+
+        private FlowerPotContainer() {
+            throw new IllegalAccessError("Attempted to construct instance of container class! (FlowerPotContainer)");
+        }
+
+        static { // TODO Add ability to track updates made to the original map through here as well
+            FULL_POTS.stream()
+                    .filter(curBlock -> RegistryUtil.getObjectFrom(curBlock.get(), curBlockId -> curBlockId.withPrefix("potted_")).isPresent())
+                    .map(curBlock -> Map.entry(curBlock.get(), RegistryUtil.getObjectFrom(curBlock.get(), curBlockId -> curBlockId.withPrefix("potted_")).get()))
+                    .forEach(curBlock -> POTTED_BY_CONTENT.put(curBlock.getKey(), curBlock.getValue()));
+        }
     }
 }

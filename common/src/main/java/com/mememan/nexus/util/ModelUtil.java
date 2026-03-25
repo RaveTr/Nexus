@@ -433,7 +433,8 @@ public final class ModelUtil {
      */
     public static BlockModelDefinition flowerPotCross(ResourceLocation flowerPotTexture) {
         return new BlockModelDefinition(ModelTemplates.FLOWER_POT_CROSS)
-                .withTextureMapping(TextureMapping.plant(RegistryUtil.pickBlockPrefix(flowerPotTexture)));
+                .withTextureMapping(TextureMapping.plant(RegistryUtil.pickBlockPrefix(flowerPotTexture)))
+                .withRenderType(CUTOUT_RENDER_TYPE);
     }
 
     /**
