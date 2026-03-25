@@ -130,7 +130,7 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
                 try {
                     return o.get() == null ? 0 : o.get().hashCode();
                 } catch (NullPointerException npe) {
-                    if (NexusServices.PLATFORM_MANAGER.isDevelopmentEnvironment()) NexusConstants.LOGGER.debug("Exception trying to hash Supplier value - In this case, it's most likely Forge's RegistryObject acting up due to PropertyWrappersContainer being initialized before deferred registration. You can ignore this warning; the custom Hash.Strategy comparisons for mapped objects (blocks, items, etc.) will still work as intended later beyond this point during runtime.", npe);
+                    if (NexusServices.PLATFORM_MANAGER.isDevelopmentEnvironment()) NexusConstants.LOGGER.trace("Exception trying to hash Supplier value - In this case, it's most likely Forge's RegistryObject acting up due to PropertyWrappersContainer being initialized before deferred registration. You can ignore this warning; the custom Hash.Strategy comparisons for mapped objects (blocks, items, etc.) will still work as intended later beyond this point during runtime.", npe);
                     return o == null ? 0 : o.hashCode();
                 }
             }
@@ -143,7 +143,7 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
                 try {
                     return Objects.equals(a, b) || Objects.equals(a.get(), b.get());
                 } catch (NullPointerException npe) {
-                    if (NexusServices.PLATFORM_MANAGER.isDevelopmentEnvironment()) NexusConstants.LOGGER.debug("Exception trying to compare Supplier values - In this case, it's most likely Forge's RegistryObjects acting up due to PropertyWrappersContainer being initialized before deferred registration. You can ignore this warning; the custom Hash.Strategy comparisons for mapped objects (blocks, items, etc.) will still work as intended later beyond this point during runtime.", npe);
+                    if (NexusServices.PLATFORM_MANAGER.isDevelopmentEnvironment()) NexusConstants.LOGGER.trace("Exception trying to compare Supplier values - In this case, it's most likely Forge's RegistryObjects acting up due to PropertyWrappersContainer being initialized before deferred registration. You can ignore this warning; the custom Hash.Strategy comparisons for mapped objects (blocks, items, etc.) will still work as intended later beyond this point during runtime.", npe);
                     return Objects.equals(a, b);
                 }
             }
@@ -162,7 +162,7 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
                 try {
                     return o.get() == null ? 0 : o.get().hashCode();
                 } catch (NullPointerException npe) {
-                    if (NexusServices.PLATFORM_MANAGER.isDevelopmentEnvironment()) NexusConstants.LOGGER.debug("Exception trying to hash Supplier value - In this case, it's most likely Forge's RegistryObject acting up due to PropertyWrappersContainer being initialized before deferred registration. You can ignore this warning; the custom Hash.Strategy comparisons for mapped objects (blocks, items, etc.) will still work as intended later beyond this point during runtime.", npe);
+                    if (NexusServices.PLATFORM_MANAGER.isDevelopmentEnvironment()) NexusConstants.LOGGER.trace("Exception trying to hash Supplier value - In this case, it's most likely Forge's RegistryObject acting up due to PropertyWrappersContainer being initialized before deferred registration. You can ignore this warning; the custom Hash.Strategy comparisons for mapped objects (blocks, items, etc.) will still work as intended later beyond this point during runtime.", npe);
                     return o == null ? 0 : o.hashCode();
                 }
             }
@@ -175,7 +175,7 @@ public interface PropertyWrapper<T, SELF extends PropertyWrapper<T, SELF, BUILDE
                 try {
                     return Objects.equals(a, b) || Objects.equals(a.get(), b.get());
                 } catch (NullPointerException npe) {
-                    if (NexusServices.PLATFORM_MANAGER.isDevelopmentEnvironment()) NexusConstants.LOGGER.debug("Exception trying to compare Supplier values - In this case, it's most likely Forge's RegistryObjects acting up due to PropertyWrappersContainer being initialized before deferred registration. You can ignore this warning; the custom Hash.Strategy comparisons for mapped objects (blocks, items, etc.) will still work as intended later beyond this point during runtime.", npe);
+                    if (NexusServices.PLATFORM_MANAGER.isDevelopmentEnvironment()) NexusConstants.LOGGER.trace("Exception trying to compare Supplier values - In this case, it's most likely Forge's RegistryObjects acting up due to PropertyWrappersContainer being initialized before deferred registration. You can ignore this warning; the custom Hash.Strategy comparisons for mapped objects (blocks, items, etc.) will still work as intended later beyond this point during runtime.", npe);
                     return Objects.equals(a, b);
                 }
             }

@@ -50,10 +50,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -1167,7 +1164,6 @@ public final class RegistryUtil {
             ResourceLocation woodenWallSignId = familyId.withSuffix("_wall_sign");
 
             ResourceLocation woodenHangingSignId = familyId.withSuffix("_hanging_sign");
-            ResourceLocation woodenCeilingHangingSignId = familyId.withSuffix("_ceiling_hanging_sign");
             ResourceLocation woodenWallHangingSignId = familyId.withSuffix("_wall_hanging_sign");
 
             Supplier<Block> woodenPlanks = BlockPropertyWrapperTemplates.registerBlockWithItemFromTemplate(woodenPlanksId, () -> new Block(BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS)), BlockPropertyWrapperTemplates.WOODEN_PLANKS, blockSupCol, itemSupCol);
@@ -1186,7 +1182,7 @@ public final class RegistryUtil {
             Supplier<Block> woodenStandingSign = BlockPropertyWrapperTemplates.registerBlockFromTemplateAndReflect(woodenSignId, () -> new DefaultableStandingSignBlock(BlockBehaviour.Properties.copy(Blocks.OAK_SIGN), woodBlockType), BlockPropertyWrapperTemplates.WOODEN_STANDING_SIGN, blockSupCol);
             Supplier<Block> woodenWallSign = BlockPropertyWrapperTemplates.registerBlockFromTemplateAndReflect(woodenWallSignId, () -> new DefaultableWallSignBlock(BlockBehaviour.Properties.copy(Blocks.OAK_WALL_SIGN).dropsLike(woodenStandingSign.get()), woodBlockType), BlockPropertyWrapperTemplates.WOODEN_WALL_SIGN, blockSupCol);
 
-            Supplier<Block> woodenCeilingHangingSign = BlockPropertyWrapperTemplates.registerBlockFromTemplateAndReflect(woodenCeilingHangingSignId, () -> new DefaultableCeilingHangingSignBlock(BlockBehaviour.Properties.copy(Blocks.OAK_HANGING_SIGN), woodBlockType), BlockPropertyWrapperTemplates.WOODEN_CEILING_HANGING_SIGN, blockSupCol);
+            Supplier<Block> woodenCeilingHangingSign = BlockPropertyWrapperTemplates.registerBlockFromTemplateAndReflect(woodenHangingSignId, () -> new DefaultableCeilingHangingSignBlock(BlockBehaviour.Properties.copy(Blocks.OAK_HANGING_SIGN), woodBlockType), BlockPropertyWrapperTemplates.WOODEN_CEILING_HANGING_SIGN, blockSupCol);
             Supplier<Block> woodenWallHangingSign = BlockPropertyWrapperTemplates.registerBlockFromTemplateAndReflect(woodenWallHangingSignId, () -> new DefaultableWallHangingSignBlock(BlockBehaviour.Properties.copy(Blocks.OAK_WALL_HANGING_SIGN).dropsLike(woodenCeilingHangingSign.get()), woodBlockType), BlockPropertyWrapperTemplates.WOODEN_WALL_HANGING_SIGN, blockSupCol);
 
             Supplier<SignItem> woodenSignItem = ItemPropertyWrapperTemplates.registerItem(woodenSignId, () -> new SignItem(new Item.Properties().stacksTo(16), woodenStandingSign.get(), woodenWallSign.get()), itemSupCol);
@@ -1219,7 +1215,7 @@ public final class RegistryUtil {
                         Supplier<BlockEntityType<DefaultableSignBlockEntity>> woodenSignBlockEntityType = BlockEntityTypePropertyWrapperTemplates.registerBlockEntityTypeFromTemplateAndReflect(signBlockEntityId, () -> BlockEntityType.Builder.of(
                                 (targetPos, targetState) -> new DefaultableSignBlockEntity(() -> BuiltInRegistries.BLOCK_ENTITY_TYPE.getOptional(signBlockEntityId).orElseThrow(), targetPos, targetState),
                                 woodenStandingSign.get(), woodenWallSign.get()
-                        ).build(Util.fetchChoiceType(References.BLOCK_ENTITY, signBlockEntityId.getPath())), BlockEntityTypePropertyWrapperTemplates.SIGN, blockEntityTypeSupCol);
+                        ).build(Util.fetchChoiceType(References.BLOCK_ENTITY, woodenSignId.getPath())), BlockEntityTypePropertyWrapperTemplates.SIGN, blockEntityTypeSupCol);
 
                         woodBlockEntityFamilyMap.put(signBlockEntityId, woodenSignBlockEntityType);
                     });
@@ -1238,7 +1234,7 @@ public final class RegistryUtil {
                         Supplier<BlockEntityType<DefaultableHangingSignBlockEntity>> woodenHangingSignBlockEntityType = BlockEntityTypePropertyWrapperTemplates.registerBlockEntityTypeFromTemplateAndReflect(hangingSignBlockEntityId, () -> BlockEntityType.Builder.of(
                                 (targetPos, targetState) -> new DefaultableHangingSignBlockEntity(() -> BuiltInRegistries.BLOCK_ENTITY_TYPE.getOptional(hangingSignBlockEntityId).orElseThrow(), targetPos, targetState),
                                 woodenCeilingHangingSign.get(), woodenWallHangingSign.get()
-                        ).build(Util.fetchChoiceType(References.BLOCK_ENTITY, hangingSignBlockEntityId.getPath())), BlockEntityTypePropertyWrapperTemplates.HANGING_SIGN, blockEntityTypeSupCol);
+                        ).build(Util.fetchChoiceType(References.BLOCK_ENTITY, woodenHangingSignId.getPath())), BlockEntityTypePropertyWrapperTemplates.HANGING_SIGN, blockEntityTypeSupCol);
 
                         woodBlockEntityFamilyMap.put(hangingSignBlockEntityId, woodenHangingSignBlockEntityType);
                     });
@@ -1288,7 +1284,7 @@ public final class RegistryUtil {
             woodBlockFamilyMap.put(woodenSignId, woodenStandingSign);
             woodBlockFamilyMap.put(woodenWallSignId, woodenWallSign);
 
-            woodBlockFamilyMap.put(woodenCeilingHangingSignId, woodenCeilingHangingSign);
+            woodBlockFamilyMap.put(woodenHangingSignId, woodenCeilingHangingSign);
             woodBlockFamilyMap.put(woodenWallHangingSignId, woodenWallHangingSign);
 
             woodItemFamilyMap.put(woodenSignId, woodenSignItem);
