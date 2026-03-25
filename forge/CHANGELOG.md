@@ -8,6 +8,7 @@
 - Fixed all ModelUtil methods that use multiple textures and models (such as ModelUtil#doublePlant) attempting to look for invalid textures/models.
 - Minor cleanup in event blueprint classes.
 - Fixed odd crash that appeared as of v1.0.9, where `MinecraftMixin` would fail to locate the obfuscation mapping for shadowed field `timer`. For whatever reason, the jar passed into `publishMods` and uploaded didn't properly remap mixins internally despite the refmap being present and properly populated.
+- (Not really a bug fix) bumped log level for `PropertyWrapper#getMappedPropertyWrappers` (+ the container field variant) down to `trace` from `debug`.
 
 ## New Features
 
