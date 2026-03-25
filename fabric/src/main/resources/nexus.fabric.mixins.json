@@ -11,6 +11,7 @@
     "fabric_api.resource_loader.ResourceManagerHelperImplMixin",
     "item.DiggerItemMixin",
     "level_data.LevelStorageAccessMixin",
+    "registries.MappedRegistryAccessor",
     "registries.MappedRegistryMixin",
     "server.PlayerListMixin"
   ],

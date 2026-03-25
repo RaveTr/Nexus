@@ -1,29 +1,35 @@
 package com.mememan.nexus.internal.loader;
 
 import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.graph.MutableNetwork;
 import com.mememan.nexus.NexusConstants;
-import com.mememan.nexus.asm.ClassFinder;
+import com.mememan.nexus.internal.registry.NexusRegistryDataManager;
 import com.mememan.nexus.loader.RegistryHookManager;
 import com.mememan.nexus.mixins.forge.registries.ForgeRegistryAccessor;
+import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.objects.*;
+import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.registries.ForgeRegistry;
+import net.minecraftforge.registries.GameData;
+import net.minecraftforge.registries.IdMappingEvent;
 import net.minecraftforge.registries.RegistryManager;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class ForgeRegistryHookManager implements RegistryHookManager {
     private static final Map<ResourceKey<? extends Registry<?>>, Object2ObjectMap<ResourceLocation, List<ResourceLocation>>> GLOBAL_APPELLATIONS = new Object2ObjectLinkedOpenHashMap<>();
     private static final Map<ResourceKey<? extends Registry<?>>, Object2ObjectMap<ResourceLocation, List<ResourceLocation>>> GLOBAL_APPELLATIONS_VIEW = Collections.unmodifiableMap(GLOBAL_APPELLATIONS);
     private static final Map<ResourceKey<? extends Registry<?>>, BiMap<Integer, ResourceLocation>> GLOBAL_BLOCKED_IDS = new Object2ObjectLinkedOpenHashMap<>();
+    private static final Map<ResourceKey<? extends Registry<?>>, BiMap<Integer, ResourceLocation>> GLOBAL_BLOCKED_IDS_VIEW = Collections.unmodifiableMap(GLOBAL_BLOCKED_IDS);
 
     public ForgeRegistryHookManager() {
 
@@ -31,12 +37,17 @@ public class ForgeRegistryHookManager implements RegistryHookManager {
 
     @Override
     public <T> void blockId(ResourceKey<Registry<T>> targetRegistryKey, int id) {
-
+        GLOBAL_BLOCKED_IDS
+                .computeIfAbsent(targetRegistryKey, k -> HashBiMap.create())
+                .put(id, NUMERICALLY_BLOCKED); // Numerically-blocking IDs should always take precedence over blocking particular entries' IDs
     }
 
     @Override
     public <T> void blockId(ResourceKey<Registry<T>> targetRegistryKey, ResourceLocation registryEntryId) {
-
+        GLOBAL_BLOCKED_IDS
+                .computeIfAbsent(targetRegistryKey, k -> HashBiMap.create())
+                .inverse()
+                .put(registryEntryId, RL_BLOCKED); // Same goes here (as specified above), but for RLs
     }
 
     @Override
@@ -58,62 +69,126 @@ public class ForgeRegistryHookManager implements RegistryHookManager {
     }
 
     @Override
-    public <T> void updateActiveRegistry(ResourceKey<Registry<T>> targetRegistryKey, Object2IntMap<ResourceLocation> idPool, ActiveRegistryMapper<T> mapper) {
-        // TODO Add prelim check to determine whether we're actually loading into a world or not
+    public <T> void updateActiveRegistryState(ResourceKey<Registry<T>> targetRegistryKey, ActiveRegistryMapper<T> mapper) {
+        MappedRegistry<T> assumedWrappedReg = GameData.getWrapper((ResourceKey) targetRegistryKey, Lifecycle.stable());
+        Map<RawRegistryEntry<T>, RawRegistryEntry<T>> potentialRemaps = RegistryHookManager.gatherPotentialRemaps(assumedWrappedReg, mapper); // Original -> Remappings
 
-        RegistryManager intermediary = new RegistryManager("INTERMEDIARY");
+        if (potentialRemaps.isEmpty()) return; // Nothing to do
+
         RegistryManager active = RegistryManager.ACTIVE;
-        ForgeRegistry<T> activeForgeReg = active.getRegistry(targetRegistryKey.location());
-        ForgeRegistry<T> targetForgeReg = intermediary.getRegistry(targetRegistryKey.location(), active); // Initially empty (this only copies registry configuration, not state)
-        Object2IntMap<ResourceLocation> usedIdPool = idPool;
+        RegistryManager frozen = RegistryManager.FROZEN;
 
-        if (!(activeForgeReg instanceof ForgeRegistryAccessor activeAccessor) || !(targetForgeReg instanceof ForgeRegistryAccessor targetAccessor)) return; // JIC
+        // TODO Check for whether we're updating at the correct time or not
 
-        ResourceLocation wrapperId = new ResourceLocation("forge", "registry_defaulted_wrapper");
-        boolean hasDefault = targetForgeReg.getDefaultKey() != null;
-        Class<?> chosenWrapperClazz = hasDefault // FIXME This is EXTREMELY fragile
-                ? ClassFinder.forNameNoInit("net.minecraftforge.registries.NamespacedDefaultedWrapper")
-                : ClassFinder.forNameNoInit("net.minecraftforge.registries.NamespacedWrapper");
-        Registry<T> wrappedRegistry = (Registry<T>) targetForgeReg.getSlaveMap(wrapperId, chosenWrapperClazz);
-        Registry<T> wrappedActiveRegistry = (Registry<T>) activeForgeReg.getSlaveMap(wrapperId, chosenWrapperClazz);
+        RegistryManager intermediary = new RegistryManager("INTERMEDIARY"); // Keeping this local since multiple calls can be made to update the same active registry state, so we want to avoid stale references/states to prevent accidental corruption
 
-        if (wrappedRegistry == null) throw new IllegalStateException(String.format("Cannot update registry '%s', as it does not have a wrapper/mapped registry.", targetRegistryKey));
+        ResourceLocation registryId = targetRegistryKey.location();
+        ForgeRegistry<T> activeTargetReg = active.getRegistry(registryId);
+        ForgeRegistry<T> intermediaryTargetReg = intermediary.getRegistry(registryId, active);
 
-        if (usedIdPool == null) {
-            NexusConstants.LOGGER.info("Calling updateActiveRegistry for registry '{}' with idPool being substituted with the entire registry. This may lead to breakages and/or indeterministic behaviour if used incorrectly. To the modder: proceed with caution.", targetRegistryKey);
-            usedIdPool = activeForgeReg.getKeys().stream()
-                    .collect(Collectors.toMap(Function.identity(), activeForgeReg::getID, (a, b) -> {
-                        throw new IllegalArgumentException("Somehow encountered duplicate registry entry numerical IDs when pooling to update active registry state. This shouldn't be possible due to preliminary checks done when validating registry entries. Problematic ID: %s".formatted(a));
-                    }, Object2IntLinkedOpenHashMap::new));
+        if (!(activeTargetReg instanceof ForgeRegistryAccessor activeAccessor) || !(intermediaryTargetReg instanceof ForgeRegistryAccessor intermediaryAccessor)) return;
+        if (!activeAccessor.nexus$hasWrapper()) return;
+
+        // First: Load everything from active to intermediary
+        activeAccessor.nexus$validateContent(registryId); // Re-do validation + debug logging JIC
+        activeAccessor.nexus$dump(registryId);
+        activeAccessor.nexus$resetDelegates();
+
+        ForgeRegistry.Snapshot activeSnapshot = activeTargetReg.makeSnapshot();
+
+        activeSnapshot.aliases.forEach(intermediaryTargetReg::addAlias); // Sync misc. data as well, cuz why not
+        activeSnapshot.blocked.forEach(intermediaryAccessor::nexus$block);
+
+        intermediaryTargetReg.loadIds(activeSnapshot.ids, activeSnapshot.overrides, new Object2IntOpenHashMap<>(), new Object2ObjectOpenHashMap<>(), activeTargetReg, registryId); // No need to keep track of missing or remapped stuff internally cuz we're js populating an empty registry state anyway
+
+        // Second: Resolve remaps
+        MutableNetwork<RawRegistryEntry<T>, RemapTarget> remapNetwork = RegistryHookManager.constructRemapNetwork(potentialRemaps, assumedWrappedReg, RemapConflictResolution.SWAP);
+
+        // Reconcile remaps, resolve cycles, and handle cascading
+        Map<RawRegistryEntry<T>, RawRegistryEntry<T>> resolvedRemaps = RegistryHookManager.resolveRemapTargets(remapNetwork, potentialRemaps);
+
+        // Forge compat: support IdRemapEvent (not done in bulk, which was probably the intention behind how it was written, but it doesn't really matter now, does it)
+        Map<ResourceLocation, IdMappingEvent.IdRemapping> forgeRemaps = new Object2ObjectOpenHashMap<>();
+
+        intermediaryAccessor.nexus$setModifiable(true);
+        intermediaryTargetReg.unfreeze();
+
+        // Third: Apply remaps to intermediary registry state
+        for (Map.Entry<RawRegistryEntry<T>, RawRegistryEntry<T>> resolvedRemap : resolvedRemaps.entrySet()) { // Includes swapped/displaced entries
+            RawRegistryEntry<T> originalEntry = resolvedRemap.getKey();
+            RawRegistryEntry<T> remappedEntry = resolvedRemap.getValue();
+
+            intermediaryTargetReg.remove(originalEntry.objId()); // Remove original entry to avoid stale IDs being reused when the remapped entry is re-inserted
+
+            int targetNumId = remappedEntry.numericalId();
+
+            if (targetNumId != -1) { // Short-circuit (we're forcing the remapped entry into its target ID, since the finalized state should NOT have any missing/dangling references)
+                ResourceKey<T> sourceKey = intermediaryTargetReg.getKey(targetNumId);
+
+                if (sourceKey != null && !Objects.equals(sourceKey.location(), intermediaryTargetReg.getDefaultKey())) {
+                    intermediaryTargetReg.remove(sourceKey.location());
+                    intermediaryAccessor.nexus$getAvailabilityMap().clear(targetNumId);
+                }
+            }
+
+            intermediaryTargetReg.register(targetNumId, remappedEntry.objId(), remappedEntry.objValue());
+
+            if (originalEntry.numericalId() != targetNumId) forgeRemaps.put(originalEntry.objId(), new IdMappingEvent.IdRemapping(originalEntry.numericalId(), targetNumId));
         }
 
-        // Load things into the intermediary manager, cuz it's about to (potentially) get messy
-        targetForgeReg.loadIds(usedIdPool, activeAccessor.nexus$getOverrideOwners(), new Object2IntLinkedOpenHashMap<>(), new Object2ObjectLinkedOpenHashMap<>(), activeForgeReg, targetRegistryKey.location());
+        // Clean unused IDs up after the fact to avoid expensive n^2 checks within the remap loop
+        intermediaryAccessor.nexus$getAvailabilityMap().stream()
+                .filter(id -> !intermediaryAccessor.nexus$getIds().containsKey(id))
+                .forEach(intermediaryAccessor.nexus$getAvailabilityMap()::clear);
 
-        usedIdPool.forEach((objId, numericalId) -> {
-            RawRegistryEntry<T> rawEntry = new RawRegistryEntry<>(targetRegistryKey, objId, activeForgeReg.getRaw(objId), numericalId);
-            T remappedEntry = mapper.map(wrappedActiveRegistry, rawEntry);
+        // Validate stuff
+        intermediaryAccessor.nexus$setModifiable(false);
+        intermediaryTargetReg.freeze();
 
-            if (remappedEntry != null && !Objects.equals(rawEntry.objValue(), remappedEntry)) {
-                // Basically, hijack the target ID only if it was mapped to the target entry's ID, if necessary
-                targetAccessor.nexus$getAvailabilityMap().clear(rawEntry.numericalId());
-                targetForgeReg.register(rawEntry.numericalId(), rawEntry.objId(), remappedEntry);
-            }
-        });
+        try {
+            intermediaryAccessor.nexus$validateContent(registryId);
+        } catch (Exception e) {
+            NexusConstants.LOGGER.error("Failed to validate intermediary registry for active registry state '{}'. Skipping state update.", registryId, e);
+            return;
+        }
 
-        resolveRegistryState(activeForgeReg, targetForgeReg); // Resolve differences in state (if any) after querying usedIdPool b4 we actually attempt to sync changes
-   //     activeAccessor.nexus$sync(targetRegistryKey.location(), targetForgeReg);
-   //     activeForgeReg.bake(); // Needed to fire callbacks that populate whatever slave map(s) the target registry may have (looking at you, blockstatetoid map)
+        intermediaryAccessor.nexus$dump(registryId);
+
+        // Finally: Sync intermediary registry state to active registry state
+        activeAccessor.nexus$sync(registryId, intermediaryTargetReg);
+        activeTargetReg.bake(); // Need this to run any necessary post-sync operations, such as populating slave maps (looking at you, BLOCKSTATE_TO_ID)
+
+        if (!forgeRemaps.isEmpty()) MinecraftForge.EVENT_BUS.post(new IdMappingEvent(Map.of(registryId, forgeRemaps), true));
+
+        NexusRegistryDataManager.markRegistryDataDirty();
     }
 
     @Override
-    public Map<ResourceKey<? extends Registry<?>>, BiMap<Integer, ResourceLocation>> getBlockedIds() {
-        return Map.of();
+    public Map<ResourceKey<? extends Registry<?>>, BiMap<Integer, ResourceLocation>> getBlockedIds(boolean computeFromLoaderApi) {
+        if (!computeFromLoaderApi) return GLOBAL_BLOCKED_IDS_VIEW;
+        else {
+            Map<ResourceKey<? extends Registry<?>>, BiMap<Integer, ResourceLocation>> result = new Object2ObjectLinkedOpenHashMap<>(GLOBAL_BLOCKED_IDS);
+
+            BuiltInRegistries.REGISTRY.entrySet().stream()
+                    .filter(curEntry -> RegistryManager.ACTIVE.getRegistry(curEntry.getKey().location()) != null)
+                    .forEach(curEntry -> {
+                        ResourceKey<? extends Registry<?>> curRegistryKey = curEntry.getKey();
+                        ForgeRegistry<?> curForgeRegistry = RegistryManager.ACTIVE.getRegistry(curEntry.getKey().location());
+
+                        if (curForgeRegistry instanceof ForgeRegistryAccessor curForgeRegistryAccessor && !curForgeRegistryAccessor.nexus$getBlockedIds().isEmpty()) {
+                            BiMap<Integer, ResourceLocation> blockedIds = result.computeIfAbsent(curRegistryKey, k -> HashBiMap.create());
+
+                            curForgeRegistryAccessor.nexus$getBlockedIds().forEach((blockedIdValue) -> blockedIds.put(blockedIdValue, NUMERICALLY_BLOCKED));
+                        }
+                    });
+
+            return result;
+        }
     }
 
     @Override
     public Map<ResourceKey<? extends Registry<?>>, Object2ObjectMap<ResourceLocation, List<ResourceLocation>>> getAppellations(boolean computeFromLoaderApi) {
-        if (computeFromLoaderApi) return GLOBAL_APPELLATIONS_VIEW;
+        if (!computeFromLoaderApi) return GLOBAL_APPELLATIONS_VIEW;
         else {
             Map<ResourceKey<? extends Registry<?>>, Object2ObjectMap<ResourceLocation, List<ResourceLocation>>> result = new Object2ObjectLinkedOpenHashMap<>(GLOBAL_APPELLATIONS);
 
@@ -136,23 +211,5 @@ public class ForgeRegistryHookManager implements RegistryHookManager {
 
             return result;
         }
-    }
-
-    private static <T> void resolveRegistryState(ForgeRegistry<T> from, ForgeRegistry<T> to) {
-        if (from == to) throw new IllegalArgumentException(String.format("Attempted to resolve registry state for the same registry! Registry: %s", from == null ? "null" : from.getRegistryKey()));
-        if (!(from instanceof ForgeRegistryAccessor fromAccessor) || !(to instanceof ForgeRegistryAccessor toAccessor)) return;
-
-        toAccessor.nexus$setModifiable(true);
-
-        /*
-         * TODO:
-         *  - Resolve differences in names (ids and such effectively pertain to it soooo...)
-         *  - Registry data migration ('to' takes precedence in id conflicts)
-         *  - Migrate rest of registry state (aliases, blocked ids, etc.)
-         */
-
-
-
-        toAccessor.nexus$setModifiable(false);
     }
 }

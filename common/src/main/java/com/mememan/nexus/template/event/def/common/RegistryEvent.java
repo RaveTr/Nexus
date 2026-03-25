@@ -108,6 +108,10 @@ public class RegistryEvent extends BaseEvent {
 
                 NexusServices.REGISTRAR.getRegistryHookManager().blockId((ResourceKey) pertainingRegistry.key(), lastKnownId);
             }),
+/*            SUBSTITUTE((pertainingRegistry, lastKnownId, oldKey, newKey) -> {
+                NexusConstants.LOGGER.info("Attempting to substitute registry entry {} (with id {}, in registry {})", oldKey, lastKnownId, pertainingRegistry.key());
+                // NO-OP: Functionality handled in NexusRegistryDataManager#updateRegistryData(LevelStorageSource.LevelDirectory)
+            }),*/
             WARN((pertainingRegistry, lastKnownId, oldKey, newKey) -> {
                 NexusConstants.LOGGER.warn("Missing registry entry for {} with id {}, old reference key: {}", pertainingRegistry.key(), lastKnownId, oldKey);
             }),

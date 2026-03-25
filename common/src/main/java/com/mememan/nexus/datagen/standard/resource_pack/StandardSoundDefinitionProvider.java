@@ -54,7 +54,8 @@ public class StandardSoundDefinitionProvider implements ModDataProvider {
      *
      * @param cachedOutput The {@link CachedOutput} instance to use for saving generated data to disk.
      *
-     * @return A {@link CompletableFuture} representing the completion of sound definition serialization.
+     * @return A {@link CompletableFuture} representing the completion of sound definition serialization into
+     * {@code sounds.json}.
      *
      * @see #serializeSoundDefinitions(JsonObject)
      */

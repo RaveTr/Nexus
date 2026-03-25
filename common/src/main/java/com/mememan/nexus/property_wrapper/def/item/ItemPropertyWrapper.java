@@ -16,8 +16,8 @@ import java.util.function.Supplier;
 
 /**
  * Definite wrapper implementation for {@link Item} objects, with constrained generic types for {@code SELF} and
- * {@code BUILDER}.
- *
+ * {@code BUILDER}. Exposes additional properties for vanilla-specific properties, such as item colors and model
+ * predicates.
  * @param <I> Any {@link Item} type.
  *
  * @see ItemPropertyWrapperBuilder
@@ -43,10 +43,27 @@ public class ItemPropertyWrapper<I extends Item> extends BaseDefaultableDataGenP
         this.compositeVanillaWrapper = new SpecializedVanillaPropertyWrapper<>();
     }
 
+    /**
+     * Retrieves the mapping function for the parent {@link Item}'s dynamic color.
+     *
+     * @return The mapping function for the parent {@link Item}'s dynamic color. May be empty.
+     *
+     * @see ItemPropertyWrapperBuilder#withItemColor(Function)
+     * @see WrappedItemColor
+     */
     public Optional<Function<Supplier<I>, WrappedItemColor>> getItemColorMapper() {
         return rawBuilder().map(builder -> builder.itemColorMappingFunc);
     }
 
+    /**
+     * Retrieves all model predicates for the parent {@link Item}.
+     *
+     * @return All model predicates for the parent {@link Item}.
+     *
+     * @see ItemPropertyWrapperBuilder#withItemModelPredicate(ResourceLocation, WrappedClampedItemPropertyFunction)
+     * @see ItemPropertyWrapperBuilder#withItemModelPredicates(Map)
+     * @see ItemPropertyWrapperBuilder#setItemModelPredicates(Map)
+     */
     public Map<ResourceLocation, WrappedClampedItemPropertyFunction> getItemModelPredicates() {
         return rawBuilder().map(builder -> builder.itemModelPredicates).orElse(Map.of());
     }

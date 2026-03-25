@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 
 /**
  * Definite builder implementation for {@link BlockEntityType} objects, with constrained generic types for {@code SELF} and
- * {@code BUILDER}.
+ * {@code DBDGPW}. Includes relevant properties for rendering and other metadata associated with block entities.
  *
  * @param <BE> Any {@link BlockEntity} type.
  *

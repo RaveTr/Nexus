@@ -433,13 +433,6 @@ public final class BlockPropertyWrapperTemplates {
     public static final BlockPropertyWrapper<Block> STRIPPED_WOODEN_LOG = new BlockPropertyWrapper<>()
             .builder()
             .copyFrom(WOODEN_LOG)
-            .withModelDefinition(parentBlock ->
-                    ModelUtil.rotatedPillar(
-                            parentBlock,
-                            RegistryUtil.getTextureLocationOrDefault(parentBlock),
-                            RegistryUtil.getTextureLocationOrDefaultWithSuffix(parentBlock, "_top")
-                    )
-            )
             .withBlockStripping(null)
             .build();
     public static final BlockPropertyWrapper<Block> WOODEN_PLANKS = new BlockPropertyWrapper<>()
@@ -772,6 +765,8 @@ public final class BlockPropertyWrapperTemplates {
      */
     public static <B extends Block> Supplier<B> registerBlockWithItem(ResourceLocation blockId, Supplier<B> blockSup, @Nullable Collection<Supplier<Block>> blockSupCol, @Nullable Collection<Supplier<Item>> blockItemSupCol) {
         Supplier<B> registeredBlock = NexusServices.REGISTRAR.registerObject(blockId, blockSup, BuiltInRegistries.BLOCK);
+
+        ItemPropertyWrapperTemplates.registerItem(blockId, () -> new BlockItem(registeredBlock.get(), new Item.Properties()), blockItemSupCol);
 
         if (blockSupCol != null) blockSupCol.add((Supplier<Block>) registeredBlock);
 

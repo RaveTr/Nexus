@@ -6,8 +6,4 @@ import com.mememan.nexus.event.result.EventResult;
 public interface EventListener<T, R> {
 
     EventResult<R> getResult(T event);
-
-    default EventListener<T, R> andThen(EventListener<T, R> subsequentListener) {
-        return subsequentListener;
-    }
 }

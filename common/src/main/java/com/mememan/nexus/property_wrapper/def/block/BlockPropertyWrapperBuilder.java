@@ -21,6 +21,14 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+/**
+ * Definite wrapper builder implementation for {@link Block} objects, with constrained generic types for {@code SELF}
+ * and {@code BDDGPW} Includes vanilla and loader API properties for singular blocks.
+ *
+ * @param <B> Any {@link Block} type.
+ *
+ * @see BlockPropertyWrapper
+ */
 public class BlockPropertyWrapperBuilder<B extends Block> extends BaseDefaultableDataGenPropertyWrapperBuilder<B, BlockPropertyWrapperBuilder<B>, BlockPropertyWrapper<B>> implements DefaultableVanillaBasedPropertyWrapperBuilder<B, BlockPropertyWrapperBuilder<B>, BlockPropertyWrapper<B>> {
     protected final SpecializedVanillaPropertyWrapperBuilder<B, BlockPropertyWrapperBuilder<B>, BlockPropertyWrapper<B>> compositeVanillaBuilder;
     protected Function<Supplier<B>, BlockStateDefinition> blockStateDefMapperFunc;

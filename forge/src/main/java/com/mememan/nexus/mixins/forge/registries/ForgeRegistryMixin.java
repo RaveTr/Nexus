@@ -1,7 +1,11 @@
 package com.mememan.nexus.mixins.forge.registries;
 
 import com.google.common.collect.BiMap;
+import com.llamalad7.mixinextras.expression.Definition;
+import com.llamalad7.mixinextras.expression.Expression;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import com.mememan.nexus.internal.registry.NexusRegistryDataManager;
@@ -17,14 +21,17 @@ import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.fml.ModLoadingStage;
 import net.minecraftforge.registries.ForgeRegistry;
+import net.minecraftforge.registries.RegistryManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -34,6 +41,10 @@ import java.util.concurrent.atomic.AtomicReference;
  * the {@code common} module) and {@link NamespacedWrapperMixin}, since Forge's registry implementation has overrides
  * that commonly call methods from {@link ForgeRegistry} for lookups, which saves us the hassle of having to write even more
  * mixins.
+ * <br></br>
+ * This also fixes infinite recursion caused by Forge's {@link ResourceLocation}-based registry lookups (the way that
+ * code is written causes keys that have aliases of each other to infinitely resolve each other without end before
+ * the active registry state is updated, since said keys aren't mapped to their respective objects by then).
  *
  * @see RegistryHookManager#getUpdatedAppellations()
  * @see NexusRegistryDataManager#handleLevelRegistryData()
@@ -49,14 +60,48 @@ public abstract class ForgeRegistryMixin {
     @Shadow
     @Final
     private BiMap<ResourceLocation, Object> names;
+    @Shadow
+    @Final
+    private Map<ResourceLocation, ResourceLocation> aliases;
 
     private ForgeRegistryMixin() {
         throw new IllegalAccessError("Attempted to construct Mixin Class! (ForgeRegistryMixin)");
     }
 
+    @Shadow
+    protected abstract int getIDRaw(ResourceLocation name);
+
     @Inject(method = "getRaw", at = @At("HEAD"))
     private void nexus$captureObjectKey(ResourceLocation key, CallbackInfoReturnable<Object> cir, @Share("key") LocalRef<ResourceLocation> keyRef) {
         keyRef.set(key); // We need these to capture queried keys before they're mutated in their respective lookup methods
+    }
+
+    @Inject(method = "getRaw", at = @At(value = "INVOKE", target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;", ordinal = 0, shift = At.Shift.AFTER), cancellable = true)
+    private <V> void nexus$replaceRawObjectAliasLookup(ResourceLocation key, CallbackInfoReturnable<V> cir, @Local(name = "ret") V originalObj) {
+        if (originalObj == null) {
+            originalObj = (V) names.get(aliases.get(key)); // key here is already mutated to be the assumed first alias tied to the original ID
+
+            if (originalObj == null) {
+                for (int attempts = 0; attempts < 10 && originalObj == null; attempts++) { // Only allow up to 10 lookups for now (yeah yeah lazy solution, but any more than 10 alias associations has never before been seen in Forge modding lmao)
+                    ResourceLocation alias = aliases.get(key);
+
+                    if (alias == null || originalObj != null) break;
+
+                    originalObj = (V) names.get(alias);
+                    key = alias;
+                }
+            }
+
+            if (originalObj != null) cir.setReturnValue(originalObj);
+        }
+    }
+
+    @Definition(id = "ret", local = @Local(type = Object.class, name = "ret"))
+    @Definition(id = "key", local = @Local(type = ResourceLocation.class, argsOnly = true))
+    @Expression({"ret == null", "key != null"})
+    @ModifyExpressionValue(method = "getRaw", at = @At("MIXINEXTRAS:EXPRESSION"))
+    private boolean nexus$cancelBuiltInRawObjectAliasLookup(boolean original) {
+        return false;
     }
 
     @ModifyReturnValue(method = "getRaw", at = @At("RETURN"))
@@ -69,6 +114,34 @@ public abstract class ForgeRegistryMixin {
     @Inject(method = "getValue(Lnet/minecraft/resources/ResourceLocation;)Ljava/lang/Object;", at = @At("HEAD"))
     private void nexus$captureValueKey(ResourceLocation key, CallbackInfoReturnable<Object> cir, @Share("key") LocalRef<ResourceLocation> keyRef) {
         keyRef.set(key);
+    }
+
+    @Inject(method = "getValue(Lnet/minecraft/resources/ResourceLocation;)Ljava/lang/Object;", at = @At(value = "INVOKE", target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;", ordinal = 0, shift = At.Shift.AFTER), cancellable = true)
+    private <V> void nexus$replaceBuiltInObjectAliasLookup(ResourceLocation key, CallbackInfoReturnable<V> cir, @Local(name = "ret") V originalObj) {
+        if (originalObj == null) {
+            originalObj = (V) names.getOrDefault(aliases.get(key), defaultValue); // key here is already mutated to be the assumed first alias tied to the original ID
+
+            if (originalObj == defaultValue) {
+                for (int attempts = 0; attempts < 10 && originalObj == null; attempts++) { // Only allow up to 10 lookups for now (yeah yeah lazy solution, but any more than 10 alias associations has never before been seen in Forge modding lmao)
+                    ResourceLocation alias = aliases.get(key);
+
+                    if (alias == null || originalObj != null) break;
+
+                    originalObj = (V) names.getOrDefault(alias, defaultValue);
+                    key = alias;
+                }
+            }
+
+            if (originalObj != defaultValue) cir.setReturnValue(originalObj);
+        }
+    }
+
+    @Definition(id = "ret", local = @Local(type = Object.class, name = "ret"))
+    @Definition(id = "key", local = @Local(type = ResourceLocation.class, argsOnly = true))
+    @Expression({"ret == null", "key != null"})
+    @ModifyExpressionValue(method = "getValue(Lnet/minecraft/resources/ResourceLocation;)Ljava/lang/Object;", at = @At(value = "MIXINEXTRAS:EXPRESSION", slice = "aliasLookup"), slice = @Slice(to = @At(value = "INVOKE", target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;", ordinal = 1), id = "aliasLookup"))
+    private boolean nexus$cancelBuiltInObjectAliasLookup(boolean original) {
+        return false;
     }
 
     @ModifyReturnValue(method = "getValue(Lnet/minecraft/resources/ResourceLocation;)Ljava/lang/Object;", at = @At("RETURN"))
@@ -85,7 +158,10 @@ public abstract class ForgeRegistryMixin {
 
     @ModifyReturnValue(method = "containsKey", at = @At("TAIL"))
     private boolean nexus$addObjectKeyLookupCallback(boolean original, @Share("key") LocalRef<ResourceLocation> keyRef) {
-        return original || nexus$getValueThroughAppellations(keyRef.get(), true) != defaultValue;
+        boolean foundThroughDelegates = original || nexus$getValueThroughAppellations(keyRef.get(), true) != defaultValue; // Not really an accurate name, given what ForgeRegistry wraps around, but whatever lmao
+        return ModLoader.get().hasCompletedState(ModLoadingStage.COMPLETE.name()) && RegistryManager.FROZEN.getRegistry(key).getID(keyRef.get()) != -1
+                ? getIDRaw(keyRef.get()) != -1
+                : foundThroughDelegates;
     }
 
     @Unique

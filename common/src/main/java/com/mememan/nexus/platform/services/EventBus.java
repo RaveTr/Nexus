@@ -54,7 +54,8 @@ public interface EventBus {
 
     /**
      * Registers an event hook mapped to the provided {@code eventKey}, using the provided {@code eventListenerMerger}.
-     * Should generally be called in your mod initializer (or your event blueprint's constructor, see {@link EventBlueprint}).
+     * Should generally be called in your mod initializer (or your [custom] event blueprint's constructor, see
+     * {@link EventBlueprint}).
      *
      * @param eventKey The identifier {@link EventKey} to register the hook for. Must wrap around a functional {@code interface}.
      * @param eventListenerMerger The merging function to use for merging event listeners' results.

@@ -10,11 +10,16 @@ import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.platform.services.Registrar;
 import com.mememan.nexus.template.event.blueprint.common.LevelDataEventBlueprint;
 import com.mememan.nexus.template.event.blueprint.common.RegistryEventBlueprint;
+import com.mememan.nexus.template.event.blueprint.server.ServerLifeCycleEventBlueprint;
 import com.mememan.nexus.template.event.def.common.RegistryEvent;
-import it.unimi.dsi.fastutil.objects.*;
+import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
@@ -32,6 +37,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -74,13 +80,39 @@ import java.util.stream.Collectors;
  *                 directory ({@link #writeOrAppendAppellationData(LevelStorageSource.LevelDirectory, CompoundTag)}
  *                 + {@link #writeOrAppendBlockedIdData(LevelStorageSource.LevelDirectory, CompoundTag)}).
  *                 <br></br>
- *                 The file pretty much serves as a sort of data store that gets updated whenever level data is saved in
- *                 order to keep track of states and allow for the injection of stuff like
+ *                 The {@code class} pretty much serves as a sort of data store that gets updated whenever level data is
+ *                 saved in order to keep track of states and allow for the injection of stuff like
  *                 {@link RegistryEvent.MissingRegistryEntriesEvent}, which would allow us to properly block IDs from being
  *                 re-used, register dummy objects, etc.
  *             </li>
  *         </ul>
  *     </li>
+ * </ul>
+ * Mod-loaders have their own methods of tracking registry states. Forge has a whole system for capturing snapshots
+ * of global registry state at different points in time:
+ * <ul>
+ *     <li>{@code RegistryManager#FROZEN} - Captures final state after registries have been frozen, including modded
+ *     entries. Acts as the fallback state that subs all data into {@code RegistryManager#ACTIVE} whenever the user
+ *     leaves a world/server.</li>
+ *     <li>{@code RegistryManager#VANILLA} - Captures Vanilla registry state post-bootstrap, before modded entries
+ *     are registered.</li>
+ *     <li>{@code RegistryManager#ACTIVE} - Contains the current state of registries, depending on when/where they're
+ *     being used. For instance, loading into a local world will update this state to reflect entries from that
+ *     world, which allows for keeping track of entries that are updated to fire events for listening/use later on
+ *     (e.g. missing registry entries, ID re-maps).</li>
+ *     <li>{@code RegistryManager#STAGING} - Temp state created whenever the user loads a world or joins a server. Used
+ *     as a buffer for validating and updating registries and their entries before pooling all changes into
+ *     {@code RegistryManager#ACTIVE}.</li>
+ * </ul>
+ * Meanwhile on Fabric, registry state is managed by the {@code fabric-registry-sync} API and is effectively split
+ * into 2 states:
+ * <ul>
+ *     <li>{@code fabric_prevIndexedEntries} / {@code fabric_prevEntries} - Contains the original registry state
+ *     after all mods have loaded and all registries have been frozen/finalized. This is only populated the first
+ *     time the user attempts to load a world or join a server and acts as the equivalent to
+ *     {@code RegistryManager#FROZEN}.</li>
+ *     <li><b>Current Registry</b> - Registry state is updated directly via their own mixins without any buffers
+ *     in-between.</li>
  * </ul>
  *
  * @see Registrar#getRegistryHookManager()
@@ -96,15 +128,26 @@ public final class NexusRegistryDataManager {
     private static final Map<ResourceKey<? extends Registry<?>>, BiMap<ResourceLocation, Integer>> UPDATED_REGISTRY_ENTRIES_FROM_MEMORY = new Object2ObjectLinkedOpenHashMap<>();
     private static final Map<ResourceKey<? extends Registry<?>>, BiMap<Integer, ResourceLocation>> CURRENT_BLOCKED_IDS = new Object2ObjectLinkedOpenHashMap<>();
     private static final Map<ResourceKey<? extends Registry<?>>, BiMap<Integer, ResourceLocation>> CURRENT_BLOCKED_IDS_VIEW = Collections.unmodifiableMap(CURRENT_BLOCKED_IDS);
-    private static final RegistryHookManager.ActiveRegistryMapper<Object> ALIAS_SUBSTITUTOR = ((targetRegistry, rawRegistryEntry) -> {
-        return rawRegistryEntry.isMissing() ? targetRegistry.get(NexusConstants.prefix("test_block_2")) : rawRegistryEntry.objValue();
-    });
-    private static final RegistryHookManager.ActiveRegistryMapper<Object> ID_BLOCKER = ((targetRegistry, rawRegistryEntry) -> {
-        return rawRegistryEntry.objValue();
-    });
+    private static final AtomicBoolean REGISTRY_DATA_DIRTY = new AtomicBoolean(false);
+    private static final RegistryHookManager.ActiveRegistryMapper<Object> ID_BLOCKER = (wrappedReg, rawEntry) -> {
+        if (!rawEntry.isMissing() && NexusServices.REGISTRAR.getRegistryHookManager().getUpdatedBlockedIds(wrappedReg.key()).containsKey(rawEntry.numericalId())) {
+            return new RegistryHookManager.RawRegistryEntry<>(rawEntry.registryKey(), rawEntry.objId(), rawEntry.objValue(), -1);
+        }
+
+        return rawEntry;
+    };
+    private static final RegistryHookManager.ActiveRegistryMapper<Object> MISSING_SUBSTITUTOR = (wrappedReg, rawEntry) -> {
+/*        if (rawEntry.isMissing()) {
+            return new RegistryHookManager.RawRegistryEntry<>(rawEntry.registryKey(), rawEntry.objId(), rawEntry.objValue(), rawEntry.numericalId());
+        }*/ // TODO Maybe implement some sort of factory mechanism that constructs dummy objects safely for the target registry(?)
+
+        return new RegistryHookManager.RawRegistryEntry<>(rawEntry.registryKey(), rawEntry.objId(), rawEntry.objValue(), rawEntry.objId().getPath().contains("grass") ? 1009 : rawEntry.numericalId());
+    };
+    @Nullable
+    private static CompoundTag CURRENT_REGISTRY_DATA_VIEW_TAG = null; // Keeping track of this to allow queries outside event listeners to optionally run
 
     static {
-        populateRegistryEntriesFromMemory(false); // Initial state post-load (not really used for anything atm, but still nice to have access to JIC)
+        populateRegistryEntriesFromMemory(false); // Initial state post-load
         handleLevelRegistryData();
     }
 
@@ -124,29 +167,13 @@ public final class NexusRegistryDataManager {
     }
 
     private static void handleLevelRegistryData() {
-/*        NexusServices.REGISTRAR.getRegistryHookManager().appellate(
-                NexusConstants.prefix("test_block"),
-                NexusConstants.prefix("test_block_2"),
-                Registries.BLOCK
-        );*/
-
-        // Test
-        RegistryEventBlueprint.MISSING_REGISTRY_ENTRIES.onEvent(event -> {
-            List<RegistryEvent.MissingRegistryEntriesEvent.WrappedEntry<?>> missingEntries = event.getMissingEntries();
-
-            missingEntries.forEach(entry -> {
-                if (entry.getOldKey().equals(NexusConstants.prefix("test_block"))) {
-                    entry.attemptRemap(NexusConstants.prefix("test_block_2"));
-
-                    NexusConstants.LOGGER.info("Found missing entry for test_block: {}", entry);
-                }
-            });
-
-            NexusConstants.LOGGER.info("Missing entries: {}", event.getMissingEntries());
-        });
-
         // Platform-agnostic listeners for Nexus API level data n stuff
         LevelDataEventBlueprint.SAVE_LEVEL_DATA_POST_LOADER.onEvent(event -> {
+            if (REGISTRY_DATA_DIRTY.get()) {
+                populateRegistryEntriesFromMemory(true);
+                REGISTRY_DATA_DIRTY.set(false);
+            }
+
             LevelStorageSource.LevelDirectory rootLevelDir = event.getLevelDirectory();
             File dataLevelDirectory = rootLevelDir.resourcePath(LEVEL_DATA_DIR).toFile();
             File regDataViewFile = new File(dataLevelDirectory, REGISTRY_DATA_VIEW.getId());
@@ -174,6 +201,8 @@ public final class NexusRegistryDataManager {
             } catch (IOException e) {
                 NexusConstants.LOGGER.warn("Failed to create RegistryDataView.dat for level '{}'. Any missing entries from registries, regardless of whether they persist or are synced, may not be recoverable if a bug prevents your mod-loader's ({}) registry mechanism from properly caching orphaned registry entries or blocking previous IDs associated with missing entries from being used by new ones.", rootLevelDir.directoryName(), NexusServices.PLATFORM_MANAGER.getPlatform().getPlatformName(), e);
             }
+
+            CURRENT_REGISTRY_DATA_VIEW_TAG = getOrCreateRegistryDataViewTag(rootLevelDir); // Update from file separately to avoid potentially stale reference + copy instead of directly set from regDataViewTag
         });
 
         LevelDataEventBlueprint.LOAD_LEVEL_DATA_POST_LOADER.onEvent(event -> {
@@ -194,6 +223,8 @@ public final class NexusRegistryDataManager {
 
             populateRegistryEntriesFromMemory(true);
             updateRegistryData(rootLevelDir);
+
+            CURRENT_REGISTRY_DATA_VIEW_TAG = getOrCreateRegistryDataViewTag(rootLevelDir);
         }, 1);
 
         if (NexusServices.PLATFORM_MANAGER.getPlatform().equals(ModLoader.FORGE)) {
@@ -270,6 +301,14 @@ public final class NexusRegistryDataManager {
                 });
             }, 1);
         }
+
+        ServerLifeCycleEventBlueprint.SERVER_STOPPED.onEvent(event -> {
+            UPDATED_REGISTRY_ENTRIES_FROM_MEMORY.clear(); // Reset current state to keep the slate clean for when another save gets loaded and whatnot
+            CURRENT_APPELLATIONS.clear();
+            CURRENT_BLOCKED_IDS.clear();
+
+            CURRENT_REGISTRY_DATA_VIEW_TAG = null;
+        });
     }
 
     private static void writeOrAppendRegistryDataView(LevelStorageSource.LevelDirectory rootLevelDir, CompoundTag rootRegistryDataViewTag) {
@@ -584,7 +623,7 @@ public final class NexusRegistryDataManager {
 
     private static <T> void updateRegistryData(LevelStorageSource.LevelDirectory rootLevelDir) {
         CompoundTag rootRegViewTag = getOrCreateRegistryDataViewTag(rootLevelDir).getCompound("RegistryData");
-        Map<ResourceKey<Registry<T>>, Object2IntMap<ResourceLocation>> subEntries = new Object2ObjectLinkedOpenHashMap<>();
+        List<ResourceKey<Registry<T>>> missingRegistries = new ObjectArrayList<>();
 
         if (!rootRegViewTag.isEmpty()) { // First: Handle missing entries in-memory that used to be present within whatever save we're loading
             rootRegViewTag.getAllKeys().forEach(regKey -> {
@@ -596,49 +635,34 @@ public final class NexusRegistryDataManager {
                     return;
                 }
 
-                CompoundTag regEntriesTag = rootRegViewTag.getCompound(regKey);
                 List<RegistryEvent.MissingRegistryEntriesEvent.WrappedEntry<T>> missingEntries = new ObjectArrayList<>(); // Supply all missing entries with default values
 
-                regEntriesTag.getAllKeys().forEach(regEntryId -> {
-                    CompoundTag regEntryDataTag = regEntriesTag.getCompound(regEntryId);
-                    ResourceLocation regEntryRLID = new ResourceLocation(regEntryId);
-                    int storedId = regEntryDataTag.getInt("LastKnownId");
-                    int fetchedId = getLastKnownId(regResourceKey, regEntryRLID, null);
-
-                    if (storedId != -1 && fetchedId == -1) { // storedId should never be -1, but as always, JIC
-                        missingEntries.add(new RegistryEvent.MissingRegistryEntriesEvent.WrappedEntry<>(regResourceKey, storedId, regEntryRLID));
-                    }
+                gatherMissingEntries(regResourceKey, rootRegViewTag).forEach((curRegEntryId, curNumericalId) -> {
+                    missingEntries.add(new RegistryEvent.MissingRegistryEntriesEvent.WrappedEntry<>(regResourceKey, curNumericalId, curRegEntryId));
                 });
+
+                if (!missingEntries.isEmpty() && !missingRegistries.contains(regResourceKey)) missingRegistries.add(regResourceKey);
 
                 RegistryEvent.MissingRegistryEntriesEvent<T> event = new RegistryEvent.MissingRegistryEntriesEvent<>(curRegistry, missingEntries);
 
                 RegistryEventBlueprint.MISSING_REGISTRY_ENTRIES.fireEvent(event); // Remapping is handled internally within the event itself
-
-                event.getMissingEntries().forEach(wrappedEntry -> {
-                    subEntries.computeIfAbsent(regResourceKey, k -> new Object2IntOpenHashMap<>())
-                            .put(wrappedEntry.getOldKey(), wrappedEntry.getLastKnownId());
-                });
             });
         }
 
         // Next: Update registry data with respect to loader-specific API implementations (appellations, blocked IDs)
         RegistryHookManager globalRegHookManager = NexusServices.REGISTRAR.getRegistryHookManager();
-        Map<ResourceKey<? extends Registry<?>>, BiMap<Integer, ResourceLocation>> blockedIds = globalRegHookManager.getBlockedIds();
 
-        if (!subEntries.isEmpty()) {
-            subEntries.forEach((curRegKey, missingEntries) -> {
+        globalRegHookManager.getUpdatedBlockedIds().forEach((regKey, blockedIds) -> {
+            globalRegHookManager.updateActiveRegistryState((ResourceKey) regKey, ID_BLOCKER);
+        });
 
-            });
-        }
-
-        if (!blockedIds.isEmpty()) {
-            blockedIds.forEach((curRegKey, mappedBlockedIds) -> {
-                globalRegHookManager.updateActiveRegistry((ResourceKey<Registry<Object>>) curRegKey, ID_BLOCKER);
-            });
-        }
+        globalRegHookManager.updateActiveRegistryState((ResourceKey) Registries.BLOCK, MISSING_SUBSTITUTOR);
+        /*globalRegHookManager.getUpdatedAppellations().forEach((regKey, appellations) -> {
+            globalRegHookManager.updateActiveRegistryState((ResourceKey) regKey, MISSING_SUBSTITUTOR);
+        });*/
     }
 
-    private static int getLastKnownId(ResourceKey<? extends Registry<?>> targetRegKey, ResourceLocation targetRegEntry, @Nullable LevelStorageSource.LevelDirectory rootLevelDir) {
+    public static int getLastKnownId(ResourceKey<? extends Registry<?>> targetRegKey, ResourceLocation targetRegEntry, @Nullable LevelStorageSource.LevelDirectory rootLevelDir) {
         AtomicInteger lastKnownId = new AtomicInteger(-1);
 
         // First, check registries in memory to see if the entry already exists
@@ -658,6 +682,37 @@ public final class NexusRegistryDataManager {
         }
 
         return lastKnownId.get();
+    }
+
+    public static BiMap<ResourceLocation, Integer> gatherMissingEntries(ResourceKey<? extends Registry<?>> targetRegKey, @Nullable CompoundTag registryDataViewTag) {
+        BiMap<ResourceLocation, Integer> missingEntries = HashBiMap.create();
+
+        Optional.ofNullable(registryDataViewTag).ifPresent(regDataViewTag -> {
+            CompoundTag regEntriesTag = regDataViewTag.getCompound(targetRegKey.location().toString());
+
+            regEntriesTag.getAllKeys().forEach(regEntryId -> {
+                CompoundTag regEntryDataTag = regEntriesTag.getCompound(regEntryId);
+                ResourceLocation regEntryRLID = new ResourceLocation(regEntryId);
+                int storedId = regEntryDataTag.getInt("LastKnownId");
+                int fetchedId = getLastKnownId(targetRegKey, regEntryRLID, null);
+
+                if (storedId != -1 && fetchedId == -1) missingEntries.put(regEntryRLID, storedId);
+            });
+        });
+
+        return missingEntries;
+    }
+
+    public static BiMap<ResourceLocation, Integer> gatherMissingEntries(ResourceKey<? extends Registry<?>> targetRegKey) {
+        return gatherMissingEntries(targetRegKey, getCurrentRegistryDataViewTag().orElse(null));
+    }
+
+    public static Optional<CompoundTag> getCurrentRegistryDataViewTag() {
+        return Optional.ofNullable(CURRENT_REGISTRY_DATA_VIEW_TAG);
+    }
+
+    public static void markRegistryDataDirty() {
+        REGISTRY_DATA_DIRTY.set(true);
     }
 
     public static Map<ResourceKey<? extends Registry<?>>, Object2ObjectMap<ResourceLocation, List<ResourceLocation>>> getCurrentAppellations() {

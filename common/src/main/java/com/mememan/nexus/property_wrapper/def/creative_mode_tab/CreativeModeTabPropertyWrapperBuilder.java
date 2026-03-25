@@ -25,7 +25,7 @@ public class CreativeModeTabPropertyWrapperBuilder<CMT extends CreativeModeTab> 
         super(ownerWrapper);
 
         this.compositeLanguageBuilder = (SpecializedLanguagePropertyWrapperBuilder<CMT, CreativeModeTabPropertyWrapperBuilder<CMT>, CreativeModeTabPropertyWrapper<CMT>>) ownerWrapper.getSpecializedLanguageWrapper().map(SpecializedLanguagePropertyWrapper::builder).get()
-                .bypassDefaultTranslation(); // Enabled by default for convenience
+                .bypassDefaultTranslation(); // Toggled by default for convenience
     }
 
     @Override

@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * Definite builder implementation for {@link MobEffect} objects, with constrained generic types for {@code SELF} and
- * {@code BUILDER}.
+ * {@code BUILDER}. Mainly serves as a convenient type wrapper.
  *
  * @param <ME> Any {@link MobEffect} type.
  *

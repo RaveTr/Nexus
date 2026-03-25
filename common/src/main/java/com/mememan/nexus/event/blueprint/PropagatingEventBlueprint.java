@@ -25,11 +25,6 @@ public abstract class PropagatingEventBlueprint<BE extends BaseEvent, R> extends
     }
 
     @Override
-    public void onEvent(EventListener<BE, R> listener, int listenerPriority) {
-        super.onEvent(listener, listenerPriority);
-    }
-
-    @Override
     public <U> U fireEvent(Function<EventListener<BE, R>, U> eventMapper, ModSide firingSide) {
         Class<? super BE> eventSuperclass = eventInterface.getSuperclass();
         AtomicBoolean cancelledThroughPropagation = new AtomicBoolean(false);

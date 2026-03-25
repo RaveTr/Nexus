@@ -2,22 +2,26 @@ package com.mememan.nexus.loader;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.graph.ElementOrder;
+import com.google.common.graph.MutableNetwork;
+import com.google.common.graph.Network;
+import com.google.common.graph.NetworkBuilder;
+import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.internal.registry.NexusRegistryDataManager;
 import com.mememan.nexus.platform.services.Registrar;
-import com.mememan.nexus.template.event.blueprint.common.LevelDataEventBlueprint;
 import com.mememan.nexus.template.event.def.common.RegistryEvent;
 import it.unimi.dsi.fastutil.objects.*;
+import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 /**
  * Centralized manager {@code interface} with per-loader implementations for dealing with different types of registry
@@ -29,6 +33,20 @@ import java.util.Objects;
  * @see RegistryEvent.MissingRegistryEntriesEvent
  */
 public interface RegistryHookManager {
+    /**
+     * Represents the {@link ResourceLocation} used to indicate that a numerical ID is blocked regardless of registry
+     * entry mapping for a given registry.
+     *
+     * @see #blockId(ResourceKey, int)
+     */
+    ResourceLocation NUMERICALLY_BLOCKED = NexusConstants.prefix("numerically_blocked");
+    /**
+     * Represents the {@code int} used to indicate that any {@link ResourceLocation} associated with it should have its
+     * actual numerical ID blocked regardless of its value for a given registry.
+     *
+     * @see #blockId(ResourceKey, ResourceLocation)
+     */
+    int RL_BLOCKED = -2;
 
     /**
      * Blocks the specified numerical ID from being used by registries.
@@ -110,12 +128,12 @@ public interface RegistryHookManager {
      *
      * @param <T> The registry object type (e.g. {@link Item}).
      *
-     * @apiNote This method more specifically looks the numerical ID of the provided {@code registryEntryId} and blocks
-     * it from being re-used within saves.
+     * @apiNote This method more specifically looks for the numerical ID of the provided {@code registryEntryId} and
+     * blocks it from being re-used within saves.
      * <br></br>
      * It should be noted that both methods are typically used to preserve the last known state of missing registry
      * entries within saves in order to provide some leeway for them to be re-introduced (e.g. readding a removed mod)
-     * without permanently losing data.
+     * without permanently losing or corrupting data.
      *
      * @implNote Unlike {@link #blockId(ResourceKey, int)}, this method should preferably be called in-between registry
      * state updates made by each world/server join, since it targets numerical IDs tied to the provided
@@ -188,70 +206,27 @@ public interface RegistryHookManager {
      */
     <T> void appellate(ResourceLocation objId, ResourceLocation aliasId, ResourceKey<Registry<T>> targetRegistryKey);
 
-    /**
-     * Method responsible for updating the active registry state for the specified registry key.
-     * <br></br>
-     * Mod-loaders have their own methods of tracking registry states. Forge has a whole system for capturing snapshots
-     * of global registry state at different points in time:
-     * <ul>
-     *     <li>{@code RegistryManager#FROZEN} - Captures final state after registries have been frozen, including modded
-     *     entries. Acts as the fallback state that subs all data into {@code RegistryManager#ACTIVE} whenever the user
-     *     leaves a world/server.</li>
-     *     <li>{@code RegistryManager#VANILLA} - Captures Vanilla registry state post-bootstrap, before modded entries
-     *     are registered.</li>
-     *     <li>{@code RegistryManager#ACTIVE} - Contains the current state of registries, depending on when/where they're
-     *     being used. For instance, loading into a local world will update this state to reflect entries from that
-     *     world, which allows for keeping track of entries that are updated to fire events for listening/use later on
-     *     (e.g. missing registry entries, ID re-maps).</li>
-     *     <li>{@code RegistryManager#STAGING} - Temp state created whenever the user loads a world or joins a server. Used
-     *     as a buffer for validating and updating registries and their entries before pooling all changes into
-     *     {@code RegistryManager#ACTIVE}.</li>
-     * </ul>
-     * Meanwhile on Fabric, registry state is managed by the {@code fabric-registry-sync} API and is effectively split
-     * into 2 states:
-     * <ul>
-     *     <li>{@code fabric_prevIndexedEntries} / {@code fabric_prevEntries} - Contains the original registry state
-     *     after all mods have loaded and all registries have been frozen/finalized. This is only populated the first
-     *     time the user attempts to load a world or join a server and acts as the equivalent to
-     *     {@code RegistryManager#FROZEN}.</li>
-     *     <li><b>Current Registry</b> - Registry state is updated directly via their own mixins without any buffers
-     *     in-between.</li>
-     * </ul>
-     *
-     * Nexus API provides this method as a sort of safe post-processing "buffer" to update the active registry state once
-     * more, particularly during world load. Trying to call this method at any other point in time may result in
-     * indeterministic behavior. It's preferred that you call this in {@link LevelDataEventBlueprint#LOAD_LEVEL_DATA_POST_LOADER},
-     * though any loading stage works.
-     * <br></br>
-     * It's also important to note that this method is primarily intended for <b>INTERNAL USE ONLY</b>. Do <b>NOT</b>
-     * call or use this yourself unless you absolutely know what you're doing.
-     *
-     * @param targetRegistryKey The registry key pertaining to the registry for which the active registry state should
-     *                          be updated.
-     * @param idPool The ID pool to query against the specified registry for re-mapping.
-     * @param mapper The {@link ActiveRegistryMapper} instance responsible for remapping registry entries.
-     *
-     * @param <T> The registry object type.
-     *
-     * @apiNote This is only effective when loading from a save (e.g. on the dedicated server, or when joining a local
-     * world). Attempting to call this method otherwise will likely lead to an exception being thrown, or nothing
-     * happening.
-     *
-     * @implNote If {@code idPool} is {@code null}, it is assumed that the end-developer intends to query the entire
-     * registry in its current state for re-mapping.
-     */
-    @ApiStatus.Internal
-    <T> void updateActiveRegistry(ResourceKey<Registry<T>> targetRegistryKey, @Nullable Object2IntMap<ResourceLocation> idPool, ActiveRegistryMapper<T> mapper);
+    <T> void updateActiveRegistryState(ResourceKey<Registry<T>> targetRegistryKey, ActiveRegistryMapper<T> mapper);
 
-    @ApiStatus.Internal
-    default <T> void updateActiveRegistry(ResourceKey<Registry<T>> targetRegistryKey, ActiveRegistryMapper<T> mapper) {
-        updateActiveRegistry(targetRegistryKey, null, mapper);
+    Map<ResourceKey<? extends Registry<?>>, BiMap<Integer, ResourceLocation>> getBlockedIds(boolean computeFromLoaderApi);
+
+    default Map<ResourceKey<? extends Registry<?>>, BiMap<Integer, ResourceLocation>> getBlockedIds() {
+        return getBlockedIds(true);
     }
-
-    Map<ResourceKey<? extends Registry<?>>, BiMap<Integer, ResourceLocation>> getBlockedIds();
 
     default BiMap<Integer, ResourceLocation> getBlockedIds(ResourceKey<? extends Registry<?>> targetRegistryKey) {
         return getBlockedIds().getOrDefault(targetRegistryKey, HashBiMap.create());
+    }
+
+    default Map<ResourceKey<? extends Registry<?>>, BiMap<Integer, ResourceLocation>> getUpdatedBlockedIds() {
+        Map<ResourceKey<? extends Registry<?>>, BiMap<Integer, ResourceLocation>> result = HashBiMap.create(getBlockedIds());
+
+
+        return result;
+    }
+
+    default BiMap<Integer, ResourceLocation> getUpdatedBlockedIds(ResourceKey<? extends Registry<?>> targetRegistryKey) {
+        return getUpdatedBlockedIds().getOrDefault(targetRegistryKey, HashBiMap.create());
     }
 
     /**
@@ -267,11 +242,14 @@ public interface RegistryHookManager {
      * API implementations.
      *
      * @apiNote This retrieves a global view of the appellations stored in memory, which may differ from aliases stored
-     * in saves from session to session based on the user's mod configuration.
+     * in saves from session to session based on the user's mod configuration. See references below for more info.
      *
      * @return A {@link Map} of all registry appellations pertaining to existing registry entries.
      *
      * @see #appellate(ResourceLocation, ResourceLocation, ResourceKey)
+     * @see #getAppellations()
+     * @see #getAppellations(ResourceKey)
+     * @see #getUpdatedAppellations()
      */
     Map<ResourceKey<? extends Registry<?>>, Object2ObjectMap<ResourceLocation, List<ResourceLocation>>> getAppellations(boolean computeFromLoaderApi);
 
@@ -292,6 +270,7 @@ public interface RegistryHookManager {
      * @return A {@link Map} of all registry appellations pertaining to existing registry entries.
      *
      * @see #getAppellations(boolean)
+     * @see #getAppellations(ResourceKey)
      * @see #getUpdatedAppellations()
      * @see #appellate(ResourceLocation, ResourceLocation, ResourceKey)
      */
@@ -299,10 +278,41 @@ public interface RegistryHookManager {
         return getAppellations(true);
     }
 
+    /**
+     * Retrieves a copy of global appellations associated with the provided {@code targetRegistry}, if any.
+     *
+     * @param targetRegistryKey The {@link ResourceKey} representing the {@link Registry} for which global appellations
+     *                          should be looked up.
+     *
+     * @return A {@link Map} containing all global appellations associated with the provided {@code targetRegistry}.
+     * May be empty.
+     *
+     * @see #getAppellations(boolean)
+     * @see #getAppellations()
+     * @see #getUpdatedAppellations()
+     * @see #appellate(ResourceLocation, ResourceLocation, ResourceKey)
+     */
     default Object2ObjectMap<ResourceLocation, List<ResourceLocation>> getAppellations(ResourceKey<? extends Registry<?>> targetRegistryKey) {
         return getAppellations().getOrDefault(targetRegistryKey, new Object2ObjectLinkedOpenHashMap<>());
     }
 
+    /**
+     * Retrieves a combined copy of all <b>active</b> registry appellations.
+     * <br></br>
+     * Differs from {@link #getAppellations(boolean)} and its overloads in that it retrieves active appellations loaded
+     * from the currently-active save, if any. Note that for duplicate entries (that is, mapped to a given registry
+     * {@link ResourceKey}), appellations from the active save take precedence over global appellations stored in memory.
+     *
+     * @return A copy of all appellations, both in memory and from the active save/world (if any). Functionally identical
+     * to {@link #getAppellations(boolean)} (+ overloads) if no save is currently active.
+     *
+     * @see #appellate(ResourceLocation, ResourceLocation, ResourceKey)
+     * @see #getAppellations(boolean)
+     * @see #getAppellations()
+     * @see #getAppellations(ResourceKey)
+     * @see #getUpdatedAppellations(ResourceKey)
+     * @see NexusRegistryDataManager#getCurrentAppellations()
+     */
     default Map<ResourceKey<? extends Registry<?>>, Object2ObjectMap<ResourceLocation, List<ResourceLocation>>> getUpdatedAppellations() {
         Map<ResourceKey<? extends Registry<?>>, Object2ObjectMap<ResourceLocation, List<ResourceLocation>>> result = new Object2ObjectOpenHashMap<>(getAppellations());
 
@@ -320,8 +330,642 @@ public interface RegistryHookManager {
         return result;
     }
 
+    /**
+     * Overloaded variant of {@link #getUpdatedAppellations()}. Retrieves a copy of all appellations associated with the
+     * provided {@code targetRegistry}, if any.
+     *
+     * @param targetRegistryKey The {@link ResourceKey} representing the {@link Registry} for which appellations should be
+     *                          looked up.
+     *
+     * @return A {@link Map} containing all appellations associated with the provided {@code targetRegistry}. May be empty.
+     *
+     * @see #appellate(ResourceLocation, ResourceLocation, ResourceKey)
+     * @see #getAppellations(boolean)
+     * @see #getAppellations()
+     * @see #getAppellations(ResourceKey)
+     * @see #getUpdatedAppellations()
+     */
     default Object2ObjectMap<ResourceLocation, List<ResourceLocation>> getUpdatedAppellations(ResourceKey<? extends Registry<?>> targetRegistryKey) {
         return getUpdatedAppellations().getOrDefault(targetRegistryKey, new Object2ObjectLinkedOpenHashMap<>());
+    }
+
+    /**
+     * Queries the target registry's entries and applies the provided {@code mapper}, then pools all (validated) remaps
+     * and returns the resulting {@link Object2ObjectLinkedOpenHashMap}. Also considers missing entries, if possible.
+     * <br></br>
+     * The resulting {@link Object2ObjectLinkedOpenHashMap} structures the original mappings (represented as
+     * {@link RawRegistryEntry} objects) as keys, and all pertaining remaps as values.
+     *
+     * @param targetReg The {@link Registry} for which remaps should be applied and pooled.
+     *
+     * @return An {@link Object2ObjectLinkedOpenHashMap} preserving entry order, containing all mappable entry remaps.
+     * May be empty.
+     *
+     * @param <T> The target registry type (e.g. {@link Item}).
+     *
+     * @apiNote Validation logic follows the specifications imposed by {@link RawRegistryEntry}, see references below.
+     * In short, remaps that are missing or (have no object/invalid numerical ID/invalid target numerical ID/invalid ID)
+     * are ignored.
+     *
+     * @see RawRegistryEntry
+     * @see #updateActiveRegistryState(ResourceKey, ActiveRegistryMapper)
+     * @see NexusRegistryDataManager#gatherMissingEntries(ResourceKey)
+     */
+    static <T> Map<RawRegistryEntry<T>, RawRegistryEntry<T>> gatherPotentialRemaps(Registry<T> targetReg, ActiveRegistryMapper<T> mapper) {
+        Map<RawRegistryEntry<T>, RawRegistryEntry<T>> result = new Object2ObjectLinkedOpenHashMap<>();
+
+        ResourceKey<Registry<T>> targetRegistryKey = (ResourceKey<Registry<T>>) targetReg.key();
+        RawRegistryEntry<T> defaultEntry = representDefaultRegistryEntry(targetReg).orElse(null);
+        BiFunction<RawRegistryEntry<T>, RawRegistryEntry<T>, Boolean> remappedEntryValidator = (RawRegistryEntry<T> remappedEntry, RawRegistryEntry<T> originalEntry) -> {
+            if (remappedEntry == null || remappedEntry.isMissing()) {
+                NexusConstants.LOGGER.warn("Attempted to remap entry {} to invalid entry: {}. Skipping...", originalEntry, remappedEntry);
+                return false;
+            }
+            if (Objects.equals(result.get(originalEntry), remappedEntry)) {
+                NexusConstants.LOGGER.warn("Attempted to remap entry {} to the same entry it's already remapped to, {}. Skipping...", originalEntry, remappedEntry);
+                return false;
+            }
+            if (Objects.equals(originalEntry, remappedEntry)) {
+                return false;
+            }
+            if (defaultEntry != null && (remappedEntry.numericalId() == defaultEntry.numericalId() || Objects.equals(remappedEntry.objId(), defaultEntry.objId()))) {
+                NexusConstants.LOGGER.warn("Attempted to remap entry {} to ID {} (numerical ID: {}) which is the default entry for registry {}. Skipping... (Original Entry: {}, Remapped Entry: {})", originalEntry.objId(), remappedEntry.objId(), remappedEntry.numericalId(), targetRegistryKey, originalEntry, remappedEntry);
+                return false;
+            }
+
+            return true;
+        };
+
+        for (Map.Entry<ResourceKey<T>, T> regEntry : targetReg.entrySet()) { // Query all existing entries first
+            ResourceLocation entryId = regEntry.getKey().location();
+
+            if (Objects.equals(entryId, defaultEntry != null ? defaultEntry.objId() : null)) continue; // Short-circuit, cuz why not
+
+            T entryObj = regEntry.getValue();
+            int entryNumId = targetReg.getId(entryObj);
+
+            RawRegistryEntry<T> rawEntry = new RawRegistryEntry<>(targetRegistryKey, entryId, entryObj, entryNumId);
+            RawRegistryEntry<T> remappedEntry = mapper.map(targetReg, rawEntry);
+
+            if (!remappedEntryValidator.apply(remappedEntry, rawEntry)) continue;
+
+            result.put(rawEntry, remappedEntry); // If we somehow ever encounter a case of duplicates (which should be impossible, since this is all done locally in a single pass), then let the last entry win
+        }
+
+        Map<ResourceLocation, Integer> missingEntries = NexusRegistryDataManager.gatherMissingEntries(targetRegistryKey);
+
+        for (Map.Entry<ResourceLocation, Integer> missingEntry : missingEntries.entrySet()) { // Go through all missing entries (depends on whether we're loading into a save with that type of info or not)
+            ResourceLocation missingKey = missingEntry.getKey();
+            Integer lastKnownId = missingEntry.getValue();
+
+            RawRegistryEntry<T> missingEntryRaw = new RawRegistryEntry<>(targetRegistryKey, missingKey, null, lastKnownId, true);
+            RawRegistryEntry<T> remappedMissingEntry = mapper.map(targetReg, missingEntryRaw);
+
+            if (!remappedEntryValidator.apply(remappedMissingEntry, missingEntryRaw)) continue;
+
+            result.put(missingEntryRaw, remappedMissingEntry);
+        }
+
+        return result;
+    }
+
+    /**
+     * Uses the provided {@code potentialRemaps} to construct a directed {@link Network} that models relationships
+     * between existing/original entries and their remap targets. Uses data from each {@link RawRegistryEntry} to model
+     * relationships such as chains and cycles between entries and their remaps out via {@link RemapTarget}.
+     *
+     * @param potentialRemaps The {@link Map} representing all raw entry <-> remap relationships, as conventionally
+     *                        specified in {@link #gatherPotentialRemaps(Registry, ActiveRegistryMapper)}.
+     * @param targetRegistry The {@link Registry} for which the remap network should be constructed.
+     * @param resolution The remap conflict resolution strategy to use for handling cycles and multi-chains.
+     *
+     * @return A {@link MutableNetwork} representing all entry <-remap-> target relationships.
+     *
+     * @param <T> The entries' object types (e.g. {@link Item}).
+     *
+     * @see #gatherPotentialRemaps(Registry, ActiveRegistryMapper)
+     */
+    static <T> MutableNetwork<RawRegistryEntry<T>, RemapTarget> constructRemapNetwork(Map<RawRegistryEntry<T>, RawRegistryEntry<T>> potentialRemaps, Registry<T> targetRegistry, RemapConflictResolution resolution) {
+        MutableNetwork<RawRegistryEntry<T>, RemapTarget> resultNetwork = NetworkBuilder.directed()
+                .allowsSelfLoops(false) // Validated input makes this kinda unnecessary, but you never know
+                .allowsParallelEdges(false)
+                .edgeOrder(ElementOrder.stable()) // Basically allows us to iterate in insertion order
+                .nodeOrder(ElementOrder.stable())
+                .build();
+
+        for (Map.Entry<RawRegistryEntry<T>, RawRegistryEntry<T>> remapEntry : potentialRemaps.entrySet()) {
+            RawRegistryEntry<T> originalEntry = remapEntry.getKey();
+            RawRegistryEntry<T> remappedEntry = remapEntry.getValue();
+
+            RawRegistryEntry<T> potentiallyExistingEntry = Optional.ofNullable(targetRegistry.byId(remappedEntry.numericalId()))
+                    .filter(obj -> !(targetRegistry instanceof DefaultedRegistry<T> defaultedTargetReg) || !defaultedTargetReg.getDefaultKey().equals(targetRegistry.getKey(obj)))
+                    .map(obj -> new RawRegistryEntry<>((ResourceKey) targetRegistry.key(), targetRegistry.getKey(obj), obj, targetRegistry.getId(obj), false))
+                    .orElse(null);
+
+            if (potentiallyExistingEntry != null && !Objects.equals(originalEntry, potentiallyExistingEntry)) {
+                resultNetwork.addEdge(
+                        originalEntry,
+                        potentiallyExistingEntry,
+                        new RemapTarget(originalEntry, remappedEntry, true, resolution)
+                );
+            } else resultNetwork.addNode(originalEntry);
+        }
+
+        return resultNetwork;
+    }
+
+    /**
+     * Untangles conflicts that may lead to cycles or cascading in the provided {@code remapNetwork}, then topologically
+     * sorts and compiles all remaps into a {@link Map} of original entries to their remapped counterparts.
+     *
+     * @param remapNetwork The {@link MutableNetwork} representing all entry <-remap-> target relationships.
+     * @param potentialRemaps The {@link Map} of initial/potential remaps.
+     *
+     * @return A {@link Map} of original entries to their remapped counterparts.
+     *
+     * @param <T> The type of registry entries, e.g. {@link Item}.
+     *
+     * @see #gatherPotentialRemaps(Registry, ActiveRegistryMapper)
+     * @see #constructRemapNetwork(Map, Registry, RemapConflictResolution)
+     * @see #resolveConflicts(MutableNetwork, Map, Map)
+     * @see #topologicalSort(Network)
+     */
+    static <T> Map<RawRegistryEntry<T>, RawRegistryEntry<T>> resolveRemapTargets(MutableNetwork<RawRegistryEntry<T>, RemapTarget> remapNetwork, Map<RawRegistryEntry<T>, RawRegistryEntry<T>> potentialRemaps) {
+        Map<RawRegistryEntry<T>, RawRegistryEntry<T>> result = new Object2ObjectLinkedOpenHashMap<>();
+        Map<RawRegistryEntry<T>, RemapTarget> cachedBreakpoints = new Object2ObjectLinkedOpenHashMap<>();
+
+        // First, resolve conflicts
+        resolveConflicts(remapNetwork, cachedBreakpoints, potentialRemaps);
+
+        // Then, topologically sort and apply all remaps
+        List<RawRegistryEntry<T>> sortedRemaps = topologicalSort(remapNetwork);
+
+        sortedRemaps.stream()
+                .map(originalEntry -> Optional.ofNullable(potentialRemaps.get(originalEntry)).map(remappedEntry -> ObjectObjectImmutablePair.of(originalEntry, remappedEntry)).orElse(null))
+                .filter(Objects::nonNull)
+                .forEach(pair -> result.put(pair.left(), pair.right()));
+
+        cachedBreakpoints.forEach((breakPoint, remappedBreakPoint) -> result.put(breakPoint, (RawRegistryEntry<T>) remappedBreakPoint.remappedEntry()));
+
+        return result;
+    }
+
+    static <T> void resolveConflicts(MutableNetwork<RawRegistryEntry<T>, RemapTarget> remapNetwork, Map<RawRegistryEntry<T>, RemapTarget> breakpoints, Map<RawRegistryEntry<T>, RawRegistryEntry<T>> potentialRemaps) {
+        ObjectArrayList<RawRegistryEntry<T>> indecisiveNodes = remapNetwork.nodes().stream()
+                .filter(node -> remapNetwork.inDegree(node) > 1)
+                .collect(Collectors.toCollection(ObjectArrayList::new));
+
+        // Resolve conflicts at already-occupied points
+        for (RawRegistryEntry<T> indecisiveNode : indecisiveNodes) {
+            Set<RemapTarget> wantingRemaps = remapNetwork.inEdges(indecisiveNode);
+
+            if (wantingRemaps.isEmpty()) continue; // Shouldn't be possible, but JIC
+
+            RemapTarget winner = wantingRemaps.stream().findFirst().get(); // Winner is essentially first-come-first-served
+            Set<RemapTarget> losers = wantingRemaps.stream()
+                    .filter(target -> !target.equals(winner))
+                    .collect(Collectors.toSet());
+
+            RawRegistryEntry<T> displacedIndecisiveEntry = new RawRegistryEntry<>(
+                    indecisiveNode.registryKey(),
+                    indecisiveNode.objId(),
+                    indecisiveNode.objValue(),
+                    -1, // Displaced instead of swapped
+                    false
+            );
+
+            if (remapNetwork.outDegree(indecisiveNode) == 0) { // Conflicted node has no outgoing edges (it's a terminal node)
+                switch (winner.resolution()) {
+                    case DISPLACE -> { // Winner gets the slot, indecisiveNode gets displaced to -1 (temp ID)
+                        breakpoints.put(indecisiveNode, new RemapTarget(
+                                indecisiveNode,
+                                displacedIndecisiveEntry,
+                                false,
+                                RemapConflictResolution.DISPLACE
+                        ));
+
+                        remapNetwork.removeNode(indecisiveNode);
+
+                        // Handle losers: displace them to -1 via breakpoints (after all other remaps are done)
+                        displaceEntries(remapNetwork, breakpoints, losers);
+                    }
+                    case SWAP -> { // Winner takes indecisiveNode's ID, indecisiveNode takes winner's original ID
+                        RawRegistryEntry<T> winnerOriginal = (RawRegistryEntry<T>) winner.originalEntry();
+                        RawRegistryEntry<T> potentialConflictAtWinnerOldPos = remapNetwork.nodes().stream()
+                                .filter(node -> !node.equals(winnerOriginal) && remapNetwork.outEdges(node).stream().anyMatch(edge -> edge.remappedEntry().numericalId() == winnerOriginal.numericalId()))
+                                .findFirst()
+                                .orElse(null);
+
+                        if (potentialConflictAtWinnerOldPos != null) {
+                            NexusConstants.LOGGER.warn("SWAP would create cascading conflict at {}. Displacing {} instead.", winnerOriginal.numericalId(), indecisiveNode);
+
+                            breakpoints.put(indecisiveNode, new RemapTarget(
+                                    indecisiveNode,
+                                    displacedIndecisiveEntry,
+                                    false,
+                                    RemapConflictResolution.DISPLACE
+                            ));
+                        } else { // Safe to swap
+                            breakpoints.put(indecisiveNode, new RemapTarget(
+                                    indecisiveNode,
+                                    new RawRegistryEntry<>(
+                                            indecisiveNode.registryKey(),
+                                            indecisiveNode.objId(),
+                                            indecisiveNode.objValue(),
+                                            winnerOriginal.numericalId(), // Takes winner's old ID
+                                            false
+                                    ),
+                                    false,
+                                    RemapConflictResolution.SWAP
+                            ));
+                        }
+
+                        remapNetwork.removeNode(indecisiveNode); // Remove indecisiveNode from remapNetwork, since it'll get processed in breakpoints anyway
+
+                        // Handle losers: displace them to -1 via breakpoints (after all other remaps are done)
+                        displaceEntries((MutableNetwork<RawRegistryEntry<T>, RemapTarget>) remapNetwork, (Map<RawRegistryEntry<T>, RemapTarget>) breakpoints, (Set<RemapTarget>) losers);
+                    }
+                    case REJECT -> {
+                        // Reject ALL remap attempts to this slot
+                        displaceEntries((MutableNetwork<RawRegistryEntry<T>, RemapTarget>) remapNetwork, (Map<RawRegistryEntry<T>, RemapTarget>) breakpoints, (Set<RemapTarget>) wantingRemaps);
+
+                        NexusConstants.LOGGER.error("Rejected remap conflict at {}", indecisiveNode);
+                        throw new UnsupportedOperationException("Remap conflict rejected at " + indecisiveNode);
+                    }
+                    case IGNORE -> {
+                        displaceEntries((MutableNetwork<RawRegistryEntry<T>, RemapTarget>) remapNetwork, (Map<RawRegistryEntry<T>, RemapTarget>) breakpoints, (Set<RemapTarget>) wantingRemaps);
+
+                        NexusConstants.LOGGER.warn("Ignored remap conflict at {}", indecisiveNode);
+                    }
+                }
+            } else { // Otherwise, the conflicted node is part of a chain/cycle
+                switch (winner.resolution()) {
+                    case DISPLACE -> {
+                        Set<RawRegistryEntry<T>> indecisiveTargets = remapNetwork.successors(indecisiveNode);
+
+                        if (indecisiveTargets.size() != 1) {
+                            throw new IllegalStateException("Expected exactly 1 outgoing edge from %s, found %d".formatted(indecisiveNode, indecisiveTargets.size()));
+                        }
+
+                        RawRegistryEntry<T> indecisiveTarget = indecisiveTargets.iterator().next();
+                        RemapTarget indecisiveRemapTarget = remapNetwork.edgeConnecting(indecisiveNode, indecisiveTarget).orElseThrow();
+
+                        RawRegistryEntry<T> tempIndecisiveEntry = displacedIndecisiveEntry;
+
+                        breakpoints.put(indecisiveNode, new RemapTarget(
+                                indecisiveNode,
+                                tempIndecisiveEntry,
+                                false,
+                                RemapConflictResolution.DISPLACE
+                        ));
+
+                        RemapTarget newRemapTarget = new RemapTarget(
+                                tempIndecisiveEntry, // New original entry
+                                indecisiveRemapTarget.remappedEntry(), // Same target
+                                indecisiveRemapTarget.isOccupied(), // Same occupation status
+                                indecisiveRemapTarget.resolution() // Same resolution
+                        );
+
+                        remapNetwork.addEdge(tempIndecisiveEntry, indecisiveTarget, newRemapTarget); // Reconnect: tempIndecisiveEntry -> indecisiveTarget
+                        remapNetwork.removeNode(indecisiveNode); // Remove original indecisiveNode from network
+
+                        displaceEntries(remapNetwork, breakpoints, losers);
+                    }
+                    case SWAP -> {
+                        RawRegistryEntry<T> winnerOriginal = (RawRegistryEntry<T>) winner.originalEntry();
+                        Set<RawRegistryEntry<T>> indecisiveTargets = remapNetwork.successors(indecisiveNode); // Get where indecisiveNode wants to go
+
+                        if (indecisiveTargets.size() != 1) {
+                            throw new IllegalStateException("Expected exactly 1 outgoing edge from %s, found %d".formatted(indecisiveNode, indecisiveTargets.size()));
+                        }
+
+                        RawRegistryEntry<T> indecisiveTarget = indecisiveTargets.iterator().next();
+                        RemapTarget indecisiveRemapTarget = remapNetwork.edgeConnecting(indecisiveNode, indecisiveTarget).orElseThrow();
+
+                        RawRegistryEntry<T> potentialConflictAtWinnerOldPos = remapNetwork.nodes().stream()
+                                .filter(node -> !node.equals(winnerOriginal) && remapNetwork.outEdges(node).stream().anyMatch(edge -> edge.remappedEntry().numericalId() == winnerOriginal.numericalId()))
+                                .findFirst()
+                                .orElse(null); // Check if swapping creates yet another conflict at winner's old position (yetanother[word]lib reference [bruh])
+
+                        RawRegistryEntry<T> swappedIndecisiveEntry;
+
+                        if (potentialConflictAtWinnerOldPos != null) {
+                            /*
+                             * Cascading conflict: some other entry is at winner's old position.
+                             * Therefore, we're displacing indecisiveNode to -1 instead of swapping.
+                             * ...
+                             * (Multi-line comments make me feel smart :drooling_patrick:)
+                             */
+                            NexusConstants.LOGGER.warn("SWAP would create cascading conflict at {}. Displacing {} instead.", winnerOriginal.numericalId(), indecisiveNode);
+
+                            swappedIndecisiveEntry = displacedIndecisiveEntry;
+                        } else { // Safe to swap
+                            swappedIndecisiveEntry = new RawRegistryEntry<>(
+                                    indecisiveNode.registryKey(),
+                                    indecisiveNode.objId(),
+                                    indecisiveNode.objValue(),
+                                    winnerOriginal.numericalId(), // Takes winner's old ID
+                                    false
+                            );
+                        }
+
+                        breakpoints.put(indecisiveNode, new RemapTarget( // Store the swap/displace in breakpoints
+                                indecisiveNode,
+                                swappedIndecisiveEntry,
+                                false,
+                                potentialConflictAtWinnerOldPos != null ? RemapConflictResolution.DISPLACE : RemapConflictResolution.SWAP
+                        ));
+
+                        RemapTarget newRemapTarget = new RemapTarget(
+                                swappedIndecisiveEntry, // New original entry
+                                indecisiveRemapTarget.remappedEntry(), // Same target
+                                indecisiveRemapTarget.isOccupied(), // Same occupation status
+                                indecisiveRemapTarget.resolution() // Same resolution
+                        );
+
+                        remapNetwork.addEdge(swappedIndecisiveEntry, indecisiveTarget, newRemapTarget); // Reconnect: swappedIndecisiveEntry -> indecisiveTarget
+                        remapNetwork.removeNode(indecisiveNode); // Remove original indecisiveNode from network
+
+                        displaceEntries(remapNetwork, breakpoints, losers);
+                    }
+                    case REJECT -> {
+                        displaceEntries(remapNetwork, breakpoints, wantingRemaps);
+
+                        NexusConstants.LOGGER.error("Rejected remap conflict at {} (part of chain)", indecisiveNode);
+                        throw new UnsupportedOperationException("Remap conflict rejected at %s".formatted(indecisiveNode));
+                    }
+                    case IGNORE -> { // Js displace everything
+                        displaceEntries(remapNetwork, breakpoints, wantingRemaps);
+
+                        NexusConstants.LOGGER.warn("Ignored remap conflict at {} (part of chain)", indecisiveNode);
+                    }
+                }
+            }
+        }
+
+        // Take care of conflicts at empty IDs
+        Map<Integer, ObjectArrayList<RawRegistryEntry<T>>> remapCompetition = remapNetwork.nodes().stream()
+                .map(node -> Map.entry(node, potentialRemaps.get(node)))
+                .filter(entry -> entry.getValue() != null) // Nodes not in potentialRemaps
+                .collect(Collectors.groupingBy(
+                        entry -> entry.getValue().numericalId(), // Group by target numerical ID
+                        Collectors.mapping(Map.Entry::getKey, Collectors.toCollection(ObjectArrayList::new))
+                ));
+
+        for (Map.Entry<Integer, ObjectArrayList<RawRegistryEntry<T>>> competition : remapCompetition.entrySet()) {
+            ObjectArrayList<RawRegistryEntry<T>> wanters = competition.getValue();
+
+            if (wanters.size() <= 1) continue; // No conflict
+
+            wanters.sort(Comparator.comparingInt(RawRegistryEntry::numericalId));
+
+            RawRegistryEntry<T> winner = wanters.get(0); // Lowest numerical ID wins
+            ObjectArrayList<RawRegistryEntry<T>> losers = new ObjectArrayList<>(wanters.subList(1, wanters.size()));
+
+            NexusConstants.LOGGER.warn("Multiple entries want target ID {}: {} (winner: {} at ID {})",
+                    competition.getKey(),
+                    wanters.stream()
+                            .map(e -> "%s (ID %d)".formatted(e.objId(), e.numericalId()))
+                            .collect(Collectors.toList()),
+                    winner.objId(),
+                    winner.numericalId());
+
+            // Displace all losers
+            for (RawRegistryEntry<T> loser : losers) {
+                breakpoints.put(loser, new RemapTarget(
+                        loser,
+                        new RawRegistryEntry<>(
+                                loser.registryKey(),
+                                loser.objId(),
+                                loser.objValue(),
+                                -1, // Displaced to temp ID
+                                false
+                        ),
+                        false,
+                        RemapConflictResolution.DISPLACE
+                ));
+
+                remapNetwork.removeNode(loser);
+                potentialRemaps.remove(loser);
+            }
+        }
+    }
+
+    /**
+     * Removes entries from the provided {@code remapNetwork} that are marked for displacement, and updates
+     * {@code breakpoints} accordingly.
+     *
+     * @param remapNetwork The remap network.
+     * @param breakpoints The map of breakpoints.
+     * @param wantingRemaps The {@link Iterable} of remaps that are waiting to be processed.
+     *
+     * @param <T> The type of registry entries, e.g. {@link Item}.
+     *
+     * @see #resolveRemapTargets(MutableNetwork, Map)
+     * @see #resolveConflicts(MutableNetwork, Map, Map)
+     */
+    static <T> void displaceEntries(MutableNetwork<RawRegistryEntry<T>, RemapTarget> remapNetwork, Map<RawRegistryEntry<T>, RemapTarget> breakpoints, Iterable<RemapTarget> wantingRemaps) {
+        for (RemapTarget target : wantingRemaps) {
+            RawRegistryEntry<T> targetEntry = (RawRegistryEntry<T>) target.originalEntry();
+
+            breakpoints.put(targetEntry, new RemapTarget(
+                    targetEntry,
+                    new RawRegistryEntry<>(
+                            targetEntry.registryKey(),
+                            targetEntry.objId(),
+                            targetEntry.objValue(),
+                            -1, // Displaced to temp ID
+                            false
+                    ),
+                    false,
+                    RemapConflictResolution.DISPLACE
+            ));
+
+            remapNetwork.removeNode(targetEntry);
+        }
+    }
+
+    /**
+     * Performs a topological sort on the provided remap {@link Network} and returns the sorted entries.
+     * <br></br>
+     * This implementation of Kahn's Algorithm assumes that the provided {@code remapNetwork} does not contain any cycles
+     * or conflicts. That is to say; all related entries should be able to reach each other (as per the definition of SCCs),
+     * and all nodes should have at most 1 dependency.
+     *
+     * @param remapNetwork The remap {@link Network} for which a topological sort should be performed.
+     *
+     * @return A {@link List} containing all entries in topologically-sorted order.
+     *
+     * @param <T> The entries' object types (e.g. {@link Item}).
+     *
+     * @see #detectCycles(Network)
+     * @see #strongConnect(RawRegistryEntry, Network, Set, Deque, Map, Map, AtomicInteger, List)
+     * @see <a href="https://en.wikipedia.org/wiki/Topological_sorting">Wikipedia: Topological Sorting</a>
+     * @see <a href="https://www.cs.usfca.edu/~galles/visualization/TopoSortIndegree.html">CS.USF: Topological Sorting Visualization</a>
+     */
+    static <T> List<RawRegistryEntry<T>> topologicalSort(Network<RawRegistryEntry<T>, RemapTarget> remapNetwork) {
+        List<RawRegistryEntry<T>> sorted = new ObjectArrayList<>();
+        Map<RawRegistryEntry<T>, Integer> inDegree = new Object2IntLinkedOpenHashMap<>();
+
+        for (RawRegistryEntry<T> node : remapNetwork.nodes()) { // In-degree = number of incoming edges = number of dependencies
+            inDegree.put(node, remapNetwork.inDegree(node));
+        }
+
+        Queue<RawRegistryEntry<T>> queue = new ArrayDeque<>();
+
+        for (RawRegistryEntry<T> node : remapNetwork.nodes()) { // Enqueue no-dependency nodes first (i.e. independent remaps)
+            if (inDegree.get(node) == 0) {
+                queue.add(node);  // Layer 0 nodes
+            }
+        }
+
+        while (!queue.isEmpty()) { // Now we get to the fun part: topologically-traversing and resolving remaps
+            RawRegistryEntry<T> node = queue.poll();
+            sorted.add(node);
+
+            for (RawRegistryEntry<T> successor : remapNetwork.successors(node)) {
+                int newInDegree = inDegree.get(successor) - 1; // In our case, if a node has more than 1 dependency, that means there's a conflict or cycle that wasn't properly resolved
+
+                inDegree.put(successor, newInDegree);
+
+                if (newInDegree == 0) queue.add(successor); // When in-degree == 0, all dependencies are satisfied
+            }
+        }
+
+        if (sorted.size() != remapNetwork.nodes().size()) {
+            throw new IllegalStateException("Conflict detected - not all nodes processed");
+        }
+
+        return sorted;
+    }
+
+    // TODO This is probably getting removed, useless here anyway due to the nature of how remaps are processed
+    private static <T> void breakCycle(List<RawRegistryEntry<T>> cycle, MutableNetwork<RawRegistryEntry<T>, RemapTarget> remapNetwork, Map<RawRegistryEntry<T>, RemapTarget> breakpoints) {
+        RawRegistryEntry<T> breakPoint = cycle.get(0);
+        RemapTarget remappedBreakPoint = remapNetwork.outEdges(breakPoint).stream()
+                .findFirst()
+                .orElse(null);
+
+        if (remappedBreakPoint == null) {
+            NexusConstants.LOGGER.warn("Attempted to break cycle at node {}, but no remap target was found. Attempting to resolve breakpoint in cycle.", breakPoint);
+
+            breakPoint = cycle.stream()
+                    .filter(cycleEntry -> !remapNetwork.outEdges(cycleEntry).isEmpty())
+                    .findFirst()
+                    .orElse(breakPoint);
+            remappedBreakPoint = remapNetwork.outEdges(breakPoint).stream()
+                    .findFirst()
+                    .orElse(null);
+
+            if (remappedBreakPoint == null) {
+                throw new IllegalStateException(String.format("No valid breakpoint found for cycle starting at %s.", cycle.get(0)));
+            }
+        }
+
+        breakpoints.put(breakPoint, remappedBreakPoint); // Breakpoints are last to be processed throughout the whole chain
+
+        remapNetwork.removeNode(breakPoint); // FIXME This wouldn't logically work anyway sooo,,
+        remapNetwork.removeEdge(remappedBreakPoint);
+    }
+
+    /**
+     * Uses Tarjan's algorithm to detect cycles in a directed {@link Network}.
+     *
+     * @param remapNetwork The remap {@link Network} for which cycles should be detected.
+     *
+     * @return An {@link ObjectArrayList} containing all detected cycles, grouped by their root nodes.
+     *
+     * @param <T> The entries' object types (e.g. {@link Item}).
+     *
+     * @see #resolveRemapTargets(MutableNetwork, Map)
+     * @see #strongConnect(RawRegistryEntry, Network, Set, Deque, Map, Map, AtomicInteger, List)
+     * @see <a href="https://www.geeksforgeeks.org/dsa/tarjan-algorithm-find-strongly-connected-components/">Geeks for Geeks: Tarjan's Algorithm for Strongly Connected Components</a>
+     * @see <a href="https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm">Wikipedia: Tarjan's Strongly Connected Components Algorithm</a>
+     */
+    private static <T> List<List<RawRegistryEntry<T>>> detectCycles(Network<RawRegistryEntry<T>, RemapTarget> remapNetwork) {
+        List<List<RawRegistryEntry<T>>> cycles = new ObjectArrayList<>();
+        Set<RawRegistryEntry<T>> visited = new ObjectOpenHashSet<>();
+        Deque<RawRegistryEntry<T>> stack = new ArrayDeque<>();
+        Map<RawRegistryEntry<T>, Integer> indices = new Object2IntOpenHashMap<>();
+        Map<RawRegistryEntry<T>, Integer> lowLinks = new Object2IntOpenHashMap<>();
+        AtomicInteger index = new AtomicInteger(0);
+
+        for (RawRegistryEntry<T> baseEntry : remapNetwork.nodes()) {
+            if (!visited.contains(baseEntry)) {
+                strongConnect(baseEntry, remapNetwork, visited, stack, indices, lowLinks, index, cycles);
+            }
+        }
+
+        return cycles.stream()
+                .filter(component -> component.size() > 1) // Filter out single-node components (not cycles)
+                .collect(Collectors.toCollection(ObjectArrayList::new));
+    }
+
+    /**
+     * Finds all strongly connected components (SCCs) in a directed {@link Network} using Tarjan's algorithm and populates
+     * the provided {@code components} {@link List} with the results.
+     *
+     * @param node The starting node for the current SCC search.
+     * @param network The directed {@link Network} for which SCCs should be found.
+     * @param visited A {@link Set} of visited nodes during the search.
+     * @param stack A {@link Deque} of nodes in the current path.
+     * @param indices A {@link Map} of node discovery indices.
+     * @param lowLinks A {@link Map} of lowest (reachable) indices for each node.
+     * @param index An {@link AtomicInteger} for tracking the current discovery index.
+     * @param components The {@link List} keeping track of all SCCs found during the search.
+     *
+     * @param <T> The entries' object types (e.g. {@link Item}).
+     *
+     * @see <a href="https://www.geeksforgeeks.org/dsa/tarjan-algorithm-find-strongly-connected-components/">Geeks for Geeks: Tarjan's Algorithm for Strongly Connected Components</a>
+     * @see <a href="https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm">Wikipedia: Tarjan's Strongly Connected Components Algorithm</a>
+     */
+    private static <T> void strongConnect(RawRegistryEntry<T> node, Network<RawRegistryEntry<T>, RemapTarget> network, Set<RawRegistryEntry<T>> visited, Deque<RawRegistryEntry<T>> stack, Map<RawRegistryEntry<T>, Integer> indices, Map<RawRegistryEntry<T>, Integer> lowLinks, AtomicInteger index, List<List<RawRegistryEntry<T>>> components) {
+        int currentIndex = index.getAndIncrement();
+
+        indices.put(node, currentIndex); // Node discovery index
+        lowLinks.put(node, currentIndex); // Lowest (reachable) index (initial value is the same as the discovery index)
+        visited.add(node); // Self-explanatory (each node gets visited 1 time, no more)
+        stack.push(node); // Nodes in current path (especially goated here since we'll be working with a lot of direct successor branches)
+
+        for (RawRegistryEntry<T> successor : network.successors(node)) { // "successors" here refers to direct successors of a node, not a chain that expands out from it, apparently
+            if (!visited.contains(successor)) {
+                strongConnect(successor, network, visited, stack, indices, lowLinks, index, components);
+                lowLinks.put(node, Math.min(lowLinks.get(node), lowLinks.get(successor)));
+            } else if (stack.contains(successor)) lowLinks.put(node, Math.min(lowLinks.get(node), indices.get(successor)));
+        }
+
+        if (lowLinks.get(node).equals(indices.get(node))) { // If node is a root node, pop the stack and create an SCC
+            List<RawRegistryEntry<T>> component = new ObjectArrayList<>();
+            RawRegistryEntry<T> curNode;
+
+            do {
+                curNode = stack.pop();
+                component.add(curNode);
+            } while (!curNode.equals(node));
+
+            components.add(component);
+        }
+    }
+
+    /**
+     * Attempts to represent the information associated with the provided {@linkplain Registry targetRegistry's} default
+     * entry, if any.
+     *
+     * @param targetRegistry The {@link Registry} for which the default entry should be represented.
+     *
+     * @return An {@link Optional} containing the {@link RawRegistryEntry} representing the default entry, if any. May
+     * be {@link Optional#empty()}.
+     *
+     * @param <T> The registry's object type (e.g. {@link Item}).
+     */
+    static <T> Optional<RawRegistryEntry<T>> representDefaultRegistryEntry(Registry<T> targetRegistry) {
+        if (!(targetRegistry instanceof DefaultedRegistry<T> defaultedReg)) return Optional.empty();
+
+        ResourceLocation defaultEntryId = defaultedReg.getDefaultKey();
+        T defaultEntryObj = defaultedReg.get(defaultEntryId);
+        int defaultEntryNumId = defaultedReg.getId(defaultEntryObj);
+
+        return Optional.of(new RawRegistryEntry<>((ResourceKey<Registry<T>>) defaultedReg.key(), defaultEntryId, defaultEntryObj, defaultEntryNumId, false));
     }
 
     /**
@@ -333,7 +977,7 @@ public interface RegistryHookManager {
      *
      * @param <T> The target {@link Registry} object type.
      *
-     * @see #updateActiveRegistry(ResourceKey, Object2IntMap, ActiveRegistryMapper)
+     * @see #updateActiveRegistryState(ResourceKey, ActiveRegistryMapper)
      */
     @FunctionalInterface
     interface ActiveRegistryMapper<T> {
@@ -342,15 +986,15 @@ public interface RegistryHookManager {
          * Remaps the provided {@link RawRegistryEntry} for the specified {@link Registry}.
          * <br></br>
          * If the remapped entry is equal to the original entry, remapping is skipped. Returning {@code null} or an
-         * invalid entry will also skip remapping.
+         * invalid entry will also skip remapping. Missing entries that aren't remapped are automatically unmapped.
          *
          * @param targetRegistry The {@link Registry} for which the entry should be remapped. Should ONLY ever be used to
          *                       query registry state, not for modifying registry entries.
          * @param rawEntry The {@link RawRegistryEntry} representing the registry entry to (potentially) remap.
          *
-         * @return An object to remap the original entry to, preserving the original metadata (numerical ID, name, etc.).
+         * @return The {@link RawRegistryEntry} to remap the original entry to.
          */
-        T map(Registry<T> targetRegistry, RawRegistryEntry<T> rawEntry);
+        RawRegistryEntry<T> map(Registry<T> targetRegistry, RawRegistryEntry<T> rawEntry);
     }
 
     /**
@@ -369,8 +1013,8 @@ public interface RegistryHookManager {
      * <ul>
      *     <li>Registry entries are <b>NOT</b> re-mappable across registries. For example, changing {@link #registryKey}
      *     should functionally do nothing, as it's only included for comparison purposes.</li>
-     *     <li>Registry entries are re-mappable in terms of {@link #objValue}. Implementors should consider stable
-     *     re-mapping implementations with respect to said data.</li>
+     *     <li>Registry entries are re-mappable in terms of {@link #objId}, {@link #objValue}, and {@link #numericalId}.
+     *     Implementors should consider stable re-mapping implementations with respect to said data.</li>
      *     <li>Registry entries can <b>ONLY</b> be re-mapped for the current "active" registry state (see references
      *     below).</li>
      *     <li>Registry entries <b>CANNOT</b> be unmapped. If an instance of this {@code class} happens to contain any
@@ -380,9 +1024,44 @@ public interface RegistryHookManager {
      *     supported, as it may lead to indeterministic behavior).</li>
      *     <li>Implementors should provide a method to consistently track re-mapped entries, whether that be through
      *     persistence to disk or written to memory.</li>
+     *     <li>For remapped registry entries whose numerical or {@link ResourceLocation} IDs have changed, implementors
+     *     should preferably implement a simple swap-in mechanism that takes the remapped entry's original numerical ID
+     *     and subs the entry at the target numerical ID in before registering the remapped entry at its target numerical
+     *     ID. For example:
+     *         <pre>
+     *             {@code
+     *                 minecraft:stone -> 1 // This is the entry at the target ID
+     *                 some_mod:original_entry -> 1005 // This is the original entry pre-remap
+     *
+     *                 // During active registry state remapping
+     *                 mapper.apply(targetRegistry, originalEntry) -> some_mod:original_entry -> 1 // The key can also change, but that doesn't really matter in this example
+     *
+     *                 if (*some check to see if remapped entry has a different ID from the original*) {
+     *                     if (*another check to see if the target numerical ID is taken*) {
+     *                         // Also probably a good idea to do all of this in some temp copy of the registry before syncing changes to gracefully handle errors, but you probably already know that if you're tinkering with this anyway
+     *                         intermediaryRegistry.remove(whateverObjExistsAtTheTargetId); // Make sure you capture this in a variable or smth
+     *                         intermediaryRegistry.register(targetId, remappedObjStuff); // targetId here is 1, cuz that's what it got remapped to earlier
+     *                         intermediaryRegistry.register(originalId, whateverObjExistsAtTheTargetId); // originalId here is 1005, because that's what the entry had in the active registry state per last check
+     *                     }
+     *                 }
+     *
+     *                 // Result
+     *                 minecraft:stone -> 1005
+     *                 some_mod:original_entry -> 1
+     *             }
+     *         </pre>
+     *         It's also wise to note that preserving metadata in general ({@link ResourceLocation}/numerical IDs) is
+     *         probably a good idea for registries that heavily rely on them for querying data actively (particularly in
+     *         the case of numerical IDs, which mob effects make use of, but blocks would not be affected by if registration
+     *         is done correctly, for instance).
+     *     </li>
+     *     <li>Default registry keys (if they exist for a given registry) should <b>NOT</b> be remapped or touched under
+     *     any circumstances. Seriously. There's literally no circumstance under which doing so is a plausible, practical,
+     *     or scalable idea.</li>
+     *     <li>Implementors are fully responsible for handling edge cases, such as chains and/or cycles in potential remaps.</li>
      * </ul>
      *
-     * @see #updateActiveRegistry(ResourceKey, Object2IntMap, ActiveRegistryMapper)
+     * @see #updateActiveRegistryState(ResourceKey, ActiveRegistryMapper)
      * @see NexusRegistryDataManager
      */
     record RawRegistryEntry<T>(ResourceKey<Registry<T>> registryKey, ResourceLocation objId, T objValue, int numericalId, boolean missing) {
@@ -392,12 +1071,30 @@ public interface RegistryHookManager {
         }
 
         /**
-         * Checks whether the registry entry is missing based on the provided numerical ID or object value.
+         * Checks whether the registry entry is missing based on the provided object value.
          *
          * @return {@code true} if the entry is missing, {@code false} otherwise.
+         *
+         * @apiNote {@link #numericalId} isn't considered, since -1 can represent a remapped entry looking for the next
+         * available ID in a given registry.
          */
         public boolean isMissing() {
-            return missing || numericalId == -1 || objValue == null;
+            return missing || objValue == null;
+        }
+
+        /**
+         * Alternative equivocation to {@link #equals(Object)} that checks for full equivalence of all fields, including
+         * {@link #objValue}.
+         *
+         * @param other The {@link RawRegistryEntry} to compare against.
+         *
+         * @return {@code true} if the entries are equivalent, {@code false} otherwise.
+         *
+         * @see #equals(Object)
+         */
+        public boolean isEquivalentTo(RawRegistryEntry<?> other) {
+            return Objects.equals(this, other)
+                    && Objects.equals(objId, other.objId);
         }
 
         @Override
@@ -406,9 +1103,13 @@ public interface RegistryHookManager {
 
             return Objects.equals(registryKey, other.registryKey)
                     && Objects.equals(objId, other.objId)
-                    && Objects.equals(objValue, other.objValue)
                     && numericalId == other.numericalId
                     && missing == other.missing;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(registryKey, objId, objValue, numericalId, missing);
         }
 
         @Override
@@ -424,65 +1125,62 @@ public interface RegistryHookManager {
     }
 
     /**
-     * Basic data-holding {@code class} representing a singular registry entry with immutable identification data but a
-     * mutable object value.
-     * <br></br>
-     * Primarily used to dynamically associate a substitute (or dummy) object value with registry entries in local saves
-     * that may have existed before but are no longer part of the active mod configuration for any reason, but can technically
-     * be used to replace/re-map object entries regardless of presence.
+     * Object-holder {@code record} representing a remap target for a given registry entry, with additional metadata
+     * pertaining to the remap's resolution strategy.
      *
-     * @param <T> The registry entry's object type.
-     *
-     * @implSpec There are a number of things to note regarding how any implementors of this {@code record} should behave,
-     * including the default contract imposed by Nexus API itself:
-     * <ul>
-     *     <li>Registry entries are <b>NOT</b> re-mappable across registries.</li>
-     *     <li>Registry entries are <b>NOT</b> re-mappable in terms of their IDs through Nexus API. It's much less brittle
-     *     and more stable to leave the re-mapping to each mod-loader's respective registry API rather than trying to
-     *     hijack them, as there'd be much more to keep track of for an unproportionally small gain.</li>
-     *     <li>Registry entries are re-mappable in terms of {@link #objValue}. Implementors should consider stable
-     *     re-mapping implementations with respect to said data.</li>
-     *     <li>Registry entries can <b>ONLY</b> be re-mapped for the current "active" registry state (see references
-     *     below).</li>
-     *     <li>If multiple {@link ActiveRegistryMapper} instances target the same {@link RawRegistryEntry}, then the
-     *     result of the last mapper to be called should be used (note: composition is highly-discouraged and not natively
-     *     supported, as it may lead to indeterministic behavior).</li>
-     * </ul>
-     *
-     * @see #updateActiveRegistry(ResourceKey, ActiveRegistryMapper)
-     * @see NexusRegistryDataManager
+     * @param originalEntry The original registry entry.
+     * @param remappedEntry The remapped registry entry.
+     * @param isOccupied Whether the remapped entry's ID is already occupied.
+     * @param resolution The remap conflict resolution strategy. Should only be used if the remapped entry's ID is
+     *                   occupied.
      */
-    class RawRegistryEntryB<T> {
-        private final ResourceKey<Registry<T>> registryKey;
-        private final ResourceLocation objId;
-        private final int numericalId;
-        private T objValue;
+    record RemapTarget(RawRegistryEntry<?> originalEntry, RawRegistryEntry<?> remappedEntry, boolean isOccupied, RemapConflictResolution resolution) {
 
-        public RawRegistryEntryB(ResourceKey<Registry<T>> registryKey, ResourceLocation objId, int numericalId, T objValue) {
-            this.registryKey = registryKey;
-            this.objId = objId;
-            this.numericalId = numericalId;
-            this.objValue = objValue;
+        @Override
+        public boolean equals(Object o) {
+            if (o == null || getClass() != o.getClass()) return false;
+
+            RemapTarget that = (RemapTarget) o;
+
+            return isOccupied == that.isOccupied
+                    && Objects.equals(originalEntry, that.originalEntry)
+                    && Objects.equals(remappedEntry, that.remappedEntry)
+                    && resolution == that.resolution;
         }
 
-        public ResourceKey<Registry<T>> getRegistryKey() {
-            return registryKey;
+        @Override
+        public int hashCode() {
+            return Objects.hash(originalEntry, remappedEntry, isOccupied, resolution);
         }
+    }
 
-        public ResourceLocation getObjId() {
-            return objId;
-        }
-
-        public int getNumericalId() {
-            return numericalId;
-        }
-
-        public T getObjValue() {
-            return objValue;
-        }
-
-        public void setObjValue(T objValue) {
-            this.objValue = objValue;
-        }
+    /**
+     * Object-holder {@code enum} representing different strategies for handling remap conflicts, which can occur
+     * under a number of circumstances (e.g. when an entry is being remapped to an occupied ID for which no remap target
+     * exists).
+     *
+     * @see RemapTarget
+     * @see RawRegistryEntry
+     */
+    enum RemapConflictResolution {
+        /**
+         * Attempts to displace the existing entry at the target ID to the next available registry ID. Fails if no such
+         * ID exists, delegating to {@link #SWAP}.
+         */
+        DISPLACE,
+        /**
+         * Swaps the remapped entry's ID with the existing entry's ID. Functionally does nothing if the target entry
+         * causing conflict has its own remap target.
+         */
+        SWAP,
+        /**
+         * Rejects the remap attempt and leaves the original entry intact, throwing an
+         * {@link UnsupportedOperationException}.
+         */
+        REJECT,
+        /**
+         * Ignores the remap attempt and leaves the original entry intact.
+         */
+        IGNORE;
     }
 }

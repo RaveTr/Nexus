@@ -41,6 +41,9 @@ legacyForge {
                             "-Dmixin.debug.export=true"]
 
             systemProperty("forge.logging.console.level", "debug")
+
+            systemProperty("forge.logging.markers", "REGISTRIES")
+            systemProperty("forge.logging.markers", "REGISTRYDUMP")
         }
 
         client {
@@ -99,7 +102,7 @@ jar {
 }
 
 publishMods {
-    file = jar.archiveFile
+    file = reobfJar.archiveFile
     changelog = file("CHANGELOG.md").getText()
     version = mod_version
     displayName = "${mod_name} v${minecraft_version}-${mod_version} [Neo/Forge]"

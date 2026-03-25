@@ -1,7 +1,9 @@
 package com.mememan.nexus.client.sound;
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 
 import java.util.Objects;
 
@@ -16,13 +18,15 @@ import java.util.Objects;
  *               only one in the sound pool).
  * @param stream Whether the sound should be streamed or not. Longer sounds (e.g. soundtracks) benefit from this being
  *               set to {@code true}.
- * @param attenuationDistance The distance at which the given sound will attenuate (i.e. reduction rate modifier).
+ * @param attenuationDistance The distance at which the given sound will attenuate (i.e. reduction rate modifier). Note
+ *                            that for soundtracks (sounds constructed as {@link Music}), this has no effect.
  * @param preload Whether the sound should be preloaded or not. Used to load during pack loading instead of when the
  *                sound is first played.
  * @param soundType How {@code soundFileLocation} is treated, either {@link SoundType#EVENT} or {@link SoundType#FILE}.
  *
  * @see <a href="https://minecraft.wiki/w/Sounds.json#Java_Edition">Minecraft Wiki: Sounds.json (Java Edition)</a>
  * @see SoundType
+ * @see SoundSource
  */
 public record SoundPropertyHolder(ResourceLocation soundFileLocation, float volume, float pitch, int weight, boolean stream, float attenuationDistance, boolean preload, SoundType soundType) {
     public static final float DEFAULT_VOLUME = 1.0F;

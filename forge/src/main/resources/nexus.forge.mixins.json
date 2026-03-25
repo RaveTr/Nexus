@@ -11,8 +11,8 @@
     "forge.registries.DeferredRegisterMixin",
     "forge.registries.ForgeRegistryAccessor",
     "forge.registries.ForgeRegistryMixin",
-    "forge.registries.GameDataMixin",
     "forge.registries.NamespacedWrapperMixin",
+    "forge.registries.RegistryManagerAccessor",
     "item.DiggerItemMixin",
     "item.HoeItemMixin",
     "level_data.LevelStorageAccessMixin"
