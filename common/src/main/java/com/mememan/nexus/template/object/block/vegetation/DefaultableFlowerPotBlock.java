@@ -1,10 +1,8 @@
 package com.mememan.nexus.template.object.block.vegetation;
 
-import com.google.common.collect.ImmutableSet;
-import com.mememan.nexus.asm.annotations.PostInit;
+import com.google.common.collect.ImmutableMap;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
-import com.mememan.nexus.util.RegistryUtil;
-import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.Stats;
@@ -29,7 +27,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 public class DefaultableFlowerPotBlock extends FlowerPotBlock {
-    protected static final ObjectOpenHashSet<Supplier<Block>> FULL_POTS = new ObjectOpenHashSet<>();
+    protected static final Object2ObjectOpenHashMap<Supplier<Block>, Supplier<Block>> FULL_POTS = new Object2ObjectOpenHashMap<>();
     protected final Supplier<Block> contentSup;
 
     public DefaultableFlowerPotBlock(Supplier<Block> content, Properties properties) {
@@ -37,7 +35,7 @@ public class DefaultableFlowerPotBlock extends FlowerPotBlock {
 
         this.contentSup = content;
 
-        FULL_POTS.add(content);
+        FULL_POTS.put(content, () -> this);
         POTTED_BY_CONTENT.remove(Blocks.AIR); // Undo defined default FlowerPotBlock behavior
     }
 
@@ -84,37 +82,24 @@ public class DefaultableFlowerPotBlock extends FlowerPotBlock {
         return contentSup.get();
     }
 
-    public static ImmutableSet<Supplier<Block>> getFullPots() {
-        return ImmutableSet.copyOf(FULL_POTS);
+    public static ImmutableMap<Supplier<Block>, Supplier<Block>> getFullPots() {
+        return ImmutableMap.copyOf(FULL_POTS);
     }
 
     public static Block getFullPot(ResourceLocation flowerBlockId) {
-        return FULL_POTS.stream()
-                .filter(curBlockSup -> Objects.equals(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(curBlockSup.get()), flowerBlockId))
+        return FULL_POTS.entrySet().stream()
+                .filter(curEntry -> Objects.equals(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(curEntry.getKey().get()), flowerBlockId))
+                .map(Map.Entry::getValue)
                 .findFirst()
                 .map(Supplier::get)
                 .orElse(Blocks.AIR);
     }
 
     public static Supplier<Block> getFullPot(Supplier<Block> flowerBlockSup) {
-        return FULL_POTS.stream()
-                .filter(curBlockSup -> curBlockSup == flowerBlockSup || Objects.equals(curBlockSup.get(), flowerBlockSup.get()))
+        return FULL_POTS.entrySet().stream()
+                .filter(curEntry -> Objects.equals(curEntry.getKey().get(), flowerBlockSup.get()))
+                .map(Map.Entry::getValue)
                 .findFirst()
                 .orElse(() -> Blocks.AIR);
-    }
-
-    @PostInit
-    private static class FlowerPotContainer {
-
-        private FlowerPotContainer() {
-            throw new IllegalAccessError("Attempted to construct instance of container class! (FlowerPotContainer)");
-        }
-
-        static { // TODO Add ability to track updates made to the original map through here as well
-            FULL_POTS.stream()
-                    .filter(curBlock -> RegistryUtil.getObjectFrom(curBlock.get(), curBlockId -> curBlockId.withPrefix("potted_")).isPresent())
-                    .map(curBlock -> Map.entry(curBlock.get(), RegistryUtil.getObjectFrom(curBlock.get(), curBlockId -> curBlockId.withPrefix("potted_")).get()))
-                    .forEach(curBlock -> POTTED_BY_CONTENT.put(curBlock.getKey(), curBlock.getValue()));
-        }
     }
 }
