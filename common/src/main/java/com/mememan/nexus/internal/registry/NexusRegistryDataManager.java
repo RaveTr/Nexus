@@ -38,6 +38,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -386,9 +387,65 @@ public final class NexusRegistryDataManager {
     }
 
     private static CompoundTag getOrCreateRegistryDataViewTag(LevelStorageSource.LevelDirectory rootLevelDir) {
+        return getOrCreateRegistryDataViewTag(rootLevelDir, false);
+    }
+
+    private static CompoundTag getOrCreateRegistryDataViewTag(LevelStorageSource.LevelDirectory rootLevelDir, boolean accountLoaderData) {
         File dataLevelDirectory = rootLevelDir.resourcePath(LEVEL_DATA_DIR).toFile();
         File regDataViewFile = new File(dataLevelDirectory, REGISTRY_DATA_VIEW.getId());
         CompoundTag regDataViewTag;
+        Consumer<CompoundTag> forgeLoaderDataPopulator = regTag -> {
+            if (!NexusServices.PLATFORM_MANAGER.getPlatform().equals(ModLoader.FORGE)) return;
+
+            try {
+                CompoundTag loaderDataTag = NbtIo.readCompressed(rootLevelDir.dataFile().toFile()); // TODO Maybe account for the tag itself rather than assume it's always in level.dat
+                CompoundTag rootFMLTag = loaderDataTag.getCompound("fml");
+                CompoundTag serializedRegistriesTag = rootFMLTag.getCompound("Registries");
+                CompoundTag rootDataViewTag = new CompoundTag();
+
+                serializedRegistriesTag.getAllKeys().forEach(curRegKey -> {
+                    CompoundTag curRegTag = serializedRegistriesTag.getCompound(curRegKey);
+                    List<CompoundTag> ids = curRegTag.getList("ids", Tag.TAG_COMPOUND).stream()
+                            .map(CompoundTag.class::cast)
+                            .collect(Collectors.toCollection(ObjectArrayList::new));
+                    CompoundTag regDataTag = new CompoundTag();
+
+                    ids.forEach(idTag -> {
+                        ResourceLocation regEntryId = new ResourceLocation(idTag.getString("K"));
+                        int regEntryIdNum = idTag.getInt("V");
+                        CompoundTag idTagData = new CompoundTag();
+
+                        if (regEntryIdNum != -1) { // JIC (Shouldn't be possible, anyway)
+                            idTagData.putInt("LastKnownId", regEntryIdNum);
+
+                            regDataTag.put(regEntryId.toString(), idTagData);
+                        }
+                    });
+
+                    rootDataViewTag.put(curRegKey, regDataTag);
+                });
+
+                if (regTag.contains("RegistryData") && !regTag.getCompound("RegistryData").isEmpty()) {
+                    CompoundTag existingRegistryDataTag = regTag.getCompound("RegistryData");
+
+                    existingRegistryDataTag.getAllKeys().forEach(curRegKey -> {
+                        if (!rootDataViewTag.contains(curRegKey)) rootDataViewTag.put(curRegKey, existingRegistryDataTag.getCompound(curRegKey));
+                        else {
+                            CompoundTag existingRegEntryTag = existingRegistryDataTag.getCompound(curRegKey);
+                            CompoundTag newRegEntryTag = rootDataViewTag.getCompound(curRegKey);
+
+                            existingRegEntryTag.getAllKeys().forEach(curEntryId -> {
+                                if (!newRegEntryTag.contains(curEntryId)) newRegEntryTag.put(curEntryId, existingRegEntryTag.getCompound(curEntryId)); // RegistryDataView tags take priority over loader-specific data
+                            });
+                        }
+                    });
+                }
+
+                regTag.put("RegistryData", rootDataViewTag);
+            } catch (Exception ex) {
+                NexusConstants.LOGGER.error("Failed to account for loader-specific registry data for level '{}'. Previous registry appellations may not be recoverable.", rootLevelDir.directoryName(), ex);
+            }
+        };
 
         try {
             FileInputStream fileInputStream = new FileInputStream(regDataViewFile);
@@ -399,6 +456,8 @@ public final class NexusRegistryDataManager {
         } catch (Exception e) {
             regDataViewTag = new CompoundTag();
         }
+
+        if (accountLoaderData) forgeLoaderDataPopulator.accept(regDataViewTag);
 
         return regDataViewTag;
     }
@@ -621,7 +680,7 @@ public final class NexusRegistryDataManager {
     }
 
     private static <T> void updateRegistryData(LevelStorageSource.LevelDirectory rootLevelDir) {
-        CompoundTag rootRegViewTag = getOrCreateRegistryDataViewTag(rootLevelDir).getCompound("RegistryData");
+        CompoundTag rootRegViewTag = getOrCreateRegistryDataViewTag(rootLevelDir, true).getCompound("RegistryData");
         List<ResourceKey<Registry<T>>> missingRegistries = new ObjectArrayList<>();
 
         if (!rootRegViewTag.isEmpty()) { // First: Handle missing entries in-memory that used to be present within whatever save we're loading
