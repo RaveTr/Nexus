@@ -1135,7 +1135,7 @@ public final class RegistryUtil {
             WoodType woodBlockType = WoodType.register(new WoodType(familyId.toString(), woodBlockSetType));
 
             ResourceLocation woodenLogId = familyId.withSuffix("_log");
-            ResourceLocation woodBlockId = familyId.withSuffix("_wood");
+            ResourceLocation woodBlockId = familyId.getPath().endsWith("wood") ? familyId : familyId.withSuffix("_wood");
             ResourceLocation woodenStrippedLogId = familyId.withPrefix("stripped_").withSuffix("_log");
 
             Supplier<RotatedPillarBlock> woodenLog = BlockPropertyWrapperTemplates.registerWithItemAndReflectAndChain(woodenLogId, () -> new RotatedPillarBlock(BlockBehaviour.Properties.copy(Blocks.OAK_LOG)), BlockPropertyWrapperTemplates.WOODEN_LOG, blockSupCol, itemSupCol)
@@ -1311,28 +1311,28 @@ public final class RegistryUtil {
             BlockSetType stoneBlockSetType = getOrCreateBlockSetType(familyId.toString());
             Function<ResourceLocation, ResourceLocation> memberMapperWrapper = familyMemberIdMapper == null ? Function.identity() : familyMemberIdMapper;
 
-            ResourceLocation standardStoneBlockId = familyId;
-            ResourceLocation stoneStairsId = familyId.withSuffix("_stairs");
-            ResourceLocation stoneSlabId = familyId.withSuffix("_slab");
-            ResourceLocation stoneWallId = familyId.withSuffix("_wall");
+            ResourceLocation standardStoneBlockId = memberMapperWrapper.apply(familyId);
+            ResourceLocation stoneStairsId = memberMapperWrapper.apply(familyId.withSuffix("_stairs"));
+            ResourceLocation stoneSlabId = memberMapperWrapper.apply(familyId.withSuffix("_slab"));
+            ResourceLocation stoneWallId = memberMapperWrapper.apply(familyId.withSuffix("_wall"));
 
-            Supplier<Block> stoneBlock = BlockPropertyWrapperTemplates.registerWithItemAndChain(memberMapperWrapper.apply(standardStoneBlockId), () -> new Block(BlockBehaviour.Properties.copy(deepslateLike ? Blocks.DEEPSLATE : Blocks.STONE)), baseBlockTemplate != null ? baseBlockTemplate : BlockPropertyWrapperTemplates.BASIC_PICKAXE, blockSupCol, itemSupCol)
+            Supplier<Block> stoneBlock = BlockPropertyWrapperTemplates.registerWithItemAndChain(standardStoneBlockId, () -> new Block(BlockBehaviour.Properties.copy(deepslateLike ? Blocks.DEEPSLATE : Blocks.STONE)), baseBlockTemplate != null ? baseBlockTemplate : BlockPropertyWrapperTemplates.BASIC_PICKAXE, blockSupCol, itemSupCol)
                     .minimumMiningLevel(miningLevel)
                     .withLootTable(baseBlockLootTableBuilder == null || Objects.equals(baseBlockLootTableBuilder, Function.identity()) ? baseBlockTemplate == null ? LootUtil::dropSelf : baseBlockTemplate.getLootTableBuilder().orElse(LootUtil::dropSelf) : baseBlockLootTableBuilder)
                     .withRecipe(baseBlockRecipeMapper == null ? baseBlockTemplate == null ? null : baseBlockTemplate.getRecipeConsumer().orElse(null) : baseBlockRecipeMapper)
                     .buildAndGet();
-            Supplier<StairBlock> stoneStairs = BlockPropertyWrapperTemplates.registerWithItemAndChain(memberMapperWrapper.apply(stoneStairsId), () -> new StairBlock(stoneBlock.get().defaultBlockState(), BlockBehaviour.Properties.copy(deepslateLike ? Blocks.DEEPSLATE_BRICK_STAIRS : Blocks.STONE_STAIRS)), BlockPropertyWrapperTemplates.STAIRS, blockSupCol, itemSupCol)
+            Supplier<StairBlock> stoneStairs = BlockPropertyWrapperTemplates.registerWithItemAndChain(stoneStairsId, () -> new StairBlock(stoneBlock.get().defaultBlockState(), BlockBehaviour.Properties.copy(deepslateLike ? Blocks.DEEPSLATE_BRICK_STAIRS : Blocks.STONE_STAIRS)), BlockPropertyWrapperTemplates.STAIRS, blockSupCol, itemSupCol)
                     .minimumMiningLevel(miningLevel)
                     .buildAndGet();
-            Supplier<SlabBlock> stoneSlab = BlockPropertyWrapperTemplates.registerWithItemAndChain(memberMapperWrapper.apply(stoneSlabId), () -> new SlabBlock(BlockBehaviour.Properties.copy(deepslateLike ? Blocks.DEEPSLATE_BRICK_SLAB : Blocks.STONE_SLAB)), BlockPropertyWrapperTemplates.SLAB, blockSupCol, itemSupCol)
+            Supplier<SlabBlock> stoneSlab = BlockPropertyWrapperTemplates.registerWithItemAndChain(stoneSlabId, () -> new SlabBlock(BlockBehaviour.Properties.copy(deepslateLike ? Blocks.DEEPSLATE_BRICK_SLAB : Blocks.STONE_SLAB)), BlockPropertyWrapperTemplates.SLAB, blockSupCol, itemSupCol)
                     .minimumMiningLevel(miningLevel)
                     .buildAndGet();
-            Supplier<WallBlock> stoneWall = BlockPropertyWrapperTemplates.registerWithItemAndChain(memberMapperWrapper.apply(stoneWallId), () -> new WallBlock(BlockBehaviour.Properties.copy(deepslateLike ? Blocks.DEEPSLATE_BRICK_WALL : Blocks.COBBLESTONE_WALL)), BlockPropertyWrapperTemplates.WALL, blockSupCol, itemSupCol)
+            Supplier<WallBlock> stoneWall = BlockPropertyWrapperTemplates.registerWithItemAndChain(stoneWallId, () -> new WallBlock(BlockBehaviour.Properties.copy(deepslateLike ? Blocks.DEEPSLATE_BRICK_WALL : Blocks.COBBLESTONE_WALL)), BlockPropertyWrapperTemplates.WALL, blockSupCol, itemSupCol)
                     .minimumMiningLevel(miningLevel)
                     .buildAndGet();
 
-            ResourceLocation stonePressurePlateId = familyId.withSuffix("_pressure_plate");
-            ResourceLocation stoneButtonId = familyId.withSuffix("_button");
+            ResourceLocation stonePressurePlateId = memberMapperWrapper.apply(familyId.withSuffix("_pressure_plate"));
+            ResourceLocation stoneButtonId = memberMapperWrapper.apply(familyId.withSuffix("_button"));
 
             Supplier<Block> stonePressurePlate = null;
             Supplier<Block> stoneButton = null;

@@ -451,8 +451,15 @@ public final class BlockPropertyWrapperTemplates {
             .withModelDefinition(parentBlock -> {
                 ResourceLocation parentBlockId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(parentBlock.get());
                 ResourceLocation logTexLoc = parentBlockId.withPath(parentBlockId.getPath().replace("_wood", "_log"));
+                ResourceLocation altLogTexLoc = parentBlockId.withSuffix("_log");
 
-                return ModelUtil.cubeColumn(parentBlock, RegistryUtil.getTextureLocation(logTexLoc.withSuffix("_side")).orElse(RegistryUtil.getTextureLocationOrDefault(logTexLoc)));
+                return ModelUtil.cubeColumn(
+                        parentBlock,
+                        RegistryUtil.getTextureLocation(logTexLoc.withSuffix("_side"), "block")
+                                .or(() -> RegistryUtil.getTextureLocation(altLogTexLoc.withSuffix("_side"), "block"))
+                                .or(() -> RegistryUtil.getTextureLocation(logTexLoc, "block"))
+                                .orElse(RegistryUtil.getTextureLocationOrDefault(altLogTexLoc, "block"))
+                );
             })
             .withRecipe(RecipeUtil::woodRecipeFrom)
             .withBlockStripping(VanillaUtil::standardWoodLogStrippingState)

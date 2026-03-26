@@ -13,6 +13,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -88,7 +89,9 @@ public final class RecipeUtil { //TODO Refactor tf out of this (tons of redundan
     }
 
     public static <B extends Block> Consumer<Supplier<B>> woodenPlanksRecipeFromWood(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
-        return woodenPlanksRecipeFromComponent(finishedRecipe, parentPlanks -> RegistryUtil.getObjectFrom(parentPlanks, parentPlanksId -> parentPlanksId.withPath(parentPlanksId.getPath().replace("_planks", "_wood"))).orElse(null), recipeIdMapper);
+        return woodenPlanksRecipeFromComponent(finishedRecipe, parentPlanks -> RegistryUtil.getObjectFrom(parentPlanks, parentPlanksId -> parentPlanksId.withPath(parentPlanksId.getPath().replace("_planks", "_wood")))
+                .or(() -> RegistryUtil.getObjectFrom(parentPlanks, parentPlanksId -> parentPlanksId.withPath(p -> p.replace("_planks", ""))))
+                .orElse(null), recipeIdMapper);
     }
 
     public static <B extends Block> Consumer<Supplier<B>> woodenPlanksRecipeFromWood(Consumer<FinishedRecipe> finishedRecipe) {
@@ -143,7 +146,10 @@ public final class RecipeUtil { //TODO Refactor tf out of this (tons of redundan
     }
 
     public static <B extends Block> Consumer<Supplier<B>> woodRecipeFrom(Consumer<FinishedRecipe> finishedRecipe, Function<ResourceLocation, ResourceLocation> recipeIdMapper) {
-        return woodRecipeFrom(finishedRecipe, parentWood -> RegistryUtil.getObjectFrom(parentWood, parentWoodId -> parentWoodId.withPath(parentWoodId.getPath().replace("_wood", "_log"))).orElse(null), recipeIdMapper);
+        return woodRecipeFrom(finishedRecipe, parentWood -> RegistryUtil.getObjectFrom(parentWood, parentWoodId -> parentWoodId.withPath(parentWoodId.getPath().replace("_wood", "_log")))
+                .filter(wood -> !Objects.equals(wood, parentWood))
+                .or(() -> RegistryUtil.getObjectFrom(parentWood, parentWoodId -> parentWoodId.withSuffix("_log")))
+                .orElse(null), recipeIdMapper);
     }
 
     public static <B extends Block> Consumer<Supplier<B>> woodRecipeFrom(Consumer<FinishedRecipe> finishedRecipe) {
