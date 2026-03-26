@@ -11,6 +11,7 @@
 - (Not really a bug fix) bumped log level for `PropertyWrapper#getMappedPropertyWrappers` (+ the container field variant) down to `trace` from `debug`.
 - Fixed defaultable vegetation not working properly in general.
 - Added DefaultableDirtPathBlock and ConfigurableSoil abstraction classes.
+- (Also not really a bug) made `StandardTagProvider` force missing tags into existence by default instead of simply removing them if both provider validation and entry-specific validation are disabled, so as to conform to deterministic behaviour.
 
 ## New Features
 

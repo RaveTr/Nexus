@@ -170,6 +170,7 @@ public class StandardTagProvider extends TagsProvider<Object> implements ModData
                                     if (validateDupeObjectTag(taggedTagKey, objectClassName, taggedTagKeyLoc)) {
                                         NexusConstants.LOGGER.debug("[{}] [Tagging TagKey]: {} -> {}", getModId(), taggedTagKeyLoc, parentTagObj);
 
+                                        if (!validateAllEntries() && !curPW.getProviderTypeRequisites().getOrDefault(getProviderType(), false)) trackTag(taggedTagKey); // Force tracking
                                         trackTag(parentTagObj).addTag(taggedTagKeyLoc);
                                     }
                                 });
@@ -247,8 +248,6 @@ public class StandardTagProvider extends TagsProvider<Object> implements ModData
 
                                 if (shouldCrash) throw new IllegalArgumentException(String.format(Locale.ROOT, "Couldn't define tag %s as it is missing following references: %s (required by mod of ID %s). Please ensure that these tags are registered and/or that their JSON files are generated beforehand (they don't have to be physically present, this primarily refers to generation order).", tagLoc, missingSerializedTags.stream().map(Objects::toString).collect(Collectors.joining(",")), modId));
                                 else {
-                                    if (!missingSerializedTags.isEmpty()) serializedTagEntries.removeAll(missingSerializedTags);
-
                                     DataResult<JsonElement> serializedTagResult = TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(serializedTagEntries, false));
                                     JsonElement serializedTagJson = serializedTagResult.getOrThrow(false, LOGGER::error);
                                     PackOutput.PathProvider actualPathProvider = rootOutput.createPathProvider(PackOutput.Target.DATA_PACK, TagManager.getTagDir(registryKey));
