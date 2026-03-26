@@ -24,6 +24,7 @@
 - Added ability to specify appellations (aliases) for registry entries. Appellations can be used as fallbacks for when registry entries aren't present for one reason or another. Circular appellations are supported (i.e. appellating a registry entry, then appellating that appellation with said entry's ID).
 - Added `onEvent` overload in `ConcreteEventBlueprint` that allows for the consumption of the target event class for convenience. Passes `EventResult#success` in by default.
 - Changed stored data in `StoneBlockGroup` and `WoodenBlockGroup` to use maps for lookups by registry entry ID in order to prevent accidental early resolution leading to exceptions being thrown.
+- Added DefaultableDirtPathBlock and ConfigurableSoil abstraction classes.
 
 # Known issues
 
