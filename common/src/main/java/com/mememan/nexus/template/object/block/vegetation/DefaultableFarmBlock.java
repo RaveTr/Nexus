@@ -25,7 +25,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
-public class DefaultableFarmBlock extends FarmBlock {
+public class DefaultableFarmBlock extends FarmBlock implements ConfigurableSoil {
     protected final Supplier<Block> mappedDirtBlock;
 
     public DefaultableFarmBlock(Properties properties, Supplier<Block> mappedDirtBlock) {
@@ -76,14 +76,15 @@ public class DefaultableFarmBlock extends FarmBlock {
         fallingEntity.causeFallDamage(fallDistance, 1.0F, fallingEntity.damageSources().fall()); // No super() call to prevent it from being reverted to normal dirt afterwards (Sorry mixin mods [lol])
     }
 
+    @Override
     @NotNull
     public Supplier<Block> getMappedDirtBlock() {
         return mappedDirtBlock;
     }
 
     public static void convertToMappedDirt(@Nullable Entity responsibleEntity, BlockState targetState, Level curLevel, BlockPos targetPos) {
-        if (targetState.getBlock() instanceof DefaultableFarmBlock customizableFarmBlock) {
-            Supplier<Block> dirtBlock = customizableFarmBlock.getMappedDirtBlock();
+        if (targetState.getBlock() instanceof ConfigurableSoil configurableSoilBlock) {
+            Supplier<Block> dirtBlock = configurableSoilBlock.getMappedDirtBlock();
             BlockState updatedState = pushEntitiesUp(targetState, dirtBlock.get() == null ? Blocks.DIRT.defaultBlockState() : dirtBlock.get().defaultBlockState(), curLevel, targetPos);
 
             curLevel.setBlockAndUpdate(targetPos, updatedState);

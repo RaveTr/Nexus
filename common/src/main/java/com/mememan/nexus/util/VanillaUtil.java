@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -104,7 +105,7 @@ public final class VanillaUtil {
      * The method attempts to find the corresponding farmland block by:
      * <ol>
      *     <li>Replacing {@code _dirt} suffix with {@code _farmland}</li>
-     *     <li>Removing {@code _farmland} suffix if the first attempt fails</li>
+     *     <li>Appending {@code _farmland} suffix if the first attempt fails</li>
      * </ol>
      *
      * @param targetBlock The {@link Supplier<Block>} representing the dirt {@link Block} to create tilling behavior for.
@@ -120,6 +121,7 @@ public final class VanillaUtil {
         Function<Block, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>>> tillingBehaviourMapper = parentBlock -> Pair.of(HoeItem::onlyIfAirAbove, HoeItem.changeIntoState(parentBlock.defaultBlockState()));
 
         return RegistryUtil.getObjectFrom(targetBlock, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_dirt", "_farmland")))
+                .filter(resolvedBlock -> !Objects.equals(resolvedBlock, targetBlock.get()))
                 .or(() -> RegistryUtil.getObjectFrom(targetBlock, parentBlockId -> parentBlockId.withSuffix("_farmland")))
                 .map(tillingBehaviourMapper)
                 .orElse(null);
@@ -133,7 +135,7 @@ public final class VanillaUtil {
      * The method attempts to find the corresponding farmland block by:
      * <ol>
      *     <li>Replacing {@code _grass_block} suffix with {@code _farmland}</li>
-     *     <li>Removing {@code _farmland} suffix if the first attempt fails</li>
+     *     <li>Appending {@code _farmland} suffix if the first attempt fails</li>
      * </ol>
      *
      * @param targetBlock The {@link Supplier<Block>} representing the dirt {@link Block} to create tilling behavior for.
@@ -149,6 +151,7 @@ public final class VanillaUtil {
         Function<Block, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>>> tillingBehaviourMapper = parentBlock -> Pair.of(HoeItem::onlyIfAirAbove, HoeItem.changeIntoState(parentBlock.defaultBlockState()));
 
         return RegistryUtil.getObjectFrom(targetBlock, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_grass_block", "_farmland")))
+                .filter(resolvedBlock -> !Objects.equals(resolvedBlock, targetBlock.get()))
                 .or(() -> RegistryUtil.getObjectFrom(targetBlock, parentBlockId -> parentBlockId.withSuffix("_farmland")))
                 .map(tillingBehaviourMapper)
                 .orElse(null);
@@ -159,7 +162,7 @@ public final class VanillaUtil {
      * corresponding path block by:
      * <ol>
      *     <li>Replacing {@code _dirt} suffix with {@code _path}</li>
-     *     <li>Removing {@code _path} suffix if the first attempt fails</li>
+     *     <li>Appending {@code _path} suffix if the first attempt fails</li>
      * </ol>
      *
      * @param targetBlockState The {@link BlockState} representing the dirt {@link Block} to create path flattening for.
@@ -168,6 +171,7 @@ public final class VanillaUtil {
      */
     public static BlockState dirtPathFlatteningAction(BlockState targetBlockState) {
         return RegistryUtil.getObjectFrom(targetBlockState.getBlock(), parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_dirt", "_path")))
+                .filter(resolvedBlock -> !Objects.equals(resolvedBlock, targetBlockState.getBlock()))
                 .or(() -> RegistryUtil.getObjectFrom(targetBlockState.getBlock(), parentBlockId -> parentBlockId.withSuffix("_path")))
                 .map(Block::defaultBlockState)
                 .orElse(null);
@@ -178,7 +182,7 @@ public final class VanillaUtil {
      * The method attempts to find the corresponding path block by:
      * <ol>
      *     <li>Replacing {@code _grass_block} suffix with {@code _path}</li>
-     *     <li>Removing {@code _path} suffix if the first attempt fails</li>
+     *     <li>Appending {@code _path} suffix if the first attempt fails</li>
      * </ol>
      *
      * @param targetBlockState The {@link BlockState} representing the grass {@link Block} to create path flattening for.
@@ -187,6 +191,7 @@ public final class VanillaUtil {
      */
     public static BlockState grassBlockPathFlatteningAction(BlockState targetBlockState) {
         return RegistryUtil.getObjectFrom(targetBlockState.getBlock(), parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_grass_block", "_path")))
+                .filter(resolvedBlock -> !Objects.equals(resolvedBlock, targetBlockState.getBlock()))
                 .or(() -> RegistryUtil.getObjectFrom(targetBlockState.getBlock(), parentBlockId -> parentBlockId.withSuffix("_path")))
                 .map(Block::defaultBlockState)
                 .orElse(null);
