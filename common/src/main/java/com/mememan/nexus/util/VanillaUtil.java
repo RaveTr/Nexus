@@ -120,7 +120,7 @@ public final class VanillaUtil {
         Function<Block, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>>> tillingBehaviourMapper = parentBlock -> Pair.of(HoeItem::onlyIfAirAbove, HoeItem.changeIntoState(parentBlock.defaultBlockState()));
 
         return RegistryUtil.getObjectFrom(targetBlock, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_dirt", "_farmland")))
-                .or(() -> RegistryUtil.getObjectFrom(targetBlock, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_farmland", ""))))
+                .or(() -> RegistryUtil.getObjectFrom(targetBlock, parentBlockId -> parentBlockId.withSuffix("_farmland")))
                 .map(tillingBehaviourMapper)
                 .orElse(null);
     }
@@ -149,7 +149,7 @@ public final class VanillaUtil {
         Function<Block, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>>> tillingBehaviourMapper = parentBlock -> Pair.of(HoeItem::onlyIfAirAbove, HoeItem.changeIntoState(parentBlock.defaultBlockState()));
 
         return RegistryUtil.getObjectFrom(targetBlock, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_grass_block", "_farmland")))
-                .or(() -> RegistryUtil.getObjectFrom(targetBlock, parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_farmland", ""))))
+                .or(() -> RegistryUtil.getObjectFrom(targetBlock, parentBlockId -> parentBlockId.withSuffix("_farmland")))
                 .map(tillingBehaviourMapper)
                 .orElse(null);
     }
@@ -168,7 +168,7 @@ public final class VanillaUtil {
      */
     public static BlockState dirtPathFlatteningAction(BlockState targetBlockState) {
         return RegistryUtil.getObjectFrom(targetBlockState.getBlock(), parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_dirt", "_path")))
-                .or(() -> RegistryUtil.getObjectFrom(targetBlockState.getBlock(), parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_path", ""))))
+                .or(() -> RegistryUtil.getObjectFrom(targetBlockState.getBlock(), parentBlockId -> parentBlockId.withSuffix("_path")))
                 .map(Block::defaultBlockState)
                 .orElse(null);
     }
@@ -187,7 +187,7 @@ public final class VanillaUtil {
      */
     public static BlockState grassBlockPathFlatteningAction(BlockState targetBlockState) {
         return RegistryUtil.getObjectFrom(targetBlockState.getBlock(), parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_grass_block", "_path")))
-                .or(() -> RegistryUtil.getObjectFrom(targetBlockState.getBlock(), parentBlockId -> parentBlockId.withPath(parentBlockId.getPath().replace("_grass_block", ""))))
+                .or(() -> RegistryUtil.getObjectFrom(targetBlockState.getBlock(), parentBlockId -> parentBlockId.withSuffix("_path")))
                 .map(Block::defaultBlockState)
                 .orElse(null);
     }

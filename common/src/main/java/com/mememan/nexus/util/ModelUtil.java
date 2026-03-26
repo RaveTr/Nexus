@@ -6085,9 +6085,9 @@ public final class ModelUtil {
      */
     public static BlockModelDefinition farmlandMoist(Supplier<Block> targetBlock, ResourceLocation moistFarmlandTexture) {
         return farmlandMoist(targetBlock, moistFarmlandTexture, RegistryUtil.getTextureLocationOrDefault(
-                DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get()).withPath(p -> p.replace("_farmland_moist", "_dirt")),
+                DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get()).withPath(p -> p.replace("_farmland", "_dirt")),
                 "block",
-                RegistryUtil.getTextureLocationOrDefault(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get()).withPath(p -> p.replace("_farmland_moist", "")), "block")));
+                RegistryUtil.getTextureLocationOrDefault(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetBlock.get()).withPath(p -> p.replace("_farmland", "")), "block")));
     }
 
     /**
