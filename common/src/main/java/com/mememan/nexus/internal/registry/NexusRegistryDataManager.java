@@ -754,7 +754,7 @@ public final class NexusRegistryDataManager {
                 int storedId = regEntryDataTag.getInt("LastKnownId");
                 int fetchedId = getLastKnownId(targetRegKey, regEntryRLID, null);
 
-                if (storedId != -1 && fetchedId == -1) missingEntries.put(regEntryRLID, storedId);
+                if (storedId != -1 && fetchedId == -1 && !missingEntries.containsKey(regEntryRLID) && !missingEntries.containsValue(storedId)) missingEntries.put(regEntryRLID, storedId);
             });
         });
 
