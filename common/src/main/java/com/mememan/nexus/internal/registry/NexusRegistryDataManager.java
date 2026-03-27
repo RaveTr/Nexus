@@ -543,9 +543,10 @@ public final class NexusRegistryDataManager {
 
         if (!appellations.isEmpty()) {
             CompoundTag appellationDataTag = new CompoundTag();
-            CompoundTag mappedRegEntriesTag = new CompoundTag();
 
             appellations.forEach((regKey, appellatedIds) -> {
+                CompoundTag mappedRegEntriesTag = new CompoundTag();
+
                 if (!appellatedIds.isEmpty()) {
                     appellatedIds.forEach((baseRegEntryId, aliases) -> {
                         CompoundTag entryAppellationDataTag = new CompoundTag();
