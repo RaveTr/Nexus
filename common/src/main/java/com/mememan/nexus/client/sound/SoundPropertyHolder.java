@@ -144,6 +144,20 @@ public record SoundPropertyHolder(ResourceLocation soundFileLocation, float volu
         return Boolean.compare(preload, DEFAULT_PRELOAD) == 0;
     }
 
+    @Override
+    public String toString() {
+        return "SoundPropertyHolder{" +
+                "soundFileLocation=" + soundFileLocation +
+                ", volume=" + volume +
+                ", pitch=" + pitch +
+                ", weight=" + weight +
+                ", stream=" + stream +
+                ", attenuationDistance=" + attenuationDistance +
+                ", preload=" + preload +
+                ", soundType=" + soundType +
+                '}';
+    }
+
     /**
      * Basic holder {@code enum} that indicates a given {@linkplain SoundEvent SoundEvent's} type. See entries for
      * more info.

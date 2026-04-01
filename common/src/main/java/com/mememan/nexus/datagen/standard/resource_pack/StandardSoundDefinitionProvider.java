@@ -3,6 +3,7 @@ package com.mememan.nexus.datagen.standard.resource_pack;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.client.sound.SoundPropertyHolder;
 import com.mememan.nexus.datagen.DuplicateDataPolicy;
 import com.mememan.nexus.datagen.NexusProviderTypes;
@@ -65,7 +66,7 @@ public class StandardSoundDefinitionProvider implements ModDataProvider {
 
         serializeSoundDefinitions(soundsFile);
 
-        return CompletableFuture.completedFuture(DataProvider.saveStable(cachedOutput, soundsFile, pathProvider.json(new ResourceLocation(modId, "sounds"))));
+        return DataProvider.saveStable(cachedOutput, soundsFile, pathProvider.json(new ResourceLocation(modId, "sounds")));
     }
 
     /**
@@ -97,6 +98,8 @@ public class StandardSoundDefinitionProvider implements ModDataProvider {
     protected <SE extends SoundEvent> JsonElement serializeSoundDefinition(SoundEventPropertyWrapper<SE> targetSEPW) {
         JsonObject mappedObj = new JsonObject();
         boolean replaceOriginal = targetSEPW.replacesOriginalSoundEvent();
+
+        NexusConstants.LOGGER.debug("[{}] [Generating Sound Definition for {}]: {} - {}", getModId(), targetSEPW.getParentObject().get().getClass().getSimpleName(), targetSEPW.getParentObject().get().getLocation().getPath(), targetSEPW.getSoundPropertyHolders());
 
         if (replaceOriginal) mappedObj.addProperty("replace", replaceOriginal);
 
