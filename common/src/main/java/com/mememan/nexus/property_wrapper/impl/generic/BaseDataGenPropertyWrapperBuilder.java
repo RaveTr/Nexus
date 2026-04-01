@@ -25,7 +25,7 @@ public class BaseDataGenPropertyWrapperBuilder<T, SELF extends DataGenPropertyWr
 
     @Override
     public SELF copyFrom(DGPW propertyWrapper) {
-        return self()
+        return super.copyFrom(propertyWrapper)
                 .excludeFromNativeDatagen(propertyWrapper.isExcludedFromDataGen())
                 .requiresSetDatagenEntries(propertyWrapper.getProviderTypeRequisites());
     }

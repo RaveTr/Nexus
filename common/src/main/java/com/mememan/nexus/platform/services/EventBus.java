@@ -295,7 +295,7 @@ public interface EventBus {
             }
 
             this.eventInterface = eventInterface;
-            this.associatedTypes.addAll(List.of(associatedTypes));
+            this.associatedTypes.addAll(ObjectArrayList.of(associatedTypes));
         }
 
         /**

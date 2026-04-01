@@ -2,6 +2,9 @@ package com.mememan.nexus.property_wrapper.base.generic;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -71,6 +74,35 @@ public interface PropertyWrapperBuilder<T, SELF extends PropertyWrapperBuilder<T
     }
 
     /**
+     * Composite helper method that allows for end-developers to use the parent object with the current builder to call
+     * additional builder methods that may not already take the parent object as the input.
+     * <br></br>
+     * By default, this works by deferring all calls made until {@link #build()} is called, at which point said calls are
+     * applied in insertion order. This means that template PWs can make use of this for inheritors, since said calls
+     * are not applied to templates themselves (only stored).
+     *
+     * @param contextualizedBuilder The contextualized builder function to apply to the current builder. Should conventionally
+     *                              return the current builder being modified.
+     *
+     * @return {@link #self()} (builder method).
+     *
+     * @implNote Some implementations may already have methods that accept the parent object as input and even set data
+     * that's already in the form of a {@link Function} that's later computed elsewhere.
+     * <br></br>
+     * Implementors are responsible for ensuring that calls made to builder methods in general do not get queried too
+     * early (usually via getters in the owner {@link PropertyWrapper} instance) if the parent object is a registrable
+     * object whose data is not yet fully initialized, thus causing errors.
+     * <br></br>
+     * The {@code default} implementation of this method is <b>NOT</b> thread-safe, which is fine for 99% of cases (since
+     * property wrappers aren't inherently designed to work in multithreaded environments, like much of MC code that
+     * deals with configuration).
+     *
+     * @implSpec Implementors are responsible for ensuring that calls made to this method actually have an effect through
+     * {@link #build()} and {@link #buildAndGet()}, should they override default behaviour accordingly.
+     */
+    SELF compose(BiFunction<Supplier<T>, SELF, SELF> contextualizedBuilder);
+
+    /**
      * Returns the owner {@link PropertyWrapper} instance of this builder.
      * <br></br>
      * This method also typically performs extra operations, such as mapping the owner PW to the parent object being
@@ -89,6 +121,15 @@ public interface PropertyWrapperBuilder<T, SELF extends PropertyWrapperBuilder<T
      */
     @NotNull
     PW getCurrentOwnerWrapper();
+
+    /**
+     * Computes and returns a copy of contextualized builder calls made to this PW instance. Primarily used
+     * to control behaviour when deriving such calls from templates, where computation is intentionally delegated to
+     * the property wrappers with parent objects that are not templates.
+     *
+     * @return A copy of contextualized builder calls made to this PW instance.
+     */
+    List<BiFunction<Supplier<T>, SELF, SELF>> getContextualizedBuilders();
 
     /**
      * Safely clones this builder via {@link Object#clone()}. Useful if you need to create a copy of this builder rather

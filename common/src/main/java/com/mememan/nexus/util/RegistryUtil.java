@@ -95,7 +95,7 @@ public final class RegistryUtil {
             "_brick", "_plank"
     };
     private static final String[] MATERIAL_SUFFIXES = new String[] {
-            "_ingot", "_nugget", "_gem", "_shard", "_dust", "_crystal", "_ore", "_block"
+            "_ingot", "_nugget", "_gem", "_shard", "_dust", "_crystal", "_ore", "_block", "_lump"
     };
     private static final BiFunction<ResourceLocation, ResourceLocation, ResourceLocation> BRICK_MEMBER_ID_MAPPER = (familyId, memberId) -> memberId.getPath().equals(familyId.getPath())
             ? memberId.withSuffix("_bricks")
