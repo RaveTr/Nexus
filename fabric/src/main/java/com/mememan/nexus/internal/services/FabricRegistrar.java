@@ -15,6 +15,7 @@ import com.mememan.nexus.resource.config.ResourceReloadListenerConfig;
 import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import it.unimi.dsi.fastutil.objects.ObjectObjectMutablePair;
 import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
@@ -37,6 +38,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Fabric-specific implementation of {@link Registrar}.
@@ -159,7 +162,8 @@ public class FabricRegistrar implements Registrar {
 
     @Override
     public List<RegistryDataLoader.RegistryData<?>> getDynamicRegistries() {
-        return DynamicRegistries.getDynamicRegistries();
+        return Stream.concat(DynamicRegistries.getDynamicRegistries().stream(), RegistryDataLoader.DIMENSION_REGISTRIES.stream())
+                .collect(Collectors.toCollection(ObjectArrayList::new));
     }
 
     @Override

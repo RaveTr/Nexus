@@ -16,10 +16,7 @@ import com.mememan.nexus.platform.services.Registrar;
 import com.mememan.nexus.resource.config.ResourceReloadListenerConfig;
 import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.Pair;
-import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
-import it.unimi.dsi.fastutil.objects.ObjectObjectMutablePair;
+import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistrySetBuilder;
@@ -40,6 +37,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Forge-specific implementation of {@link Registrar}.
@@ -185,7 +183,7 @@ public class ForgeRegistrar implements Registrar {
 
     @Override
     public List<RegistryDataLoader.RegistryData<?>> getDynamicRegistries() {
-        return DataPackRegistriesHooks.getDataPackRegistries();
+        return DataPackRegistriesHooks.getDataPackRegistriesWithDimensions().collect(Collectors.toCollection(ObjectArrayList::new));
     }
 
     @Override

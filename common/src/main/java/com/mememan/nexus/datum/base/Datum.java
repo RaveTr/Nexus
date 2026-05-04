@@ -11,7 +11,7 @@ import net.minecraft.nbt.CompoundTag;
  *
  * @see <a href="https://github.com/RaveTr/Nexus/wiki/datum">Nexus Wiki: Datum</a>
  */
-public interface Datum {
+public interface Datum extends Cloneable {
 
     /**
      * Writes data tied to this datum to the provided {@code tag}.
@@ -26,4 +26,8 @@ public interface Datum {
      * @param tag The {@link CompoundTag} to deserialize this datum's data from.
      */
     void readFrom(CompoundTag tag);
+
+    Datum clone();
+
+    boolean equals(Datum otherDatum);
 }

@@ -91,7 +91,7 @@ public class StandardBlockStateProvider implements ModDataProvider {
             BlockStateDefinition mappedBSD = bsdMappingFunc.apply(parentObjSup);
             JsonElement generatedState = serializeBlockStateJson(mappedBSD, blockClassName, blockName);
             Runnable stateSaveTask = () -> {
-                NexusConstants.LOGGER.info("[{}] [Generating Block State for {}]: {}", getModId(), blockClassName, blockStateRL);
+                NexusConstants.LOGGER.debug("[{}] [Generating Block State for {}]: {}", getModId(), blockClassName, blockStateRL);
 
                 savedStateFutures.add(DataProvider.saveStable(targetOutput, generatedState, blockStatePathProvider.json(blockStateRL)));
             };

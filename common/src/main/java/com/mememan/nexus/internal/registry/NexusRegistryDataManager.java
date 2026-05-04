@@ -129,20 +129,6 @@ public final class NexusRegistryDataManager {
     private static final Map<ResourceKey<? extends Registry<?>>, BiMap<Integer, ResourceLocation>> CURRENT_BLOCKED_IDS = new Object2ObjectLinkedOpenHashMap<>();
     private static final Map<ResourceKey<? extends Registry<?>>, BiMap<Integer, ResourceLocation>> CURRENT_BLOCKED_IDS_VIEW = Collections.unmodifiableMap(CURRENT_BLOCKED_IDS);
     private static final AtomicBoolean REGISTRY_DATA_DIRTY = new AtomicBoolean(false);
-    private static final RegistryHookManager.ActiveRegistryMapper<Object> ID_BLOCKER = (wrappedReg, rawEntry) -> {
-        if (!rawEntry.isMissing() && NexusServices.REGISTRAR.getRegistryHookManager().getUpdatedBlockedIds(wrappedReg.key()).containsKey(rawEntry.numericalId())) {
-            return new RegistryHookManager.RawRegistryEntry<>(rawEntry.registryKey(), rawEntry.objId(), rawEntry.objValue(), -1);
-        }
-
-        return rawEntry;
-    };
-    private static final RegistryHookManager.ActiveRegistryMapper<Object> MISSING_SUBSTITUTOR = (wrappedReg, rawEntry) -> {
-/*        if (rawEntry.isMissing()) {
-            return new RegistryHookManager.RawRegistryEntry<>(rawEntry.registryKey(), rawEntry.objId(), rawEntry.objValue(), rawEntry.numericalId());
-        }*/ // TODO Maybe implement some sort of factory mechanism that constructs dummy objects safely for the target registry(?)
-
-        return new RegistryHookManager.RawRegistryEntry<>(rawEntry.registryKey(), rawEntry.objId(), rawEntry.objValue(), rawEntry.objId().getPath().contains("grass") ? 1009 : rawEntry.numericalId());
-    };
     @Nullable
     private static CompoundTag CURRENT_REGISTRY_DATA_VIEW_TAG = null; // Keeping track of this to allow queries outside event listeners to optionally run
 
@@ -709,15 +695,7 @@ public final class NexusRegistryDataManager {
         }
 
         // Next: Update registry data with respect to loader-specific API implementations (appellations, blocked IDs)
-        RegistryHookManager globalRegHookManager = NexusServices.REGISTRAR.getRegistryHookManager();
-
-        globalRegHookManager.getUpdatedBlockedIds().forEach((regKey, blockedIds) -> {
-            globalRegHookManager.updateActiveRegistryState((ResourceKey) regKey, ID_BLOCKER);
-        });
-
-        /*globalRegHookManager.getUpdatedAppellations().forEach((regKey, appellations) -> {
-            globalRegHookManager.updateActiveRegistryState((ResourceKey) regKey, MISSING_SUBSTITUTOR);
-        });*/
+        RegistryHookManager globalRegHookManager = NexusServices.REGISTRAR.getRegistryHookManager(); // TODO
     }
 
     public static int getLastKnownId(ResourceKey<? extends Registry<?>> targetRegKey, ResourceLocation targetRegEntry, @Nullable LevelStorageSource.LevelDirectory rootLevelDir) {

@@ -1,6 +1,5 @@
 package com.mememan.nexus.template.object.block.vegetation;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
@@ -30,16 +29,21 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 public class DefaultableMultiLayerPlantBlock extends BushBlock implements BonemealableBlock, ConfigurablePlant {
+    @Nullable
+    private static IntegerProperty pendingLevelProperty; // We can skip the whole "store in [either ThreadLocal or AtomicReference or whatever]" shtick here cuz registration is single-threaded, and if a mod does any goofy hacky stuff then it's their fault anyway
     protected final Set<Supplier<TagKey<Block>>> validPlacementTags;
-    protected IntegerProperty level;
+    protected final IntegerProperty level;
     protected final IntOpenHashSet modularLevels = new IntOpenHashSet();
     protected final int maxLevel;
 
     public DefaultableMultiLayerPlantBlock(Properties properties, int maxLevel, IntOpenHashSet modularLevels, Set<Supplier<TagKey<Block>>> validPlacementTags) {
-        super(properties);
+        super(storeLevelInStaticInitializer(properties, IntegerProperty.create("level", 0, maxLevel)));
         this.maxLevel = maxLevel;
         this.validPlacementTags = validPlacementTags;
+        this.level = pendingLevelProperty;
 
+        validateModularLevels(this, maxLevel, modularLevels);
+        cleanupPendingLevel();
         registerDefaultState(getStateDefinition().any().setValue(getLevelProperty(), 0));
 
         modularLevels.intStream()
@@ -70,7 +74,9 @@ public class DefaultableMultiLayerPlantBlock extends BushBlock implements Boneme
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(getLevelProperty());
+        IntegerProperty levelProp = level != null ? level : pendingLevelProperty;
+
+        if (levelProp != null) builder.add(levelProp);
     }
 
     @Override
@@ -136,11 +142,7 @@ public class DefaultableMultiLayerPlantBlock extends BushBlock implements Boneme
     }
 
     public IntegerProperty getLevelProperty() {
-        return level == null
-                ? level = IntegerProperty.create("level", 0, maxLevel == 0 ? 2 : maxLevel)
-                : level != null && ImmutableList.copyOf(level.getPossibleValues()).get(level.getPossibleValues().size() - 1) != maxLevel
-                ? level = IntegerProperty.create("level", 0, maxLevel)
-                : level;
+        return level;
     }
 
     public int getMaxLevel() {
@@ -219,5 +221,23 @@ public class DefaultableMultiLayerPlantBlock extends BushBlock implements Boneme
     @Override
     public Set<Supplier<TagKey<Block>>> getValidPlacementTags() {
         return validPlacementTags;
+    }
+
+    private static void validateModularLevels(Block targetBlock, int maxLevel, IntOpenHashSet modularLevels) {
+        int maxModularLevel = modularLevels.intStream().max().orElse(0);
+
+        if (!modularLevels.isEmpty() && maxModularLevel > maxLevel) {
+            throw new IllegalArgumentException(String.format("Modular levels' max element must be less than provided maxLevel for %s '%s', with max modular level being: %d, provided maxLevel: %d", targetBlock.getClass().getSimpleName(), targetBlock.builtInRegistryHolder().key().location(), maxLevel, maxModularLevel));
+        }
+    }
+
+    private static Properties storeLevelInStaticInitializer(Properties properties, IntegerProperty levelProperty) {
+        pendingLevelProperty = levelProperty;
+
+        return properties;
+    }
+
+    private static void cleanupPendingLevel() {
+        pendingLevelProperty = null;
     }
 }

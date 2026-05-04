@@ -134,6 +134,11 @@ public class StandardSoundDefinitionProvider implements ModDataProvider {
     }
 
     @Override
+    public @NotNull String getName() {
+        return String.format("Sound Definitions [%s]", getModId());
+    }
+
+    @Override
     public @NotNull String getModId() {
         return modId;
     }

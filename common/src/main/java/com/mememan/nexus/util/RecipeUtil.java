@@ -595,8 +595,8 @@ public final class RecipeUtil { //TODO Refactor tf out of this (tons of redundan
 
                 ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, parentItemLike)
                         .define('#', componentItemLike)
-                        .pattern("##")
-                        .pattern("##")
+                        .pattern("###")
+                        .pattern("###")
                         .unlockedBy("has_" + componentItemLikeId.getPath(), PredicateUtil.has(componentItemLike))
                         .save(finishedRecipe, baseRecipeId);
             }

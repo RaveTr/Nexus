@@ -1,5 +1,8 @@
 package com.mememan.nexus.property_wrapper.base.generic;
 
+import com.mememan.nexus.platform.services.Registrar;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -85,6 +88,11 @@ public interface PropertyWrapperBuilder<T, SELF extends PropertyWrapperBuilder<T
      *                              return the current builder being modified.
      *
      * @return {@link #self()} (builder method).
+     *
+     * @apiNote If used on registrable objects, end-developers should almost always consider using
+     * {@link Registrar#registerObjectAndReflect(ResourceLocation, Supplier, Registry)} (or its utility-{@code class}
+     * equivalents, where applicable), as invoking {@link Supplier#get()} on registry entries on Neo/Forge when they're
+     * registered using deferred registries will result in NPEs/ISEs being thrown.
      *
      * @implNote Some implementations may already have methods that accept the parent object as input and even set data
      * that's already in the form of a {@link Function} that's later computed elsewhere.
