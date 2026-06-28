@@ -5,18 +5,29 @@
   "refmap": "${mod_id}.refmap.json",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "entity.FabricPlayerMixin",
+    "entity.container.AbstractContainerMenuMixin",
+    "entity.container.ContainerEntityMixin",
+    "entity.container.ContainerMixin",
+    "entity.container.HorseInventoryMenuMixin",
+    "entity.container.InventoryMixin",
+    "entity.container.ItemCombinerMenuMixin",
     "fabric_api.datagen.FabricDataGeneratorAccessor",
     "fabric_api.datagen.FabricDataGenHelperMixin",
     "fabric_api.datagen.PackAccessor",
     "fabric_api.resource_loader.ResourceManagerHelperImplMixin",
     "item.DiggerItemMixin",
+    "item.ItemMixin",
     "level_data.LevelStorageAccessMixin",
     "registries.MappedRegistryAccessor",
     "registries.MappedRegistryMixin",
-    "server.PlayerListMixin"
+    "server.ServerGamePacketListenerImplMixin",
+    "server.ServerPlayerGameModeMixin"
   ],
   "client": [
-    "client.FabricMinecraftMixin"
+    "client.FabricMinecraftMixin",
+    "client.GameRendererMixin",
+    "client.MultiPlayerGameModeMixin"
   ],
   "server": [
     "server.FabricMinecraftServerMainMixin"
@@ -26,5 +37,6 @@
   },
   "mixinextras": {
     "minVersion": "${mixinextras_version}"
-  }
+  },
+  "plugin": "com.mememan.nexus.mixins.NexusFabricMixinConfigPlugin"
 }

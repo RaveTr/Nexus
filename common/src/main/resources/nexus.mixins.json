@@ -10,6 +10,7 @@
     "entity.LivingEntityMixin",
     "entity.PlayerMixin",
     "server.MinecraftServerMixin",
+    "server.PlayerListMixin",
     "server.ServerLevelMixin"
   ],
   "client": [

@@ -1,6 +1,7 @@
 package com.mememan.nexus.util;
 
 import com.mememan.nexus.client.block.WrappedBlockColor;
+import com.mememan.nexus.client.item.WrappedClampedItemPropertyFunction;
 import com.mememan.nexus.template.object.item.dispense_item_behaviour.DefaultableBoatDispenseItemBehaviour;
 import com.mememan.nexus.template.object.item.entity.boat.BoatType;
 import com.mememan.nexus.template.object.item.entity.boat.DefaultableBoatItem;
@@ -9,7 +10,9 @@ import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.IntIntMutablePair;
 import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
+import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.HoeItem;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GrassColor;
 import net.minecraft.world.level.ItemLike;
@@ -27,6 +30,12 @@ import java.util.function.Supplier;
  * Utility {@code class} containing helpful vanilla compat shortcut/delegator helper methods.
  */
 public final class VanillaUtil {
+    public static final WrappedClampedItemPropertyFunction STANDARD_BOW_PULLING_PREDICATE = (targetStack, curLevel, livingOwner, seed) -> livingOwner != null && livingOwner.isUsingItem() && Objects.equals(livingOwner.getUseItem(), targetStack) ? 1.0F : 0.0F;
+    public static final WrappedClampedItemPropertyFunction STANDARD_BOW_PULL_PREDICATE = (targetStack, curLevel, livingOwner, seed) -> livingOwner == null || !Objects.equals(livingOwner.getUseItem(), targetStack) ? 0.0F : (float) (targetStack.getUseDuration() - livingOwner.getUseItemRemainingTicks()) / 20.0F;
+    public static final WrappedClampedItemPropertyFunction STANDARD_CROSSBOW_PULLING_PREDICATE = (targetStack, curLevel, livingOwner, seed) -> livingOwner != null && livingOwner.isUsingItem() && Objects.equals(livingOwner.getUseItem(), targetStack) && !CrossbowItem.isCharged(targetStack) ? 1.0F : 0.0F;
+    public static final WrappedClampedItemPropertyFunction STANDARD_CROSSBOW_PULL_PREDICATE = (targetStack, curLevel, livingOwner, seed) -> livingOwner == null || CrossbowItem.isCharged(targetStack) ? 0.0F : (float) (targetStack.getUseDuration() - livingOwner.getUseItemRemainingTicks()) / (float) CrossbowItem.getChargeDuration(targetStack);
+    public static final WrappedClampedItemPropertyFunction STANDARD_CROSSBOW_CHARGED_PREDICATE = (targetStack, curLevel, livingOwner, seed) -> CrossbowItem.isCharged(targetStack) ? 1.0F : 0.0F;
+    public static final WrappedClampedItemPropertyFunction STANDARD_CROSSBOW_FIREWORK_PREDICATE = (targetStack, curLevel, livingOwner, seed) -> CrossbowItem.isCharged(targetStack) && CrossbowItem.containsChargedProjectile(targetStack, Items.FIREWORK_ROCKET) ? 1.0F : 0.0F;
 
     private VanillaUtil() {
         throw new IllegalAccessError("Attempted to construct instance of utility class! (VanillaUtil)");

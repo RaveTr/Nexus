@@ -1,12 +1,20 @@
 # Nexus API Changelog (Forge)
 
-# v1.1.3 (1.20.1)
+# v1.1.4 (1.20.1)
 
 ## Bug Fixes
 
-- Made `ForgeRegistrar#getDynamicRegistries` impl consider dimension registries via `DataPackRegistriesHooks#getDataPackRegistriesWithDimensions`.
-- Fixed misc. logical errors in recipe templates provided in `RecipeUtil`.
-- (Not really a bug fix) Bumped log level for `StandardBlockStateProvider` elements down to `debug` from `info` for consistency with other providers.
-- Implemented `getName` for `StandardSoundDefinitionProvider`.
-- Patched `DefaultableMultiLayerPlantBlock` to allow for custom level `IntegerProperty` spec without breaking due to superconstructor calls to `Block#createBaseDefinitiom` running before the pertaining property gets initialized via a pre-constructor initializer hack.
-- - Deleted leftover test code in `NexusRegistryDataManager`.
+- Fixed a few typos in Javadocs around the codebase, as well as minor log message inconsistencies.
+- Fixed an issue in `NexusRegistryDataManager#populateRegistryEntriesFromMemory` where duplicate entries were not properly handled by the collector used to collect all registry elements in-stream to a `HashBiMap`.
+
+## Internal Changes
+
+- Changed datapack sync to use the newly-added `ServerLifeCycleEventBlueprint#DATAPACK_INDIVIDUAL_SYNC` event hooks (see "New Features" below). Internal datapack sync is now handled in `NexusServerLifeCycleManager`.
+- Moved datapack sync to `PlayerListMixin` inside `common` to accommodate for the above change.
+- Updated dependencies to latest (Forge version is now 47.4.20).
+
+## New Features
+
+- Added datapack event hooks to `ServerLifeCycleEventBlueprint` for datapack reload start/end and sync.
+- Added `BOW`, `CROSSBOW`, and `CROSSBOW_FIREWORK` to `ItemPropertyWrapperTemplates`.
+- Added `NexusAttributes`, containing common attribute hooks with cross-loader-dependency-compatibility in mind (see Javadocs for more info).

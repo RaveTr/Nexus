@@ -36,6 +36,25 @@ public final class ItemPropertyWrapperTemplates {
             .withModelDefinition(ModelUtil::handheldRod)
             .build();
 
+    public static final ItemPropertyWrapper<Item> BOW = new ItemPropertyWrapper<>()
+            .builder()
+            .withModelDefinition(ModelUtil::standardBow)
+            .withItemModelPredicate(new ResourceLocation("pulling"), VanillaUtil.STANDARD_BOW_PULLING_PREDICATE)
+            .withItemModelPredicate(new ResourceLocation("pull"), VanillaUtil.STANDARD_BOW_PULL_PREDICATE)
+            .build();
+    public static final ItemPropertyWrapper<Item> CROSSBOW = new ItemPropertyWrapper<>()
+            .builder()
+            .withModelDefinition(ModelUtil::standardCrossbow)
+            .withItemModelPredicate(new ResourceLocation("pulling"), VanillaUtil.STANDARD_CROSSBOW_PULLING_PREDICATE)
+            .withItemModelPredicate(new ResourceLocation("pull"), VanillaUtil.STANDARD_CROSSBOW_PULL_PREDICATE)
+            .withItemModelPredicate(new ResourceLocation("charged"), VanillaUtil.STANDARD_CROSSBOW_CHARGED_PREDICATE)
+            .build();
+    public static final ItemPropertyWrapper<Item> CROSSBOW_FIREWORK = new ItemPropertyWrapper<>()
+            .builder()
+            .copyFrom(CROSSBOW)
+            .withItemModelPredicate(new ResourceLocation("firework"), VanillaUtil.STANDARD_CROSSBOW_FIREWORK_PREDICATE)
+            .build();
+
     public static final ItemPropertyWrapper<Item> COOKED_FOOD = new ItemPropertyWrapper<>()
             .builder()
             .copyFrom(BASIC_GENERATED)

@@ -110,6 +110,7 @@ public class RegistryEvent extends BaseEvent {
             }),
 /*            SUBSTITUTE((pertainingRegistry, lastKnownId, oldKey, newKey) -> {
                 NexusConstants.LOGGER.info("Attempting to substitute registry entry {} (with id {}, in registry {})", oldKey, lastKnownId, pertainingRegistry.key());
+                // TODO
                 // NO-OP: Functionality handled in NexusRegistryDataManager#updateRegistryData(LevelStorageSource.LevelDirectory)
             }),*/
             WARN((pertainingRegistry, lastKnownId, oldKey, newKey) -> {

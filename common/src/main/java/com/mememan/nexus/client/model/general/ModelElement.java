@@ -19,7 +19,7 @@ import java.util.Map;
  * Elements usually define core visual properties of a model, such as its cuboid's endpoints (from/to) and face UV
  * data.
  * <br></br>
- * Element data contained within a {@code ModelElement} is unclamped for the most part. Thus, while you can inout whatever
+ * Element data contained within a {@code ModelElement} is unclamped for the most part. Thus, while you can input whatever
  * values you want to work with, it's recommended that you follow the conventional constraints defined by Minecraft (see
  * references below).
  *

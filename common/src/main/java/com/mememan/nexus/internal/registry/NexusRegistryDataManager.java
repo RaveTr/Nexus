@@ -132,6 +132,10 @@ public final class NexusRegistryDataManager {
     @Nullable
     private static CompoundTag CURRENT_REGISTRY_DATA_VIEW_TAG = null; // Keeping track of this to allow queries outside event listeners to optionally run
 
+    private NexusRegistryDataManager() {
+
+    }
+
     static {
         populateRegistryEntriesFromMemory(false); // Initial state post-load
         handleLevelRegistryData();
@@ -145,7 +149,7 @@ public final class NexusRegistryDataManager {
             Supplier<HashBiMap<ResourceLocation, Integer>> pooledRegData = () -> curRegistry.entrySet().stream()
                     .sorted(Comparator.comparingInt((mappedRegEntry) -> curRegistry.getId(mappedRegEntry.getValue())))
                     .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey().location(), curRegistry.getId(entry.getValue())))
-                    .collect(Collectors.toMap(Map.Entry::getKey, AbstractMap.SimpleEntry::getValue, (e1, e2) -> e1, HashBiMap::create));
+                    .collect(HashBiMap::create, (map, element) -> map.forcePut(element.getKey(), element.getValue()), BiMap::putAll);
 
             if (!trackingUpdatedState) REGISTRY_ENTRIES_FROM_MEMORY.computeIfAbsent(curEntry.getKey(), k -> pooledRegData.get());
             else UPDATED_REGISTRY_ENTRIES_FROM_MEMORY.computeIfAbsent(curEntry.getKey(), k -> pooledRegData.get());
@@ -178,6 +182,7 @@ public final class NexusRegistryDataManager {
                 }
             } catch (IOException e) {
                 NexusConstants.LOGGER.warn("Failed to create RegistryDataLock.dat for level '{}'. Any missing entries from registries, regardless of whether they persist or are synced, may not be recoverable if a bug prevents your mod-loader's ({}) registry mechanism from properly caching orphaned registry entries or blocking previous IDs associated with missing entries from being used by new ones.", rootLevelDir.directoryName(), NexusServices.PLATFORM_MANAGER.getPlatform().getPlatformName(), e);
+                NexusConstants.LOGGER.info("If you're loading into a brand new world, you can safely ignore this warning.");
             }
 
             try {
@@ -186,6 +191,7 @@ public final class NexusRegistryDataManager {
                 }
             } catch (IOException e) {
                 NexusConstants.LOGGER.warn("Failed to create RegistryDataView.dat for level '{}'. Any missing entries from registries, regardless of whether they persist or are synced, may not be recoverable if a bug prevents your mod-loader's ({}) registry mechanism from properly caching orphaned registry entries or blocking previous IDs associated with missing entries from being used by new ones.", rootLevelDir.directoryName(), NexusServices.PLATFORM_MANAGER.getPlatform().getPlatformName(), e);
+                NexusConstants.LOGGER.info("If you're loading into a brand new world, you can safely ignore this warning.");
             }
 
             CURRENT_REGISTRY_DATA_VIEW_TAG = getOrCreateRegistryDataViewTag(rootLevelDir); // Update from file separately to avoid potentially stale reference + copy instead of directly set from regDataViewTag

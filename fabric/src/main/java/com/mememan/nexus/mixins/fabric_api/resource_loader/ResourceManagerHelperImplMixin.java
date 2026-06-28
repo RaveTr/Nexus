@@ -2,7 +2,6 @@ package com.mememan.nexus.mixins.fabric_api.resource_loader;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mememan.nexus.internal.services.FabricRegistrar;
-import com.mememan.nexus.mixins.server.PlayerListMixin;
 import com.mememan.nexus.resource.config.ResourceReloadListenerConfig;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -26,8 +25,6 @@ import java.util.stream.Collectors;
  * register a {@link PreparableReloadListener} of your own choosing and mapping that to a {@link ResourceLocation}.
  * <br></br>
  * In other words, this {@code class} handles resource reload listener registration on Fabric.
- *
- * @see PlayerListMixin
  */
 @Mixin(ResourceManagerHelperImpl.class)
 public abstract class ResourceManagerHelperImplMixin {

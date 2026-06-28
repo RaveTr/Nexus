@@ -1,26 +1,19 @@
 package com.mememan.nexus.internal.event.common;
 
-import com.mememan.nexus.NexusConstants;
 import com.mememan.nexus.internal.ForgeVanillaCompat;
-import com.mememan.nexus.internal.network.packets.s2c.DatapackEntriesSyncPacket;
 import com.mememan.nexus.internal.services.ForgeRegistrar;
-import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.property_wrapper.base.generic.PropertyWrapper;
 import com.mememan.nexus.property_wrapper.base.specialised.vanilla.VanillaBasedPropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.block.BlockPropertyWrapper;
 import com.mememan.nexus.property_wrapper.def.tag.TagPropertyWrapper;
-import com.mememan.nexus.resource.config.ResourceReloadListenerConfig;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.IntIntMutablePair;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import net.minecraft.Util;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.tags.TagKey;
@@ -32,13 +25,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.ToolAction;
 import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.event.furnace.FurnaceFuelBurnTimeEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -91,13 +82,6 @@ public class NexusForgeCommonMiscEvents {
                         .orElse(false))
                 .map(Pair::first)
                 .forEach(resourceReloadListenerList::add);
-    });
-    private static final Object2ObjectOpenHashMap<ResourceLocation, Pair<PreparableReloadListener, ResourceReloadListenerConfig<PreparableReloadListener>>> CACHED_SYNCABLE_RESOURCE_RELOAD_LISTENERS = Util.make(new Object2ObjectOpenHashMap<>(), syncableResourceReloadListenerMap -> {
-        ForgeRegistrar.getCachedResourceReloadListeners().entrySet().stream()
-                .filter(curListenerEntry -> curListenerEntry.getValue().second()
-                        .map(curListenerConfig -> curListenerConfig.listenerPackType() == PackType.SERVER_DATA && curListenerConfig.shouldSyncToClient())
-                        .orElse(false))
-                .forEach(curListenerEntry -> syncableResourceReloadListenerMap.putIfAbsent(curListenerEntry.getKey(), ObjectObjectImmutablePair.of(curListenerEntry.getValue().first(), curListenerEntry.getValue().second().get())));
     });
     public static final Object2ObjectOpenHashMap<Block, IntIntMutablePair> CACHED_FLAMMABILITY_BY_TAG = new Object2ObjectOpenHashMap<>(); // Allow for dynamic resource reloads to actually affect tagged objects appropriately
     public static final Object2ObjectOpenHashMap<Block, Function<Supplier<Block>, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>>>> CACHED_BLOCK_TILLING_BEHAVIOURS = Util.make(new Object2ObjectOpenHashMap<>(), tillingBehaviourMap -> {
@@ -174,23 +158,5 @@ public class NexusForgeCommonMiscEvents {
     @SubscribeEvent
     public static void onAddReloadListenerEvent(AddReloadListenerEvent event) {
         CACHED_RESOURCE_RELOAD_LISTENERS.forEach(event::addListener);
-    }
-
-    @SubscribeEvent
-    public static void onDatapackSyncEvent(OnDatapackSyncEvent event) {
-        ServerPlayer primaryPlayer = event.getPlayer();
-
-        CACHED_SYNCABLE_RESOURCE_RELOAD_LISTENERS.forEach((curListenerId, curListenerPair) -> {
-            PreparableReloadListener listener = curListenerPair.first();
-            ResourceReloadListenerConfig<PreparableReloadListener> listenerConfig = curListenerPair.second();
-            Optional<Function<PreparableReloadListener, Map<ResourceLocation, ?>>> listenerDataMapper = listenerConfig.dataMapGetter();
-
-            listenerDataMapper.ifPresentOrElse(dataMapper -> {
-                DatapackEntriesSyncPacket<?> syncPacket = new DatapackEntriesSyncPacket<>(curListenerId, dataMapper.apply(listener));
-
-                if (primaryPlayer != null) NexusServices.NETWORK_MANAGER.sendToClient(syncPacket, primaryPlayer);
-                else NexusServices.NETWORK_MANAGER.sendToAllClients(syncPacket);
-            }, () -> NexusConstants.LOGGER.warn("Skipping syncable resource reload listener of id '{}' due to missing data mapper.", curListenerId));
-        });
     }
 }

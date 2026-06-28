@@ -17,25 +17,25 @@ import java.util.function.Supplier;
  * custom model overrides.
  */
 public class ItemModelDefinition extends BaseModelDefinition<ItemModelDefinition> {
-    protected final Map<Map<ResourceLocation, Float>, ResourceLocation> modelTextureOverrides = new Object2ObjectLinkedOpenHashMap<>();
+    protected final Map<ResourceLocation, Map<String, Float>> modelTextureOverrides = new Object2ObjectLinkedOpenHashMap<>();
 
     public ItemModelDefinition(@NotNull ModelTemplate parentModel) {
         super(parentModel, "item");
     }
 
     /**
-     * Defines a custom texture override for the item model. The key represents a {@link Map} of predicates (fulfilled
-     * based on the criteria of the value's... well, value) and the value represents a {@link ResourceLocation}
-     * representing the item model to delegate to if said predicate(s) is/are fulfilled.
+     * Defines a custom texture override for the item model. The key represents a {@link ResourceLocation} pointing to
+     * the item model to use when the predicates are fulfilled, and the value represents a {@link Map} of predicates
+     * (fulfilled based on the criteria of the value's... well, value).
      * <br></br>
      * An entry would generally be structured as:
      * <br>
-     * K: {@code Map.of(new ResourceLocation("mymodid:my_predicate_location"), 1.0F, ...)},
+     * K: {@code new ResourceLocation("mymodid:my_conditional_texture_location")}.
      * <p></p>
-     * V: {@code new ResourceLocation("mymodid:my_conditional_texture_location")}.
+     * V: {@code Map.of(new ResourceLocation("mymodid:my_predicate_location").toString(), 1.0F, ...)}, <- Predicate ID doesn't necessarily have to be a {@link ResourceLocation}.
      *
-     * @param textureOverridePredicates The custom map of texture overrides for the item model.
-     * @param textureOverride The custom map of texture overrides for the item model.
+     * @param textureOverride The {@link ResourceLocation} of the item model to delegate to if the predicates are fulfilled.
+     * @param textureOverridePredicates The {@link Map} of predicates that must be fulfilled for this override to apply.
      *
      * @return {@code this} (builder method)
      *
@@ -43,31 +43,31 @@ public class ItemModelDefinition extends BaseModelDefinition<ItemModelDefinition
      * @see #setItemModelTextureOverrides(Map)
      * @see #getItemModelTextureOverrides()
      */
-    public ItemModelDefinition withItemModelTextureOverride(Map<ResourceLocation, Float> textureOverridePredicates, ResourceLocation textureOverride) {
-        this.modelTextureOverrides.put(textureOverridePredicates, textureOverride);
+    public ItemModelDefinition withItemModelTextureOverride(ResourceLocation textureOverride, Map<String, Float> textureOverridePredicates) {
+        this.modelTextureOverrides.put(textureOverride, textureOverridePredicates);
         return this;
     }
 
     /**
-     * Defines a custom {@link Map} of texture overrides for the item model. The key represents a {@link Map} of
-     * predicates (fulfilled based on the criteria of the value's... well, value) per
-     * {@link ResourceLocation} representing the item model to delegate to if said predicate(s) is/are fulfilled.
+     * Defines a custom {@link Map} of texture overrides for the item model. The key is a
+     * {@link ResourceLocation} representing the item model to delegate to, and the value is a {@link Map} of
+     * predicates that must be fulfilled for said override to apply.
      * <br></br>
      * An entry would generally be structured as:
      * <br>
-     * K: {@code Map.of(new ResourceLocation("mymodid:my_predicate_location"), 1.0F, ...)},
+     * K: {@code new ResourceLocation("mymodid:my_conditional_texture_location")}.
      * <p></p>
-     * V: {@code new ResourceLocation("mymodid:my_conditional_texture_location")}.
+     * V: {@code Map.of(new ResourceLocation("mymodid:my_predicate_location").toString(), 1.0F, ...)}, <- Predicate ID doesn't necessarily have to be a {@link ResourceLocation}.
      *
      * @param textureOverrides The custom {@link Map} of texture overrides for the item model.
      *
      * @return {@code this} (builder method)
      *
-     * @see #withItemModelTextureOverride(Map, ResourceLocation)
+     * @see #withItemModelTextureOverride(ResourceLocation, Map)
      * @see #setItemModelTextureOverrides(Map)
      * @see #getItemModelTextureOverrides()
      */
-    public ItemModelDefinition withItemModelTextureOverrides(Map<Map<ResourceLocation, Float>, ResourceLocation> textureOverrides) {
+    public ItemModelDefinition withItemModelTextureOverrides(Map<ResourceLocation, Map<String, Float>> textureOverrides) {
         this.modelTextureOverrides.putAll(textureOverrides);
         return this;
     }
@@ -79,25 +79,25 @@ public class ItemModelDefinition extends BaseModelDefinition<ItemModelDefinition
      *
      * @return {@code this} (builder method)
      *
-     * @see #withItemModelTextureOverride(Map, ResourceLocation)
+     * @see #withItemModelTextureOverride(ResourceLocation, Map)
      * @see #withItemModelTextureOverrides(Map)
      * @see #getItemModelTextureOverrides()
      */
-    public ItemModelDefinition setItemModelTextureOverrides(Map<Map<ResourceLocation, Float>, ResourceLocation> textureOverrides) {
+    public ItemModelDefinition setItemModelTextureOverrides(Map<ResourceLocation, Map<String, Float>> textureOverrides) {
         this.modelTextureOverrides.clear();
         this.modelTextureOverrides.putAll(textureOverrides);
         return this;
     }
 
     /**
-     * Gets the custom map of texture overrides for the item model. Texture overrides are applied based on the
-     * {@link Map} of predicate values they share.
+     * Gets the custom map of texture overrides for the item model. The key is a {@link ResourceLocation} pointing to
+     * the item model to delegate to, and its value is the {@link Map} of predicates that must be fulfilled.
      *
      * @return The texture overrides {@link Map}. May be empty.
      *
-     * @see #withItemModelTextureOverride(Map, ResourceLocation)
+     * @see #withItemModelTextureOverride(ResourceLocation, Map)
      */
-    public Map<Map<ResourceLocation, Float>, ResourceLocation> getItemModelTextureOverrides() {
+    public Map<ResourceLocation, Map<String, Float>> getItemModelTextureOverrides() {
         return modelTextureOverrides;
     }
 
@@ -108,14 +108,14 @@ public class ItemModelDefinition extends BaseModelDefinition<ItemModelDefinition
         if (!modelTextureOverrides.isEmpty()) {
             JsonArray modelTextureOverridesArray = new JsonArray();
 
-            modelTextureOverrides.forEach((overrideConditions, overrideTextureLoc) -> {
+            modelTextureOverrides.forEach((overrideTextureLoc, overrideConditions) -> {
                 JsonObject rootOverridesObj = new JsonObject();
 
                 if (!overrideConditions.isEmpty()) {
-                    overrideConditions.forEach((predicateLoc, predicateValue) -> {
+                    overrideConditions.forEach((predicateId, predicateValue) -> {
                         JsonObject predicateObj = new JsonObject();
 
-                        if (predicateLoc != null && predicateValue != null) predicateObj.addProperty(predicateLoc.toString(), predicateValue);
+                        if (predicateId != null && predicateValue != null) predicateObj.addProperty(predicateId, predicateValue);
 
                         rootOverridesObj.add("predicate", predicateObj);
                     });

@@ -179,3 +179,6 @@ accessible method net/minecraft/client/renderer/blockentity/SignRenderer renderS
 
 # LevelResource
 accessible method net/minecraft/world/level/storage/LevelResource <init> (Ljava/lang/String;)V
+
+## AW
+accessible field net/minecraft/world/entity/ai/attributes/AttributeSupplier$Builder builder Ljava/util/Map;

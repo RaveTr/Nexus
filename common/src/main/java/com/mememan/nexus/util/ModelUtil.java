@@ -4,7 +4,10 @@ import com.mememan.nexus.client.block.BlockStateDefinition;
 import com.mememan.nexus.client.model.block.BlockModelDefinition;
 import com.mememan.nexus.client.model.item.ItemModelDefinition;
 import com.mememan.nexus.property_wrapper.base.generic.DataGenPropertyWrapper;
+import com.mememan.nexus.property_wrapper.base.specialised.model.ModelBasedPropertyWrapper;
 import com.mememan.nexus.template.object.block.vegetation.DefaultableMultiLayerPlantBlock;
+import it.unimi.dsi.fastutil.floats.FloatSet;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.Direction;
 import net.minecraft.data.models.blockstates.*;
@@ -14,6 +17,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.*;
 
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -32,6 +38,8 @@ public final class ModelUtil {
     public static final ModelTemplate BARS_SIDE_MODEL_TEMPLATE = new ModelTemplate(Optional.of(new ResourceLocation("block/iron_bars_side")), Optional.of("_side"), TextureSlot.PARTICLE, BARS_TEXTURE_SLOT, TextureSlot.EDGE);
     public static final ModelTemplate BARS_SIDE_ALT_MODEL_TEMPLATE = new ModelTemplate(Optional.of(new ResourceLocation("block/iron_bars_side_alt")), Optional.of("_side_alt"), TextureSlot.PARTICLE, BARS_TEXTURE_SLOT, TextureSlot.EDGE);
     public static final ModelTemplate GRASS_BLOCK_MODEL_TEMPLATE = new ModelTemplate(Optional.of(new ResourceLocation("block/grass_block")), Optional.empty(), TextureSlot.PARTICLE, TextureSlot.BOTTOM, TextureSlot.TOP, TextureSlot.SIDE, OVERLAY_TEXTURE_SLOT);
+    public static final ModelTemplate BOW_MODEL_TEMPLATE = new ModelTemplate(Optional.of(new ResourceLocation("item/bow")), Optional.empty(), TextureSlot.LAYER0);
+    public static final ModelTemplate CROSSBOW_MODEL_TEMPLATE = new ModelTemplate(Optional.of(new ResourceLocation("item/crossbow")), Optional.empty(), TextureSlot.LAYER0);
     public static final TextureMapping EMPTY_TEXTURE_MAPPING = new TextureMapping();
     public static final ResourceLocation SOLID_RENDER_TYPE = new ResourceLocation("solid");
     public static final ResourceLocation CUTOUT_MIPPED_RENDER_TYPE = new ResourceLocation("cutout_mipped");
@@ -6324,10 +6332,33 @@ public final class ModelUtil {
         return generatedBlock(RegistryUtil.getTextureLocationOrDefault(targetBlock, "item"));
     }
 
+    /**
+     * Creates a simple {@link ItemModelDefinition} referencing the specified model location without any additional
+     * parameters (textures, overrides, etc.).
+     *
+     * @param modelLocation The {@link ResourceLocation} pointing towards the parent model.
+     *
+     * @return A new {@link ItemModelDefinition} wrapping the specified model location.
+     *
+     * @see #standardBlock(Supplier)
+     * @see #fromLocation(ResourceLocation)
+     */
     public static ItemModelDefinition standardBlock(ResourceLocation modelLocation) {
         return new ItemModelDefinition(fromLocation(modelLocation));
     }
 
+    /**
+     * Overloaded variant of {@link #standardBlock(ResourceLocation)}. Creates a simple {@link ItemModelDefinition}
+     * referencing the model location derived from the provided block's registry ID.
+     *
+     * @param targetBlock The {@code Supplier<Block>} representing the owner {@link Block} to be used for
+     *                    automatic model location resolution.
+     *
+     * @return A new {@link ItemModelDefinition} wrapping the resolved model location.
+     *
+     * @see #standardBlock(ResourceLocation)
+     * @see ModelLocationUtils#getModelLocation(Block)
+     */
     public static ItemModelDefinition standardBlock(Supplier<Block> targetBlock) {
         return standardBlock(ModelLocationUtils.getModelLocation(targetBlock.get()));
     }
@@ -6410,5 +6441,516 @@ public final class ModelUtil {
      */
     public static ItemModelDefinition handheldRod(Supplier<Item> targetItem) {
         return handheldRod(RegistryUtil.getTextureLocationOrDefault(targetItem, "item"));
+    }
+
+    /**
+     * Creates a {@link ItemModelDefinition} with the {@link #BOW_MODEL_TEMPLATE} template and the specified texture
+     * overrides.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.pickItemPrefix(bowTexLoc)}</li>
+     *     </ul>
+     *
+     * @param bowTexLoc The {@link ResourceLocation} pointing towards the base bow texture.
+     * @param bowTextureOverrides A {@code Map} of texture overrides keyed by model location, each containing a
+     *                            {@code Map} of predicate key-value pairs.
+     *
+     * @return A new {@link ItemModelDefinition} with the {@link #BOW_MODEL_TEMPLATE} template.
+     *
+     * @see #bow(ResourceLocation)
+     * @see #bow(Supplier, Map)
+     */
+    public static ItemModelDefinition bow(ResourceLocation bowTexLoc, Map<ResourceLocation, Map<String, Float>> bowTextureOverrides) {
+        return new ItemModelDefinition(BOW_MODEL_TEMPLATE)
+                .withItemModelTextureOverrides(bowTextureOverrides)
+                .withTextureMapping(TextureMapping.layer0(RegistryUtil.pickItemPrefix(bowTexLoc)));
+    }
+
+    /**
+     * Overloaded variant of {@link #bow(ResourceLocation, Map)}. Creates a {@link ItemModelDefinition} with the
+     * {@link #BOW_MODEL_TEMPLATE} template without any texture overrides.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.pickItemPrefix(bowTexLoc)}</li>
+     *     </ul>
+     *
+     * @param bowTexLoc The {@link ResourceLocation} pointing towards the base bow texture.
+     *
+     * @return A new {@link ItemModelDefinition} with the {@link #BOW_MODEL_TEMPLATE} template.
+     *
+     * @see #bow(ResourceLocation, Map)
+     */
+    public static ItemModelDefinition bow(ResourceLocation bowTexLoc) {
+        return bow(bowTexLoc, new Object2ObjectOpenHashMap<>());
+    }
+
+    /**
+     * Overloaded variant of {@link #bow(ResourceLocation, Map)}. Creates a {@link ItemModelDefinition} with the
+     * {@link #BOW_MODEL_TEMPLATE} template using the texture location derived from the provided item.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.getTextureLocationOrDefault(targetItem, "item")}</li>
+     *     </ul>
+     *
+     * @param targetItem The {@code Supplier<Item>} used to automatically resolve the texture location.
+     * @param bowTextureOverrides A {@code Map} of texture overrides keyed by model location, each containing a
+     *                            {@code Map} of predicate key-value pairs.
+     *
+     * @return A new {@link ItemModelDefinition} with the {@link #BOW_MODEL_TEMPLATE} template.
+     *
+     * @see #bow(ResourceLocation, Map)
+     * @see #bow(Supplier)
+     */
+    public static ItemModelDefinition bow(Supplier<Item> targetItem, Map<ResourceLocation, Map<String, Float>> bowTextureOverrides) {
+        return bow(RegistryUtil.getTextureLocationOrDefault(targetItem, "item"), bowTextureOverrides);
+    }
+
+    /**
+     * Overloaded variant of {@link #bow(ResourceLocation)} and {@link #bow(Supplier, Map)}. Creates a
+     * {@link ItemModelDefinition} with the {@link #BOW_MODEL_TEMPLATE} template using automatic texture resolution
+     * without any texture overrides.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.getTextureLocationOrDefault(targetItem, "item")}</li>
+     *     </ul>
+     *
+     * @param targetItem The {@code Supplier<Item>} used to automatically resolve the texture location.
+     *
+     * @return A new {@link ItemModelDefinition} with the {@link #BOW_MODEL_TEMPLATE} template.
+     *
+     * @see #bow(Supplier, Map)
+     * @see #bow(ResourceLocation)
+     */
+    public static ItemModelDefinition bow(Supplier<Item> targetItem) {
+        return bow(RegistryUtil.getTextureLocationOrDefault(targetItem, "item"));
+    }
+
+    /**
+     * Creates a {@link ItemModelDefinition} for a specific bow pulling phase with the {@link #BOW_MODEL_TEMPLATE}
+     * template. The resulting model is automatically named using the item's registry ID suffixed with
+     * {@code "_pulling_<pullingPhase>"}.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.pickItemPrefix(RegistryUtil.getTextureLocationOrDefault(pullingPhaseId, "item"))}</li>
+     *     </ul>
+     *
+     * @param targetItem The {@code Supplier<Item>} representing the bow item to create the pulling phase model for.
+     * @param pullingPhase The pulling phase index ({@code 0}-based) for which to generate the model.
+     *
+     * @return A new {@link ItemModelDefinition} with the {@link #BOW_MODEL_TEMPLATE} template and the custom name set.
+     *
+     * @see #standardBow(Supplier, int, String, String, FloatSet)
+     */
+    public static ItemModelDefinition bowPulling(Supplier<Item> targetItem, int pullingPhase) {
+        ResourceLocation pullingPhaseId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetItem.get()).withSuffix("_pulling_%d".formatted(pullingPhase));
+
+        return new ItemModelDefinition(BOW_MODEL_TEMPLATE)
+                .withTextureMapping(TextureMapping.layer0(RegistryUtil.pickItemPrefix(RegistryUtil.getTextureLocationOrDefault(pullingPhaseId, "item"))))
+                .withCustomName(pullingPhaseId.getPath());
+    }
+
+    /**
+     * Creates a full standard bow model setup with the {@link #BOW_MODEL_TEMPLATE} template, including automatic
+     * generation of pulling phase sub-models and predicate-based texture overrides. Validates that the pulling phase
+     * count is non-negative.
+     * <p>
+     *     <h3>Generated Sub-Models</h3>
+     *     <ul>
+     *         <li>Base bow model with the specified texture overrides</li>
+     *         <li>{@code pullingPhases} pulling phase sub-models (e.g., {@code "_pulling_0"}, {@code "_pulling_1"})</li>
+     *     </ul>
+     *     <h3>Predicate Mappings</h3>
+     *     <ul>
+     *         <li>{@code pullingPredicateKey} is used to associate each pulling phase model with its predicate</li>
+     *         <li>{@code pullPredicateKey} uses the values in {@code bowSpriteFrames} to determine the charge pull
+     *         threshold for each sprite frame</li>
+     *     </ul>
+     *
+     * @param targetItem The {@code Supplier<Item>} representing the bow item to generate models for.
+     * @param pullingPhases The number of pulling phases to generate. Must be {@code >= 0}.
+     * @param pullingPredicateKey The predicate key name for the pulling state (e.g., {@code "pulling"}).
+     * @param pullPredicateKey The predicate key name for the pull charge state (e.g., {@code "pull"}).
+     * @param bowSpriteFrames A {@link FloatSet} of pull time fractions determining the charge pull threshold for each
+     *                        additional sprite frame after the initial pulling phase.
+     *
+     * @return An {@link ItemModelDefinition} containing the base bow model and all pulling phase sub-models.
+     *
+     * @throws IllegalArgumentException If {@code pullingPhases} is negative.
+     *
+     * @see #standardBow(Supplier)
+     * @see #bow(Supplier, Map)
+     * @see #bowPulling(Supplier, int)
+     */
+    public static ItemModelDefinition standardBow(Supplier<Item> targetItem, int pullingPhases, String pullingPredicateKey, String pullPredicateKey, FloatSet bowSpriteFrames) {
+        ResourceLocation baseBowId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetItem.get());
+
+        if (pullingPhases < 0) throw new IllegalArgumentException(String.format("Tried generating a standard bow item model for %s%s with less than 0 pulling phases!", targetItem.get().getClass().getSimpleName(), baseBowId));
+
+        Map<ResourceLocation, Map<String, Float>> bowTextureOverrides = new Object2ObjectOpenHashMap<>();
+
+        if (!bowSpriteFrames.isEmpty()) {
+            int curIdx = 0;
+
+            bowTextureOverrides.put(
+                    baseBowId.withSuffix("_pulling_%d".formatted(curIdx)),
+                    Map.of(
+                            pullingPredicateKey,
+                            1.0F
+                    )
+            );
+
+            for (float spriteFrameSec : bowSpriteFrames) {
+                ResourceLocation pullingPhaseId = baseBowId.withSuffix("_pulling_%d".formatted(curIdx++));
+
+                bowTextureOverrides.put(
+                        pullingPhaseId,
+                        Map.of(
+                                pullingPredicateKey,
+                                1.0F,
+                                pullPredicateKey,
+                                spriteFrameSec
+                        )
+                );
+            }
+        }
+
+        ItemModelDefinition baseIMD = bow(targetItem, bowTextureOverrides);
+        List<ModelBasedPropertyWrapper.ModelDefinition> pullingPhaseIMDs = new ObjectArrayList<>();
+
+        for (int pullingPhase = 0; pullingPhase < pullingPhases; pullingPhase++) { // TODO Maybe use a basic pre-determined fallback based on use duration(?) (Though, there doesn't seem to be a reliable method to get the actual duration it takes for a bow to reach max charge, and even then, it's only really a fallback since bow pulling phases aren't necessarily dependent on any particular distribution of charge/time)
+            pullingPhaseIMDs.add(bowPulling(targetItem, pullingPhase));
+        }
+
+        return baseIMD.withOrdinalModelDefinitions(pullingPhaseIMDs);
+    }
+
+    /**
+     * Overloaded variant of {@link #standardBow(Supplier, int, String, String, FloatSet)}. Creates a standard bow
+     * model setup with default values: 2 pulling phases, {@code "pulling"} and {@code "pull"} predicate keys, and
+     * sprite frames at {@code 0.65F} and {@code 0.9F}.
+     *
+     * @param targetItem The {@code Supplier<Item>} representing the bow item to generate models for.
+     *
+     * @return An {@link ItemModelDefinition} containing the base bow model and all pulling phase sub-models.
+     *
+     * @see #standardBow(Supplier, int, String, String, FloatSet)
+     */
+    public static ItemModelDefinition standardBow(Supplier<Item> targetItem) {
+        return standardBow(targetItem, 2, "pulling", "pull", FloatSet.of(0.65F, 0.9F));
+    }
+
+    /**
+     * Creates a {@link ItemModelDefinition} with the {@link #CROSSBOW_MODEL_TEMPLATE} template and the specified texture
+     * overrides.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.pickItemPrefix(crossbowTexLoc)}</li>
+     *     </ul>
+     *
+     * @param crossbowTexLoc The {@link ResourceLocation} pointing towards the base crossbow texture.
+     * @param crossbowTextureOverrides A {@code Map} of texture overrides keyed by model location, each containing a
+     *                                 {@code Map} of predicate key-value pairs.
+     *
+     * @return A new {@link ItemModelDefinition} with the {@link #CROSSBOW_MODEL_TEMPLATE} template.
+     *
+     * @see #crossbow(ResourceLocation)
+     * @see #crossbow(Supplier, Map)
+     */
+    public static ItemModelDefinition crossbow(ResourceLocation crossbowTexLoc, Map<ResourceLocation, Map<String, Float>> crossbowTextureOverrides) {
+        return new ItemModelDefinition(CROSSBOW_MODEL_TEMPLATE)
+                .withItemModelTextureOverrides(crossbowTextureOverrides)
+                .withTextureMapping(TextureMapping.layer0(RegistryUtil.pickItemPrefix(crossbowTexLoc)));
+    }
+
+    /**
+     * Overloaded variant of {@link #crossbow(ResourceLocation, Map)}. Creates a {@link ItemModelDefinition} with the
+     * {@link #CROSSBOW_MODEL_TEMPLATE} template without any texture overrides.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.pickItemPrefix(crossbowTexLoc)}</li>
+     *     </ul>
+     *
+     * @param crossbowTexLoc The {@link ResourceLocation} pointing towards the base crossbow texture.
+     *
+     * @return A new {@link ItemModelDefinition} with the {@link #CROSSBOW_MODEL_TEMPLATE} template.
+     *
+     * @see #crossbow(ResourceLocation, Map)
+     */
+    public static ItemModelDefinition crossbow(ResourceLocation crossbowTexLoc) {
+        return crossbow(crossbowTexLoc, new Object2ObjectOpenHashMap<>());
+    }
+
+    /**
+     * Overloaded variant of {@link #crossbow(ResourceLocation, Map)}. Creates a {@link ItemModelDefinition} with the
+     * {@link #CROSSBOW_MODEL_TEMPLATE} template using the texture location derived from the provided item.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.getTextureLocationOrDefault(targetItem, "item")}</li>
+     *     </ul>
+     *
+     * @param targetItem The {@code Supplier<Item>} used to automatically resolve the texture location.
+     * @param crossbowTextureOverrides A {@code Map} of texture overrides keyed by model location, each containing a
+     *                                 {@code Map} of predicate key-value pairs.
+     *
+     * @return A new {@link ItemModelDefinition} with the {@link #CROSSBOW_MODEL_TEMPLATE} template.
+     *
+     * @see #crossbow(ResourceLocation, Map)
+     * @see #crossbow(Supplier)
+     */
+    public static ItemModelDefinition crossbow(Supplier<Item> targetItem, Map<ResourceLocation, Map<String, Float>> crossbowTextureOverrides) {
+        return crossbow(RegistryUtil.getTextureLocationOrDefault(targetItem, "item"), crossbowTextureOverrides);
+    }
+
+    /**
+     * Overloaded variant of {@link #crossbow(ResourceLocation)} and {@link #crossbow(Supplier, Map)}. Creates a
+     * {@link ItemModelDefinition} with the {@link #CROSSBOW_MODEL_TEMPLATE} template using automatic texture resolution
+     * without any texture overrides.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.getTextureLocationOrDefault(targetItem, "item")}</li>
+     *     </ul>
+     *
+     * @param targetItem The {@code Supplier<Item>} used to automatically resolve the texture location.
+     *
+     * @return A new {@link ItemModelDefinition} with the {@link #CROSSBOW_MODEL_TEMPLATE} template.
+     *
+     * @see #crossbow(Supplier, Map)
+     * @see #crossbow(ResourceLocation)
+     */
+    public static ItemModelDefinition crossbow(Supplier<Item> targetItem) {
+        return crossbow(RegistryUtil.getTextureLocationOrDefault(targetItem, "item"));
+    }
+
+    /**
+     * Creates a {@link ItemModelDefinition} for a specific crossbow pulling phase with the
+     * {@link #CROSSBOW_MODEL_TEMPLATE} template. The resulting model is automatically named using the item's registry
+     * ID suffixed with {@code "_pulling_<pullingPhase>"}.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.pickItemPrefix(RegistryUtil.getTextureLocationOrDefault(pullingPhaseId, "item"))}</li>
+     *     </ul>
+     *
+     * @param targetItem The {@code Supplier<Item>} representing the crossbow item to create the pulling phase model for.
+     * @param pullingPhase The pulling phase index ({@code 0}-based) for which to generate the model.
+     *
+     * @return A new {@link ItemModelDefinition} with the {@link #CROSSBOW_MODEL_TEMPLATE} template and the custom name set.
+     *
+     * @see #standardCrossbow(Supplier, int, String, String, String, FloatSet, String, String...)
+     */
+    public static ItemModelDefinition crossbowPulling(Supplier<Item> targetItem, int pullingPhase) {
+        ResourceLocation pullingPhaseId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetItem.get()).withSuffix("_pulling_%d".formatted(pullingPhase));
+
+        return new ItemModelDefinition(CROSSBOW_MODEL_TEMPLATE)
+                .withTextureMapping(TextureMapping.layer0(RegistryUtil.pickItemPrefix(RegistryUtil.getTextureLocationOrDefault(pullingPhaseId, "item"))))
+                .withCustomName(pullingPhaseId.getPath());
+    }
+
+    /**
+     * Creates a {@link ItemModelDefinition} for a crossbow loaded with a specific projectile type using the
+     * {@link #CROSSBOW_MODEL_TEMPLATE} template. The resulting model is automatically named using the item's registry
+     * ID suffixed with {@code "_<projectileId>"}.
+     * <p>
+     *     <h3>Required Texture Slots</h3>
+     *     <ul>
+     *         <li>{@link TextureSlot#LAYER0} -> {@code RegistryUtil.pickItemPrefix(RegistryUtil.getTextureLocationOrDefault(crossbowWithProjectileId, "item"))}</li>
+     *     </ul>
+     *
+     * @param targetItem The {@code Supplier<Item>} representing the crossbow item to create the projectile model for.
+     * @param projectileId The projectile identifier string (e.g., {@code "arrow"}, {@code "firework"}) used to
+     *                     resolve the suffix and texture.
+     *
+     * @return A new {@link ItemModelDefinition} with the {@link #CROSSBOW_MODEL_TEMPLATE} template and the custom name set.
+     *
+     * @see #crossbowWithArrow(Supplier)
+     * @see #crossbowWithFirework(Supplier)
+     * @see #standardCrossbow(Supplier, int, String, String, String, FloatSet, String, String...)
+     */
+    public static ItemModelDefinition crossbowWithProjectile(Supplier<Item> targetItem, String projectileId) {
+        ResourceLocation crossbowWithProjectileId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetItem.get()).withSuffix("_" + projectileId.toLowerCase(Locale.ROOT));
+
+        return new ItemModelDefinition(CROSSBOW_MODEL_TEMPLATE)
+                .withTextureMapping(TextureMapping.layer0(RegistryUtil.pickItemPrefix(RegistryUtil.getTextureLocationOrDefault(crossbowWithProjectileId, "item"))))
+                .withCustomName(crossbowWithProjectileId.getPath());
+    }
+
+    /**
+     * Creates a {@link ItemModelDefinition} for a crossbow loaded with an arrow using the
+     * {@link #CROSSBOW_MODEL_TEMPLATE} template. Convenience wrapper around
+     * {@link #crossbowWithProjectile(Supplier, String)} with the projectile ID set to {@code "arrow"}.
+     *
+     * @param targetItem The {@code Supplier<Item>} representing the crossbow item to create the arrow-loaded model for.
+     *
+     * @return A new {@link ItemModelDefinition} with the {@link #CROSSBOW_MODEL_TEMPLATE} template and the custom name set.
+     *
+     * @see #crossbowWithProjectile(Supplier, String)
+     * @see #crossbowWithFirework(Supplier)
+     */
+    public static ItemModelDefinition crossbowWithArrow(Supplier<Item> targetItem) {
+        return crossbowWithProjectile(targetItem, "arrow");
+    }
+
+    /**
+     * Creates a {@link ItemModelDefinition} for a crossbow loaded with a firework rocket using the
+     * {@link #CROSSBOW_MODEL_TEMPLATE} template. Convenience wrapper around
+     * {@link #crossbowWithProjectile(Supplier, String)} with the projectile ID set to {@code "firework"}.
+     *
+     * @param targetItem The {@code Supplier<Item>} representing the crossbow item to create the firework-loaded model for.
+     *
+     * @return A new {@link ItemModelDefinition} with the {@link #CROSSBOW_MODEL_TEMPLATE} template and the custom name set.
+     *
+     * @see #crossbowWithProjectile(Supplier, String)
+     * @see #crossbowWithArrow(Supplier)
+     */
+    public static ItemModelDefinition crossbowWithFirework(Supplier<Item> targetItem) {
+        return crossbowWithProjectile(targetItem, "firework");
+    }
+
+    /**
+     * Creates a full standard crossbow model setup with the {@link #CROSSBOW_MODEL_TEMPLATE} template, including
+     * automatic generation of pulling phase sub-models, projectile-loaded sub-models, and predicate-based texture
+     * overrides. Validates that the pulling phase count is non-negative.
+     * <p>
+     *     <h3>Generated Sub-Models</h3>
+     *     <ul>
+     *         <li>Base crossbow model with the specified texture overrides</li>
+     *         <li>{@code pullingPhases} pulling phase sub-models (e.g., {@code "_pulling_0"}, {@code "_pulling_1"})</li>
+     *         <li>Projectile-loaded sub-models for the default projectile and each additional projectile ID</li>
+     *     </ul>
+     *     <h3>Predicate Mappings</h3>
+     *     <ul>
+     *         <li>{@code pullingPredicateKey} is used to associate each pulling phase model with its predicate</li>
+     *         <li>{@code pullPredicateKey} uses the values in {@code crossbowSpriteFrames} to determine the charge pull
+     *         threshold for each sprite frame</li>
+     *         <li>{@code chargedPredicateKey} is used to associate the loaded projectile models (if non-{@code null})</li>
+     *     </ul>
+     *
+     * @param targetItem The {@code Supplier<Item>} representing the crossbow item to generate models for.
+     * @param pullingPhases The number of pulling phases to generate. Must be {@code >= 0}.
+     * @param pullingPredicateKey The predicate key name for the pulling state (e.g., {@code "pulling"}).
+     * @param pullPredicateKey The predicate key name for the pull charge state (e.g., {@code "pull"}).
+     * @param chargedPredicateKey The predicate key name for the charged state (e.g., {@code "charged"}). If
+     *                            {@code null}, projectile-loaded sub-models will not be generated.
+     * @param crossbowSpriteFrames A {@link FloatSet} of pull time fractions determining the charge pull threshold for
+     *                             each additional sprite frame after the initial pulling phase.
+     * @param defaultProjectileId The default projectile identifier (e.g., {@code "arrow"}). If {@code null}, falls
+     *                            back to {@code "arrow"}.
+     * @param additionalProjectileIds Additional projectile identifiers to generate loaded sub-models for (e.g.,
+     *                                {@code "firework"}).
+     *
+     * @return An {@link ItemModelDefinition} containing the base crossbow model, pulling phase sub-models, and
+     *         projectile-loaded sub-models.
+     *
+     * @throws IllegalArgumentException If {@code pullingPhases} is negative.
+     *
+     * @see #standardCrossbow(Supplier)
+     * @see #crossbow(Supplier, Map)
+     * @see #crossbowPulling(Supplier, int)
+     * @see #crossbowWithProjectile(Supplier, String)
+     */
+    public static ItemModelDefinition standardCrossbow(Supplier<Item> targetItem, int pullingPhases, String pullingPredicateKey, String pullPredicateKey, String chargedPredicateKey, FloatSet crossbowSpriteFrames, String defaultProjectileId, String... additionalProjectileIds) {
+        ResourceLocation baseCrossbowId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetItem.get());
+
+        if (pullingPhases < 0) throw new IllegalArgumentException(String.format("Tried generating a standard crossbow item model for %s%s with less than 0 pulling phases!", targetItem.get().getClass().getSimpleName(), baseCrossbowId));
+
+        Map<ResourceLocation, Map<String, Float>> crossbowTextureOverrides = new Object2ObjectOpenHashMap<>();
+
+        if (!crossbowSpriteFrames.isEmpty()) {
+            int curIdx = 0;
+
+            crossbowTextureOverrides.put(
+                    baseCrossbowId.withSuffix("_pulling_%d".formatted(curIdx)),
+                    Map.of(
+                            pullingPredicateKey,
+                            1.0F
+                    )
+            );
+
+            for (float spriteFrameSec : crossbowSpriteFrames) {
+                ResourceLocation pullingPhaseId = baseCrossbowId.withSuffix("_pulling_%d".formatted(curIdx++));
+
+                crossbowTextureOverrides.put(
+                        pullingPhaseId,
+                        Map.of(
+                                pullingPredicateKey,
+                                1.0F,
+                                pullPredicateKey,
+                                spriteFrameSec
+                        )
+                );
+            }
+        }
+
+        String chosenDefaultProjectileId = defaultProjectileId == null ? "arrow" : defaultProjectileId;
+
+        if (chargedPredicateKey != null) {
+            crossbowTextureOverrides.put(
+                    baseCrossbowId.withSuffix("_" + chosenDefaultProjectileId),
+                    Map.of(
+                            chargedPredicateKey,
+                            1.0F
+                    )
+            );
+
+            for (String projectileId : additionalProjectileIds) {
+                if (projectileId == null) continue;
+
+                ResourceLocation crossbowWithProjectileId = baseCrossbowId.withSuffix("_" + projectileId);
+
+                crossbowTextureOverrides.put(
+                        crossbowWithProjectileId,
+                        Map.of(
+                                chargedPredicateKey,
+                                1.0F,
+                                projectileId,
+                                1.0F
+                        )
+                );
+            }
+        }
+
+        ItemModelDefinition baseIMD = crossbow(targetItem, crossbowTextureOverrides);
+        ObjectArrayList<ModelBasedPropertyWrapper.ModelDefinition> pullingPhaseIMDs = new ObjectArrayList<>();
+
+        for (int pullingPhase = 0; pullingPhase < pullingPhases; pullingPhase++) {
+            pullingPhaseIMDs.add(crossbowPulling(targetItem, pullingPhase));
+        }
+
+        pullingPhaseIMDs.add(crossbowWithProjectile(targetItem, chosenDefaultProjectileId));
+
+        for (String projectileId : additionalProjectileIds) {
+            if (projectileId == null) continue;
+
+            pullingPhaseIMDs.add(crossbowWithProjectile(targetItem, projectileId));
+        }
+
+        return baseIMD.withOrdinalModelDefinitions(pullingPhaseIMDs);
+    }
+
+    /**
+     * Overloaded variant of
+     * {@link #standardCrossbow(Supplier, int, String, String, String, FloatSet, String, String...)}. Creates a standard
+     * crossbow model setup with default values: 2 pulling phases, {@code "pulling"}, {@code "pull"}, and
+     * {@code "charged"} predicate keys, sprite frames at {@code 0.58F} and {@code 1.0F}, {@code "arrow"} as the
+     * default projectile, and {@code "firework"} as the additional projectile.
+     *
+     * @param targetItem The {@code Supplier<Item>} representing the crossbow item to generate models for.
+     *
+     * @return An {@link ItemModelDefinition} containing the base crossbow model, pulling phase sub-models, and
+     *         projectile-loaded sub-models.
+     *
+     * @see #standardCrossbow(Supplier, int, String, String, String, FloatSet, String, String...)
+     */
+    public static ItemModelDefinition standardCrossbow(Supplier<Item> targetItem) {
+        return standardCrossbow(targetItem, 2, "pulling", "pull", "charged", FloatSet.of(0.58F, 1.0F), "arrow", "firework");
     }
 }

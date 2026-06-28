@@ -9,11 +9,16 @@ import com.mememan.nexus.template.event.blueprint.server.ServerLifeCycleEventBlu
 import com.mememan.nexus.template.event.def.common.TickEvent;
 import com.mememan.nexus.template.event.def.server.ServerLifeCycleEvent;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.packs.resources.ResourceManager;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BooleanSupplier;
 
 /**
@@ -31,6 +36,9 @@ public abstract class MinecraftServerMixin {
     private MinecraftServerMixin() {
         throw new IllegalArgumentException("Attempted to construct Mixin Class! (MinecraftServerMixin)");
     }
+
+    @Shadow
+    public abstract ResourceManager getResourceManager();
 
     @Definition(id = "initServer", method = "Lnet/minecraft/server/MinecraftServer;initServer()Z")
     @Expression("this.initServer()")
@@ -72,5 +80,23 @@ public abstract class MinecraftServerMixin {
     private void nexus$handlePostServerTickEventHook(BooleanSupplier hasTimeLeft, CallbackInfo ci) {
         TickEvent.ServerTickEvent serverTickEventHook = new TickEvent.ServerTickEvent(TickEvent.Phase.END, (MinecraftServer) (Object) this, hasTimeLeft);
         TickEventBlueprint.SERVER_TICK.fireEvent(serverTickEventHook);
+    }
+
+    @Inject(method = "reloadResources", at = @At("HEAD"), cancellable = true)
+    private void nexus$handleDataPackReloadStartEventHook(Collection<String> selectedIds, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
+        ServerLifeCycleEvent.DataPackReloadStartEvent dataPackReloadStartEventHook = new ServerLifeCycleEvent.DataPackReloadStartEvent((MinecraftServer) (Object) this, getResourceManager());
+        EventResult<ServerLifeCycleEvent.DataPackReloadStartEvent> dataPackReloadStartEventResult = ServerLifeCycleEventBlueprint.DATAPACK_RELOAD_START.fireEvent(dataPackReloadStartEventHook);
+
+        if (dataPackReloadStartEventResult.cancelled()) cir.setReturnValue(CompletableFuture.allOf());
+    }
+
+    @Inject(method = "reloadResources", at = @At("TAIL"), cancellable = true)
+    private void nexus$handleDataPackReloadEndEventHook(Collection<String> selectedIds, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
+        cir.getReturnValue().handleAsync((value, throwable) -> {
+            ServerLifeCycleEvent.DataPackReloadEndEvent dataPackReloadEndEventHook = new ServerLifeCycleEvent.DataPackReloadEndEvent((MinecraftServer) (Object) this, getResourceManager(), throwable == null);
+            ServerLifeCycleEventBlueprint.DATAPACK_RELOAD_END.fireEvent(dataPackReloadEndEventHook);
+
+            return value;
+        }, (MinecraftServer) (Object) this);
     }
 }
