@@ -5,16 +5,23 @@ import com.llamalad7.mixinextras.expression.Expression;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mememan.nexus.event.result.EventResult;
+import com.mememan.nexus.template.event.blueprint.client.ClientLifeCycleEventBlueprint;
 import com.mememan.nexus.template.event.blueprint.common.TickEventBlueprint;
+import com.mememan.nexus.template.event.def.client.ClientLifeCycleEvent;
 import com.mememan.nexus.template.event.def.common.TickEvent;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.ResourceLoadStateTracker;
 import net.minecraft.client.Timer;
+import net.minecraft.server.packs.repository.PackRepository;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Mixin {@code class} responsible for firing and handling client tick event hooks with as little intrusion as
@@ -32,6 +39,14 @@ public abstract class MinecraftMixin {
     private volatile boolean pause;
     @Shadow
     private float pausePartialTick;
+    @Shadow
+    @Final
+    private ResourceLoadStateTracker reloadStateTracker;
+    @Shadow
+    @Final
+    private PackRepository resourcePackRepository;
+    @Shadow
+    private CompletableFuture<Void> pendingReload;
 
     private MinecraftMixin() {
         throw new IllegalArgumentException("Attempted to construct Mixin Class! (MinecraftMixin)");
@@ -68,5 +83,38 @@ public abstract class MinecraftMixin {
         TickEvent.RenderTickEvent renderTickEventHook = new TickEvent.RenderTickEvent(TickEvent.Phase.END, renderLevel, actualPartialTick);
 
         TickEventBlueprint.RENDER_TICK.fireEvent(renderTickEventHook);
+    }
+
+    @Inject(method = "reloadResourcePacks(Z)Ljava/util/concurrent/CompletableFuture;", at = @At("HEAD"), cancellable = true)
+    private void nexus$handleResourcePackReloadPreStartEventHook(boolean error, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
+        ClientLifeCycleEvent.ResourcePackReloadPreStartEvent resourcePackReloadPreStartEventHook = new ClientLifeCycleEvent.ResourcePackReloadPreStartEvent(
+                reloadStateTracker.reloadState == null ? ResourceLoadStateTracker.ReloadReason.UNKNOWN : reloadStateTracker.reloadState.reloadReason,
+                reloadStateTracker.reloadState,
+                reloadStateTracker.reloadState == null ? null : reloadStateTracker.reloadState.recoveryReloadInfo,
+                reloadStateTracker.reloadCount,
+                resourcePackRepository.openAllSelected(),
+                reloadStateTracker.reloadState == null || reloadStateTracker.reloadState.recoveryReloadInfo == null ? null : reloadStateTracker.reloadState.recoveryReloadInfo.error,
+                pendingReload != null
+        );
+        EventResult<ClientLifeCycleEvent.ResourcePackReloadPreStartEvent> resourcePackReloadPreStartEventResult = ClientLifeCycleEventBlueprint.RESOURCEPACK_RELOAD_PRE_START.fireEvent(resourcePackReloadPreStartEventHook);
+
+        resourcePackReloadPreStartEventResult.ifCancelled(event -> cir.cancel());
+    }
+
+    @Inject(method = {"method_49293", "lambda$reloadResourcePacks$26(ZLjava/lang/Throwable;)V"}, at = @At("TAIL"), remap = false)
+    private void nexus$handleResourcePackReloadEndEventHook(boolean error, Throwable p_272301_, CallbackInfo ci) {
+        if (error) {
+            ClientLifeCycleEvent.ResourcePackReloadEndEvent resourcePackReloadEndEventHook = new ClientLifeCycleEvent.ResourcePackReloadEndEvent(
+                    reloadStateTracker.reloadState == null ? ResourceLoadStateTracker.ReloadReason.UNKNOWN : reloadStateTracker.reloadState.reloadReason,
+                    reloadStateTracker.reloadState,
+                    reloadStateTracker.reloadState == null ? null : reloadStateTracker.reloadState.recoveryReloadInfo,
+                    reloadStateTracker.reloadCount,
+                    resourcePackRepository.openAllSelected(),
+                    p_272301_,
+                    true
+            );
+
+            ClientLifeCycleEventBlueprint.RESOURCEPACK_RELOAD_END.fireEvent(resourcePackReloadEndEventHook);
+        }
     }
 }

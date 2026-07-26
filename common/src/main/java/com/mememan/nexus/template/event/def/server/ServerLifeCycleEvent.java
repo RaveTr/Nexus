@@ -14,6 +14,7 @@ public abstract class ServerLifeCycleEvent extends BaseEvent {
 
     public ServerLifeCycleEvent(MinecraftServer targetServer) {
         super(ModSide.COMMON);
+
         this.targetServer = targetServer;
     }
 

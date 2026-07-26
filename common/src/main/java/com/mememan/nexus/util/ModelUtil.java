@@ -6587,9 +6587,9 @@ public final class ModelUtil {
      * @see #bowPulling(Supplier, int)
      */
     public static ItemModelDefinition standardBow(Supplier<Item> targetItem, int pullingPhases, String pullingPredicateKey, String pullPredicateKey, FloatSet bowSpriteFrames) {
-        ResourceLocation baseBowId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetItem.get());
+        ResourceLocation baseBowModelId = RegistryUtil.pickItemPrefix(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetItem.get()));
 
-        if (pullingPhases < 0) throw new IllegalArgumentException(String.format("Tried generating a standard bow item model for %s%s with less than 0 pulling phases!", targetItem.get().getClass().getSimpleName(), baseBowId));
+        if (pullingPhases < 0) throw new IllegalArgumentException(String.format("Tried generating a standard bow item model for %s%s with less than 0 pulling phases!", targetItem.get().getClass().getSimpleName(), baseBowModelId));
 
         Map<ResourceLocation, Map<String, Float>> bowTextureOverrides = new Object2ObjectOpenHashMap<>();
 
@@ -6597,7 +6597,7 @@ public final class ModelUtil {
             int curIdx = 0;
 
             bowTextureOverrides.put(
-                    baseBowId.withSuffix("_pulling_%d".formatted(curIdx)),
+                    baseBowModelId.withSuffix("_pulling_%d".formatted(curIdx)),
                     Map.of(
                             pullingPredicateKey,
                             1.0F
@@ -6605,7 +6605,7 @@ public final class ModelUtil {
             );
 
             for (float spriteFrameSec : bowSpriteFrames) {
-                ResourceLocation pullingPhaseId = baseBowId.withSuffix("_pulling_%d".formatted(curIdx++));
+                ResourceLocation pullingPhaseId = baseBowModelId.withSuffix("_pulling_%d".formatted(curIdx++));
 
                 bowTextureOverrides.put(
                         pullingPhaseId,
@@ -6858,9 +6858,9 @@ public final class ModelUtil {
      * @see #crossbowWithProjectile(Supplier, String)
      */
     public static ItemModelDefinition standardCrossbow(Supplier<Item> targetItem, int pullingPhases, String pullingPredicateKey, String pullPredicateKey, String chargedPredicateKey, FloatSet crossbowSpriteFrames, String defaultProjectileId, String... additionalProjectileIds) {
-        ResourceLocation baseCrossbowId = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetItem.get());
+        ResourceLocation baseCrossbowModelId = RegistryUtil.pickItemPrefix(DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(targetItem.get()));
 
-        if (pullingPhases < 0) throw new IllegalArgumentException(String.format("Tried generating a standard crossbow item model for %s%s with less than 0 pulling phases!", targetItem.get().getClass().getSimpleName(), baseCrossbowId));
+        if (pullingPhases < 0) throw new IllegalArgumentException(String.format("Tried generating a standard crossbow item model for %s%s with less than 0 pulling phases!", targetItem.get().getClass().getSimpleName(), baseCrossbowModelId));
 
         Map<ResourceLocation, Map<String, Float>> crossbowTextureOverrides = new Object2ObjectOpenHashMap<>();
 
@@ -6868,7 +6868,7 @@ public final class ModelUtil {
             int curIdx = 0;
 
             crossbowTextureOverrides.put(
-                    baseCrossbowId.withSuffix("_pulling_%d".formatted(curIdx)),
+                    baseCrossbowModelId.withSuffix("_pulling_%d".formatted(curIdx)),
                     Map.of(
                             pullingPredicateKey,
                             1.0F
@@ -6876,7 +6876,7 @@ public final class ModelUtil {
             );
 
             for (float spriteFrameSec : crossbowSpriteFrames) {
-                ResourceLocation pullingPhaseId = baseCrossbowId.withSuffix("_pulling_%d".formatted(curIdx++));
+                ResourceLocation pullingPhaseId = baseCrossbowModelId.withSuffix("_pulling_%d".formatted(curIdx++));
 
                 crossbowTextureOverrides.put(
                         pullingPhaseId,
@@ -6894,7 +6894,7 @@ public final class ModelUtil {
 
         if (chargedPredicateKey != null) {
             crossbowTextureOverrides.put(
-                    baseCrossbowId.withSuffix("_" + chosenDefaultProjectileId),
+                    baseCrossbowModelId.withSuffix("_" + chosenDefaultProjectileId),
                     Map.of(
                             chargedPredicateKey,
                             1.0F
@@ -6904,7 +6904,7 @@ public final class ModelUtil {
             for (String projectileId : additionalProjectileIds) {
                 if (projectileId == null) continue;
 
-                ResourceLocation crossbowWithProjectileId = baseCrossbowId.withSuffix("_" + projectileId);
+                ResourceLocation crossbowWithProjectileId = baseCrossbowModelId.withSuffix("_" + projectileId);
 
                 crossbowTextureOverrides.put(
                         crossbowWithProjectileId,

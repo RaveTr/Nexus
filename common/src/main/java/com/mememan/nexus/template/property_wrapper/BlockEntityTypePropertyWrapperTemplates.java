@@ -107,7 +107,7 @@ public final class BlockEntityTypePropertyWrapperTemplates {
      *
      * @param <BE> Any {@link BlockEntity} type.
      */
-    public static <BE extends BlockEntity> Supplier<BlockEntityType<BE>> registerBlockEntityTypeFromTemplate(ResourceLocation blockEntityId, Supplier<BlockEntityType<BE>> blockEntityTypeSup, BlockEntityTypePropertyWrapper<BE> templateBEPW) {
+    public static <BE extends BlockEntity> Supplier<BlockEntityType<BE>> registerBlockEntityTypeFromTemplate(ResourceLocation blockEntityId, Supplier<BlockEntityType<BE>> blockEntityTypeSup, BlockEntityTypePropertyWrapper<? super BE> templateBEPW) {
         return registerBlockEntityTypeFromTemplate(blockEntityId, blockEntityTypeSup, templateBEPW, null);
     }
 
@@ -148,7 +148,7 @@ public final class BlockEntityTypePropertyWrapperTemplates {
      *
      * @param <BE> Any {@link BlockEntity} type.
      */
-    public static <BE extends BlockEntity> BlockEntityTypePropertyWrapperBuilder<BE> registerAndChain(ResourceLocation blockEntityId, Supplier<BlockEntityType<BE>> blockEntityTypeSup, BlockEntityTypePropertyWrapper<BE> templateBEPW) {
+    public static <BE extends BlockEntity> BlockEntityTypePropertyWrapperBuilder<BE> registerAndChain(ResourceLocation blockEntityId, Supplier<BlockEntityType<BE>> blockEntityTypeSup, BlockEntityTypePropertyWrapper<? super BE> templateBEPW) {
         return registerAndChain(blockEntityId, blockEntityTypeSup, templateBEPW, null);
     }
 
@@ -268,7 +268,7 @@ public final class BlockEntityTypePropertyWrapperTemplates {
      *
      * @param <BE> Any {@link BlockEntity} type.
      */
-    public static <BE extends BlockEntity> Supplier<BlockEntityType<BE>> registerBlockEntityTypeFromTemplateAndReflect(ResourceLocation blockEntityId, Supplier<BlockEntityType<BE>> blockEntityTypeSup, BlockEntityTypePropertyWrapper<BE> templateBEPW) {
+    public static <BE extends BlockEntity> Supplier<BlockEntityType<BE>> registerBlockEntityTypeFromTemplateAndReflect(ResourceLocation blockEntityId, Supplier<BlockEntityType<BE>> blockEntityTypeSup, BlockEntityTypePropertyWrapper<? super BE> templateBEPW) {
         return registerBlockEntityTypeFromTemplateAndReflect(blockEntityId, blockEntityTypeSup, templateBEPW, null);
     }
 
@@ -309,7 +309,7 @@ public final class BlockEntityTypePropertyWrapperTemplates {
      *
      * @param <BE> Any {@link BlockEntity} type.
      */
-    public static <BE extends BlockEntity> BlockEntityTypePropertyWrapperBuilder<BE> registerAndReflectAndChain(ResourceLocation blockEntityId, Supplier<BlockEntityType<BE>> blockEntityTypeSup, BlockEntityTypePropertyWrapper<BE> templateBEPW) {
+    public static <BE extends BlockEntity> BlockEntityTypePropertyWrapperBuilder<BE> registerAndReflectAndChain(ResourceLocation blockEntityId, Supplier<BlockEntityType<BE>> blockEntityTypeSup, BlockEntityTypePropertyWrapper<? super BE> templateBEPW) {
         return registerAndReflectAndChain(blockEntityId, blockEntityTypeSup, templateBEPW, null);
     }
 

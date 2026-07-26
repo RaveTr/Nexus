@@ -112,13 +112,13 @@ public class ItemModelDefinition extends BaseModelDefinition<ItemModelDefinition
                 JsonObject rootOverridesObj = new JsonObject();
 
                 if (!overrideConditions.isEmpty()) {
+                    JsonObject predicateObj = new JsonObject();
+
                     overrideConditions.forEach((predicateId, predicateValue) -> {
-                        JsonObject predicateObj = new JsonObject();
-
                         if (predicateId != null && predicateValue != null) predicateObj.addProperty(predicateId, predicateValue);
-
-                        rootOverridesObj.add("predicate", predicateObj);
                     });
+
+                    rootOverridesObj.add("predicate", predicateObj);
                 }
 
                 if (overrideTextureLoc != null) rootOverridesObj.addProperty("model", overrideTextureLoc.toString());

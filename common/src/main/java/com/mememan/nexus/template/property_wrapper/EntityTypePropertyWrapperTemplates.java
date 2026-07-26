@@ -136,12 +136,12 @@ public final class EntityTypePropertyWrapperTemplates {
      *
      * @param <E> Any {@link Entity} type.
      */
-    public static <E extends Entity> EntityTypePropertyWrapperBuilder<E> registerAndChain(ResourceLocation entityId, Supplier<EntityType<E>> entityTypeSup, EntityTypePropertyWrapper<E> templateBPW, @Nullable Collection<Supplier<EntityType<Entity>>> entityTypeSupCol) {
+    public static <E extends Entity> EntityTypePropertyWrapperBuilder<E> registerAndChain(ResourceLocation entityId, Supplier<EntityType<E>> entityTypeSup, EntityTypePropertyWrapper<? super E> templateBPW, @Nullable Collection<Supplier<EntityType<Entity>>> entityTypeSupCol) {
         Supplier<EntityType<E>> registeredEntityType = registerEntityType(entityId, entityTypeSup, entityTypeSupCol);
 
         return new EntityTypePropertyWrapper<>(registeredEntityType, entityId.getNamespace())
                 .builder()
-                .copyFromType(templateBPW);
+                .copyFrom((EntityTypePropertyWrapper<E>) templateBPW);
     }
 
     /**
@@ -157,7 +157,7 @@ public final class EntityTypePropertyWrapperTemplates {
      *
      * @param <E> Any {@link Entity} type.
      */
-    public static <E extends Entity> EntityTypePropertyWrapperBuilder<E> registerAndChain(ResourceLocation entityId, Supplier<EntityType<E>> entityTypeSup, EntityTypePropertyWrapper<E> templateBPW) {
+    public static <E extends Entity> EntityTypePropertyWrapperBuilder<E> registerAndChain(ResourceLocation entityId, Supplier<EntityType<E>> entityTypeSup, EntityTypePropertyWrapper<? super E> templateBPW) {
         return registerAndChain(entityId, entityTypeSup, templateBPW, null);
     }
 
@@ -299,12 +299,12 @@ public final class EntityTypePropertyWrapperTemplates {
      *
      * @param <E> Any {@link Entity} type.
      */
-    public static <E extends Entity> EntityTypePropertyWrapperBuilder<E> registerAndReflectAndChain(ResourceLocation entityId, Supplier<EntityType<E>> entityTypeSup, EntityTypePropertyWrapper<E> templateBPW, @Nullable Collection<Supplier<EntityType<Entity>>> entityTypeSupCol) {
+    public static <E extends Entity> EntityTypePropertyWrapperBuilder<E> registerAndReflectAndChain(ResourceLocation entityId, Supplier<EntityType<E>> entityTypeSup, EntityTypePropertyWrapper<? super E> templateBPW, @Nullable Collection<Supplier<EntityType<Entity>>> entityTypeSupCol) {
         Supplier<EntityType<E>> registeredEntityType = registerEntityTypeAndReflect(entityId, entityTypeSup, entityTypeSupCol);
 
         return new EntityTypePropertyWrapper<>(registeredEntityType, entityId.getNamespace())
                 .builder()
-                .copyFromType(templateBPW);
+                .copyFrom((EntityTypePropertyWrapper<E>) templateBPW);
     }
 
     /**
@@ -320,7 +320,7 @@ public final class EntityTypePropertyWrapperTemplates {
      *
      * @param <E> Any {@link Entity} type.
      */
-    public static <E extends Entity> EntityTypePropertyWrapperBuilder<E> registerAndReflectAndChain(ResourceLocation entityId, Supplier<EntityType<E>> entityTypeSup, EntityTypePropertyWrapper<E> templateBPW) {
+    public static <E extends Entity> EntityTypePropertyWrapperBuilder<E> registerAndReflectAndChain(ResourceLocation entityId, Supplier<EntityType<E>> entityTypeSup, EntityTypePropertyWrapper<? super E> templateBPW) {
         return registerAndReflectAndChain(entityId, entityTypeSup, templateBPW, null);
     }
 

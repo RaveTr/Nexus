@@ -15,7 +15,8 @@
   ],
   "client": [
     "client.ClientLevelMixin",
-    "client.MinecraftMixin"
+    "client.MinecraftMixin",
+    "client.ResourceLoadStateTrackerMixin"
   ],
   "server": [
   ],

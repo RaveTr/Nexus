@@ -180,5 +180,19 @@ accessible method net/minecraft/client/renderer/blockentity/SignRenderer renderS
 # LevelResource
 accessible method net/minecraft/world/level/storage/LevelResource <init> (Ljava/lang/String;)V
 
+# ResourceLoadStateTracker
+accessible class net/minecraft/client/ResourceLoadStateTracker$ReloadState
+accessible field net/minecraft/client/ResourceLoadStateTracker reloadState Lnet/minecraft/client/ResourceLoadStateTracker$ReloadState;
+accessible field net/minecraft/client/ResourceLoadStateTracker reloadCount I
+
+accessible method net/minecraft/client/ResourceLoadStateTracker$ReloadState <init> (Lnet/minecraft/client/ResourceLoadStateTracker$ReloadReason;Ljava/util/List;)V
+accessible field net/minecraft/client/ResourceLoadStateTracker$ReloadState reloadReason Lnet/minecraft/client/ResourceLoadStateTracker$ReloadReason;
+accessible field net/minecraft/client/ResourceLoadStateTracker$ReloadState recoveryReloadInfo Lnet/minecraft/client/ResourceLoadStateTracker$RecoveryInfo;
+accessible field net/minecraft/client/ResourceLoadStateTracker$ReloadState finished Z
+
+accessible class net/minecraft/client/ResourceLoadStateTracker$RecoveryInfo
+accessible method net/minecraft/client/ResourceLoadStateTracker$RecoveryInfo <init> (Ljava/lang/Throwable;)V
+accessible field net/minecraft/client/ResourceLoadStateTracker$RecoveryInfo error Ljava/lang/Throwable;
+
 ## AW
 accessible field net/minecraft/world/entity/ai/attributes/AttributeSupplier$Builder builder Ljava/util/Map;
