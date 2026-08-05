@@ -1,6 +1,6 @@
 package com.mememan.nexus.resource.config;
 
-import com.mememan.nexus.internal.network.packets.s2c.DatapackEntriesSyncPacket;
+import com.mememan.nexus.internal.network.packets.s2c.DatapackEntriesSyncChunkPacket;
 import com.mememan.nexus.platform.NexusServices;
 import com.mememan.nexus.platform.services.Registrar;
 import com.mememan.nexus.resource.reload_listeners.DefaultedCodecResourceReloadListener;
@@ -34,7 +34,7 @@ import java.util.function.Function;
  * @param dataCodecMapper The {@link Codec} used to encode/decode data from the scanned files for the associated listener,
  *                        only really used during syncing. If {@code dataMapGetter}'s presence check (and its preceding
  *                        checks) passes and this is not present, an {@link IllegalArgumentException} will be thrown
- *                        from within the {@link DatapackEntriesSyncPacket} itself.
+ *                        from within the {@link DatapackEntriesSyncChunkPacket} itself.
  * @param resourceSyncOperation A side-safe operation to run on the client once data is received. This should usually
  *                              be a method that updates the client-side data of the associated listener. If this is not
  *                              present, then nothing will be done on the target side.
@@ -43,7 +43,7 @@ import java.util.function.Function;
  *              associated with.
  *
  * @see Registrar#registerReloadListener(ResourceLocation, PreparableReloadListener, ResourceReloadListenerConfig)
- * @see DatapackEntriesSyncPacket
+ * @see DatapackEntriesSyncChunkPacket
  */
 public record ResourceReloadListenerConfig<PRL extends PreparableReloadListener>(PackType listenerPackType, boolean shouldSyncToClient, Optional<Function<PRL, Map<ResourceLocation, ?>>> dataMapGetter, Optional<Function<PRL, Codec<?>>> dataCodecMapper, Optional<BiConsumer<PRL, Map<ResourceLocation, ?>>> resourceSyncOperation) {
 
@@ -94,7 +94,7 @@ public record ResourceReloadListenerConfig<PRL extends PreparableReloadListener>
      * @param dataCodecMapper The {@link Codec} used to encode/decode data from the scanned files for the associated listener,
      *                        only really used during syncing. If {@code dataMapGetter}'s presence check (and its preceding
      *                        checks) passes and this is not present, an {@link IllegalArgumentException} will be thrown
-     *                        from within the {@link DatapackEntriesSyncPacket} itself.
+     *                        from within the {@link DatapackEntriesSyncChunkPacket} itself.
      * @param resourceSyncOperation A side-safe operation to run on the client once data is received. This should usually
      *                              be a method that updates the client-side data of the associated listener. If this is not
      *                              present, then nothing will be done on the target side.

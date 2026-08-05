@@ -82,6 +82,6 @@ public class DefaultedCodecResourceReloadListener<T> extends SimpleJsonResourceR
 
     @ApiStatus.Internal
     public void updateSyncedObjectData(Map<ResourceLocation, T> syncedObjectMap) { // Should ONLY be called on the main client thread
-        if (ClientUtil.onClient()) this.objectMap = syncedObjectMap; // Prevent overrides on the server
+        if (ClientUtil.onClient()) this.objectMap = new Object2ObjectOpenHashMap<>(syncedObjectMap); // Prevent overrides on the server
     }
 }

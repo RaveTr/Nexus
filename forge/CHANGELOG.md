@@ -1,18 +1,12 @@
 # Nexus API Changelog (Forge)
 
-# v1.1.5 (1.20.1)
-
-## Bug Fixes
-
-- Fixed faulty implementation of `ModelUtil#standardBow` and `ModelUtil#standardCrossbow` (which didn't properly prefix "item/" to the base model definition).
-- Fixed generic types for static template registration method overloads in `BlockEntityTypePropertyWrapperTemplates` and `EntityTypePropertyWrapperTemplates`.
-- Fixed `ItemModelDefinition#constructJson` incorrectly replacing the `predicates` property entirely for each new individual predicate added.
-- Made `RecipeUtil#materialBlockFrom` consider the `_ingot` suffix when looking for corresponding block material.
+# v1.1.6 (1.20.1)
 
 ## Internal Changes
 
-- Bumped Forge version to 47.4.22.
+- Changed `DatapackEntriesSyncPacket` to `DatapackEntriesSyncChunkPacket`. As the packet class's new name implies, datapacks are now synced in chunks of around 512 KiB through NAPI, with a single entry being allowed a maximum size of ~1.75 MiB on its own (the default packet size limit is roughly 2 MiB).
+- Updated Javadocs in `ResourceReloadListenerConfig` accordingly.
 
 ## New Features
 
-- Added client-side event hooks through the newly-added `ClientLifeCycleEventBlueprint`; more specifically, hooks for resource pack reloads.
+- Added `EntityEventBlueprint` and `PlayerEventBlueprint`. Only `PlayerEventBlueprint` has actual events at the moment (said events being `PLAYER_LOGIN`, `PLAYER_LOGOUT`, and `PLAYER_DISCONNECT`).

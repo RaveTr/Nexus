@@ -154,6 +154,8 @@ tasks.withType(Javadoc).configureEach {
 
 publishing {
     repositories {
+        mavenLocal()
+
         maven {
             name = "meme-man-mods"
             url = "https://maven.cloudsmith.io/meme-man-mods/nexus/"

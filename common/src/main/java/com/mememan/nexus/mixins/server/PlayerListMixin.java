@@ -1,6 +1,8 @@
 package com.mememan.nexus.mixins.server;
 
+import com.mememan.nexus.template.event.blueprint.common.PlayerEventBlueprint;
 import com.mememan.nexus.template.event.blueprint.server.ServerLifeCycleEventBlueprint;
+import com.mememan.nexus.template.event.def.common.PlayerEvent;
 import com.mememan.nexus.template.event.def.server.ServerLifeCycleEvent;
 import net.minecraft.network.Connection;
 import net.minecraft.server.MinecraftServer;
@@ -18,10 +20,13 @@ import java.util.List;
 
 /**
  * Mixin {@code class} to handle proper syncing of resource reload listener data for the appropriate
- * {@link PreparableReloadListener} instances by firing relevant event hooks.
+ * {@link PreparableReloadListener} instances by firing relevant event hooks. Also handles some additional player-related
+ * event hooks.
  *
  * @see ServerLifeCycleEventBlueprint#DATAPACK_SYNC
  * @see ServerLifeCycleEventBlueprint#DATAPACK_INDIVIDUAL_SYNC
+ * @see PlayerEventBlueprint#PLAYER_LOGIN
+ * @see PlayerEventBlueprint#PLAYER_LOGOUT
  */
 @Mixin(PlayerList.class)
 public abstract class PlayerListMixin {
@@ -49,5 +54,15 @@ public abstract class PlayerListMixin {
         }
 
         ServerLifeCycleEventBlueprint.DATAPACK_SYNC.fireEvent(new ServerLifeCycleEvent.DataPackSyncEvent(server, server.getResourceManager(), (PlayerList) (Object) this, null));
+    }
+
+    @Inject(method = "placeNewPlayer", at = @At("TAIL"))
+    private void nexus$handlePlayerLoginEventHook(Connection netManager, ServerPlayer player, CallbackInfo ci) {
+        PlayerEventBlueprint.PLAYER_LOGIN.fireEvent(new PlayerEvent.PlayerLoginEvent(player));
+    }
+
+    @Inject(method = "remove", at = @At("HEAD"))
+    private void nexus$handlePlayerLogoutEventHook(ServerPlayer player, CallbackInfo ci) {
+        PlayerEventBlueprint.PLAYER_LOGOUT.fireEvent(new PlayerEvent.PlayerLogoutEvent(player));
     }
 }
