@@ -52,6 +52,19 @@ public class TagPropertyWrapper<T, TK extends TagKey<T>> extends SpecializedTagP
     }
 
     /**
+     * Gets the {@link List} of {@link Supplier}s for additional objects that should be tagged with this instance's
+     * parent {@link TagKey}. These may be of any compatible type, in addition to the typed
+     * {@link #getTaggedObjects()}.
+     *
+     * @return The {@link List} of {@link Supplier}s for additional tagged objects. May be empty.
+     *
+     * @see TagPropertyWrapperBuilder#withAdditionalStoredTaggedObject(Supplier)
+     */
+    public List<Supplier<?>> getAdditionalStoredTaggedObjects() {
+        return rawBuilder().map(builder -> builder.additionalStoredTaggedObjects).orElse(ObjectArrayList.of());
+    }
+
+    /**
      * Gets the {@link List} of {@link Supplier}s for child tags that should be included within this instance's parent
      * {@link TagKey}.
      *

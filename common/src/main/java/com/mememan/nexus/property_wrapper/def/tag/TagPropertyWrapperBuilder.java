@@ -24,7 +24,9 @@ import java.util.function.Supplier;
  */
 public class TagPropertyWrapperBuilder<T, TK extends TagKey<T>> extends SpecializedTagPropertyWrapperBuilder<TK, TagPropertyWrapperBuilder<T, TK>, TagPropertyWrapper<T, TK>> {
     protected final List<Supplier<T>> storedTaggedObjects = new ObjectArrayList<>();
+    protected final List<Supplier<?>> additionalStoredTaggedObjects = new ObjectArrayList<>();
     protected final List<Supplier<TK>> storedTags = new ObjectArrayList<>();
+
     protected int cookTime;
     protected IntIntMutablePair flammabilityPair;
 
@@ -35,8 +37,9 @@ public class TagPropertyWrapperBuilder<T, TK extends TagKey<T>> extends Speciali
     @Override
     public TagPropertyWrapperBuilder<T, TK> copyFrom(TagPropertyWrapper<T, TK> propertyWrapper) {
         return super.copyFrom(propertyWrapper)
-                .setTaggedObjects(propertyWrapper.getTaggedObjects())
-                .setChildTags(propertyWrapper.getChildTags())
+                .setTaggedObjects(new ObjectArrayList<>(propertyWrapper.getTaggedObjects()))
+                .setAdditionalStoredTaggedObjects(new ObjectArrayList<>(propertyWrapper.getAdditionalStoredTaggedObjects()))
+                .setChildTags(new ObjectArrayList<>(propertyWrapper.getChildTags()))
                 .withCookTime(propertyWrapper.getCookTime())
                 .withFlammability(propertyWrapper.getFlammabilityPair().orElse(null));
     }
@@ -276,6 +279,94 @@ public class TagPropertyWrapperBuilder<T, TK extends TagKey<T>> extends Speciali
     public TagPropertyWrapperBuilder<T, TK> setTaggedObjectsOfType(List<Supplier<? extends T>> taggedObjects) {
         this.storedTaggedObjects.clear();
         this.storedTaggedObjects.addAll((List) taggedObjects);
+        return self();
+    }
+
+    /**
+     * Specifies an object to be tagged with this instance's parent {@link TagKey} (via its owner
+     * {@link TagPropertyWrapper}), in addition to any already-specified tagged objects. Unlike
+     * {@link #withTaggedObject(Supplier)}, this method accepts objects of any type without type-safe casting.
+     * <br></br>
+     * This primarily exists to allow for dynamic registry objects to be used inside of {@link TagKey} instances that
+     * want to umbrella them without having to write an entirely separate extension for this PWB.
+     *
+     * @param taggedObject The object to tag with this instance's parent {@link TagKey}.
+     *
+     * @return {@link #self()} (builder method).
+     *
+     * @see DataGenPropertyWrapper.RegistryLookupContainer#getObjectRegistryId(Object)
+     * @see #withAdditionalStoredTaggedObjects(Supplier[])
+     * @see #withAdditionalStoredTaggedObjects(List)
+     * @see #setAdditionalStoredTaggedObjects(List)
+     */
+    public TagPropertyWrapperBuilder<T, TK> withAdditionalStoredTaggedObject(Supplier<?> taggedObject) {
+        this.additionalStoredTaggedObjects.add(taggedObject);
+        return self();
+    }
+
+    /**
+     * Specifies multiple objects to be tagged with this instance's parent {@link TagKey} (via its owner
+     * {@link TagPropertyWrapper}), in addition to any already-specified tagged objects. Accepts a variable number of
+     * object suppliers of any type.
+     * <br></br>
+     * This primarily exists to allow for dynamic registry objects to be used inside of {@link TagKey} instances that
+     * want to umbrella them without having to write an entirely separate extension for this PWB.
+     *
+     * @param taggedObjects The objects to tag with this instance's parent {@link TagKey}.
+     *
+     * @return {@link #self()} (builder method).
+     *
+     * @see DataGenPropertyWrapper.RegistryLookupContainer#getObjectRegistryId(Object)
+     * @see #withAdditionalStoredTaggedObject(Supplier)
+     * @see #withAdditionalStoredTaggedObjects(List)
+     * @see #setAdditionalStoredTaggedObjects(List)
+     */
+    public TagPropertyWrapperBuilder<T, TK> withAdditionalStoredTaggedObjects(Supplier<?>... taggedObjects) {
+        return withAdditionalStoredTaggedObjects(ObjectArrayList.of(taggedObjects));
+    }
+
+    /**
+     * Specifies multiple objects to be tagged with this instance's parent {@link TagKey} (via its owner
+     * {@link TagPropertyWrapper}), in addition to any already-specified tagged objects. Accepts a {@link List} of
+     * object suppliers of any type.
+     * <br></br>
+     * This primarily exists to allow for dynamic registry objects to be used inside of {@link TagKey} instances that
+     * want to umbrella them without having to write an entirely separate extension for this PWB.
+     *
+     * @param taggedObjects The {@link List} of objects to tag with this instance's parent {@link TagKey}.
+     *
+     * @return {@link #self()} (builder method).
+     *
+     * @see DataGenPropertyWrapper.RegistryLookupContainer#getObjectRegistryId(Object)
+     * @see #withAdditionalStoredTaggedObject(Supplier)
+     * @see #withAdditionalStoredTaggedObjects(Supplier[])
+     * @see #setAdditionalStoredTaggedObjects(List)
+     */
+    public TagPropertyWrapperBuilder<T, TK> withAdditionalStoredTaggedObjects(List<Supplier<?>> taggedObjects) {
+        this.additionalStoredTaggedObjects.addAll(taggedObjects);
+        return self();
+    }
+
+    /**
+     * Sets the objects to be tagged with this instance's parent {@link TagKey} (via its owner
+     * {@link TagPropertyWrapper}), replacing any previously specified additional tagged objects. Accepts a
+     * {@link List} of object suppliers of any type.
+     * <br></br>
+     * This primarily exists to allow for dynamic registry objects to be used inside of {@link TagKey} instances that
+     * want to umbrella them without having to write an entirely separate extension for this PWB.
+     *
+     * @param taggedObjects The {@link List} of objects to tag with this instance's parent {@link TagKey}.
+     *
+     * @return {@link #self()} (builder method).
+     *
+     * @see DataGenPropertyWrapper.RegistryLookupContainer#getObjectRegistryId(Object)
+     * @see #withAdditionalStoredTaggedObject(Supplier)
+     * @see #withAdditionalStoredTaggedObjects(Supplier[])
+     * @see #withAdditionalStoredTaggedObjects(List)
+     */
+    public TagPropertyWrapperBuilder<T, TK> setAdditionalStoredTaggedObjects(List<Supplier<?>> taggedObjects) {
+        this.additionalStoredTaggedObjects.clear();
+        this.additionalStoredTaggedObjects.addAll(taggedObjects);
         return self();
     }
 

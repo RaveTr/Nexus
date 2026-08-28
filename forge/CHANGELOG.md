@@ -1,12 +1,11 @@
 # Nexus API Changelog (Forge)
 
-# v1.1.6 (1.20.1)
+# v1.1.7 (1.20.1)
 
 ## Internal Changes
 
-- Changed `DatapackEntriesSyncPacket` to `DatapackEntriesSyncChunkPacket`. As the packet class's new name implies, datapacks are now synced in chunks of around 512 KiB through NAPI, with a single entry being allowed a maximum size of ~1.75 MiB on its own (the default packet size limit is roughly 2 MiB).
-- Updated Javadocs in `ResourceReloadListenerConfig` accordingly.
+- Fixed `EntityTypePropertyWrapper#getLootTableDir` not appending a "/" at the end, which broke entity loot tables.
 
 ## New Features
 
-- Added `EntityEventBlueprint` and `PlayerEventBlueprint`. Only `PlayerEventBlueprint` has actual events at the moment (said events being `PLAYER_LOGIN`, `PLAYER_LOGOUT`, and `PLAYER_DISCONNECT`).
+- Added `TagPropertyWrapper#getAdditionalStoredTaggedObjects` along with its builder methods and overloads and such, which allows for tagged objects not necessarily constrained to the exact generic type of the pertaining TPW. Primarily intended for use with dynamic registries (see javadocs for further info).

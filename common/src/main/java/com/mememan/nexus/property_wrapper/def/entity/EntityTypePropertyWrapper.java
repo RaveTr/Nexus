@@ -70,7 +70,7 @@ public class EntityTypePropertyWrapper<E extends Entity> extends BaseDefaultable
 
     @Override
     public @NotNull String getLootTableDir() {
-        return "entities";
+        return "entities/";
     }
 
     @Override

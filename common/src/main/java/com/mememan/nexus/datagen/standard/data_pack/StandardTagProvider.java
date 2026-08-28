@@ -147,6 +147,7 @@ public class StandardTagProvider extends TagsProvider<Object> implements ModData
                             Supplier<TagKey<T>> parentTag = curTagPW.getParentObject();
                             TagKey<T> parentTagObj = parentTag.get();
                             List<Supplier<T>> taggedObjects = curTagPW.getTaggedObjects();
+                            List<Supplier<?>> additionalTaggedObjects = curTagPW.getAdditionalStoredTaggedObjects();
                             List<Supplier<TagKey<T>>> tagKeys = curTagPW.getChildTags();
 
                             if (taggedObjects.isEmpty() && tagKeys.isEmpty()) tagHasNoExclusiveData.set(true);
@@ -158,6 +159,18 @@ public class StandardTagProvider extends TagsProvider<Object> implements ModData
 
                                     if (validateDupeObjectTag(parentTagObj, taggedObjClassName, childObjLoc)) {
                                         NexusConstants.LOGGER.debug("[{}] [Tagging {}]: {} -> {}", getModId(), taggedObjClassName, childObjLoc, parentTagObj);
+
+                                        trackTag(parentTagObj).addElement(childObjLoc);
+                                    }
+                                });
+
+                                additionalTaggedObjects.forEach(curTaggedObject -> {
+                                    Object taggedObject = curTaggedObject.get();
+                                    String taggedObjClassName = taggedObject.getClass().getSimpleName();
+                                    ResourceLocation childObjLoc = DataGenPropertyWrapper.RegistryLookupContainer.getObjectRegistryIdOrThrow(taggedObject);
+
+                                    if (validateDupeObjectTag(parentTagObj, taggedObjClassName, childObjLoc)) {
+                                        NexusConstants.LOGGER.debug("[{}] [Tagging {} (Additional Tagged Object)]: {} -> {}", getModId(), taggedObjClassName, childObjLoc, parentTagObj);
 
                                         trackTag(parentTagObj).addElement(childObjLoc);
                                     }

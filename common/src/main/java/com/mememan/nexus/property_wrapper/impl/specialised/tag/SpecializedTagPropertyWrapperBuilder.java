@@ -35,7 +35,7 @@ public class SpecializedTagPropertyWrapperBuilder<T, SELF extends TagBasedProper
 
     @Override
     public SELF withTag(Supplier<TagKey<? super T>> targetTag) {
-        if (targetTag != null && targetTag.get() != null) this.objectTagKeys.add(targetTag);
+        this.objectTagKeys.add(targetTag);
         return self();
     }
 
@@ -54,7 +54,7 @@ public class SpecializedTagPropertyWrapperBuilder<T, SELF extends TagBasedProper
 
     @Override
     public SELF withAdditionalTag(Supplier<TagKey<?>> targetTag) {
-        if (targetTag != null && targetTag.get() != null) this.additionalTagKeys.add(targetTag);
+        this.additionalTagKeys.add(targetTag);
         return self();
     }
 
